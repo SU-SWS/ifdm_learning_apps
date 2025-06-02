@@ -8,12 +8,12 @@ The app reinforces key lessons from IFDM’s **four learning modules**, each wit
 
 This repository serves as source/hosting for an interactive learning tool, using Claude's prototype as a starting point. The goal is to validate how educational content can be embedded, presented, and interacted with via GitHub Pages.
 
-> 🔗 Live prototype: [https://hcoeacyt.manus.space/](https://hcoeacyt.manus.space/)  
-> 🔗 Claude Prototype: [Claude Link](https://claude.site/artifacts/5b6a466d-81a3-4234-b166-ffebe469f809)
+> Live prototype: [https://hcoeacyt.manus.space/](https://hcoeacyt.manus.space/)  
+> Claude Prototype: [Claude Link](https://claude.site/artifacts/5b6a466d-81a3-4234-b166-ffebe469f809)
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - HTML, CSS, JavaScript (based on Claude prototype)
 - GitHub Pages for hosting
@@ -21,7 +21,7 @@ This repository serves as source/hosting for an interactive learning tool, using
 
 ---
 
-## 📎 Resources & References
+## Resources & References
 
 - [IFDM Home](https://ifdm.stanford.edu)
 - [Notes from David & Jen’s meeting](https://docs.google.com/document/d/1bt9eoo_rSJIFA3zOv2Z-w0CpIXLkW8h2d3SPKFPxug8/edit?tab=t.0#heading=h.w444hwwdu051)
@@ -30,7 +30,7 @@ This repository serves as source/hosting for an interactive learning tool, using
 
 ---
 
-## 📬 Contact
+## Contact
 
 For questions or ideas, please reach out to sws-developers@lists.stanford.edu or submit an issue in this repo.
 
