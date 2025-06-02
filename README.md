@@ -21,15 +21,6 @@ This repository serves as source/hosting for an interactive learning tool, using
 
 ---
 
-## 🤝 Contributors & Roles
-
-- **David** – Coordination, stakeholder communication
-- **Christina** – Creator of the Claude app
-- **Claude** – Prototype author and AI collaborator
-- **Ian, Jen, Hannah, Catalina** – Advisors, strategy, and potential PM support
-
----
-
 ## 📎 Resources & References
 
 - [IFDM Home](https://ifdm.stanford.edu)
@@ -39,17 +30,7 @@ This repository serves as source/hosting for an interactive learning tool, using
 
 ---
 
-## 🚧 Current Status
-
-✅ Claude prototype reviewed  
-✅ GitHub Pages deployed  
-🔲 Requirements gathering  
-🔲 Mighty Networks trial setup  
-🔲 Meeting planning with stakeholders
-
----
-
 ## 📬 Contact
 
-For questions or ideas, please reach out to [Your Name or Team Lead] or submit an issue in this repo.
+For questions or ideas, please reach out to sws-developers@lists.stanford.edu or submit an issue in this repo.
 
