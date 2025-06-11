@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && next export",
-    "predeploy": "yarn build",
+    "build": "next build",
+    "export": "next export && cp CNAME out/CNAME",
+    "predeploy": "yarn build && yarn export",
     "deploy": "gh-pages -d out",
     "start": "next start",
     "lint": "next lint"
