@@ -3,10 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     output: 'export',
     trailingSlash: true,
-    // basePath: '/ifdm_learning_apps',
-    // assetPrefix: '/ifdm_learning_apps/',  // Add trailing slash
+    basePath: '',
     images: {
-        unoptimized: true  // Required for static export
+        unoptimized: true
     }
 };
 

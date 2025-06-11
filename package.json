@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build && cp CNAME out/CNAME",
-    "predeploy": "yarn build",
+    "predeploy": "yarn build && touch out/.nojekyll",
     "deploy": "gh-pages -d out",
     "start": "next start",
     "lint": "next lint"
