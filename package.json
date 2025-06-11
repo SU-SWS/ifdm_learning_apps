@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && cp CNAME out/CNAME",
-    "predeploy": "yarn build && touch out/.nojekyll",
+    "build": "echo \"\" > public/.nojekyll && next build && cp CNAME out/CNAME",
+    "predeploy": "yarn build",
     "deploy": "gh-pages -d out",
     "start": "next start",
     "lint": "next lint"
