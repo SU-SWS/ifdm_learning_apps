@@ -41,7 +41,7 @@ const InterestRateVisual = () => {
   }, [amount, interestRate, years, compounding, mode]);
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
+    <div className="bg-black p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold text-center text-black mb-2">Understanding Money Building Blocks</h2>
       <p className="text-center text-gray-600 mb-6">At its core, money has a price - we call this the interest rate.</p>
       
