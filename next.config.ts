@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     basePath: '',
     images: {
         unoptimized: true
+    },
+    assetPrefix: undefined,
+    generateBuildId: async () => {
+        return Date.now().toString()
     }
 };
 
