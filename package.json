@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "echo \" \" > public/.nojekyll && next build && cp CNAME out/CNAME",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d out",
     "start": "next start",
     "lint": "next lint"
   },
@@ -23,7 +25,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "gh-pages": "^6.3.0",
     "tailwindcss": "^4.1.8",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
