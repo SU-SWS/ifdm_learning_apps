@@ -74,19 +74,6 @@ const InterestRateVisual = () => {
               <rect x="35" y="115" width="50" height="10" fill="#006F54" rx="2" />
               <text x="60" y="155" textAnchor="middle" fontSize="14" fill="white" fontWeight="bold">$</text>
               
-              {/* Arrow direction based on mode */}
-              {mode === 'saving' ? (
-                <>
-                  <path d="M100 150 L140 150" stroke="#B6B1A9" strokeWidth="3" />
-                  <path d="M130 140 L140 150 L130 160" fill="none" stroke="#B6B1A9" strokeWidth="3" />
-                </>
-              ) : (
-                <>
-                  <path d="M140 150 L100 150" stroke="#ef4444" strokeWidth="3" />
-                  <path d="M110 140 L100 150 L110 160" fill="none" stroke="#ef4444" strokeWidth="3" />
-                </>
-              )}
-              
               {/* Interest visualization */}
               <rect x="110" y="120" width="60" height="60" fill={mode === 'saving' ? "#B6B1A9" : "#B1040E"} rx="4" />
               <rect x="115" y="115" width="50" height="10" fill={mode === 'saving' ? "#7F7776" : "#ef4444"} rx="2" />
