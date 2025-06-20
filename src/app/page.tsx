@@ -3,7 +3,10 @@ import React, { useState, useEffect } from 'react';
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState('saving'); // 'saving' or 'borrowing'
-  const [amount, setAmount] = useState(1000);
+  // const [amount, setAmount] = useState(1000); // Default amount in dollars
+    // ...existing code...
+  const [amount, setAmount] = useState<number>(0);
+  // ...existing code...
   const [interestRate, setInterestRate] = useState(4);
   const [years, setYears] = useState(1);
   const [compounding, setCompounding] = useState('annually');
@@ -71,19 +74,6 @@ const InterestRateVisual = () => {
               <rect x="35" y="115" width="50" height="10" fill="#006F54" rx="2" />
               <text x="60" y="155" textAnchor="middle" fontSize="14" fill="white" fontWeight="bold">$</text>
               
-              {/* Arrow direction based on mode */}
-              {mode === 'saving' ? (
-                <>
-                  <path d="M100 150 L140 150" stroke="#B6B1A9" strokeWidth="3" />
-                  <path d="M130 140 L140 150 L130 160" fill="none" stroke="#B6B1A9" strokeWidth="3" />
-                </>
-              ) : (
-                <>
-                  <path d="M140 150 L100 150" stroke="#ef4444" strokeWidth="3" />
-                  <path d="M110 140 L100 150 L110 160" fill="none" stroke="#ef4444" strokeWidth="3" />
-                </>
-              )}
-              
               {/* Interest visualization */}
               <rect x="110" y="120" width="60" height="60" fill={mode === 'saving' ? "#B6B1A9" : "#B1040E"} rx="4" />
               <rect x="115" y="115" width="50" height="10" fill={mode === 'saving' ? "#7F7776" : "#ef4444"} rx="2" />
@@ -130,16 +120,21 @@ const InterestRateVisual = () => {
             </div>
           </div>
           
-          <div className="flex-1 min-w-[150px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($):</label>
-            <input
-              type="number"
-              min="1"
-              value={amount}
-              onChange={(e) => setAmount(Math.max(1, parseInt(e.target.value) || 0))}
-              className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
-            />
-          </div>
+              <div className="flex-1 min-w-[150px]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($):</label>
+              <input
+                type="number"
+                min="0"
+                placeholder='Enter amount'
+                value={amount === 0 ? '' : amount}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setAmount(val === '' ? 0 : Math.max(0, parseInt(val) || 0));
+                }}
+                onFocus={(e) => e.target.select()}
+                className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
+              />
+              </div>
           
           <div className="flex-1 min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%):</label>
