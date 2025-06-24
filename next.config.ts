@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     basePath: '',
     images: {
         unoptimized: true
+    },
+    generateBuildId: () => {
+        return `build-${Date.now()}`
     }
 };
 
