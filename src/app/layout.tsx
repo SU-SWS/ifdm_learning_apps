@@ -8,10 +8,6 @@ const MulishFont = Mulish({
   display: "swap",
   weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
-// Creates cache busting for github pages on build.
-const buildVersion = process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_BUILD_ID || Date.now()
-    : 'dev'
 
 export const metadata: Metadata = {
   title: "Understanding money's building blocks",
