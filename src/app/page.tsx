@@ -3,12 +3,9 @@ import React, { useState, useEffect } from 'react';
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState('saving'); // 'saving' or 'borrowing'
-  // const [amount, setAmount] = useState(1000); // Default amount in dollars
-    // ...existing code...
   const [amount, setAmount] = useState<number>(0);
-  // ...existing code...
-  const [interestRate, setInterestRate] = useState(4);
-  const [years, setYears] = useState(1);
+  const [interestRate, setInterestRate] = useState<number>(0);
+  const [years, setYears] = useState<number>(0);
   const [compounding, setCompounding] = useState('annually');
   
   const [interestAmount, setInterestAmount] = useState(0);
@@ -120,30 +117,31 @@ const InterestRateVisual = () => {
             </div>
           </div>
           
-              <div className="flex-1 min-w-[150px]">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($):</label>
-              <input
-                type="number"
-                min="0"
-                placeholder='Enter amount'
-                value={amount === 0 ? '' : amount}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setAmount(val === '' ? 0 : Math.max(0, parseInt(val) || 0));
-                }}
-                onFocus={(e) => e.target.select()}
-                className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
-              />
-              </div>
+          <div className="flex-1 min-w-[150px]">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($):</label>
+          <input
+            type="number"
+            min="0"
+            placeholder='Enter amount'
+            value={amount === 0 ? '' : amount}
+            onChange={(e) => {
+              const val = e.target.value;
+              setAmount(val === '' ? 0 : Math.max(0, parseInt(val) || 0));
+            }}
+            onFocus={(e) => e.target.select()}
+            className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
+          />
+          </div>
           
           <div className="flex-1 min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%):</label>
             <input
               type="number"
               min="0.1"
+              placeholder='Enter rate'
               step="0.1"
-              value={interestRate}
-              onChange={(e) => setInterestRate(Math.max(0.1, parseFloat(e.target.value) || 0))}
+              value={interestRate === 0 ? '' : interestRate}
+              onChange={(e) => setInterestRate(Math.max(0, parseFloat(e.target.value) || 0))}
               className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
             />
           </div>
@@ -156,8 +154,9 @@ const InterestRateVisual = () => {
               type="number"
               min="1"
               max="30"
-              value={years}
-              onChange={(e) => setYears(Math.min(30, Math.max(1, parseInt(e.target.value) || 0)))}
+              placeholder='Enter years'
+              value={years === 0 ? '' : years }
+              onChange={(e) => setYears(Math.min(30, Math.max(0, parseInt(e.target.value) || 0)))}
               className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
             />
           </div>
