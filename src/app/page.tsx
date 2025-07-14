@@ -43,7 +43,7 @@ const InterestRateVisual = () => {
   }, [amount, interestRate, years, compounding, mode]);
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold text-black mb-2">Interest Calculator</h2>
       <p className="text-black mb-6">Explore how interest affects your money over time</p>
     
@@ -163,7 +163,7 @@ const InterestRateVisual = () => {
         {/* Results section */}
         <div className="mt-6 p-4 bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
           <h2 className="text-2xl text-black font-bold pb-4">Results:</h2>
-          <div className="lg:grid lg:grid-cols-2 gap-4">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-col gap-4 mb-6">
                 <div className="flex align-center flex-row">
