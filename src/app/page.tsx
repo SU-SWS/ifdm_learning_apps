@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaPiggyBank } from 'react-icons/fa'; 
 import { FaArrowTrendDown } from 'react-icons/fa6';
+import { BiSolidUpArrow } from "react-icons/bi";
+import { BiSolidDownArrow } from "react-icons/bi";
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState('saving'); // 'saving' or 'borrowing'
@@ -55,7 +57,7 @@ const InterestRateVisual = () => {
 
           <div className="flex-1 flex gap-4">
               <button
-                className={`min-w-[150px] flex-1 py-2 px-3 text-sm font-medium ${
+                className={`min-w-[150px] flex-1 py-2 px-3 text-md font-bold ${
                   mode === 'saving' 
                     ? 'bg-[#279989] rounded-lg border-1 border-[#279989]' 
                     : 'rounded-lg border-1 border-[#279989]'
@@ -68,7 +70,7 @@ const InterestRateVisual = () => {
                     ? 'text-[#ffffff]' 
                     : 'text-[#279989]'
                 }`}><FaPiggyBank /></div>
-                  <div className={`text-2xl self-center ${
+                  <div className={`self-center ${
                   mode === 'saving' 
                     ? 'text-[#ffffff]' 
                     : 'text-[#000000]'
@@ -77,7 +79,7 @@ const InterestRateVisual = () => {
                 
               </button>
               <button
-                className={` min-w-[150px] flex-1 py-2 px-3 text-sm font-medium ${
+                className={` min-w-[150px] flex-1 py-2 px-3 text-md font-bold ${
                   mode === 'borrowing' 
                     ? 'bg-[#C31F70] rounded-lg border-1 border-[#C31F70]' 
                     : 'rounded-lg border-1 border-[#C31F70]'
@@ -90,7 +92,7 @@ const InterestRateVisual = () => {
                     ? 'text-[#ffffff]' 
                     : 'text-[#C31F70]'
                 }`}><FaArrowTrendDown /></div>
-                  <div className={`text-2xl self-center ${
+                  <div className={` self-center ${
                   mode === 'borrowing' 
                     ? 'text-[#ffffff]' 
                     : 'text-[#000000]'
@@ -101,33 +103,81 @@ const InterestRateVisual = () => {
         </div>
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-black mb-1">Initial amount ($):</label>
-          <input
-            type="number"
-            min="0"
-            placeholder='Enter amount'
-            value={amount === 0 ? '' : amount}
-            onChange={(e) => {
-              const val = e.target.value;
-              setAmount(val === '' ? 0 : Math.max(0, parseInt(val) || 0));
-            }}
-            onFocus={(e) => e.target.select()}
-            className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
-          />
+            <label className="block text-sm font-medium text-black mb-1">Initial amount ($):</label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter amount"
+                value={amount === 0 ? '' : amount}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setAmount(val === '' ? 0 : Math.max(0, parseInt(val) || 0));
+                }}
+                onFocus={(e) => e.target.select()}
+                className="text-[#343434] font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Increase amount"
+                  onClick={() => setAmount((prev) => Math.max(0, prev + 1))}
+                  className=" hover:text-[#279989] focus:outline-none"
+                >
+                  <BiSolidUpArrow />
+                </button>
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Decrease amount"
+                  onClick={() => setAmount((prev) => Math.max(0, prev - 1))}
+                  className=" hover:text-[#C31F70] focus:outline-none"
+                >
+                  <BiSolidDownArrow />
+                </button>
+              </div>
+            </div>
           </div>
           
-          <div className="flex-1 min-w-[150px]">
+            <div className="flex-1 min-w-[150px]">
             <label className="block text-sm font-medium text-black mb-1">Interest rate (%):</label>
-            <input
+            <div className="relative">
+              <input
               type="number"
               min="0.1"
               placeholder='Enter rate'
               step="0.1"
               value={interestRate === 0 ? '' : interestRate}
               onChange={(e) => setInterestRate(Math.max(0, parseFloat(e.target.value) || 0))}
-              className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border"
-            />
-          </div>
+              className={`font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                mode === 'borrowing' 
+                  ? 'text-[#C31F70]' 
+                  : 'text-[#007C92]'
+                }`}
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Increase interest rate"
+                onClick={() => setInterestRate((prev) => Math.max(0, parseFloat((prev + 0.1).toFixed(1))))}
+                className="hover:text-[#279989] focus:outline-none"
+              >
+                <BiSolidUpArrow />
+              </button>
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Decrease interest rate"
+                onClick={() => setInterestRate((prev) => Math.max(0, parseFloat((prev - 0.1).toFixed(1))))}
+                className="hover:text-[#C31F70] focus:outline-none"
+              >
+                <BiSolidDownArrow />
+              </button>
+              </div>
+            </div>
+            </div>
 
         </div>
         
