@@ -58,8 +58,8 @@ const InterestRateVisual = () => {
       </p>
 
       {/* Interactive calculator */}
-      <div className=" p-6">
-        <div className="flex flex-col gap-4 mb-6">
+      <div className="py-6">
+        <div className="flex flex-col mb-6">
           <h2 className="poppins-bold text-xl text-black font-bold mb-1">I am:</h2>
 
           <div className="flex-1 flex gap-4">
