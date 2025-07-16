@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Mulish } from "next/font/google";
+import { Open_Sans as OpenSansFont } from "next/font/google";
 import "./globals.css";
 
-const MulishFont = Mulish({
-  variable: "--font-mulish",
+const openSans = OpenSansFont({
+  variable: "--font-open-sans",
   subsets: ["latin"],
   display: "swap",
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${MulishFont.variable}  antialiased`}
+        className={`${openSans.variable}  antialiased`}
       >
         {children}
       </body>
