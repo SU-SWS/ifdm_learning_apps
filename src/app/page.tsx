@@ -4,7 +4,7 @@ import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { BiSolidUpArrow } from "react-icons/bi";
 import { BiSolidDownArrow } from "react-icons/bi";
-import { Poppins, Open_Sans } from 'next/font/google'
+import { Poppins } from 'next/font/google'
  
 const poppins = Poppins({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -12,8 +12,6 @@ const poppins = Poppins({
   variable: '--font-poppins', 
   subsets: ['latin'],
 })
-
-
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
