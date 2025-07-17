@@ -4,6 +4,7 @@ import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { BiSolidUpArrow } from "react-icons/bi";
 import { BiSolidDownArrow } from "react-icons/bi";
+import { poppins } from '@/app/fonts';
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
@@ -50,7 +51,7 @@ const InterestRateVisual = () => {
 
   return (
     <div className="bg-white p-6 max-w-5xl mx-auto">
-      <h2 className="poppins-bold text-[20px] lg:text-[50px] font-bold text-black mb-2">
+      <h2 className={ `${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2` }>
         Interest Calculator
       </h2>
       <p className="text-black mb-6">
@@ -60,7 +61,7 @@ const InterestRateVisual = () => {
       {/* Interactive calculator */}
       <div className="py-6">
         <div className="flex flex-col mb-6">
-          <h2 className="poppins-bold text-xl text-black font-bold mb-1">I am:</h2>
+          <h2 className={`${poppins.className} text-xl text-black font-bold mb-1`}>I am:</h2>
 
           <div className="flex-1 flex gap-4">
             <button
@@ -272,7 +273,7 @@ const InterestRateVisual = () => {
 
         {/* Results section */}
         <div className="mt-6 p-4 bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
-          <h2 className="poppins-bold text-lg text-black font-bold pb-4">Results:</h2>
+          <h2 className={ `${poppins.className} text-lg text-black font-bold pb-4`}>Results:</h2>
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">

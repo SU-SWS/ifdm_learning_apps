@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Open_Sans as OpenSansFont } from "next/font/google";
+import { openSans, poppins } from '@/app/fonts';
 import "./globals.css";
-
-const openSans = OpenSansFont({
-  variable: "--font-open-sans",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
 
 export const metadata: Metadata = {
   title: "Understanding money's building blocks",
