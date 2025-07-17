@@ -13,12 +13,7 @@ const poppins = Poppins({
   subsets: ['latin'],
 })
 
-const openSans = Open_Sans({
-  weight: ['300', '400', '500', '600', '700', '800'],
-  style: ['normal', 'italic'],
-  variable: '--font-open-sans',
-  subsets: ['latin'],
-});
+
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
