@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "echo \" \" > public/.nojekyll && next build && cp CNAME out/CNAME",
     "predeploy": "node scripts/check-branch.js && yarn build",
-    "deploy": "gh-pages -d app",
+    "deploy": "gh-pages -d out",
     "start": "next start",
     "lint": "next lint"
   },
