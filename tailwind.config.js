@@ -5,7 +5,7 @@ module.exports = {
         'digital-blue-opacity': 'rgba(0, 108, 184, 0.05)',
       },
       fontFamily: {
-        mule: ['"Open_Sans"', ...defaultTheme.fontFamily.sans],
+        'Open_sans': ['"Open_Sans"', ...defaultTheme.fontFamily.sans],
         'Poppins': ['"Poppins"', ...defaultTheme.fontFamily.sans]
       }
     }
