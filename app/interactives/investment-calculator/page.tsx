@@ -4,7 +4,7 @@ import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { BiSolidUpArrow } from "react-icons/bi";
 import { BiSolidDownArrow } from "react-icons/bi";
-import { poppins } from './ui/fonts'
+import { poppins } from '@/app/ui/fonts';
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
