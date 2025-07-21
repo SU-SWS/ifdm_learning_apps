@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { openSans } from "./fonts";
-import "./globals.css";
+import { openSans } from "./ui/fonts";
+import "./ui/globals.css";
 
 
 
