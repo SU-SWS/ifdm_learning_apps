@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { openSans } from "@/app/fonts";
-import "./globals.css";
+import { openSans } from "@/app/ui/fonts";
+import "@/app/ui/globals.css";
 
 
 
