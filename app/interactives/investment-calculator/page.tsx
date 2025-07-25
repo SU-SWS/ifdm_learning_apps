@@ -8,9 +8,9 @@ import { poppins } from '@/app/ui/fonts';
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
-  const [amount, setAmount] = useState<number>(0);
-  const [interestRate, setInterestRate] = useState<number>(0);
-  const [years, setYears] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(100);
+  const [interestRate, setInterestRate] = useState<number>(5);
+  const [years, setYears] = useState<number>(10);
   const [compounding, setCompounding] = useState("annually");
 
   const [interestAmount, setInterestAmount] = useState(0);
@@ -51,9 +51,9 @@ const InterestRateVisual = () => {
 
   return (
     <div className="bg-white p-6 max-w-5xl mx-auto">
-      <h2 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>
+      <h1 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>
         Interest Calculator
-      </h2>
+      </h1>
       <p className="text-black mb-6">
         Explore how interest affects your money over time
       </p>
@@ -140,7 +140,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev + 1))}
-                  className=" hover:text-[#279989] focus:outline-none"
+                  className=" hover:text-[#D7D7D7] focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -149,7 +149,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev - 1))}
-                  className=" hover:text-[#C31F70] focus:outline-none"
+                  className=" hover:text-[#D7D7D7] focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -185,7 +185,7 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev + 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-[#279989] focus:outline-none"
+                  className="hover:text-[#D7D7D7] focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -198,7 +198,7 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev - 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-[#C31F70] focus:outline-none"
+                  className="hover:text-[#D7D7D7] focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -232,7 +232,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase years"
                   onClick={() => setYears((prev) => Math.min(30, prev + 1))}
-                  className="hover:text-[#279989] focus:outline-none"
+                  className="hover:text-[#D7D7D7] focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -241,7 +241,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease years"
                   onClick={() => setYears((prev) => Math.max(1, prev - 1))}
-                  className="hover:text-[#C31F70] focus:outline-none"
+                  className="hover:text-[#D7D7D7] focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
