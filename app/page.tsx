@@ -20,15 +20,6 @@ const PageMoved = () => {
               Investment Calculator
             </a>
           </li>
-          <li>
-            <a
-              className="text-blue-500 hover:underline"
-              href="/interactives/compound-interest-calculator"
-            >
-              <CiCalculator1 className="w-[2em] h-[2em] inline-block mr-2" />
-              Compound Interest Calculator
-            </a>
-          </li>
         </ul>
       </div>
   );
