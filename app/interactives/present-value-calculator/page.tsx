@@ -14,16 +14,38 @@ export default function PresentValueCalculator() {
   const [futureValue, setFutureValue] = useState(10000)
   const [interestRate, setInterestRate] = useState([5.0])
   const [timePeriod, setTimePeriod] = useState([10])
+  const [animatedYear, setAnimatedYear] = useState(timePeriod[0])
+  const [isAnimating, setIsAnimating] = useState(false)
 
   // Calculate present value using the formula: PV = FV / (1 + r)^n
-  const calculatePresentValue = () => {
+  const calculatePresentValue = (years: number) => {
     const rate = interestRate[0] / 100
-    const years = timePeriod[0]
     const pv = futureValue / Math.pow(1 + rate, years)
     return pv
   }
 
-  const presentValue = calculatePresentValue()
+  // Animate years from 0 to selected
+  const handleWatchClick = () => {
+    setIsAnimating(true)
+    setAnimatedYear(0)
+    let current = 0
+    const target = timePeriod[0]
+    const step = target > 30 ? 2 : 1 // speed up for large numbers
+    const interval = setInterval(() => {
+      current += step
+      if (current >= target) {
+        setAnimatedYear(target)
+        setIsAnimating(false)
+        clearInterval(interval)
+      } else {
+        setAnimatedYear(current)
+      }
+    }, 60)
+  }
+
+  // Use animatedYear for display if animating, else use selected
+  const displayYear = isAnimating ? animatedYear : timePeriod[0]
+  const presentValue = calculatePresentValue(displayYear)
   const discountAmount = futureValue - presentValue
   const valueRetained = (presentValue / futureValue) * 100
 
@@ -54,14 +76,14 @@ export default function PresentValueCalculator() {
                   onChange={(e) => setFutureValue(Number(e.target.value))}
                   className="text-[#343434] font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-2 top-1/2 flex flex-col">
+                <div className="absolute right-2 top-[45%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
                   <button
                   type="button"
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setFutureValue((prev) => prev + 1)}
-                  className="hover:text-[#279989] focus:outline-none"
+                  className="hover:text-[#D7D7D7] focus:outline-none"
                   >
                   <BiSolidUpArrow />
                   </button>
@@ -70,7 +92,7 @@ export default function PresentValueCalculator() {
                   tabIndex={-1}
                   aria-label="Decrease amount"
                   onClick={() => setFutureValue((prev) => Math.max(0, prev - 1))}
-                  className="hover:text-[#C31F70] focus:outline-none"
+                  className="hover:text-[#D7D7D7] focus:outline-none"
                   >
                   <BiSolidDownArrow />
                   </button>
@@ -103,7 +125,13 @@ export default function PresentValueCalculator() {
               </div>
 
               {/* Watch Time Impact Button */}
-              <Button className="w-full py-[35px] px-[30px] text-md font-bold bg-[#C31F70] hover:bg-gray-800 text-white">Watch Time Impact</Button>
+              <Button
+                className="w-full py-[35px] px-[30px] text-md font-bold bg-[#C31F70] hover:bg-gray-800 text-white"
+                onClick={handleWatchClick}
+                disabled={isAnimating}
+              >
+                Watch Time Impact
+              </Button>
             </CardContent>
           </Card>
 
@@ -115,7 +143,9 @@ export default function PresentValueCalculator() {
             <CardContent className="">
               {/* Main Result */}
               <div className="text-center">
-                <p className="text-md font-bold mb-2">After {timePeriod[0]} years</p>
+                <p className="text-md font-bold mb-2">
+                  After {displayYear} {displayYear === 1 ? "year" : "years"}
+                </p>
                 <p className="text-[40px] font-bold text-[#279989] mb-1">
                   ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
