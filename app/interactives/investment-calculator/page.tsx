@@ -51,9 +51,9 @@ const InterestRateVisual = () => {
 
   return (
     <div className="bg-white p-6 max-w-5xl mx-auto">
-      <h2 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>
+      <h1 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>
         Interest Calculator
-      </h2>
+      </h1>
       <p className="text-black mb-6">
         Explore how interest affects your money over time
       </p>

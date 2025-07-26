@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-
+import { poppins } from "@/app/ui/fonts";
+import { BiSolidUpArrow } from "react-icons/bi";
+import { BiSolidDownArrow } from "react-icons/bi";
 
 export default function PresentValueCalculator() {
   const [futureValue, setFutureValue] = useState(10000)
@@ -27,130 +28,158 @@ export default function PresentValueCalculator() {
   const valueRetained = (presentValue / futureValue) * 100
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="bg-white p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <FaArrowTrendDown className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Present Value Calculator</h1>
+        <div className="mb-8">
+          <div className="flex gap-2 mb-2">
+            <h1 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>Present Value Calculator</h1>
           </div>
-          <p className="text-gray-600">Discover how to discount a sum of money due into the future</p>
+          <p className="text-gray-600">Discover how to discount a sum of money due into the future.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Parameters Panel */}
           <Card>
-            <CardHeader>
-              <CardTitle>Parameters</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+             <CardContent className="space-y-6">
               {/* Future Value Input */}
-              <div className="space-y-2">
-                <Label htmlFor="future-value" className="text-sm font-medium">
-                  $ Future Value
+              <div className="space-y-2 relative">
+                <Label htmlFor="future-value" className="text-sm mb-1 block font-bold">
+                  Future Value ($)
                 </Label>
                 <Input
                   id="future-value"
                   type="number"
                   value={futureValue}
                   onChange={(e) => setFutureValue(Number(e.target.value))}
-                  className="text-lg"
+                  className="text-[#343434] font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
+                <div className="absolute right-2 top-1/2 flex flex-col">
+                  {/* Increment/Decrement buttons for Future Value */}
+                  <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Increase amount"
+                  onClick={() => setFutureValue((prev) => prev + 1)}
+                  className="hover:text-[#279989] focus:outline-none"
+                  >
+                  <BiSolidUpArrow />
+                  </button>
+                  <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Decrease amount"
+                  onClick={() => setFutureValue((prev) => Math.max(0, prev - 1))}
+                  className="hover:text-[#C31F70] focus:outline-none"
+                  >
+                  <BiSolidDownArrow />
+                  </button>
+                </div>
               </div>
 
               {/* Interest Rate Slider */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">% Interest Rate: {interestRate[0].toFixed(1)}%</Label>
+                <Label className="text-sm mb-1 block font-bold">% Interest Rate: <span className="text-[#007c92]">{interestRate[0].toFixed(1)}% </span></Label>
                 <Slider
                   value={interestRate}
                   onValueChange={setInterestRate}
-                  max={20}
+                  max={12}
                   min={0.1}
                   step={0.1}
-                  className="w-full"
+                  className="w-full border-color-[#007c92]"
                 />
               </div>
 
               {/* Time Period Slider */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">⏱ Time Period: {timePeriod[0]} years</Label>
-                <Slider value={timePeriod} onValueChange={setTimePeriod} max={50} min={1} step={1} className="w-full" />
+                <Label className="text-sm mb-1 block font-bold">Time Period: <span className="text-[#007c92]">{timePeriod[0]} years</span></Label>
+                <Slider 
+                  value={timePeriod} 
+                  onValueChange={setTimePeriod} 
+                  max={50} 
+                  min={1} 
+                  step={1} 
+                  className="w-full" />
               </div>
 
               {/* Watch Time Impact Button */}
-              <Button className="w-full bg-black hover:bg-gray-800 text-white">Watch Time Impact</Button>
+              <Button className="w-full py-[35px] px-[30px] text-md font-bold bg-[#C31F70] hover:bg-gray-800 text-white">Watch Time Impact</Button>
             </CardContent>
           </Card>
 
           {/* Present Value Calculation Panel */}
-          <Card>
+          <Card className="bg-[#F7F8FF] rounded-3xl p-[32px]">
             <CardHeader>
-              <CardTitle>Present Value Calculation</CardTitle>
+              <CardTitle className="text-center text-md font-normal">Present Value Calculation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="">
               {/* Main Result */}
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">After {timePeriod[0]} years</p>
-                <p className="text-4xl font-bold text-green-600 mb-1">
+                <p className="text-md font-bold mb-2">After {timePeriod[0]} years</p>
+                <p className="text-[40px] font-bold text-[#279989] mb-1">
                   ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="text-sm text-gray-600">Present Value</p>
+                <p className="text-md font-bold">Present Value</p>
               </div>
 
               {/* Calculation Breakdown */}
-              <div className="space-y-3 border-t pt-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Future Value:</span>
-                  <span className="font-medium">
-                    ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
+              <div className="pt-4">
+                {/* Results section */}
+                <div className="bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
+                  <h2 className={`${poppins.className} text-lg text-black font-bold pb-4`}>Results:</h2>
+                    <div className="innerwrapper">
+                      <div className="flex flex-col mb-1">
+                        <div className="flex align-center flex-row">
+                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
+                            Future Value:
+                          </div>
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                            ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col  mb-1">
+                        <div className={`flex align-center flex-row`}>
+                          <div
+                            className="w-[50%] text-md p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
+                            Present Value:
+                          </div>
+                          <div
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold overflow-hidden bg-white text-ellipsis"
+                          >
+                            ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Present Value:</span>
-                  <span className="font-medium text-green-600">
-                    ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col my-3"><hr/></div>
+                      <div className="flex flex-col mb-1">
+                        <div className={`flex align-center flex-row`}>
+                          <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg whitespace-nowrap">
+                            Discount Amount:
+                          </div>
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white  overflow-hidden text-ellipsis">
+                            -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col mb-1">
+                        <div className={`flex align-center flex-row`}>
+                          <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg">
+                            Value Retained:
+                          </div>
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white  overflow-hidden text-ellipsis">
+                            {valueRetained.toFixed(1)}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {/* Wrapper section ends */}
                 </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Discount Amount:</span>
-                  <span className="font-medium text-red-600">
-                    -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Value Retained:</span>
-                  <span className="font-medium">{valueRetained.toFixed(1)}%</span>
-                </div>
-              </div>
-
-              {/* Formula Display */}
-              <div className="bg-blue-50 p-4 rounded-lg border-t">
-                <p className="text-sm text-gray-600 mb-2">Formula Used:</p>
-                <p className="text-sm font-mono text-blue-800 mb-1">PV = FV ÷ (1 + r)^n</p>
-                <p className="text-xs font-mono text-blue-600">
-                  PV = ${futureValue.toLocaleString()} ÷ (1 + {(interestRate[0] / 100).toFixed(3)})^{timePeriod[0]}
-                </p>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        {/* Educational Content */}
-        <Card className="mt-8">
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-3">Understanding Present Value</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Present Value (PV) is a financial concept that determines the current worth of a future sum of money,
-              given a specified rate of return. The calculation accounts for the time value of money - the principle
-              that money available today is worth more than the same amount in the future due to its potential earning
-              capacity.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
