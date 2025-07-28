@@ -1,0 +1,178 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { Badge } from "@/components/ui/badge"
+import { poppins } from "@/app/ui/fonts";
+import { BiSolidUpArrow } from "react-icons/bi";
+import { BiSolidDownArrow } from "react-icons/bi";
+
+
+export default function InflationCalculator() {
+  const [initialPrice, setInitialPrice] = useState(100)
+  const [inflationRate, setInflationRate] = useState(3.5)
+  const [timePeriod, setTimePeriod] = useState(10)
+  const [futureValue, setFutureValue] = useState(0)
+
+  // Calculate future value based on compound inflation
+  useEffect(() => {
+    const future = initialPrice * Math.pow(1 + inflationRate / 100, timePeriod)
+    setFutureValue(future)
+  }, [initialPrice, inflationRate, timePeriod])
+
+  const getInflationLabel = (rate: number) => {
+    if (rate <= 2) return "Low"
+    if (rate <= 4) return "Moderate"
+    if (rate <= 6) return "High"
+    return "Very High"
+  }
+
+  const getInflationColor = (rate: number) => {
+    if (rate <= 2) return "bg-green-500"
+    if (rate <= 4) return "bg-yellow-500"
+    if (rate <= 6) return "bg-orange-500"
+    return "bg-red-500"
+  }
+
+  return (
+    <div className="bg-white p-6 max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex gap-2 mb-2">
+            <h1 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>Inflation Impact Calculator</h1>
+          </div>
+          <p className="text-gray-600">Explore how inflation affects your money's purchasing power over time</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Parameters Panel */}
+          <Card>
+            <CardHeader>
+              <CardDescription>
+                Use the sliders below to see how different inflation rates and time periods affect your money
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Future Value Input */}
+              <div className="space-y-2 relative">
+                <Label htmlFor="initial-price" className="text-sm font-medium">
+                  Initial Price ($):
+                </Label>
+
+                <Input
+                  id="initial-price"
+                  type="number"
+                  value={initialPrice}
+                  onChange={(e) => setInitialPrice(Number(e.target.value) || 0)}
+                  className="text-[#343434] font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  min="1"
+                  max="1000000"
+                />
+                <div className="absolute right-2 top-[45%] flex flex-col">
+                  {/* Increment/Decrement buttons for Future Value */}
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Increase amount"
+                    onClick={() => setInitialPrice((prev) => prev + 1)}
+                    className="hover:text-[#D7D7D7] focus:outline-none"
+                  >
+                    <BiSolidUpArrow />
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Decrease amount"
+                    onClick={() => setInitialPrice((prev) => Math.max(1, prev - 1))}
+                    className="hover:text-[#D7D7D7] focus:outline-none"
+                  >
+                    <BiSolidDownArrow />
+                  </button>
+                </div>
+              </div>
+
+              {/* Interest Rate Slider */}
+              <div className="space-y-3">
+                  <div className="flex items-center space-between gap-2">
+                    <Label className="text-sm font-medium">Annual Inflation Rate (%):</Label>
+                    <Badge className={`${getInflationColor(inflationRate)} text-white`}>
+                      {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
+                    </Badge>
+                  </div>
+                 <Slider
+                  value={[inflationRate]}
+                  onValueChange={(value) => setInflationRate(value[0])}
+                  max={15}
+                  min={0}
+                  step={0.1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>0%</span>
+                  <span>15%</span>
+                </div>
+              </div>
+
+              {/* Time Period Slider */}
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <Label className="text-sm font-medium">Time Period: </Label>
+                  <span className="text-sm font-semibold flex items-center gap-1 text-[#007C92]">
+                    {timePeriod} year{timePeriod !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                <Slider
+                  value={[timePeriod]}
+                  onValueChange={(value) => setTimePeriod(value[0])}
+                  max={50}
+                  min={1}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>1 year</span>
+                  <span>50 years</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Present Value Calculation Panel */}
+          <Card className="bg-[#F7F8FF] rounded-3xl p-[32px]">
+            <CardHeader>
+              <CardTitle className="text-center text-md font-normal">Results:</CardTitle>
+            </CardHeader>
+            <CardContent className="">
+              {/* Main Result */}
+            
+              {/* Calculation Breakdown */}
+              <div className="pt-4">
+                {/* Results section */}
+                <div className="bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
+                    <div className="innerwrapper">
+                      <div className="flex flex-col mb-1">
+                        <div className="flex align-center flex-row">
+                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
+                            Future Price:
+                          </div>
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-[#F7F8FF] font-bold text-black overflow-hidden text-ellipsis">
+                            ${futureValue.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  {/* Wrapper section ends */}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}

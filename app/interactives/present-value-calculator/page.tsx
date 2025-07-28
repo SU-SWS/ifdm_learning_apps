@@ -170,7 +170,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
                             Future Value:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-[#FCFBFF] font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-[#F7F8FF] font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -182,7 +182,7 @@ export default function PresentValueCalculator() {
                             Present Value:
                           </div>
                           <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-[#279989] font-bold overflow-hidden bg-[#FCFBFF] text-ellipsis"
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-[#279989] font-bold overflow-hidden bg-[#F7F8FF] text-ellipsis"
                           >
                             ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
@@ -195,7 +195,8 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg whitespace-nowrap">
                             Discount Amount:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-[#C31F70] bg-[#FCFBFF]  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-[#C31F70] bg-[#
+                          ]  overflow-hidden text-ellipsis">
                             -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -205,7 +206,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg">
                             Value Retained:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-[#FCFBFF]  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-[#F7F8FF]  overflow-hidden text-ellipsis">
                             {valueRetained.toFixed(1)}%
                           </div>
                         </div>
