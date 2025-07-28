@@ -110,6 +110,10 @@ export default function PresentValueCalculator() {
                   step={0.1}
                   className="w-full border-color-[#007c92]"
                 />
+                <div className="flex justify-between text-sm font-bold">
+                  <span>0.1%</span>
+                  <span>12%</span>
+                </div>
               </div>
 
               {/* Time Period Slider */}
@@ -122,6 +126,10 @@ export default function PresentValueCalculator() {
                   min={1} 
                   step={1} 
                   className="w-full" />
+                  <div className="flex justify-between text-sm font-bold">
+                  <span>1 year</span>
+                  <span>50 years</span>
+                </div>
               </div>
 
               {/* Watch Time Impact Button */}
@@ -156,14 +164,13 @@ export default function PresentValueCalculator() {
               <div className="pt-4">
                 {/* Results section */}
                 <div className="bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
-                  <h2 className={`${poppins.className} text-lg text-black font-bold pb-4`}>Results:</h2>
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex align-center flex-row">
                           <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
                             Future Value:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-[#FCFBFF] font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -171,11 +178,11 @@ export default function PresentValueCalculator() {
                       <div className="flex flex-col  mb-1">
                         <div className={`flex align-center flex-row`}>
                           <div
-                            className="w-[50%] text-md p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
+                            className="w-[50%] text-md p-4 font-medium  rounded-l-lg bg-[#D7D7D7]">
                             Present Value:
                           </div>
                           <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold overflow-hidden bg-white text-ellipsis"
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-[#279989] font-bold overflow-hidden bg-[#FCFBFF] text-ellipsis"
                           >
                             ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
@@ -188,7 +195,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg whitespace-nowrap">
                             Discount Amount:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-[#C31F70] bg-[#FCFBFF]  overflow-hidden text-ellipsis">
                             -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -198,7 +205,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg">
                             Value Retained:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-[#FCFBFF]  overflow-hidden text-ellipsis">
                             {valueRetained.toFixed(1)}%
                           </div>
                         </div>
