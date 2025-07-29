@@ -31,10 +31,10 @@ export default function InflationCalculator() {
   }
 
   const getInflationColor = (rate: number) => {
-    if (rate <= 2) return "bg-green-500"
-    if (rate <= 4) return "bg-yellow-500"
-    if (rate <= 6) return "bg-orange-500"
-    return "bg-red-500"
+    if (rate <= 2) return "bg-[#87CDA8]" // Green
+    if (rate <= 4) return "bg-[#FDE183]" // Yellow
+    if (rate <= 6) return "bg-[#FD8D43]" // Orange
+    return "bg-[#F95048]" // Red
   }
 
   return (
@@ -99,7 +99,7 @@ export default function InflationCalculator() {
               <div className="space-y-3">
                   <div className="flex items-center space-between gap-2">
                     <Label className="text-sm font-medium">Annual Inflation Rate (%):</Label>
-                    <Badge className={`${getInflationColor(inflationRate)} text-white`}>
+                    <Badge className={`${getInflationColor(inflationRate)} text-black font-bold`}>
                       {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
                     </Badge>
                   </div>
