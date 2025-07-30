@@ -277,7 +277,7 @@ const InterestRateVisual = () => {
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">
                 <div className="flex align-center flex-row">
-                  <div className="w-[50%] text-[15px]  p-4 text-black rounded-l-lg bg-[#D7D7D7]">
+                  <div className="w-[50%] text-[15px]  p-4 text-black rounded-l-lg bg-grey-med-dark">
                     Initial Amount:
                   </div>
                   <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
@@ -297,8 +297,8 @@ const InterestRateVisual = () => {
                   <div
                     className={`w-[50%] text-xl p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
                       mode === "saving"
-                        ? "bg-palo-verde-light] text-palo-verde"
-                        : "bg-berry-light] text-berry"
+                        ? "bg-palo-verde-light text-palo-verde"
+                        : "bg-berry-light text-berry"
                     }`}
                   >
                     ${Math.abs(interestAmount).toLocaleString(undefined, {
@@ -310,10 +310,10 @@ const InterestRateVisual = () => {
               </div>
               <div className="flex flex-col mb-1">
                 <div className={`flex align-center flex-row`}>
-                  <div className="w-[50%] text-[15px] p-4 font-bold text-white bg-navy] rounded-l-lg">
+                  <div className="w-[50%] text-[15px] p-4 font-bold text-white bg-navy rounded-l-lg">
                     Final Amount:
                   </div>
-                  <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white  overflow-hidden text-ellipsis">
+                  <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
                     ${totalAmount.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

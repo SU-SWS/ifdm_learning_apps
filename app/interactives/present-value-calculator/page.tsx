@@ -82,7 +82,7 @@ export default function PresentValueCalculator() {
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setFutureValue((prev) => prev + 1)}
-                  className="hover:text-[#D7D7D7] focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                   >
                   <BiSolidUpArrow />
                   </button>
@@ -91,7 +91,7 @@ export default function PresentValueCalculator() {
                   tabIndex={-1}
                   aria-label="Decrease amount"
                   onClick={() => setFutureValue((prev) => Math.max(0, prev - 1))}
-                  className="hover:text-[#D7D7D7] focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                   >
                   <BiSolidDownArrow />
                   </button>
@@ -166,10 +166,10 @@ export default function PresentValueCalculator() {
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
+                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark">
                             Future value:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-med font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-light font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -177,11 +177,11 @@ export default function PresentValueCalculator() {
                       <div className="flex flex-col  mb-1">
                         <div className={`flex align-center flex-row`}>
                           <div
-                            className="w-[50%] text-md p-4 font-medium  rounded-l-lg bg-[#D7D7D7]">
+                            className="w-[50%] text-md p-4 font-medium  rounded-l-lg bg-grey-med-dark">
                             Present value:
                           </div>
                           <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-grey-med text-ellipsis"
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-grey-light text-ellipsis"
                           >
                             ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
@@ -191,21 +191,20 @@ export default function PresentValueCalculator() {
                       <div className="flex flex-col my-3"><hr/></div>
                       <div className="flex flex-col mb-1">
                         <div className={`flex align-center flex-row`}>
-                          <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg whitespace-nowrap">
+                          <div className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg whitespace-nowrap">
                             Discount amount:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-berry bg-[#
-                          ]  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-berry bg-grey-light  overflow-hidden text-ellipsis">
                             -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-col mb-1">
                         <div className={`flex align-center flex-row`}>
-                          <div className="w-[50%] text-md p-4 font-medium text-black bg-[#D7D7D7] rounded-l-lg">
+                          <div className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg">
                             Value retained:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-grey-med  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-grey-light overflow-hidden text-ellipsis">
                             {valueRetained.toFixed(1)}%
                           </div>
                         </div>

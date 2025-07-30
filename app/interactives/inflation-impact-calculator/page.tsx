@@ -78,7 +78,7 @@ export default function InflationCalculator() {
                     tabIndex={-1}
                     aria-label="Increase amount"
                     onClick={() => setInitialPrice((prev) => prev + 1)}
-                    className="hover:text-[#D7D7D7] focus:outline-none"
+                    className="hover:text-grey-med-dark focus:outline-none"
                   >
                     <BiSolidUpArrow />
                   </button>
@@ -87,7 +87,7 @@ export default function InflationCalculator() {
                     tabIndex={-1}
                     aria-label="Decrease amount"
                     onClick={() => setInitialPrice((prev) => Math.max(1, prev - 1))}
-                    className="hover:text-[#D7D7D7] focus:outline-none"
+                    className="hover:text-grey-med-dark focus:outline-none"
                   >
                     <BiSolidDownArrow />
                   </button>
@@ -156,10 +156,10 @@ export default function InflationCalculator() {
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
+                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-med font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-light font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>
