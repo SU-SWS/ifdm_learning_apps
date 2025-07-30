@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
+import { CustomSlider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { poppins } from "@/app/ui/fonts";
 import { BiSolidUpArrow } from "react-icons/bi";
@@ -102,7 +102,7 @@ export default function PresentValueCalculator() {
               {/* Interest Rate Slider */}
               <div className="space-y-3">
                 <Label className="text-sm mb-1 block font-bold">% Interest Rate: <span className="text-[#007c92]">{interestRate[0].toFixed(1)}% </span></Label>
-                <Slider
+                <CustomSlider
                   value={interestRate}
                   onValueChange={setInterestRate}
                   max={12}
@@ -119,7 +119,7 @@ export default function PresentValueCalculator() {
               {/* Time Period Slider */}
               <div className="space-y-3">
                 <Label className="text-sm mb-1 block font-bold">Time Period: <span className="text-[#007c92]">{timePeriod[0]} years</span></Label>
-                <Slider 
+                <CustomSlider 
                   value={timePeriod} 
                   onValueChange={setTimePeriod} 
                   max={50} 

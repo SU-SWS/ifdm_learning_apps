@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
+import { CustomSlider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { poppins } from "@/app/ui/fonts";
 import { BiSolidUpArrow } from "react-icons/bi";
@@ -103,7 +103,7 @@ export default function InflationCalculator() {
                       {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
                     </Badge>
                   </div>
-                 <Slider
+                 <CustomSlider
                   value={[inflationRate]}
                   onValueChange={(value) => setInflationRate(value[0])}
                   max={15}
@@ -125,13 +125,14 @@ export default function InflationCalculator() {
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
                 </div>
-                <Slider
+                <CustomSlider
                   value={[timePeriod]}
                   onValueChange={(value) => setTimePeriod(value[0])}
                   max={50}
                   min={1}
                   step={1}
                   className="w-full"
+                  rangeClassName="time-period-range bg-[#6B9BAC]"
                 />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>1 year</span>
@@ -164,7 +165,6 @@ export default function InflationCalculator() {
                           </div>
                         </div>
                       </div>
-
                     </div>
                   {/* Wrapper section ends */}
                 </div>
