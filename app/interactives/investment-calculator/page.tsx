@@ -7,9 +7,9 @@ import { BiSolidDownArrow } from "react-icons/bi";
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
-  const [amount, setAmount] = useState<number>(0);
-  const [interestRate, setInterestRate] = useState<number>(0);
-  const [years, setYears] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(100);
+  const [interestRate, setInterestRate] = useState<number>(5);
+  const [years, setYears] = useState<number>(10);
   const [compounding, setCompounding] = useState("annually");
 
   const [interestAmount, setInterestAmount] = useState(0);
@@ -139,7 +139,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev + 1))}
-                  className=" hover:text-palo-verde focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -148,7 +148,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev - 1))}
-                  className=" hover:text-berry focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -184,7 +184,7 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev + 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-palo-verde focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -197,7 +197,7 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev - 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-berry focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -231,7 +231,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase years"
                   onClick={() => setYears((prev) => Math.min(30, prev + 1))}
-                  className="hover:text-palo-verde focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -240,7 +240,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease years"
                   onClick={() => setYears((prev) => Math.max(1, prev - 1))}
-                  className="hover:text-berry focus:outline-none"
+                  className="hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>

@@ -9,7 +9,8 @@ module.exports = {
         'palo-verde': '#279989',
       },
       fontFamily: {
-        mule: ['"Mulish"', ...defaultTheme.fontFamily.sans]
+        'Open_sans': ['"Open_Sans"', ...defaultTheme.fontFamily.sans],
+        'Poppins': ['"Poppins"', ...defaultTheme.fontFamily.sans]
       }
     }
   }
