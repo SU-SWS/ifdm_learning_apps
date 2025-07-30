@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CustomSlider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
-import { poppins } from "@/app/ui/fonts";
 import { BiSolidUpArrow } from "react-icons/bi";
 import { BiSolidDownArrow } from "react-icons/bi";
 
@@ -31,10 +30,10 @@ export default function InflationCalculator() {
   }
 
   const getInflationColor = (rate: number) => {
-    if (rate <= 2) return "bg-[#87CDA8]" // Green
-    if (rate <= 4) return "bg-[#FDE183]" // Yellow
-    if (rate <= 6) return "bg-[#FD8D43]" // Orange
-    return "bg-[#F95048]" // Red
+    if (rate <= 2) return "bg-badge-green" // Green
+    if (rate <= 4) return "bg-badge-yellow" // Yellow
+    if (rate <= 6) return "bg-badge-orange" // Orange
+    return "bg-badge-red" // Red
   }
 
   return (
@@ -43,9 +42,9 @@ export default function InflationCalculator() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex gap-2 mb-2">
-            <h1 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>Inflation Impact Calculator</h1>
+            <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">Inflation Impact Calculator</h1>
           </div>
-          <p className="text-gray-600">Explore how inflation affects your money's purchasing power over time</p>
+          <p className="text-gray-600">Explore how inflation affects your money&rsquo;s purchasing power over time</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -60,15 +59,15 @@ export default function InflationCalculator() {
               {/* Future Value Input */}
               <div className="space-y-2 relative">
                 <Label htmlFor="initial-price" className="text-sm font-medium">
-                  Initial Price ($):
+                  Initial amount ($):
                 </Label>
 
                 <Input
-                  id="initial-price"
+                  id="initial-amount"
                   type="number"
                   value={initialPrice}
                   onChange={(e) => setInitialPrice(Number(e.target.value) || 0)}
-                  className="text-[#343434] font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
                   max="1000000"
                 />
@@ -98,7 +97,7 @@ export default function InflationCalculator() {
               {/* Interest Rate Slider */}
               <div className="space-y-3">
                   <div className="flex items-center space-between gap-2">
-                    <Label className="text-sm font-medium">Annual Inflation Rate (%):</Label>
+                    <Label className="text-sm font-medium">Annual inflation rate (%):</Label>
                     <Badge className={`${getInflationColor(inflationRate)} text-black font-bold`}>
                       {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
                     </Badge>
@@ -120,8 +119,8 @@ export default function InflationCalculator() {
               {/* Time Period Slider */}
               <div className="space-y-3">
                 <div className="flex items-center">
-                  <Label className="text-sm font-medium">Time Period: </Label>
-                  <span className="text-sm font-semibold flex items-center gap-1 text-[#007C92]">
+                  <Label className="text-sm font-medium">Time period: </Label>
+                  <span className="text-sm font-semibold flex items-center gap-1 text-lagunita">
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
                 </div>
@@ -132,7 +131,7 @@ export default function InflationCalculator() {
                   min={1}
                   step={1}
                   className="w-full"
-                  rangeClassName="time-period-range bg-[#6B9BAC]"
+                  rangeClassName="time-period-range bg-lagunita-light"
                 />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>1 year</span>
@@ -143,7 +142,7 @@ export default function InflationCalculator() {
           </Card>
 
           {/* Present Value Calculation Panel */}
-          <Card className="bg-[#F7F8FF] rounded-3xl p-[32px]">
+          <Card className="bg-grey-med rounded-3xl p-[32px]">
             <CardHeader>
               <CardTitle className="text-center text-md font-normal">Results:</CardTitle>
             </CardHeader>
@@ -153,14 +152,14 @@ export default function InflationCalculator() {
               {/* Calculation Breakdown */}
               <div className="pt-4">
                 {/* Results section */}
-                <div className="bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
+                <div className="bg-grey-med rounded-lg border border-grey-med">
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex align-center flex-row">
                           <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-[#D7D7D7]">
-                            Future Price:
+                            Future price:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-[#F7F8FF] font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-med font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>

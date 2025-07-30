@@ -41,6 +41,22 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --font-poppins: Poppins, sans-serif;
+  --color-berry: rgba(195, 31, 112, 1);
+  --color-berry-light: rgba(255, 237, 246, 1);
+  --color-palo-verde: rgba(39, 153, 137, 1);
+  --color-palo-verde-light: rgba(239, 247, 239, 1);
+  --color-lagunita: rgba(0, 124, 146, 1);
+  --color-lagunita-light: rgba(107, 155, 172, 1);
+  --color-navy: rgba(14, 59, 79, 1);
+  --color-charcoal: rgba(52, 52, 52, 1);
+  --color-grey-med: rgba(247, 248, 255, 1);
+
+  --color-badge-green: rgba(135, 205, 168, 1);
+  --color-badge-yellow: rgba(253, 225, 131, 1);
+  --color-badge-red: rgba(249, 80, 72, 1);
+  --color-badge-orange: rgba(253, 141, 67, 1);
 }
 
 body {

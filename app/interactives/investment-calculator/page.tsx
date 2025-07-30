@@ -4,7 +4,6 @@ import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { BiSolidUpArrow } from "react-icons/bi";
 import { BiSolidDownArrow } from "react-icons/bi";
-import { poppins } from '@/app/ui/fonts';
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
@@ -51,7 +50,7 @@ const InterestRateVisual = () => {
 
   return (
     <div className="bg-white p-6 max-w-5xl mx-auto">
-      <h1 className={`${poppins.className} text-[20px] lg:text-[50px] font-bold text-black mb-2`}>
+      <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">
         Interest Calculator
       </h1>
       <p className="text-black mb-6">
@@ -61,28 +60,28 @@ const InterestRateVisual = () => {
       {/* Interactive calculator */}
       <div className="py-6">
         <div className="flex flex-col mb-6">
-          <h2 className={`${poppins.className} text-xl text-black font-bold mb-1`}>I am:</h2>
+          <h2 className="font-poppins text-xl text-black font-bold mb-1">I am:</h2>
 
           <div className="flex-1 flex gap-4">
             <button
               className={`min-w-[150px] flex-1 py-2 px-3 text-md font-bold ${
                 mode === "saving"
-                  ? "bg-[#279989] rounded-lg border-1 border-[#279989]"
-                  : "rounded-lg border-1 border-[#279989]"
+                  ? "bg-palo-verde rounded-lg border-1 border-palo-verde"
+                  : "rounded-lg border-1 border-palo-verde"
               }`}
               onClick={() => setMode("saving")}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
                 <div
                   className={`text-3xl self-center ${
-                    mode === "saving" ? "text-[#ffffff]" : "text-[#279989]"
+                    mode === "saving" ? "text-white" : "text-palo-verde"
                   }`}
                 >
                   <FaPiggyBank />
                 </div>
                 <div
                   className={`self-center ${
-                    mode === "saving" ? "text-[#ffffff]" : "text-[#000000]"
+                    mode === "saving" ? "text-white" : "text-black"
                   }`}
                 >
                   Saving
@@ -92,22 +91,22 @@ const InterestRateVisual = () => {
             <button
               className={` min-w-[150px] flex-1 py-2 px-3 text-md font-bold ${
                 mode === "borrowing"
-                  ? "bg-[#C31F70] rounded-lg border-1 border-[#C31F70]"
-                  : "rounded-lg border-1 border-[#C31F70]"
+                  ? "bg-berry rounded-lg border-1 border-berry"
+                  : "rounded-lg border-1 border-berry"
               }`}
               onClick={() => setMode("borrowing")}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
                 <div
                   className={`text-3xl self-center ${
-                    mode === "borrowing" ? "text-[#ffffff]" : "text-[#C31F70]"
+                    mode === "borrowing" ? "text-white" : "text-berry"
                   }`}
                 >
                   <FaArrowTrendDown />
                 </div>
                 <div
                   className={` self-center ${
-                    mode === "borrowing" ? "text-[#ffffff]" : "text-[#000000]"
+                    mode === "borrowing" ? "text-white" : "text-black"
                   }`}
                 >
                   Borrowing
@@ -132,7 +131,7 @@ const InterestRateVisual = () => {
                   setAmount(val === "" ? 0 : Math.max(0, parseInt(val) || 0));
                 }}
                 onFocus={(e) => e.target.select()}
-                className="text-[#343434] font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                 <button
@@ -140,7 +139,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev + 1))}
-                  className=" hover:text-[#279989] focus:outline-none"
+                  className=" hover:text-palo-verde focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -149,7 +148,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev - 1))}
-                  className=" hover:text-[#C31F70] focus:outline-none"
+                  className=" hover:text-berry focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -172,7 +171,7 @@ const InterestRateVisual = () => {
                   setInterestRate(Math.max(0, parseFloat(e.target.value) || 0))
                 }
                 className={`font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                  mode === "borrowing" ? "text-[#C31F70]" : "text-[#007C92]"
+                  mode === "borrowing" ? "text-berry" : "text-lagunita"
                 }`}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -185,7 +184,7 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev + 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-[#279989] focus:outline-none"
+                  className="hover:text-palo-verde focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -198,7 +197,7 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev - 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-[#C31F70] focus:outline-none"
+                  className="hover:text-berry focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -232,7 +231,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase years"
                   onClick={() => setYears((prev) => Math.min(30, prev + 1))}
-                  className="hover:text-[#279989] focus:outline-none"
+                  className="hover:text-palo-verde focus:outline-none"
                 >
                   <BiSolidUpArrow />
                 </button>
@@ -241,7 +240,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease years"
                   onClick={() => setYears((prev) => Math.max(1, prev - 1))}
-                  className="hover:text-[#C31F70] focus:outline-none"
+                  className="hover:text-berry focus:outline-none"
                 >
                   <BiSolidDownArrow />
                 </button>
@@ -272,8 +271,8 @@ const InterestRateVisual = () => {
         </div>
 
         {/* Results section */}
-        <div className="mt-6 p-4 bg-[#F7F8FF] rounded-lg border border-[#F7F8FF]">
-          <h2 className={`${poppins.className} text-lg text-black font-bold pb-4`}>Results:</h2>
+        <div className="mt-6 p-4 bg-grey-med rounded-lg border border-grey-med">
+          <h2 className="font-poppins text-lg text-black font-bold pb-4">Results:</h2>
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">
@@ -290,7 +289,7 @@ const InterestRateVisual = () => {
                 <div className={`flex align-center flex-row`}>
                   <div
                     className={`w-[50%] text-[15px] p-4 font-bold text-white rounded-l-lg  ${
-                      mode === "saving" ? "bg-[#279989]" : "bg-[#c31f70]"
+                      mode === "saving" ? "bg-palo-verde" : "bg-berry"
                     }`}
                   >
                     {mode === "saving" ? "Interest Earned" : "Interest Paid"}:
@@ -298,8 +297,8 @@ const InterestRateVisual = () => {
                   <div
                     className={`w-[50%] text-xl p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
                       mode === "saving"
-                        ? "bg-[#EFF7EF] text-[#279989]"
-                        : "bg-[#FFEDF6] text-[#C31f70]"
+                        ? "bg-palo-verde-light] text-palo-verde"
+                        : "bg-berry-light] text-berry"
                     }`}
                   >
                     ${Math.abs(interestAmount).toLocaleString(undefined, {
@@ -311,7 +310,7 @@ const InterestRateVisual = () => {
               </div>
               <div className="flex flex-col mb-1">
                 <div className={`flex align-center flex-row`}>
-                  <div className="w-[50%] text-[15px] p-4 font-bold text-white bg-[#0E3B4F] rounded-l-lg">
+                  <div className="w-[50%] text-[15px] p-4 font-bold text-white bg-navy] rounded-l-lg">
                     Final Amount:
                   </div>
                   <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white  overflow-hidden text-ellipsis">
@@ -326,11 +325,11 @@ const InterestRateVisual = () => {
             {/* Example section */}
             <div className="mt-6 py-4 align-self-top lg:mt-0 lg:py-0">
               {mode === "saving" ? (
-                <h2 className="text-md font-bold text-[#279989] mb-2">
+                <h2 className="text-md font-bold text-palo-verde mb-2">
                   <FaPiggyBank /> When you save:
                 </h2>
               ) : (
-                <h2 className="text-md font-bold text-[#C31F70] mb-2">
+                <h2 className="text-md font-bold text-berry mb-2">
                   <FaArrowTrendDown /> When you borrow
                 </h2>
               )}
