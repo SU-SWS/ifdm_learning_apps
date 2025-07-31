@@ -1,10 +1,7 @@
 import React from 'react';
-import { openSans } from "@/app/ui/fonts";
 import { poppins } from '@/app/ui/fonts';
 import "@/app/ui/globals.css";
 import { CiCalculator1 } from "react-icons/ci";
-
-
 
 const PageMoved = () => {
   return (
