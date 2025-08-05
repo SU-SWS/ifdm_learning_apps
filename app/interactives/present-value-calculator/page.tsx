@@ -56,7 +56,7 @@ export default function PresentValueCalculator() {
           <div className="flex gap-2 mb-2">
             <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">Present Value Calculator</h1>
           </div>
-          <p className="text-gray-600">Discover how to discount a sum of money due into the future.</p>
+          <p>Discover how to discount a sum of money due into the future.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -71,7 +71,7 @@ export default function PresentValueCalculator() {
                 <Input
                   id="future-value"
                   type="number"
-                  value={futureValue}
+                  value={futureValue === 0 ? "" : futureValue}
                   onChange={(e) => setFutureValue(Number(e.target.value))}
                   className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
@@ -109,7 +109,7 @@ export default function PresentValueCalculator() {
                   step={0.1}
                   className="w-full border-color-lagunita"
                 />
-                <div className="flex justify-between text-sm font-bold">
+                <div className="flex justify-between text-sm text-black font-medium font-poppins">
                   <span>0.1%</span>
                   <span>12%</span>
                 </div>
@@ -124,8 +124,9 @@ export default function PresentValueCalculator() {
                   max={50} 
                   min={1} 
                   step={1} 
-                  className="w-full" />
-                  <div className="flex justify-between text-sm font-bold">
+                  className="w-full" 
+                  rangeClassName="time-period-range bg-lagunita-light"/>
+                  <div className="flex justify-between text-sm text-black font-medium font-poppins">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>

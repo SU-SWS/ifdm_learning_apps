@@ -24,14 +24,14 @@ export default function InflationCalculator() {
 
   const getInflationLabel = (rate: number) => {
     if (rate <= 2) return "Low"
-    if (rate <= 4) return "Moderate"
+    if (rate <= 3.5) return "Moderate"
     if (rate <= 6) return "High"
     return "Very High"
   }
 
   const getInflationColor = (rate: number) => {
     if (rate <= 2) return "bg-badge-green" // Green
-    if (rate <= 4) return "bg-badge-yellow" // Yellow
+    if (rate <= 3.5) return "bg-badge-yellow" // Yellow
     if (rate <= 6) return "bg-badge-orange" // Orange
     return "bg-badge-red" // Red
   }
@@ -40,21 +40,16 @@ export default function InflationCalculator() {
     <div className="bg-white p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="flex gap-2 mb-2">
             <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">Inflation Impact Calculator</h1>
           </div>
-          <p className="text-gray-600">Explore how inflation affects your money&rsquo;s purchasing power over time</p>
+          <p>Use the sliders below to see how different inflation rates and time periods affect your money</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Parameters Panel */}
           <Card>
-            <CardHeader>
-              <CardDescription>
-                Use the sliders below to see how different inflation rates and time periods affect your money
-              </CardDescription>
-            </CardHeader>
             <CardContent className="space-y-6">
               {/* Future Value Input */}
               <div className="space-y-2 relative">
@@ -65,7 +60,8 @@ export default function InflationCalculator() {
                 <Input
                   id="initial-amount"
                   type="number"
-                  value={initialPrice}
+                  value={initialPrice === 0 ? "" : initialPrice}
+                  
                   onChange={(e) => setInitialPrice(Number(e.target.value) || 0)}
                   className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
@@ -95,9 +91,9 @@ export default function InflationCalculator() {
               </div>
 
               {/* Interest Rate Slider */}
-              <div className="space-y-3">
+              <div className="space-y-3 relative">
                   <div className="flex items-center space-between gap-2">
-                    <Label className="text-sm font-medium">Annual inflation rate (%):</Label>
+                    <Label className="text-sm font-bold">Annual inflation rate (%):</Label>
                     <Badge className={`${getInflationColor(inflationRate)} text-black font-bold`}>
                       {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
                     </Badge>
@@ -110,7 +106,15 @@ export default function InflationCalculator() {
                   step={0.1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="absolute top-15 text-lagunita text-sm font-bold text-foreground font-poppins"
+                  style={{
+                    left: `${(inflationRate / 15) * 100}%`,
+                    transform: 'translateX(-50%)'
+                  }}
+                >
+                  {inflationRate.toFixed(1)}%
+                </div>
+                <div className="flex justify-between text-sm text-black font-medium font-poppins">
                   <span>0%</span>
                   <span>15%</span>
                 </div>
@@ -119,7 +123,7 @@ export default function InflationCalculator() {
               {/* Time Period Slider */}
               <div className="space-y-3">
                 <div className="flex items-center">
-                  <Label className="text-sm font-medium">Time period: </Label>
+                  <Label className="text-sm font-bold">Time period: </Label>
                   <span className="text-sm font-semibold flex items-center gap-1 text-lagunita">
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
@@ -133,7 +137,7 @@ export default function InflationCalculator() {
                   className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-sm text-black font-medium font-poppins">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>
@@ -144,11 +148,13 @@ export default function InflationCalculator() {
           {/* Present Value Calculation Panel */}
           <Card className="bg-grey-med rounded-3xl p-[32px]">
             <CardHeader>
-              <CardTitle className="text-center text-md font-normal">Results:</CardTitle>
+              <CardTitle className="text-lg font-bold font-poppins">Results:</CardTitle>
             </CardHeader>
             <CardContent className="">
               {/* Main Result */}
-            
+             <span className="text-sm font-bold font-poppins text-lagunita">
+                After {timePeriod} year{timePeriod !== 1 ? "s" : ""}
+              </span>
               {/* Calculation Breakdown */}
               <div className="pt-4">
                 {/* Results section */}
@@ -156,7 +162,7 @@ export default function InflationCalculator() {
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark">
+                          <div className="w-[50%] text-md  p-4 font-bold text-black rounded-l-lg bg-grey-med-dark">
                             Future price:
                           </div>
                           <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-light font-bold text-black overflow-hidden text-ellipsis">

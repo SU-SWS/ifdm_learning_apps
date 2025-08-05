@@ -12,12 +12,31 @@ const PageMoved = () => {
           <li className="mb-2">
             <a
               className="text-blue-500 hover:underline"
+              href="/interactives/inflation-impact-calculator"
+            >
+              <CiCalculator1 className="w-[2em] h-[2em] inline-block mr-2" />
+              Inflation Impact Calculator
+            </a>
+          </li>
+          <li className="mb-2">
+            <a
+              className="text-blue-500 hover:underline"
               href="/interactives/investment-calculator"
             >
               <CiCalculator1 className="w-[2em] h-[2em] inline-block mr-2" />
               Investment Calculator
             </a>
           </li>
+           <li className="mb-2">
+            <a
+              className="text-blue-500 hover:underline"
+              href="/interactives/present-value-calculator"
+            >
+              <CiCalculator1 className="w-[2em] h-[2em] inline-block mr-2" />
+              Present Value Calculator
+            </a>
+          </li>
+          
         </ul>
       </div>
   );
