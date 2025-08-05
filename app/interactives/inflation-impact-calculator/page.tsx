@@ -147,8 +147,8 @@ export default function InflationCalculator() {
 
           {/* Present Value Calculation Panel */}
           <Card className="bg-grey-med rounded-3xl p-[32px]">
-            <CardHeader>
-              <CardTitle className="text-lg font-bold font-poppins">Results:</CardTitle>
+            <CardHeader className="py-1">
+              <CardTitle className="py-1 text-lg font-bold font-poppins">Results:</CardTitle>
             </CardHeader>
             <CardContent className="">
               {/* Main Result */}
@@ -165,7 +165,7 @@ export default function InflationCalculator() {
                           <div className="w-[50%] text-md  p-4 font-bold text-black rounded-l-lg bg-grey-med-dark">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-light font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>

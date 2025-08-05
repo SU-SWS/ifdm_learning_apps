@@ -100,7 +100,7 @@ export default function PresentValueCalculator() {
 
               {/* Interest Rate Slider */}
               <div className="space-y-3">
-                <Label className="text-sm mb-1 block font-bold">Interest rate (%): <span className="text-lagunita">{interestRate[0].toFixed(1)}% </span></Label>
+                <Label className="text-sm mb-1 block font-bold">Interest rate (%): <span className="text-lagunita">{interestRate[0].toFixed(1)} </span></Label>
                 <CustomSlider
                   value={interestRate}
                   onValueChange={setInterestRate}
@@ -145,7 +145,7 @@ export default function PresentValueCalculator() {
 
           {/* Present Value Calculation Panel */}
           <Card className="bg-grey-med rounded-3xl p-[32px]">
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle className="text-center text-md font-normal">Present value calculation</CardTitle>
             </CardHeader>
             <CardContent className="">
@@ -161,7 +161,7 @@ export default function PresentValueCalculator() {
               </div>
 
               {/* Calculation Breakdown */}
-              <div className="pt-4">
+              <div className="pt-6">
                 {/* Results section */}
                 <div className="bg-grey-med rounded-lg border border-grey-med">
                     <div className="innerwrapper">
@@ -170,7 +170,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark">
                             Future value:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-grey-light font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -182,7 +182,7 @@ export default function PresentValueCalculator() {
                             Present value:
                           </div>
                           <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-grey-light text-ellipsis"
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-white text-ellipsis"
                           >
                             ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
@@ -195,7 +195,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg whitespace-nowrap">
                             Discount amount:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-berry bg-grey-light  overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-berry bg-white overflow-hidden text-ellipsis">
                             -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -205,7 +205,7 @@ export default function PresentValueCalculator() {
                           <div className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg">
                             Value retained:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-grey-light overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
                             {valueRetained.toFixed(1)}%
                           </div>
                         </div>
