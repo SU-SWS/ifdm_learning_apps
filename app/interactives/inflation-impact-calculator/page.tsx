@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CustomSlider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
-import { BiSolidUpArrow } from "react-icons/bi";
-import { BiSolidDownArrow } from "react-icons/bi";
+import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 
 
 export default function InflationCalculator() {
@@ -106,14 +105,6 @@ export default function InflationCalculator() {
                   step={0.1}
                   className="w-full"
                 />
-                <div className="absolute top-15 text-lagunita text-sm font-bold text-foreground font-poppins"
-                  style={{
-                    left: `${(inflationRate / 15) * 100}%`,
-                    transform: 'translateX(-50%)'
-                  }}
-                >
-                  {inflationRate.toFixed(1)}%
-                </div>
                 <div className="flex justify-between text-sm text-black font-medium font-poppins">
                   <span>0%</span>
                   <span>15%</span>
@@ -123,7 +114,7 @@ export default function InflationCalculator() {
               {/* Time Period Slider */}
               <div className="space-y-3">
                 <div className="flex items-center">
-                  <Label className="text-sm font-bold">Time period: </Label>
+                  <Label className="text-sm font-bold">Time period:&nbsp;</Label>
                   <span className="text-sm font-semibold flex items-center gap-1 text-lagunita">
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
@@ -162,10 +153,10 @@ export default function InflationCalculator() {
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md  p-4 font-bold text-black rounded-l-lg bg-grey-med-dark">
+                          <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 self-center  min-h-[80px] rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>
