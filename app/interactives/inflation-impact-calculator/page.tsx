@@ -152,11 +152,11 @@ export default function InflationCalculator() {
                 <div className="bg-grey-med rounded-lg border border-grey-med">
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
-                        <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark">
+                        <div className="flex flex-row items-stretch">
+                          <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-xl p-4 self-center  min-h-[80px] rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                          <div className="w-[50%] text-xl p-4 rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis flex items-center">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>
