@@ -163,53 +163,64 @@ export default function PresentValueCalculator() {
               <div className="pt-6">
                 {/* Results section */}
                 <div className="bg-grey-med rounded-lg border border-grey-med">
-                    <div className="innerwrapper">
-                      <div className="flex flex-col mb-1">
-                        <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark">
-                            Future value:
-                          </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis min-h-[80px]">
-                            ${futureValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </div>
+                  <div className="innerwrapper">
+                    <div className="flex flex-col mb-1">
+                      <div className="flex align-center flex-row">
+                        <div
+                            className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark items-center">
+                          Future value:
                         </div>
-                      </div>
-                      <div className="flex flex-col  mb-1">
-                        <div className={`flex align-center flex-row`}>
-                          <div
-                            className="w-[50%] text-md p-4 font-medium  rounded-l-lg bg-grey-med-dark">
-                            Present value:
-                          </div>
-                          <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-white text-ellipsis min-h-[80px]"
-                          >
-                            ${presentValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col my-3"><hr/></div>
-                      <div className="flex flex-col mb-1">
-                        <div className="flex align-center flex-row">
-                          <div className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg ">
-                            Discount amount:
-                          </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-berry bg-white overflow-hidden text-ellipsis min-h-[80px]">
-                            -${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col mb-1">
-                        <div className={`flex align-center flex-row`}>
-                          <div className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg">
-                            Value retained:
-                          </div>
-                          <div className="w-[50%] text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis min-h-[80px]">
-                            {valueRetained.toFixed(1)}%
-                          </div>
+                        <div
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                          ${futureValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </div>
                       </div>
                     </div>
+                    <div className="flex flex-col  mb-1">
+                      <div className="flex align-center flex-row items-center">
+                        <div
+                            className="w-[50%] text-md p-4 font-medium  rounded-l-lg bg-grey-med-dark">
+                          Present value:
+                        </div>
+                        <div
+                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-white text-ellipsis"
+                        >
+                          ${presentValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col my-3">
+                      <hr/>
+                    </div>
+                    <div className="flex flex-col mb-1">
+                      <div className="flex flex-row items-stretch"> {/* items-stretch is actually the default */}
+                        <div
+                            className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg flex items-center">
+                          Discount amount:
+                        </div>
+                        <div
+                            className="w-[50%] text-xl p-4 rounded-r-lg font-bold text-berry bg-white overflow-hidden text-ellipsis flex items-center">
+                          -${discountAmount.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                        })}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col mb-1">
+                      <div className={`flex align-center flex-row items-center`}>
+                        <div
+                            className="w-[50%] h-full text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg">
+                          Value retained:
+                        </div>
+                        <div
+                            className="w-[50%] h-full text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
+                          {valueRetained.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   {/* Wrapper section ends */}
                 </div>
               </div>
