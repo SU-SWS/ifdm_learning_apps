@@ -59,10 +59,7 @@
   --color-badge-yellow: rgba(253, 225, 131, 1);
   --color-badge-red: rgba(249, 80, 72, 1);
   --color-badge-orange: rgba(253, 141, 67, 1);
-}
-
-body {
-  font-family: "Open Sans", Arial, Helvetica, sans-serif;
+  --text-lg-title: 20px;
 }
 
 :root {
@@ -141,4 +138,12 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+html {
+ font-size: 17px;
+}
+
+body {
+  font-family: "Open Sans", Arial, Helvetica, sans-serif;
 }

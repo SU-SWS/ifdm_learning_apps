@@ -41,7 +41,7 @@ export default function InflationCalculator() {
         {/* Header */}
         <div className="mb-4">
           <div className="flex gap-2 mb-2">
-            <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">Inflation Impact Calculator</h1>
+            <h1 className="sr-only mb-2">Inflation Impact Calculator</h1>
           </div>
           <p>Use the sliders below to see how different inflation rates and time periods affect your money</p>
         </div>
@@ -52,7 +52,7 @@ export default function InflationCalculator() {
             <CardContent className="space-y-6">
               {/* Future Value Input */}
               <div className="space-y-2 relative">
-                <Label htmlFor="initial-price" className="text-sm font-medium">
+                <Label htmlFor="initial-price" className="text-md font-medium">
                   Initial amount ($):
                 </Label>
 
@@ -62,20 +62,20 @@ export default function InflationCalculator() {
                   value={initialPrice === 0 ? "" : initialPrice}
                   
                   onChange={(e) => setInitialPrice(Number(e.target.value) || 0)}
-                  className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="text-charcoal text-md font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
                   max="1000000"
                 />
-                <div className="absolute right-2 top-[45%] flex flex-col">
+                <div className="absolute right-2 top-[38%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
                   <button
                     type="button"
                     tabIndex={-1}
                     aria-label="Increase amount"
                     onClick={() => setInitialPrice((prev) => prev + 1)}
-                    className="hover:text-grey-med-dark focus:outline-none"
+                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                   >
-                    <BiSolidUpArrow />
+                    <BiSolidUpArrow size={24} />
                   </button>
                   <button
                     type="button"
@@ -84,7 +84,7 @@ export default function InflationCalculator() {
                     onClick={() => setInitialPrice((prev) => Math.max(1, prev - 1))}
                     className="hover:text-grey-med-dark focus:outline-none"
                   >
-                    <BiSolidDownArrow />
+                    <BiSolidDownArrow size={24} />
                   </button>
                 </div>
               </div>
@@ -92,7 +92,7 @@ export default function InflationCalculator() {
               {/* Interest Rate Slider */}
               <div className="space-y-3 relative">
                   <div className="flex items-center space-between gap-2">
-                    <Label className="text-sm font-bold">Annual inflation rate (%):</Label>
+                    <Label className="text-md font-bold">Annual inflation rate (%):</Label>
                     <Badge className={`${getInflationColor(inflationRate)} text-black font-bold`}>
                       {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
                     </Badge>
@@ -105,7 +105,7 @@ export default function InflationCalculator() {
                   step={0.1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-sm text-black font-medium font-poppins">
+                <div className="flex justify-between text-md text-black font-medium font-poppins">
                   <span>0%</span>
                   <span>15%</span>
                 </div>
@@ -114,8 +114,8 @@ export default function InflationCalculator() {
               {/* Time Period Slider */}
               <div className="space-y-3">
                 <div className="flex items-center">
-                  <Label className="text-sm font-bold">Time period:&nbsp;</Label>
-                  <span className="text-sm font-semibold flex items-center gap-1 text-lagunita">
+                  <Label className="text-md font-bold">Time period:&nbsp;</Label>
+                  <span className="text-md font-semibold flex items-center gap-1 text-lagunita">
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
                 </div>
@@ -128,7 +128,7 @@ export default function InflationCalculator() {
                   className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"
                 />
-                <div className="flex justify-between text-sm text-black font-medium font-poppins">
+                <div className="flex justify-between text-md text-black font-medium font-poppins">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>
@@ -139,11 +139,11 @@ export default function InflationCalculator() {
           {/* Present Value Calculation Panel */}
           <Card className="bg-grey-med rounded-3xl p-[32px]">
             <CardHeader className="py-1">
-              <CardTitle className="py-1 text-lg font-bold font-poppins">Results:</CardTitle>
+              <CardTitle className="py-1 font-bold font-poppins">Results:</CardTitle>
             </CardHeader>
             <CardContent className="">
               {/* Main Result */}
-             <span className="text-sm font-bold font-poppins text-lagunita">
+             <span className="text-md font-bold font-poppins text-lagunita">
                 After {timePeriod} year{timePeriod !== 1 ? "s" : ""}
               </span>
               {/* Calculation Breakdown */}
@@ -156,7 +156,7 @@ export default function InflationCalculator() {
                           <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-xl p-4 rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis flex items-center">
+                          <div className="w-[50%] text-lg-title p-4 rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis flex items-center">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>
