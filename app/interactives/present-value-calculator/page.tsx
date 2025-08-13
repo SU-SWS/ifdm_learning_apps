@@ -53,7 +53,7 @@ export default function PresentValueCalculator() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex gap-2 mb-2">
-            <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">Present Value Calculator</h1>
+            <h1 className="sr-only mb-2">Present Value Calculator</h1>
           </div>
           <p>Discover how to discount a sum of money due into the future.</p>
         </div>
@@ -64,7 +64,7 @@ export default function PresentValueCalculator() {
              <CardContent className="space-y-6">
               {/* Future Value Input */}
               <div className="space-y-2 relative">
-                <Label htmlFor="future-value" className="text-sm mb-1 block font-bold">
+                <Label htmlFor="future-value" className="text-md mb-1 block font-bold">
                   Future value ($):
                 </Label>
                 <Input
@@ -72,7 +72,7 @@ export default function PresentValueCalculator() {
                   type="number"
                   value={futureValue === 0 ? "" : futureValue}
                   onChange={(e) => setFutureValue(Number(e.target.value))}
-                  className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="text-charcoal text-md font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="absolute right-2 top-[45%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
@@ -99,7 +99,7 @@ export default function PresentValueCalculator() {
 
               {/* Interest Rate Slider */}
               <div className="space-y-3">
-                <Label className="text-sm mb-1 block font-bold">Interest rate (%): <span className="text-lagunita">{interestRate[0].toFixed(1)} </span></Label>
+                <Label className="text-md mb-1 block font-bold">Interest rate (%): <span className="text-lagunita">{interestRate[0].toFixed(1)} </span></Label>
                 <CustomSlider
                   value={interestRate}
                   onValueChange={setInterestRate}
@@ -108,7 +108,7 @@ export default function PresentValueCalculator() {
                   step={0.1}
                   className="w-full border-color-lagunita"
                 />
-                <div className="flex justify-between text-sm text-black font-medium font-poppins">
+                <div className="flex justify-between text-black font-medium font-poppins">
                   <span>0.1%</span>
                   <span>12%</span>
                 </div>
@@ -116,7 +116,7 @@ export default function PresentValueCalculator() {
 
               {/* Time Period Slider */}
               <div className="space-y-3">
-                <Label className="text-sm mb-1 block font-bold">Time period: <span className="text-lagunita">{timePeriod[0]} years</span></Label>
+                <Label className="text-md mb-1 block font-bold">Time period: <span className="text-lagunita">{timePeriod[0]} years</span></Label>
                 <CustomSlider 
                   value={timePeriod} 
                   onValueChange={setTimePeriod} 
@@ -125,7 +125,7 @@ export default function PresentValueCalculator() {
                   step={1} 
                   className="w-full" 
                   rangeClassName="time-period-range bg-lagunita-light"/>
-                  <div className="flex justify-between text-sm text-black font-medium font-poppins">
+                  <div className="flex justify-between text-black font-medium font-poppins">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>
@@ -133,9 +133,10 @@ export default function PresentValueCalculator() {
 
               {/* Watch Time Impact Button */}
               <Button
-                className="w-full py-[35px] px-[30px] text-md font-bold bg-berry hover:bg-gray-800 text-white"
+                className="w-full py-[35px] px-[30px] font-bold bg-berry hover:bg-gray-800 text-white"
                 onClick={handleWatchClick}
                 disabled={isAnimating}
+                size="watch"
               >
                 Watch Time Impact
               </Button>
@@ -171,7 +172,7 @@ export default function PresentValueCalculator() {
                           Future value:
                         </div>
                         <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                            className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
                           ${futureValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </div>
                       </div>
@@ -183,7 +184,7 @@ export default function PresentValueCalculator() {
                           Present value:
                         </div>
                         <div
-                            className="w-[50%] text-xl p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-white text-ellipsis"
+                            className="w-[50%] text-lg-title p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-white text-ellipsis"
                         >
                           ${presentValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
 
@@ -200,7 +201,7 @@ export default function PresentValueCalculator() {
                           Discount amount:
                         </div>
                         <div
-                            className="w-[50%] text-xl p-4 rounded-r-lg font-bold text-berry bg-white overflow-hidden text-ellipsis flex items-center">
+                            className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold text-berry bg-white overflow-hidden text-ellipsis flex items-center">
                           -${discountAmount.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2
@@ -215,7 +216,7 @@ export default function PresentValueCalculator() {
                           Value retained:
                         </div>
                         <div
-                            className="w-[50%] h-full text-xl p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
+                            className="w-[50%] h-full text-lg-title p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
                           {valueRetained.toFixed(1)}%
                         </div>
                       </div>

@@ -50,7 +50,7 @@ const InterestRateVisual = () => {
 
   return (
     <div className="bg-white p-6 max-w-5xl mx-auto">
-      <h1 className="font-poppins text-[20px] lg:text-[50px] font-bold text-black mb-2">
+      <h1 className="sr-only mb-2">
         Interest Calculator
       </h1>
       <p className="text-black mb-6">
@@ -60,7 +60,7 @@ const InterestRateVisual = () => {
       {/* Interactive calculator */}
       <div className="py-6">
         <div className="flex flex-col mb-6">
-          <h2 className="font-poppins text-xl text-black font-bold mb-1">I am:</h2>
+          <h2 className="font-poppins text-lg-title text-black font-bold mb-1">I am:</h2>
 
           <div className="flex-1 flex gap-4">
             <button
@@ -117,7 +117,7 @@ const InterestRateVisual = () => {
         </div>
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-sm font-medium text-black mb-1">
+            <label className="block text-md font-medium text-black mb-1">
               Initial amount ($):
             </label>
             <div className="relative">
@@ -157,7 +157,7 @@ const InterestRateVisual = () => {
           </div>
 
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-sm font-medium text-black mb-1">
+            <label className="block text-md font-medium text-black mb-1">
               Interest rate (%):
             </label>
             <div className="relative">
@@ -208,7 +208,7 @@ const InterestRateVisual = () => {
 
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-sm font-medium text-black mb-1">
+            <label className="block text-md font-medium text-black mb-1">
               Time Period (years):
             </label>
             <div className="relative">
@@ -249,7 +249,7 @@ const InterestRateVisual = () => {
           </div>
 
           <div className="flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-black mb-1">
+          <label className="block text-md font-medium text-black mb-1">
             Compounding:
           </label>
             <div className="relative">
@@ -272,15 +272,15 @@ const InterestRateVisual = () => {
 
         {/* Results section */}
         <div className="mt-6 p-4 bg-grey-med rounded-lg border border-grey-med">
-          <h2 className="font-poppins text-lg text-black font-bold pb-4">Results:</h2>
+          <h2 className="font-poppins text-lg-title text-black font-bold pb-4">Results:</h2>
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">
                 <div className="flex align-center flex-row">
-                  <div className="w-[50%] text-[15px] p-4 text-black rounded-l-lg bg-grey-med-dark">
+                  <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
                     Initial Amount:
                   </div>
-                  <div className="w-[50%]  min-h-[80px] text-xl p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                  <div className="w-[50%]  min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
                     ${amount.toLocaleString()}
                   </div>
                 </div>
@@ -288,14 +288,14 @@ const InterestRateVisual = () => {
               <div className="flex flex-col  mb-1">
                 <div className={`flex align-center flex-row`}>
                   <div
-                    className={`w-[50%] text-[15px] p-4 font-bold text-white rounded-l-lg  ${
+                    className={`w-[50%] p-4 font-bold text-white rounded-l-lg  ${
                       mode === "saving" ? "bg-palo-verde" : "bg-berry"
                     }`}
                   >
                     {mode === "saving" ? "Interest Earned" : "Interest Paid"}:
                   </div>
                   <div
-                    className={`w-[50%] text-xl min-h-[80px] p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
+                    className={`w-[50%] text-lg-title min-h-[80px] p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
                       mode === "saving"
                         ? "bg-palo-verde-light text-palo-verde"
                         : "bg-berry-light text-berry"
@@ -310,10 +310,10 @@ const InterestRateVisual = () => {
               </div>
               <div className="flex flex-col mb-1">
                 <div className={`flex align-center flex-row`}>
-                  <div className="w-[50%] text-[15px] p-4 font-bold text-white bg-navy rounded-l-lg">
+                  <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
                     Final Amount:
                   </div>
-                  <div className="w-[50%] text-xl p-4 min-h-[80px] self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
+                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
                     ${totalAmount.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
