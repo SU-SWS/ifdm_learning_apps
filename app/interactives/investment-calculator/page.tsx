@@ -139,9 +139,9 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setAmount((prev) => Math.max(0, prev + 1))}
-                  className="hover:text-grey-med-dark focus:outline-none"
+                  className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                 >
-                  <BiSolidUpArrow />
+                  <BiSolidUpArrow size={24} />
                 </button>
                 <button
                   type="button"
@@ -150,7 +150,7 @@ const InterestRateVisual = () => {
                   onClick={() => setAmount((prev) => Math.max(0, prev - 1))}
                   className="hover:text-grey-med-dark focus:outline-none"
                 >
-                  <BiSolidDownArrow />
+                  <BiSolidDownArrow size={24} />
                 </button>
               </div>
             </div>
@@ -184,9 +184,9 @@ const InterestRateVisual = () => {
                       Math.max(0, parseFloat((prev + 0.1).toFixed(1)))
                     )
                   }
-                  className="hover:text-grey-med-dark focus:outline-none"
+                  className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                 >
-                  <BiSolidUpArrow />
+                  <BiSolidUpArrow size={24} />
                 </button>
                 <button
                   type="button"
@@ -199,7 +199,7 @@ const InterestRateVisual = () => {
                   }
                   className="hover:text-grey-med-dark focus:outline-none"
                 >
-                  <BiSolidDownArrow />
+                  <BiSolidDownArrow size={24} />
                 </button>
               </div>
             </div>
@@ -231,9 +231,9 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Increase years"
                   onClick={() => setYears((prev) => Math.min(30, prev + 1))}
-                  className="hover:text-grey-med-dark focus:outline-none"
+                  className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                 >
-                  <BiSolidUpArrow />
+                  <BiSolidUpArrow size={24} />
                 </button>
                 <button
                   type="button"
@@ -242,7 +242,7 @@ const InterestRateVisual = () => {
                   onClick={() => setYears((prev) => Math.max(1, prev - 1))}
                   className="hover:text-grey-med-dark focus:outline-none"
                 >
-                  <BiSolidDownArrow />
+                  <BiSolidDownArrow size={24} />
                 </button>
               </div>
             </div>

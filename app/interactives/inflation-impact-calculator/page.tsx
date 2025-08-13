@@ -66,16 +66,16 @@ export default function InflationCalculator() {
                   min="1"
                   max="1000000"
                 />
-                <div className="absolute right-2 top-[45%] flex flex-col">
+                <div className="absolute right-2 top-[38%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
                   <button
                     type="button"
                     tabIndex={-1}
                     aria-label="Increase amount"
                     onClick={() => setInitialPrice((prev) => prev + 1)}
-                    className="hover:text-grey-med-dark focus:outline-none"
+                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                   >
-                    <BiSolidUpArrow />
+                    <BiSolidUpArrow size={24} />
                   </button>
                   <button
                     type="button"
@@ -84,7 +84,7 @@ export default function InflationCalculator() {
                     onClick={() => setInitialPrice((prev) => Math.max(1, prev - 1))}
                     className="hover:text-grey-med-dark focus:outline-none"
                   >
-                    <BiSolidDownArrow />
+                    <BiSolidDownArrow size={24} />
                   </button>
                 </div>
               </div>

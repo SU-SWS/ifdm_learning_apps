@@ -74,16 +74,16 @@ export default function PresentValueCalculator() {
                   onChange={(e) => setFutureValue(Number(e.target.value))}
                   className="text-charcoal text-md font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-2 top-[45%] flex flex-col">
+                <div className="absolute right-2 top-[41%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
                   <button
                   type="button"
                   tabIndex={-1}
                   aria-label="Increase amount"
                   onClick={() => setFutureValue((prev) => prev + 1)}
-                  className="hover:text-grey-med-dark focus:outline-none"
+                  className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                   >
-                  <BiSolidUpArrow />
+                  <BiSolidUpArrow size={24} />
                   </button>
                   <button
                   type="button"
@@ -92,7 +92,7 @@ export default function PresentValueCalculator() {
                   onClick={() => setFutureValue((prev) => Math.max(0, prev - 1))}
                   className="hover:text-grey-med-dark focus:outline-none"
                   >
-                  <BiSolidDownArrow />
+                  <BiSolidDownArrow size={24} />
                   </button>
                 </div>
               </div>
