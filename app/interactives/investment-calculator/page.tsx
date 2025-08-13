@@ -276,26 +276,26 @@ const InterestRateVisual = () => {
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">
-                <div className="flex align-center flex-row">
-                  <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
+                <div className="flex items-stretch flex-row">
+                  <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark flex items-center min-h-[80px]">
                     Initial Amount:
                   </div>
-                  <div className="w-[50%]  min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                  <div className="w-[50%] min-h-[80px] text-lg-title p-4 rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis flex items-center">
                     ${amount.toLocaleString()}
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col  mb-1">
-                <div className={`flex align-center flex-row`}>
+              <div className="flex flex-col mb-1">
+                <div className={`flex items-stretch flex-row`}>
                   <div
-                    className={`w-[50%] p-4 font-bold text-white rounded-l-lg  ${
+                    className={`w-[50%] p-4 font-bold text-white rounded-l-lg flex items-center min-h-[80px]  ${
                       mode === "saving" ? "bg-palo-verde" : "bg-berry"
                     }`}
                   >
                     {mode === "saving" ? "Interest Earned" : "Interest Paid"}:
                   </div>
                   <div
-                    className={`w-[50%] text-lg-title min-h-[80px] p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
+                    className={`w-[50%] text-lg-title min-h-[80px] p-4  rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center  ${
                       mode === "saving"
                         ? "bg-palo-verde-light text-palo-verde"
                         : "bg-berry-light text-berry"
@@ -309,11 +309,11 @@ const InterestRateVisual = () => {
                 </div>
               </div>
               <div className="flex flex-col mb-1">
-                <div className={`flex align-center flex-row`}>
-                  <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
+                <div className={`flex items-stretch flex-row`}>
+                  <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg flex items-center min-h-[80px]">
                     Final Amount:
                   </div>
-                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
+                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis flex items-center">
                     ${totalAmount.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
