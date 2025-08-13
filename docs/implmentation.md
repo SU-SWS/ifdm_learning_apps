@@ -1,4 +1,4 @@
-# Instructions for implementation  
+# Instructions for deployment and embedding  
 
 ## Prerequisites
 - Node.js and yarn installed
@@ -15,6 +15,8 @@ Deploy to GitHub Pages: Use the following command:
 
 `yarn deploy`
 
+This command builds and push the built version to gh-pages branch, which is the designated branch for the live site.
+
 You can review the app on the site: https://ifdm-learning.stanford.edu/
 
 ---
@@ -30,11 +32,7 @@ If it's a new lesson or game, you can embed it on the
 Example iFrame:
 
 ```angular2html
-<iframe
-src="https://ifdm-learning.stanford.edu/interactives/investment-calculator/"
-width="1000"
-style="border:none; height: 100vh;"
-></iframe>
+<iframe src="https://ifdm-learning.stanford.edu/interactives/investment-calculator/"></iframe>
 ```
 See below screencast as an example of embedding an iframe
 
