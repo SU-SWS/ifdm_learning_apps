@@ -53,9 +53,6 @@ const InterestRateVisual = () => {
       <h1 className="sr-only mb-2">
         Interest Calculator
       </h1>
-      <p className="text-black mb-6">
-        Explore how interest affects your money over time
-      </p>
 
       {/* Interactive calculator */}
       <div className="py-6">

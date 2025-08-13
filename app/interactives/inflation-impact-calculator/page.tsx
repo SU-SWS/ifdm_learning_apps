@@ -43,7 +43,6 @@ export default function InflationCalculator() {
           <div className="flex gap-2 mb-2">
             <h1 className="sr-only mb-2">Inflation Impact Calculator</h1>
           </div>
-          <p>Use the sliders below to see how different inflation rates and time periods affect your money</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">

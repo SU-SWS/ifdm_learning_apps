@@ -55,7 +55,6 @@ export default function PresentValueCalculator() {
           <div className="flex gap-2 mb-2">
             <h1 className="sr-only mb-2">Present Value Calculator</h1>
           </div>
-          <p>Discover how to discount a sum of money due into the future.</p>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
