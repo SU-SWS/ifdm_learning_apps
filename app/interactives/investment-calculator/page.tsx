@@ -129,7 +129,7 @@ const InterestRateVisual = () => {
                   setAmount(val === "" ? 0 : Math.max(0, parseInt(val) || 0));
                 }}
                 onFocus={(e) => e.target.select()}
-                className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                 <button
@@ -168,7 +168,7 @@ const InterestRateVisual = () => {
                 onChange={(e) =>
                   setInterestRate(Math.max(0, parseFloat(e.target.value) || 0))
                 }
-                className={`font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                   mode === "borrowing" ? "text-berry" : "text-lagunita"
                 }`}
               />
@@ -221,7 +221,7 @@ const InterestRateVisual = () => {
                     Math.min(30, Math.max(0, parseInt(e.target.value) || 0))
                   )
                 }
-                className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                 <button
@@ -254,7 +254,7 @@ const InterestRateVisual = () => {
               <select
               value={compounding}
               onChange={(e) => setCompounding(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border appearance-none"
+              className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
               >
               <option value="annually">Annually</option>
               <option value="semi-annually">Semi-annually</option>
@@ -275,10 +275,10 @@ const InterestRateVisual = () => {
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">
                 <div className="flex align-center flex-row">
-                  <div className="w-[50%] p-4 text-[var(--foreground)] rounded-l-lg bg-grey-med-dark">
+                  <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
                     Initial Amount:
                   </div>
-                  <div className="w-[50%]  min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
+                  <div className="w-[50%] min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
                     ${amount.toLocaleString()}
                   </div>
                 </div>
@@ -311,7 +311,7 @@ const InterestRateVisual = () => {
                   <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
                     Final Amount:
                   </div>
-                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-[var(--foreground)] bg-white overflow-hidden text-ellipsis">
+                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
                     ${totalAmount.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

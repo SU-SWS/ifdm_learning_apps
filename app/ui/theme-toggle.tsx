@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { FiSun, FiMoon, FiMonitor } from "react-icons/fi";
 
 const themes = [
-  { label: "Light", value: "light" },
-  { label: "Dark", value: "dark" },
-  { label: "System", value: "system" },
+  { label: "Light", value: "light", icon: <FiSun size={20} /> },
+  { label: "Dark", value: "dark", icon: <FiMoon size={20} /> },
+  { label: "System", value: "system", icon: <FiMonitor size={20} /> },
 ];
 
 export default function ThemeToggle() {
@@ -33,14 +34,15 @@ export default function ThemeToggle() {
   }, []);
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex gap-2 items-center justify-end mb-4">
       {themes.map((t) => (
         <button
           key={t.value}
-          className={`px-3 py-1 rounded border ${theme === t.value ? "bg-lagunita text-white" : "bg-grey-light text-black"}`}
+          className={`px-3 py-1 rounded border flex items-center justify-center ${theme === t.value ? "bg-lagunita text-white" : "bg-grey-light text-black"}`}
           onClick={() => setTheme(t.value)}
+          aria-label={t.label}
         >
-          {t.label}
+          {t.icon}
         </button>
       ))}
     </div>

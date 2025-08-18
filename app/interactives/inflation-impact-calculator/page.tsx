@@ -156,7 +156,7 @@ export default function InflationCalculator() {
                           <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-lg-title p-4 rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis flex items-center">
+                          <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>
