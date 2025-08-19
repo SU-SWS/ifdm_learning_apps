@@ -10,30 +10,34 @@ const themes = [
 ];
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState("system");
+  const [theme, setTheme] = useState(() => {
+    // Initialize from localStorage immediately since we're client-only
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem("theme") || "system";
+    }
+    return "system";
+  });
 
   useEffect(() => {
+    const applyTheme = (isDark: boolean) => {
+      document.documentElement.classList.remove("light", "dark");
+      document.documentElement.classList.add(isDark ? "dark" : "light");
+    };
+
     if (theme === "system") {
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.classList.toggle("dark", isDark);
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      applyTheme(mediaQuery.matches);
+
+      const handler = (e: MediaQueryListEvent) => applyTheme(e.matches);
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
     } else {
-      document.documentElement.classList.toggle("dark", theme === "dark");
-      document.documentElement.classList.toggle("light", theme === "light");
+      applyTheme(theme === "dark");
     }
+
+    // Save to localStorage
     localStorage.setItem("theme", theme);
   }, [theme]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") || "system";
-    setTheme(saved);
-    if (saved === "system") {
-      const handler = (e: MediaQueryListEvent) => {
-        document.documentElement.classList.toggle("dark", e.matches);
-      };
-      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", handler);
-      return () => window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", handler);
-    }
-  }, []);
 
   return (
     <div className="flex gap-2 items-center justify-end mb-4">
