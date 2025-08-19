@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CustomSlider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
+import { Input } from "@/app/ui/components/input"
+import { Label } from "@/app/ui/components/label"
+import { CustomSlider } from "@/app/ui/components/slider"
+import { Badge } from "@/app/ui/components/badge"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import ThemeToggle from "@/app/ui/theme-toggle"; 
 
