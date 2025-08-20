@@ -7,7 +7,7 @@ import { Label } from "@/app/ui/components/label"
 import { CustomSlider } from "@/app/ui/components/slider"
 import { Button } from "@/app/ui/components/button"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
-import ThemeToggle from "@/app/ui/theme-toggle"; 
+import ThemeToggle from "@/app/lib/theme-toggle";
 
 export default function PresentValueCalculator() {
   const [futureValue, setFutureValue] = useState(10000)

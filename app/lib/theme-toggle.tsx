@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react";
 import { FiSun, FiMoon, FiMonitor } from "react-icons/fi";
 

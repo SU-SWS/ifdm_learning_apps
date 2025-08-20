@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
-import ThemeToggle from "@/app/ui/theme-toggle"; 
+import ThemeToggle from "@/app/lib/theme-toggle";
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
