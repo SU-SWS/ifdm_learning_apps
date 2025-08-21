@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CustomSlider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
+import { Input } from "@/app/ui/components/input"
+import { Label } from "@/app/ui/components/label"
+import { CustomSlider } from "@/app/ui/components/slider"
+import { Button } from "@/app/ui/components/button"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+import ThemeToggle from "@/app/lib/theme-toggle";
 
 export default function PresentValueCalculator() {
   const [futureValue, setFutureValue] = useState(10000)
@@ -48,7 +49,7 @@ export default function PresentValueCalculator() {
   const valueRetained = (presentValue / futureValue) * 100
 
   return (
-    <div className="bg-white p-6 max-w-5xl mx-auto">
+    <div className=" p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -56,7 +57,7 @@ export default function PresentValueCalculator() {
             <h1 className="sr-only mb-2">Present Value Calculator</h1>
           </div>
         </div>
-
+        <ThemeToggle />
         <div className="flex flex-col md:flex-row gap-8">
           {/* Parameters Panel */}
           <Card className="flex-1">
@@ -71,7 +72,7 @@ export default function PresentValueCalculator() {
                   type="number"
                   value={futureValue === 0 ? "" : futureValue}
                   onChange={(e) => setFutureValue(Number(e.target.value))}
-                  className="text-charcoal text-md font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="text-md font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="absolute right-2 top-[41%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
@@ -143,7 +144,7 @@ export default function PresentValueCalculator() {
           </Card>
 
           {/* Present Value Calculation Panel */}
-          <Card className="bg-grey-med rounded-3xl p-[32px]">
+          <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardHeader className="pb-2">
               <CardTitle className="text-center text-md font-normal">Present value calculation</CardTitle>
             </CardHeader>
@@ -162,7 +163,7 @@ export default function PresentValueCalculator() {
               {/* Calculation Breakdown */}
               <div className="pt-6">
                 {/* Results section */}
-                <div className="bg-grey-med rounded-lg border border-grey-med">
+                <div className="rounded-lg">
                   <div className="innerwrapper">
                     <div className="flex flex-col mb-1">
                       <div className="flex align-center flex-row">
@@ -171,7 +172,7 @@ export default function PresentValueCalculator() {
                           Future value:
                         </div>
                         <div
-                            className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                            className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                           ${futureValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </div>
                       </div>
@@ -179,11 +180,11 @@ export default function PresentValueCalculator() {
                     <div className="flex flex-col  mb-1">
                       <div className="flex align-center flex-row items-center">
                         <div
-                            className="w-[50%] text-md p-4 font-medium  rounded-l-lg bg-grey-med-dark">
+                            className="w-[50%] text-md p-4 text-black font-medium rounded-l-lg bg-grey-med-dark">
                           Present value:
                         </div>
                         <div
-                            className="w-[50%] text-lg-title p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden bg-white text-ellipsis"
+                            className="w-[50%] text-lg-title p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
                         >
                           ${presentValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
 
@@ -200,7 +201,7 @@ export default function PresentValueCalculator() {
                           Discount amount:
                         </div>
                         <div
-                            className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold text-berry bg-white overflow-hidden text-ellipsis flex items-center">
+                            className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold text-berry overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                           -${discountAmount.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2
@@ -215,7 +216,7 @@ export default function PresentValueCalculator() {
                           Value retained:
                         </div>
                         <div
-                            className="w-[50%] h-full text-lg-title p-4 self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
+                            className="w-[50%] h-full text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                           {valueRetained.toFixed(1)}%
                         </div>
                       </div>

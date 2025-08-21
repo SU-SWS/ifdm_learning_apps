@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -60,11 +58,15 @@
   --color-badge-red: rgba(249, 80, 72, 1);
   --color-badge-orange: rgba(253, 141, 67, 1);
   --text-lg-title: 20px;
+  --color-border-dark: rgba(80, 80, 80, 1);
 }
 
 :root {
+  --background: oklch(1 0 0);
+  --foreground: rgba(0, 0, 0, 1);
   --radius: 0.625rem;
-  --card: oklch(1 0 0);
+  --card:  oklch(0.985 0 0);;
+  --card-background: rgba(247, 248, 255, 1);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -72,13 +74,18 @@
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
+  --secondary-background: rgba(255, 255, 255, 1);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
+  --results-blue-background: rgba(255, 255, 255, 1);;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
+  --input-color: --color-charcoal;
+  --input-border-color: rgba(208, 213, 221, 1);
+  --input-background: rgba(255, 255, 255, 1);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -99,22 +106,28 @@
 
 .dark {
   --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --foreground: rgba(255, 255, 255, 1);
+  --card: rgba(35, 35, 35, 1);
+  --card-background: rgba(35, 35, 35, 1);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --secondary: rgba(35, 35, 35, 1);
+  --secondary-foreground:  oklch(0.985 0 0);;
+  --secondary-background: rgba(18, 18, 18, 1);
   --muted: oklch(0.269 0 0);
+  --results-blue-background: rgba(25, 47, 57, 1);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --border:  rgba(80, 80, 80, 1);
+  --input: rgba(80, 80, 80, 1);
+  --input-text: rgba(255, 255, 255, 1);
+  --input-background:rgba(35, 35, 35, 1);
+  --input-border-color: rgba(80, 80, 80, 1);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);

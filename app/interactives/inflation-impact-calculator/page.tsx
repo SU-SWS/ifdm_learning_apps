@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CustomSlider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
+import { Input } from "@/app/ui/components/input"
+import { Label } from "@/app/ui/components/label"
+import { CustomSlider } from "@/app/ui/components/slider"
+import { Badge } from "@/app/ui/components/badge"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
-
+import ThemeToggle from "@/app/lib/theme-toggle";
 
 export default function InflationCalculator() {
   const [initialPrice, setInitialPrice] = useState(100)
@@ -36,7 +36,8 @@ export default function InflationCalculator() {
   }
 
   return (
-    <div className="bg-white p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto">
+      <ThemeToggle />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-4">
@@ -61,7 +62,7 @@ export default function InflationCalculator() {
                   value={initialPrice === 0 ? "" : initialPrice}
                   
                   onChange={(e) => setInitialPrice(Number(e.target.value) || 0)}
-                  className="text-charcoal text-md font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="bg-[var(--input-background)] text-[var(--input-text)] bg-[var(--input-border)] text-md font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
                   max="1000000"
                 />
@@ -136,7 +137,7 @@ export default function InflationCalculator() {
           </Card>
 
           {/* Present Value Calculation Panel */}
-          <Card className="bg-grey-med rounded-3xl p-[32px]">
+          <Card className="rounded-3xl p-[32px] bg-[var(--card-background)]">
             <CardHeader className="py-1">
               <CardTitle className="py-1 font-bold font-poppins">Results:</CardTitle>
             </CardHeader>
@@ -148,14 +149,14 @@ export default function InflationCalculator() {
               {/* Calculation Breakdown */}
               <div className="pt-4">
                 {/* Results section */}
-                <div className="bg-grey-med rounded-lg border border-grey-med">
+                <div className="rounded-lg">
                     <div className="innerwrapper">
                       <div className="flex flex-col mb-1">
                         <div className="flex flex-row items-stretch">
                           <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
                             Future price:
                           </div>
-                          <div className="w-[50%] text-lg-title p-4 rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis flex items-center">
+                          <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
                             ${futureValue.toFixed(2)}
                           </div>
                         </div>

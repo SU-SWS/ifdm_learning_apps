@@ -1,9 +1,10 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
-
+import ThemeToggle from "@/app/lib/theme-toggle";
 
 const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
@@ -49,15 +50,16 @@ const InterestRateVisual = () => {
   }, [amount, interestRate, years, compounding, mode]);
 
   return (
-    <div className="bg-white p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto">
       <h1 className="sr-only mb-2">
         Interest Calculator
       </h1>
 
       {/* Interactive calculator */}
       <div className="py-6">
+        <ThemeToggle />
         <div className="flex flex-col mb-6">
-          <h2 className="font-poppins text-lg-title text-black font-bold mb-1">I am:</h2>
+          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
 
           <div className="flex-1 flex gap-4">
             <button
@@ -78,7 +80,7 @@ const InterestRateVisual = () => {
                 </div>
                 <div
                   className={`self-center ${
-                    mode === "saving" ? "text-white" : "text-black"
+                    mode === "saving" ? "text-white" : "text-[var(--foreground)]"
                   }`}
                 >
                   Saving
@@ -103,7 +105,7 @@ const InterestRateVisual = () => {
                 </div>
                 <div
                   className={` self-center ${
-                    mode === "borrowing" ? "text-white" : "text-black"
+                    mode === "borrowing" ? "text-white" : "text-[var(--foreground)]"
                   }`}
                 >
                   Borrowing
@@ -114,7 +116,7 @@ const InterestRateVisual = () => {
         </div>
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-md font-medium text-black mb-1">
+            <label className="block text-md font-medium text-[var(--foreground)] mb-1">
               Initial amount ($):
             </label>
             <div className="relative">
@@ -128,7 +130,7 @@ const InterestRateVisual = () => {
                   setAmount(val === "" ? 0 : Math.max(0, parseInt(val) || 0));
                 }}
                 onFocus={(e) => e.target.select()}
-                className="text-charcoal font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                 <button
@@ -154,7 +156,7 @@ const InterestRateVisual = () => {
           </div>
 
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-md font-medium text-black mb-1">
+            <label className="block text-md font-medium text-[var(--foreground)] mb-1">
               Interest rate (%):
             </label>
             <div className="relative">
@@ -167,7 +169,7 @@ const InterestRateVisual = () => {
                 onChange={(e) =>
                   setInterestRate(Math.max(0, parseFloat(e.target.value) || 0))
                 }
-                className={`font-bold block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                   mode === "borrowing" ? "text-berry" : "text-lagunita"
                 }`}
               />
@@ -205,7 +207,7 @@ const InterestRateVisual = () => {
 
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-md font-medium text-black mb-1">
+            <label className="block text-md font-medium text-[var(--foreground)] mb-1">
               Time Period (years):
             </label>
             <div className="relative">
@@ -220,7 +222,7 @@ const InterestRateVisual = () => {
                     Math.min(30, Math.max(0, parseInt(e.target.value) || 0))
                   )
                 }
-                className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                 <button
@@ -246,14 +248,14 @@ const InterestRateVisual = () => {
           </div>
 
           <div className="flex-1 min-w-[150px]">
-          <label className="block text-md font-medium text-black mb-1">
+          <label className="block text-md font-medium text-[var(--foreground)] mb-1">
             Compounding:
           </label>
             <div className="relative">
               <select
               value={compounding}
               onChange={(e) => setCompounding(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 bg-white border appearance-none"
+              className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
               >
               <option value="annually">Annually</option>
               <option value="semi-annually">Semi-annually</option>
@@ -268,8 +270,8 @@ const InterestRateVisual = () => {
         </div>
 
         {/* Results section */}
-        <div className="mt-6 p-4 bg-grey-med rounded-lg border border-grey-med">
-          <h2 className="font-poppins text-lg-title text-black font-bold pb-4">Results:</h2>
+        <div className="mt-6 p-4 rounded-lg bg-[var(--card-background)]">
+          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">Results:</h2>
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-col mb-1">
@@ -277,7 +279,7 @@ const InterestRateVisual = () => {
                   <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
                     Initial Amount:
                   </div>
-                  <div className="w-[50%]  min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-white font-bold text-black overflow-hidden text-ellipsis">
+                  <div className="w-[50%] min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
                     ${amount.toLocaleString()}
                   </div>
                 </div>
@@ -310,7 +312,7 @@ const InterestRateVisual = () => {
                   <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
                     Final Amount:
                   </div>
-                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-black bg-white overflow-hidden text-ellipsis">
+                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
                     ${totalAmount.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -330,7 +332,7 @@ const InterestRateVisual = () => {
                   <FaArrowTrendDown /> When you borrow
                 </h2>
               )}
-              <p className="text-black mb-2 text-md">
+              <p className="text-[var(--foreground)] mb-2 text-md">
                 {mode === "saving"
                   ? `You are essentially a lender, and you get interest from those using your money.`
                   : `You are paying intereest for the privilege of using someone else's money.`}
