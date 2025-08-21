@@ -4,14 +4,13 @@ import path from 'path';
 import Link from 'next/link';
 import React from 'react';
 import "@/app/ui/globals.css";
-import { CiCalculator1 } from "react-icons/ci";
 
 // Function to get all page routes from the app directory
 function getPageRoutes() {
     const appDir = path.join(process.cwd(), 'app');
     const routes: { path: string; name: string; }[] = [];
 
-    function scanDirectory(dir: fs.PathLike, basePath = '') {
+    function scanDirectory(dir: string, basePath = '') {
         const items = fs.readdirSync(dir, { withFileTypes: true });
 
         for (const item of items) {
@@ -56,7 +55,7 @@ export default function HomePage() {
                 </h1>
                 <div>
                     <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl">
-                        This page helps developers find the pages they're working on quicker.
+                        This page helps developers find the pages they are working on quicker.
                     </p>
                 </div>
 
