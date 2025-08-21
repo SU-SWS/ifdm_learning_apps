@@ -2,6 +2,9 @@
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
+import React from 'react';
+import "@/app/ui/globals.css";
+import { CiCalculator1 } from "react-icons/ci";
 
 // Function to get all page routes from the app directory
 function getPageRoutes() {
