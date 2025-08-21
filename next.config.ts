@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
     output: 'export',
     trailingSlash: true,
     basePath: '',
+    eslint: {
+        // Directories to run ESLint on during builds
+        dirs: ['app'],
+
+        // Skip ESLint during builds (not recommended for production)
+        ignoreDuringBuilds: false,
+    },
     images: {
         unoptimized: true
     },

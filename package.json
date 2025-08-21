@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "build:local": "next build",
     "build": "echo \" \" > public/.nojekyll && next build && cp CNAME out/CNAME",
     "predeploy": "node scripts/check-branch.js && yarn build",
     "deploy": "gh-pages -d out",
