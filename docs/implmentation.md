@@ -9,7 +9,7 @@
 
 To deploy, this app uses gh-pages. It's a library that allows you to push build and deploy to a designated branch.
 
-This app is deployed using [gh-pages](https://www.npmjs.com/package/gh-pages) via the gh-pages branch. Build the project: The deploy script will automatically run the build step to generate the static files.
+Build the project: The deploy script will automatically run the build step to generate the static files.
 
 Deploy to GitHub Pages: Use the following command:
 
