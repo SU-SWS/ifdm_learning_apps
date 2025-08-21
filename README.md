@@ -44,17 +44,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Deployment
 
-To deploy, this app uses gh-pages. It's a library that allows you to push build and deploy to a designated branch. 
-
-Deployment
-
-This app is deployed using [gh-pages](https://www.npmjs.com/package/gh-pages) via the gh-pages branch. Build the project: The deploy script will automatically run the build step to generate the static files.
-
-Deploy to GitHub Pages: Use the following command:
-
-`yarn deploy`
-
----
+Please see documentation on deployment here: [implmentation.md](docs/implmentation.md)
 
 ## Getting Started
 
