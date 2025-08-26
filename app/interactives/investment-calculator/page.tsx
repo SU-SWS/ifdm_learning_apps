@@ -114,7 +114,7 @@ const InterestRateVisual = () => {
             </button>
           </div>
         </div>
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
           <div className="flex-1 min-w-[150px]">
             <label className="block text-md font-medium text-[var(--foreground)] mb-1">
               Initial amount ($):
@@ -205,7 +205,7 @@ const InterestRateVisual = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
           <div className="flex-1 min-w-[150px]">
             <label className="block text-md font-medium text-[var(--foreground)] mb-1">
               Time Period (years):
@@ -274,50 +274,47 @@ const InterestRateVisual = () => {
           <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">Results:</h2>
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
-              <div className="flex flex-col mb-1">
-                <div className="flex align-center flex-row">
-                  <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
-                    Initial Amount:
-                  </div>
-                  <div className="w-[50%] min-h-[80px] text-lg-title p-4 self-center rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                    ${amount.toLocaleString()}
-                  </div>
+              <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
+                <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
+                  Initial Amount:
+                </div>
+                <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
+                  ${amount.toLocaleString()}
                 </div>
               </div>
-              <div className="flex flex-col  mb-1">
-                <div className={`flex align-center flex-row`}>
-                  <div
-                    className={`w-[50%] p-4 font-bold text-white rounded-l-lg  ${
-                      mode === "saving" ? "bg-palo-verde" : "bg-berry"
-                    }`}
-                  >
-                    {mode === "saving" ? "Interest Earned" : "Interest Paid"}:
-                  </div>
-                  <div
-                    className={`w-[50%] text-lg-title min-h-[80px] p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
-                      mode === "saving"
-                        ? "bg-palo-verde-light text-palo-verde"
-                        : "bg-berry-light text-berry"
-                    }`}
-                  >
-                    ${Math.abs(interestAmount).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </div>
+              <div className={` flex flex-row rounded-lg mb-1 ${ mode === "saving"
+                  ? "bg-palo-verde-light text-palo-verde"
+                  : "bg-berry-light text-berry"
+                }`}>
+                <div
+                  className={`w-[50%] p-4 font-bold text-white rounded-l-lg  ${
+                    mode === "saving" ? "bg-palo-verde" : "bg-berry"
+                  }`}
+                >
+                  {mode === "saving" ? "Interest Earned" : "Interest Paid"}:
+                </div>
+                <div
+                  className={`w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
+                    mode === "saving"
+                      ? "bg-palo-verde-light text-palo-verde"
+                      : "bg-berry-light text-berry"
+                  }`}
+                >
+                  ${Math.abs(interestAmount).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </div>
               </div>
-              <div className="flex flex-col mb-1">
-                <div className={`flex align-center flex-row`}>
-                  <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
-                    Final Amount:
-                  </div>
-                  <div className="w-[50%] text-lg-title p-4 min-h-[80px] self-center rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
-                    ${totalAmount.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </div>
+              <div className="flex flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
+                <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
+                  Final Amount:
+                </div>
+                <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
+                  ${totalAmount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </div>
               </div>
             </div>
@@ -325,17 +322,17 @@ const InterestRateVisual = () => {
             <div className="mt-6 py-4 align-self-top lg:mt-0 lg:py-0">
               {mode === "saving" ? (
                 <h2 className="text-md font-bold text-palo-verde mb-2">
-                  <FaPiggyBank /> When you save:
+                  <FaPiggyBank className="w-[1.7em] h-[1.7em]"/> When you save:
                 </h2>
               ) : (
                 <h2 className="text-md font-bold text-berry mb-2">
-                  <FaArrowTrendDown /> When you borrow
+                  <FaArrowTrendDown className="w-[1.7em] h-[1.7em]" /> When you borrow
                 </h2>
               )}
               <p className="text-[var(--foreground)] mb-2 text-md">
                 {mode === "saving"
                   ? `You are essentially a lender, and you get interest from those using your money.`
-                  : `You are paying intereest for the privilege of using someone else's money.`}
+                  : `You are paying interest for the privilege of using someone else's money.`}
               </p>
             </div>
           </div>{" "}

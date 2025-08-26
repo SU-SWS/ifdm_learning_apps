@@ -91,7 +91,7 @@ export default function InflationCalculator() {
 
               {/* Interest Rate Slider */}
               <div className="space-y-3 relative">
-                  <div className="flex items-center space-between gap-2">
+                  <div className="flex sm:items-center space-between gap-2 flex-col sm:flex-row">
                     <Label className="text-md font-bold">Annual inflation rate (%):</Label>
                     <Badge className={`${getInflationColor(inflationRate)} text-black font-bold`}>
                       {inflationRate.toFixed(1)}% - {getInflationLabel(inflationRate)}
@@ -151,14 +151,12 @@ export default function InflationCalculator() {
                 {/* Results section */}
                 <div className="rounded-lg">
                     <div className="innerwrapper">
-                      <div className="flex flex-col mb-1">
-                        <div className="flex flex-row items-stretch">
-                          <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
-                            Future price:
-                          </div>
-                          <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
-                            ${futureValue.toFixed(2)}
-                          </div>
+                      <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
+                        <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
+                          Future price:
+                        </div>
+                        <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
+                          ${futureValue.toFixed(2)}
                         </div>
                       </div>
                     </div>
