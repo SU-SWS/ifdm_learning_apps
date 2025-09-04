@@ -15,6 +15,7 @@ const InterestRateVisual = () => {
 
   const [interestAmount, setInterestAmount] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
+  const MAX_YEARS = 240;
 
   // Calculate the interest and total amount
   useEffect(() => {
@@ -214,12 +215,12 @@ const InterestRateVisual = () => {
               <input
                 type="number"
                 min="1"
-                max="340"
+                max={MAX_YEARS.toString()}
                 placeholder="Enter years"
                 value={years === 0 ? "" : years}
                 onChange={(e) =>
                   setYears(
-                    Math.min(340, Math.max(0, parseInt(e.target.value) || 0))
+                    Math.min(MAX_YEARS, Math.max(0, parseInt(e.target.value) || 0))
                   )
                 }
                 className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -229,10 +230,10 @@ const InterestRateVisual = () => {
                   type="button"
                   tabIndex={-1}
                   aria-label="Increase years"
-                  onClick={() => setYears((prev) => Math.min(340, prev + 1))}
-                  disabled={years >= 340}
+                  onClick={() => setYears((prev) => Math.min(MAX_YEARS, prev + 1))}
+                  disabled={years >= MAX_YEARS}
                   className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                    years >= 340 ? 'opacity-30 cursor-not-allowed' : ''
+                    years >= MAX_YEARS ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
                 >
                   <BiSolidUpArrow size={24} />
@@ -242,7 +243,7 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease years"
                   onClick={() => setYears((prev) => Math.max(1, prev - 1))}
-                  disabled={years >= 340}
+                  disabled={years >= MAX_YEARS}
                   className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
                     years <= 1 ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
