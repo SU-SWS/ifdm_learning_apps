@@ -8,8 +8,7 @@ import { Label } from "@/app/ui/components/label"
 import { Select } from "@/app/ui/components/select";
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
-import { FaPiggyBank,FaRegCalendar, FaDollarSign } from "react-icons/fa";
-import { FaArrowTrendUp } from "react-icons/fa6";
+import { FaPiggyBank,FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
 
 type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
@@ -36,11 +35,12 @@ export default function SavingsCalculator() {
   const [savingsGoal, setSavingsGoal] = useState(8000)
   const [currentBalance, setCurrentBalance] = useState(100)
   const [timeYears, setTimeYears] = useState(1)
-  const [timeMonths, setTimeMonths] = useState(24)
+  const [timeMonths, setTimeMonths] = useState(3)
   const [interestRate, setInterestRate] = useState(5.0)
   const [compounding, setCompounding] = useState<CompoundingFrequency>("monthly")
   const [monthlyContribution, setMonthlyContribution] = useState(203)
   const [showBreakdown, setShowBreakdown] = useState(false)
+  const MAX_MONTHS = 11;
 
   const [results, setResults] = useState<CalculationResults>({
     monthlyContribution: 203,
@@ -191,64 +191,14 @@ export default function SavingsCalculator() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <FaPiggyBank className="h-8 w-8 text-teal-600" />
-            <h1 className="text-4xl font-bold text-teal-800">Savings Calculator</h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowBreakdown(!showBreakdown)}
-              className="ml-4 text-teal-600 hover:text-teal-700 hover:bg-teal-100"
-            >
-              <ChevronDown className={`h-5 w-5 transition-transform ${showBreakdown ? "rotate-90" : ""}`} />
-              Year by Year
-            </Button>
+            <FaPiggyBank className="h-8 w-8 text-[var(--foreground)]" />
+            <h1 className="text-4xl font-bold text-[var(--foreground)]">Savings Calculator</h1>
           </div>
-          <p className="text-gray-600 text-lg">
+          <p className="text-[var(--foreground)] text-lg">
             Plan your savings goals with compound interest and regular contributions. See how your money grows over
             time.
           </p>
         </div>
-
-        {showBreakdown && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-teal-700">
-                <FaArrowTrendUp className="h-5 w-5" />
-                Year-by-Year Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-teal-200">
-                      <th className="text-left py-2 px-3 font-medium text-teal-800">Year</th>
-                      <th className="text-right py-2 px-3 font-medium text-teal-800">Starting Balance</th>
-                      <th className="text-right py-2 px-3 font-medium text-teal-800">Contributions</th>
-                      <th className="text-right py-2 px-3 font-medium text-teal-800">Interest Earned</th>
-                      <th className="text-right py-2 px-3 font-medium text-teal-800">Ending Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {yearlyBreakdown.map((year) => (
-                      <tr key={year.year} className="border-b border-gray-100 hover:bg-teal-50">
-                        <td className="py-2 px-3 font-medium">{year.year}</td>
-                        <td className="py-2 px-3 text-right">${Math.round(year.startingBalance).toLocaleString()}</td>
-                        <td className="py-2 px-3 text-right">${Math.round(year.contributions).toLocaleString()}</td>
-                        <td className="py-2 px-3 text-right text-teal-600">
-                          ${Math.round(year.interestEarned).toLocaleString()}
-                        </td>
-                        <td className="py-2 px-3 text-right font-semibold">
-                          ${Math.round(year.endingBalance).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Mode Selection */}
         <div className="mb-8">
@@ -256,7 +206,7 @@ export default function SavingsCalculator() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               variant={mode === "monthly-savings" ? "default" : "outline"}
-              className={`h-16 ${mode === "monthly-savings" ? "bg-lagunita hover:bg-grey-700" : "bg-grey-light"}`}
+              className={`h-16 ${mode === "monthly-savings" ? "bg-lagunita hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
               onClick={() => setMode("monthly-savings")}
             >
               <FaDollarSign className="h-5 w-5 mr-2" />
@@ -264,7 +214,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "time-to-goal" ? "default" : "outline"}
-              className={`h-16 ${mode === "time-to-goal" ? "bg-navy hover:bg-grey-700" : ""}`}
+              className={`h-16 ${mode === "time-to-goal" ? "bg-navy hover:bg-grey-700 text-white" : "bg-[var(--results-white-background)]"}`}
               onClick={() => setMode("time-to-goal")}
             >
               <FaRegCalendar className="h-5 w-5 mr-2" />
@@ -272,7 +222,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "future-balance" ? "default" : "outline"}
-              className={`h-16 ${mode === "future-balance" ? "bg-palo-verde hover:bg-grey-700" : ""}`}
+              className={`h-16 ${mode === "future-balance" ? "bg-palo-verde hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
               onClick={() => setMode("future-balance")}
             >
               <FaArrowTrendUp className="h-5 w-5 mr-2" />
@@ -396,151 +346,270 @@ export default function SavingsCalculator() {
 
               {mode !== "time-to-goal" && (
                 <div>
-                  <Label className="text-sm font-medium">Time to goal:</Label>
+                  <Label className="font-medium">
+                    {mode === "future-balance" ? "Time period" : "Time to goal"}:
+                    </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
-                    <div>
+                    <div className="flex flex-row gap-2 items-center">
                       <div className="relative">
                         <Input
                           type="number"
                           value={timeYears}
                           onChange={(e) => setTimeYears(Number(e.target.value))}
-                          className="pr-12"
+                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
-                            onClick={() => incrementValue(setTimeYears, timeYears)}
-                            className="h-4 w-4 flex items-center justify-center hover:bg-gray-100 rounded"
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => setTimeYears((prev) => Math.max(0, prev + 1))}
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                           >
-                            <ChevronUp className="h-3 w-3" />
+                            <BiSolidUpArrow size={24} />
                           </button>
                           <button
-                            onClick={() => decrementValue(setTimeYears, timeYears)}
-                            className="h-4 w-4 flex items-center justify-center hover:bg-gray-100 rounded"
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => setTimeYears((prev) => Math.max(0, prev - 1))}
+                            className="hover:text-grey-med-dark focus:outline-none"
                           >
-                            <ChevronDown className="h-3 w-3" />
+                            <BiSolidDownArrow size={24} />
                           </button>
                         </div>
                       </div>
-                      <Label className="text-xs text-gray-500">Years</Label>
+                      <Label className="font-medium">Years</Label>
                     </div>
-                    <div>
+                    <div className="flex flex-row gap-2 items-center">
                       <div className="relative">
                         <Input
                           type="number"
                           value={timeMonths}
-                          onChange={(e) => setTimeMonths(Number(e.target.value))}
-                          className="pr-12"
+                          onChange={(e) =>
+                            setTimeMonths(
+                              Math.min(MAX_MONTHS, Math.max(0, parseInt(e.target.value) || 0))
+                            )
+                          }
+                          max={MAX_MONTHS.toString()}
+                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
-                            onClick={() => incrementValue(setTimeMonths, timeMonths)}
-                            className="h-4 w-4 flex items-center justify-center hover:bg-gray-100 rounded"
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase months"
+                            onClick={() => setTimeMonths((prev) => Math.min(MAX_MONTHS, prev + 1))}
+                            disabled={timeMonths >= MAX_MONTHS}
+                            className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
+                              timeMonths >= MAX_MONTHS ? 'opacity-30 cursor-not-allowed' : ''
+                            }`}
                           >
-                            <ChevronUp className="h-3 w-3" />
+                            <BiSolidUpArrow size={24} />
                           </button>
                           <button
-                            onClick={() => decrementValue(setTimeMonths, timeMonths)}
-                            className="h-4 w-4 flex items-center justify-center hover:bg-gray-100 rounded"
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease months"
+                            onClick={() => setTimeMonths((prev) => Math.max(0, prev - 1))}
+                            disabled={timeMonths > MAX_MONTHS}
+                            className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
+                              timeMonths <= 1 ? 'opacity-30 cursor-not-allowed' : ''
+                            }`}
                           >
-                            <ChevronDown className="h-3 w-3" />
+                            <BiSolidDownArrow size={24} />
                           </button>
                         </div>
                       </div>
-                      <Label className="text-xs text-gray-500">Months</Label>
+                      <Label className="font-medium">Months</Label>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div>
+              <div className="relative">
                 <Label htmlFor="interest-rate" className="font-medium">
                   Annual interest rate (%)
                 </Label>
                 <div className="relative mt-1">
-                  <FaArrowTrendUp className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="interest-rate"
                     type="number"
                     step="0.1"
                     value={interestRate}
                     onChange={(e) => setInterestRate(Number(e.target.value))}
-                    className="pl-10"
+                    className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita"
                   />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Increase amount"
+                      onClick={() => setInterestRate((prev) => Math.max(0, prev + 1))}
+                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                    >
+                      <BiSolidUpArrow size={24} />
+                    </button>
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Decrease amount"
+                      onClick={() => setInterestRate((prev) => Math.max(0, prev - 1))}
+                      className="hover:text-grey-med-dark focus:outline-none"
+                    >
+                      <BiSolidDownArrow size={24} />
+                    </button>
+                  </div>
                 </div>
               </div>
-
               <div>
-                <Label className="font-medium">Compounding</Label>
-                  <Select
-                    value={compounding}
-                    onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
-                    options={[
-                      { value: "monthly", label: "Monthly" },
-                      { value: "quarterly", label: "Quarterly" },
-                      { value: "annually", label: "Annually" },
-                    ]}
-                />
+                <label className="block text-md font-medium text-[var(--foreground)] mb-1">Compounding</label>
+                  <div className="relative">
+                  <select
+                  value={compounding}
+                  onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
+                  className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
+                  >
+                    <option value="annually">Annually</option>
+                    <option value="semi-annually">Semi-annually</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    <FaAngleDown />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Results Panel */}
-          <Card className="mt-6 p-4 rounded-lg bg-[var(--card-background)]">
-            <CardContent className="p-6">
-              {mode === "monthly-savings" && (
-                <div className="text-center mb-6">
-                  <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">Required monthly contribution:</h2>
-                  <div className="text-4xl font-bold text-teal-600">
-                    ${Math.round(results.monthlyContribution).toLocaleString()}
-                  </div>
-                </div>
-              )}
+          {/* Savings Calculation Panel */}
+          <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+            {/*  Three different heading types */}
+              <CardHeader className="pb-2">
+                {mode === "monthly-savings" && (
+                  <>
+                    <CardTitle className="text-center text-md font-normal">Required monthly contribution:</CardTitle>
+                    <div className="text-4xl font-bold text-lagunita text-center">
+                      ${Math.round(results.monthlyContribution).toLocaleString()}
+                    </div>
+                  </>
+                )}
 
-              {mode === "time-to-goal" && (
-                <div className="text-center mb-6">
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">Time to reach goal:</h3>
-                  <div className="text-4xl font-bold text-teal-600">
-                    {Math.floor(results.timeInMonths / 12)} years {results.timeInMonths % 12} months
-                  </div>
-                </div>
-              )}
+                {mode === "time-to-goal" && (
+                  <>
+                  <CardTitle className="text-center text-md font-normal">Time to reach goal:</CardTitle>
+                    <div className="text-4xl font-bold text-lagunita text-center">
+                      {Math.floor(results.timeInMonths / 12)} years {results.timeInMonths % 12} months
+                    </div>
+                  </>
+                )}
 
-              {mode === "future-balance" && (
-                <div className="text-center mb-6">
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">Future balance:</h3>
-                  <div className="text-4xl font-bold text-teal-600">
+                {mode === "future-balance" && (
+                  <>
+                  <CardTitle className="text-center text-md font-normal">Future balance:</CardTitle>
+                  <div className="text-4xl font-bold text-lagunita text-center">
                     ${Math.round(results.finalBalance).toLocaleString()}
                   </div>
-                </div>
-              )}
+                  </>
+                )}
+            </CardHeader>
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-gray-600">Total Deposited:</span>
-                  <span className="font-semibold">${Math.round(results.totalDeposited).toLocaleString()}</span>
-                </div>
+            <CardContent>
+            {/* Calculation Breakdown */}
+              <div className="pt-6">
+                {/* Results section */}
+                <div className="rounded-lg">
+                  <div className="innerwrapper">
+                    <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
+                      <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
+                        Total Deposited:
+                      </div>
+                      <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                        ${Math.round(results.totalDeposited).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="flex flex-row mb-1 bg-palo-verde rounded-lg">
+                      <div className="w-[50%] text-md p-4 rounded-l-lg font-bold text-white">
+                        Interest earned:
+                      </div>
+                      <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-palo-verde-light text-palo-verde font-bold overflow-hidden text-ellipsis"
+                      >
+                        ${Math.round(results.interestEarned).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="flex flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
+                      <div className="w-[50%] text-md p-4 font-medium text-white bg-navy rounded-l-lg flex items-center">
+                        Final Balance:
+                      </div>
+                      <div className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
+                        ${Math.round(results.finalBalance).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="flex mt-6 flex-row mb-1 bg-[var(--results-white-background)] rounded-lg border border-teal-200">
+                      <div className=" p-4 ">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowBreakdown(!showBreakdown)}
+                            className="ml-4 text-[var(--foreground)] hover:text-teal-700 hover:bg-teal-100"
+                          >
+                            Year by Year breakdown
+                            <ChevronDown className={`h-5 w-5 transition-transform ${showBreakdown ? "rotate-180" : ""}`} />
+                          </Button>
+                          <p className="">See how your savings grow over time</p>
+                          {showBreakdown && (
+                            <Card className="mb-8">
+                              <CardHeader>
+                                {mode === "monthly-savings" && (
+                                  <CardTitle className="text-lagunita text-center">Monthly Savings</CardTitle>
+                                )}
+                                {mode === "time-to-goal" && (
+                                  <CardTitle className="text-center text-navy">Time to Goal</CardTitle>
+                                )}
+                                {mode === "future-balance" && (
+                                  <CardTitle className="ftext-center text-palo-verde">Future Balance</CardTitle>
+                                )}
+                              </CardHeader>
+                              <CardContent>
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr className="border-b border-teal-200">
+                                        <th className="text-left py-2 px-3 font-medium text-teal-800">Year</th>
+                                        <th className="text-right py-2 px-3 font-medium text-teal-800">Starting Balance</th>
+                                        <th className="text-right py-2 px-3 font-medium text-teal-800">Contributions</th>
+                                        <th className="text-right py-2 px-3 font-medium text-teal-800">Interest Earned</th>
+                                        <th className="text-right py-2 px-3 font-medium text-teal-800">Ending Balance</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {yearlyBreakdown.map((year) => (
+                                        <tr key={year.year} className="border-b border-gray-100 hover:bg-teal-50">
+                                          <td className="py-2 px-3 font-medium">{year.year}</td>
+                                          <td className="py-2 px-3 text-right">${Math.round(year.startingBalance).toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right">${Math.round(year.contributions).toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right text-teal-600">
+                                            ${Math.round(year.interestEarned).toLocaleString()}
+                                          </td>
+                                          <td className="py-2 px-3 text-right font-semibold">
+                                            ${Math.round(year.endingBalance).toLocaleString()}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
 
-                <div className="bg-teal-600 text-white p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span>Interest earned:</span>
-                    <span className="font-bold">${Math.round(results.interestEarned).toLocaleString()}</span>
+                        </div>
+                    </div>
                   </div>
+                  {/* Wrapper section ends */}
                 </div>
-
-                <div className="bg-teal-800 text-white p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span>Final Balance:</span>
-                    <span className="font-bold">${Math.round(results.finalBalance).toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <FaArrowTrendUp className="h-5 w-5 text-teal-600" />
-                  <h4 className="font-medium text-teal-800">Year by Year breakdown</h4>
-                </div>
-                <p className="text-teal-700">See how your savings grow over time</p>
               </div>
             </CardContent>
           </Card>

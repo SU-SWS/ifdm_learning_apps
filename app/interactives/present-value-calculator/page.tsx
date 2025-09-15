@@ -10,7 +10,7 @@ import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import ThemeToggle from "@/app/lib/theme-toggle";
 
 export default function PresentValueCalculator() {
-  const [futureValue, setFutureValue] = useState(10000)
+  const [futureValue, setFutureValue] = useState(1000)
   const [interestRate, setInterestRate] = useState([5.0])
   const [timePeriod, setTimePeriod] = useState([10])
   const [animatedYear, setAnimatedYear] = useState(timePeriod[0])

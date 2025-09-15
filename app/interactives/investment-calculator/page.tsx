@@ -209,7 +209,7 @@ const InterestRateVisual = () => {
         <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
           <div className="flex-1 min-w-[150px]">
             <label className="block text-md font-medium text-[var(--foreground)] mb-1">
-              Time Period (years):
+              Time period (years):
             </label>
             <div className="relative">
               <input
