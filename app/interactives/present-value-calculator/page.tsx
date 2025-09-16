@@ -167,7 +167,7 @@ export default function PresentValueCalculator() {
                   <div className="innerwrapper">
                     <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] text-md  p-4 font-medium text-black rounded-l-lg bg-grey-med-dark items-center">
+                          className="w-[50%] text-md  p-4 font-bold text-black rounded-l-lg bg-grey-med-dark items-center">
                         Future value:
                       </div>
                       <div
@@ -177,7 +177,7 @@ export default function PresentValueCalculator() {
                     </div>
                     <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] text-md p-4 text-black font-medium rounded-l-lg bg-grey-med-dark">
+                          className="w-[50%] text-md p-4 text-black font-bold rounded-l-lg bg-grey-med-dark">
                         Present value:
                       </div>
                       <div
@@ -192,7 +192,7 @@ export default function PresentValueCalculator() {
                     </div>
                     <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg flex items-center">
+                          className="w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-l-lg flex items-center">
                         Discount amount:
                       </div>
                       <div
@@ -205,7 +205,7 @@ export default function PresentValueCalculator() {
                     </div>
                     <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] h-full text-md p-4 font-medium text-black bg-grey-med-dark rounded-l-lg">
+                          className="w-[50%] h-full text-md p-4 font-bold text-black bg-grey-med-dark rounded-l-lg">
                         Value retained:
                       </div>
                       <div

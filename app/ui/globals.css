@@ -47,11 +47,13 @@
   --color-palo-verde-light: rgba(239, 247, 239, 1);
   --color-lagunita: rgba(0, 124, 146, 1);
   --color-lagunita-light: rgba(107, 155, 172, 1);
+  --color-lagunita-lighter: rgba(240, 251, 253, 1);
   --color-navy: rgba(14, 59, 79, 1);
   --color-charcoal: rgba(52, 52, 52, 1);
   --color-grey-med: rgba(247, 248, 255, 1);
   --color-grey-med-dark: rgba(215, 215, 215, 1);
   --color-grey-light: rgba(251, 251, 255, 1);
+  --color-grey-border: rgba(207, 207, 207, 1);
 
   --color-badge-green: rgba(135, 205, 168, 1);
   --color-badge-yellow: rgba(253, 225, 131, 1);
@@ -79,6 +81,7 @@
   --muted-foreground: oklch(0.556 0 0);
   --results-blue-background: rgba(255, 255, 255, 1);
   --results-white-background: rgba(255, 255, 255, 1);
+  --results-year-background: rgba(233, 255, 251, 1);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -120,7 +123,8 @@
   --secondary-background: rgba(18, 18, 18, 1);
   --muted: oklch(0.269 0 0);
   --results-blue-background: rgba(25, 47, 57, 1);
-  --results-white-background:  oklch(0.145 0 0);;
+  --results-white-background:  oklch(0.145 0 0);
+  --results-year-background:  oklch(0.145 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
@@ -148,15 +152,18 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-offset: 2px;
   }
+ 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
 html {
- font-size: 17px;
+ font-size: 17.5px;
 }
 
 body {
