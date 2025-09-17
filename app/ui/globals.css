@@ -155,7 +155,6 @@
     border-color: var(--border);
     outline-offset: 2px;
   }
- 
   body {
     background-color: var(--background);
     color: var(--foreground);
@@ -168,4 +167,9 @@ html {
 
 body {
   font-family: "Open Sans", Arial, Helvetica, sans-serif;
+}
+
+input,
+select {
+  min-height: 48px;
 }
