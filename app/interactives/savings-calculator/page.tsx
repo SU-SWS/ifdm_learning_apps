@@ -11,7 +11,7 @@ import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-
 import ThemeToggle from "@/app/lib/theme-toggle";
 
 type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
-type CompoundingFrequency = "monthly" | "quarterly" | "annually"
+type CompoundingFrequency = "monthly" | "quarterly" | "annually" | "semi-annually"
 
 interface CalculationResults {
   monthlyContribution: number
@@ -27,6 +27,16 @@ interface YearlyBreakdown {
   contributions: number
   interestEarned: number
   endingBalance: number
+}
+
+// Helper to get periods per year and rate per period
+function getCompoundingParams(frequency: CompoundingFrequency, annualRate: number) {
+  let periodsPerYear = 12;
+  if (frequency === "quarterly") periodsPerYear = 4;
+  else if (frequency === "annually") periodsPerYear = 1;
+  else if (frequency === "semi-annually") periodsPerYear = 2;
+  const ratePerPeriod = annualRate / 100 / periodsPerYear;
+  return { periodsPerYear, ratePerPeriod };
 }
 
 export default function SavingsCalculator() {
@@ -51,66 +61,66 @@ export default function SavingsCalculator() {
 
   const [yearlyBreakdown, setYearlyBreakdown] = useState<YearlyBreakdown[]>([])
 
- const calculateYearlyBreakdown = useCallback(
-  (monthlyAmount: number, totalMonths: number) => {
-    const monthlyRate = interestRate / 100 / 12
-    const breakdown: YearlyBreakdown[] = []
-    let balance = currentBalance
+  // Updated breakdown to use compounding frequency
+  const calculateYearlyBreakdown = useCallback(
+    (contribution: number, totalPeriods: number) => {
+      const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
+      const breakdown: YearlyBreakdown[] = [];
+      let balance = currentBalance;
+      const totalYears = Math.ceil(totalPeriods / periodsPerYear);
 
-    const totalYears = Math.ceil(totalMonths / 12)
+      for (let year = 1; year <= totalYears; year++) {
+        const startingBalance = balance;
+        const periodsInThisYear = Math.min(periodsPerYear, totalPeriods - (year - 1) * periodsPerYear);
+        let yearlyContributions = 0;
+        let yearlyInterest = 0;
 
-    for (let year = 1; year <= totalYears; year++) {
-      const startingBalance = balance
-      const monthsInThisYear = Math.min(12, totalMonths - (year - 1) * 12)
-      let yearlyContributions = 0
-      let yearlyInterest = 0
+        for (let period = 1; period <= periodsInThisYear; period++) {
+          const interestThisPeriod = balance * ratePerPeriod;
+          yearlyInterest += interestThisPeriod;
+          balance += interestThisPeriod + contribution;
+          yearlyContributions += contribution;
+        }
 
-      for (let month = 1; month <= monthsInThisYear; month++) {
-        const interestThisMonth = balance * monthlyRate
-        yearlyInterest += interestThisMonth
-        balance += interestThisMonth + monthlyAmount
-        yearlyContributions += monthlyAmount
+        breakdown.push({
+          year,
+          startingBalance,
+          contributions: yearlyContributions,
+          interestEarned: yearlyInterest,
+          endingBalance: balance,
+        });
       }
 
-      breakdown.push({
-        year,
-        startingBalance,
-        contributions: yearlyContributions,
-        interestEarned: yearlyInterest,
-        endingBalance: balance,
-      })
-    }
+      return breakdown;
+    },
+    [compounding, interestRate, currentBalance]
+  );
 
-    return breakdown
-  },
-  [interestRate, currentBalance]
-)
-
+  // Updated calculation logic to use compounding frequency
   const calculateResults = useCallback(() => {
-    const totalTimeInMonths = timeYears * 12 + timeMonths
-    const monthlyRate = interestRate / 100 / 12
-    const compoundingPerYear = compounding === "monthly" ? 12 : compounding === "quarterly" ? 4 : 1
-    const periodsPerYear = compoundingPerYear
-    const ratePerPeriod = interestRate / 100 / periodsPerYear
+    const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
+    const totalTimeInMonths = timeYears * 12 + timeMonths;
+    const totalPeriods = timeYears * periodsPerYear + timeMonths * (periodsPerYear / 12);
 
     if (mode === "monthly-savings") {
       // Calculate required monthly contribution to reach goal
-      const futureValueOfInitial = currentBalance * Math.pow(1 + monthlyRate, totalTimeInMonths)
-      const remainingAmount = savingsGoal - futureValueOfInitial
+      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
+      const remainingAmount = savingsGoal - futureValueOfInitial;
 
       if (remainingAmount <= 0) {
-        const monthlyNeeded = 0
+        const monthlyNeeded = 0;
         setResults({
           monthlyContribution: monthlyNeeded,
           totalDeposited: currentBalance,
           interestEarned: savingsGoal - currentBalance,
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
-        })
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalTimeInMonths))
+        });
+        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
       } else {
-        const monthlyNeeded = remainingAmount / ((Math.pow(1 + monthlyRate, totalTimeInMonths) - 1) / monthlyRate)
-        const totalDeposited = currentBalance + monthlyNeeded * totalTimeInMonths
+        const monthlyNeeded =
+          remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+        const totalDeposited = currentBalance + monthlyNeeded * totalPeriods;
 
         setResults({
           monthlyContribution: monthlyNeeded,
@@ -118,16 +128,16 @@ export default function SavingsCalculator() {
           interestEarned: savingsGoal - totalDeposited,
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
-        })
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalTimeInMonths))
+        });
+        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
       }
     } else if (mode === "future-balance") {
       // Calculate future balance with current monthly contribution
-      const futureValueOfInitial = currentBalance * Math.pow(1 + monthlyRate, totalTimeInMonths)
+      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
       const futureValueOfAnnuity =
-        monthlyContribution * ((Math.pow(1 + monthlyRate, totalTimeInMonths) - 1) / monthlyRate)
-      const finalBalance = futureValueOfInitial + futureValueOfAnnuity
-      const totalDeposited = currentBalance + monthlyContribution * totalTimeInMonths
+        monthlyContribution * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
+      const totalDeposited = currentBalance + monthlyContribution * totalPeriods;
 
       setResults({
         monthlyContribution: monthlyContribution,
@@ -135,8 +145,8 @@ export default function SavingsCalculator() {
         interestEarned: finalBalance - totalDeposited,
         finalBalance: finalBalance,
         timeInMonths: totalTimeInMonths,
-      })
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, totalTimeInMonths))
+      });
+      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, totalPeriods));
     } else {
       // Calculate time to reach goal with current monthly contribution
       if (monthlyContribution <= 0) {
@@ -146,37 +156,47 @@ export default function SavingsCalculator() {
           interestEarned: 0,
           finalBalance: currentBalance,
           timeInMonths: 0,
-        })
-        setYearlyBreakdown([])
-        return
+        });
+        setYearlyBreakdown([]);
+        return;
       }
 
       // Use iterative approach to find time needed
-      let months = 1
-      let balance = currentBalance
+      let periods = 1;
+      let balance = currentBalance;
 
-      while (balance < savingsGoal && months < 1200) {
-        // Max 100 years
-        balance = balance * (1 + monthlyRate) + monthlyContribution
-        months++
+      while (balance < savingsGoal && periods < 1200) {
+        balance = balance * (1 + ratePerPeriod) + monthlyContribution;
+        periods++;
       }
 
-      const totalDeposited = currentBalance + monthlyContribution * months
+      const totalDeposited = currentBalance + monthlyContribution * periods;
+      const timeInMonths = Math.round(periods * (12 / periodsPerYear));
 
       setResults({
         monthlyContribution: monthlyContribution,
         totalDeposited: totalDeposited,
         interestEarned: savingsGoal - totalDeposited,
         finalBalance: savingsGoal,
-        timeInMonths: months,
-      })
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, months))
+        timeInMonths: timeInMonths,
+      });
+      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, periods));
     }
-  }, [mode, savingsGoal, currentBalance, timeYears, timeMonths, interestRate, compounding, monthlyContribution, calculateYearlyBreakdown]);
+  }, [
+    mode,
+    savingsGoal,
+    currentBalance,
+    timeYears,
+    timeMonths,
+    interestRate,
+    compounding,
+    monthlyContribution,
+    calculateYearlyBreakdown,
+  ]);
 
   useEffect(() => {
-    calculateResults()
-  }, [calculateResults])
+    calculateResults();
+  }, [calculateResults]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -490,42 +510,38 @@ export default function SavingsCalculator() {
           </Card>
 
           {/* Results Panel */}
-          {/* Savings Calculation Panel */}
           <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-            {/*  Three different heading types */}
-              <CardHeader className="pb-2">
-                {mode === "monthly-savings" && (
-                  <>
-                    <CardTitle className="text-center text-md font-bold">Required monthly contribution:</CardTitle>
-                    <div className="text-4xl font-bold text-lagunita text-center">
-                      ${Math.round(results.monthlyContribution).toLocaleString()}
-                    </div>
-                  </>
-                )}
-
-                {mode === "time-to-goal" && (
-                  <>
-                  <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
-                    <div className="text-4xl font-bold text-lagunita text-center">
-                      {Math.floor(results.timeInMonths / 12)} years {results.timeInMonths % 12} months
-                    </div>
-                  </>
-                )}
-
-                {mode === "future-balance" && (
-                  <>
-                  <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
+            <CardHeader className="pb-2">
+              {mode === "monthly-savings" && (
+                <>
+                  <CardTitle className="text-center text-md font-bold">Required monthly contribution:</CardTitle>
                   <div className="text-4xl font-bold text-lagunita text-center">
-                    ${Math.round(results.finalBalance).toLocaleString()}
+                    ${results.monthlyContribution.toFixed(2).toLocaleString()}
                   </div>
-                  </>
-                )}
+                </>
+              )}
+
+              {mode === "time-to-goal" && (
+                <>
+                <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
+                  <div className="text-4xl font-bold text-lagunita text-center">
+                    {Math.floor(results.timeInMonths / 12)} years {results.timeInMonths % 12} months
+                  </div>
+                </>
+              )}
+
+              {mode === "future-balance" && (
+                <>
+                <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
+                <div className="text-4xl font-bold text-lagunita text-center">
+                  ${results.finalBalance.toFixed(2).toLocaleString()}
+                </div>
+                </>
+              )}
             </CardHeader>
 
             <CardContent>
-            {/* Calculation Breakdown */}
               <div className="pt-6">
-                {/* Results section */}
                 <div className="rounded-lg">
                   <div className="innerwrapper">
                     <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
@@ -533,7 +549,7 @@ export default function SavingsCalculator() {
                         Total deposited:
                       </div>
                       <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                        ${Math.round(results.totalDeposited).toLocaleString()}
+                        ${results.totalDeposited.toFixed(2).toLocaleString()}
                       </div>
                     </div>
                     <div className="flex flex-row mb-1 bg-lagunita-lighter rounded-lg">
@@ -542,7 +558,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
                       >
-                        ${Math.round(results.interestEarned).toLocaleString()}
+                        ${results.interestEarned.toFixed(2).toLocaleString()}
                       </div>
                     </div>
                     {mode !== "future-balance" && (
@@ -551,7 +567,7 @@ export default function SavingsCalculator() {
                         Final balance:
                       </div>
                       <div className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        ${Math.round(results.finalBalance).toLocaleString()}
+                        ${results.finalBalance.toFixed(2).toLocaleString()}
                       </div>
                     </div>
                     )}
