@@ -82,6 +82,8 @@
   --results-blue-background: rgba(255, 255, 255, 1);
   --results-white-background: rgba(255, 255, 255, 1);
   --results-year-background: rgba(233, 255, 251, 1);
+  --year-by-year-table: rgba(246, 246, 246, 1);
+  --year-by-year-table-line: rgba(200, 200, 200, 1);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -125,6 +127,8 @@
   --results-blue-background: rgba(25, 47, 57, 1);
   --results-white-background:  oklch(0.145 0 0);
   --results-year-background:  oklch(0.145 0 0);
+  --year-by-year-table: oklch(0.145 0 0);
+  --year-by-year-table-line: rgba(255, 255, 255, 1);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);

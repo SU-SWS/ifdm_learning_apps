@@ -208,8 +208,7 @@ export default function SavingsCalculator() {
             <h1 className="sr-only">Savings Calculator</h1>
           </div>
           <p className="text-[var(--foreground)] text-lg">
-            Plan your savings goals with compound interest and regular contributions. See how your money grows over
-            time.
+            Plan your savings goals with compound interest and regular contributions. See how your money grows over time.
           </p>
         </div>
 
@@ -219,7 +218,7 @@ export default function SavingsCalculator() {
           <div className="grid grid-cols-3 gap-2">
             <Button
               variant={mode === "monthly-savings" ? "default" : "outline"}
-              className={`h-16 whitespace-normal ${mode === "monthly-savings" ? "bg-lagunita hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
+              className={`h-18 whitespace-normal ${mode === "monthly-savings" ? "bg-lagunita hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
               onClick={() => setMode("monthly-savings")}
             >
               <FaDollarSign className="hidden sm:block h-5 w-5 mr-2" />
@@ -227,7 +226,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "time-to-goal" ? "default" : "outline"}
-              className={`h-16 whitespace-normal ${mode === "time-to-goal" ? "bg-navy hover:bg-grey-700 text-white" : "bg-[var(--results-white-background)]"}`}
+              className={`h-18 whitespace-normal ${mode === "time-to-goal" ? "bg-navy hover:bg-grey-700 text-white" : "bg-[var(--results-white-background)]"}`}
               onClick={() => setMode("time-to-goal")}
             >
               <FaRegCalendar className="hidden sm:block h-5 w-5 mr-2" />
@@ -235,7 +234,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "future-balance" ? "default" : "outline"}
-              className={`h-16 whitespace-normal ${mode === "future-balance" ? "bg-palo-verde hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
+              className={`h-18 whitespace-normal ${mode === "future-balance" ? "bg-palo-verde hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
               onClick={() => setMode("future-balance")}
             >
               <FaArrowTrendUp className="hidden sm:block h-5 w-5 mr-2" />
@@ -249,17 +248,16 @@ export default function SavingsCalculator() {
           <Card className="">
             <CardHeader>
               {mode === "monthly-savings" && (
-                  <p className="font-semibold">How much do I need to save each month to reach my goal?</p>
-                )}
+                <p className="font-semibold">How much do I need to save each month to reach my goal?</p>
+              )}
 
-                {mode === "time-to-goal" && (
-                  <p className="font-semibold">How long will it take me to reach my goal?</p>
-                )}
+              {mode === "time-to-goal" && (
+                <p className="font-semibold">How long will it take me to reach my goal?</p>
+              )}
 
-                {mode === "future-balance" && (
-                  <p className="font-semibold">What will my savings grow to in the future?</p>
-                )}
-              
+              {mode === "future-balance" && (
+                <p className="font-semibold">What will my savings grow to in the future?</p>
+              )}
             </CardHeader>
             <CardContent className="space-y-6">
               {mode !== "future-balance" && (
@@ -374,7 +372,7 @@ export default function SavingsCalculator() {
                 <div>
                   <Label className="font-medium">
                     {mode === "future-balance" ? "Time period" : "Time to goal"}:
-                    </Label>
+                  </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
                     <div className="flex flex-row gap-2 items-center">
                       <div className="relative">
@@ -572,85 +570,68 @@ export default function SavingsCalculator() {
                     </div>
                     )}
 
-                    {/* Year by Year section */}
-                    <div className="hidden lg:block flex-1 mt-6 flex-row mb-1 bg-[var(--results-year-background)] rounded-lg border border-grey-border">
-                      <div className="p-4">
-                          <div
-                            onClick={() => setShowBreakdown(!showBreakdown)}
-                            className="flex flex-row justify-between items-center gap-2 text-[var(--foreground)] whitespace-normal cursor-pointer select-none"
-                          >
-                            <div>
-                              <p className="font-bold">Year by year breakdown</p>
-                              <p className="font-regular text-[15px]">See how your savings grow over time</p>
-                            </div>
-                            <ChevronDown className={`h-8 w-8 transition-transform ${showBreakdown ? "rotate-180" : ""}`} />
-                          </div>
-                          
-                          {showBreakdown && (
-                            <Card className="mb-8">
-                              <CardHeader>
-                                {mode === "monthly-savings" && (
-                                  <CardTitle className="md:text-center py-2">Monthly Savings</CardTitle>
-                                )}
-                                {mode === "time-to-goal" && (
-                                  <CardTitle className="md:text-center py-2">Time to Goal</CardTitle>
-                                )}
-                                {mode === "future-balance" && (
-                                  <CardTitle className="md:text-center py-2">Future Balance</CardTitle>
-                                )}
-                              </CardHeader>
-                              <CardContent>
-                                <div className="overflow-x-auto">
-                                  <table className="w-full text-sm">
-                                    <thead>
-                                      <tr className="border-b border-teal-200 hidden md:table-row">
-                                        <th className="text-left py-2 px-1 font-medium">Year</th>
-                                        <th className="text-right py-2 px-3 font-medium">Starting Balance</th>
-                                        <th className="text-right py-2 px-3 font-medium">Contributions</th>
-                                        <th className="text-right py-2 px-3 font-medium">Interest Earned</th>
-                                        <th className="text-right py-2 px-1 font-medium">Ending Balance</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {yearlyBreakdown.map((year) => (
-                                        <tr key={year.year} className="border-b border-gray-100 hover:bg-[var(--muted)]">
-                                          <td className="py-2 px-1 md:text-right flex md:table-cell">
-                                            <span className="md:hidden font-bold pr-1">Year: </span>
-                                            {year.year}
-                                          </td>
-                                          <td className="py-2 px-3 md:text-right flex md:table-cell">
-                                            <span className="md:hidden font-bold pr-1">Starting Balance:</span>
-                                            ${Math.round(year.startingBalance).toLocaleString()}
-                                          </td>
-                                          <td className="py-2 px-3 md:text-right flex md:table-cell">
-                                            <span className="md:hidden font-bold pr-1">Contributions:</span>
-                                            ${Math.round(year.contributions).toLocaleString()}
-                                          </td>
-                                          <td className="py-2 px-3 md:text-right flex md:table-cell">
-                                            <span className="md:hidden font-bold pr-1">Interest Earned:</span>
-                                            ${Math.round(year.interestEarned).toLocaleString()}
-                                          </td>
-                                          <td className="py-2 px-1 md:text-right flex md:table-cell mb-6">
-                                            <span className="md:hidden font-bold pr-1">Ending Balance:</span>
-                                            ${Math.round(year.endingBalance).toLocaleString()}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          )}
-
-                        </div>
-                    </div>
+                    
                   </div>
                   {/* Wrapper section ends */}
                 </div>
               </div>
             </CardContent>
           </Card>
+        </div>
+        {/* Year by Year section */}
+        <div className="hidden lg:block flex-1 mt-6 flex-row mb-1 bg-[var(--year-by-year-table)] rounded-lg border border-grey-border">
+          <div className="p-4">
+              <div
+                onClick={() => setShowBreakdown(!showBreakdown)}
+                className="flex flex-row justify-between items-center gap-2 text-[var(--foreground)] whitespace-normal cursor-pointer select-none"
+              >
+                <div>
+                  <p className="font-bold">Year by year breakdown</p>
+                </div>
+                <ChevronDown className={`h-8 w-8 transition-transform ${showBreakdown ? "rotate-180" : ""}`} />
+              </div>
+              
+              {showBreakdown && (
+                <Card className="mb-8">
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full mt-5">
+                        <thead>
+                          <tr className="border-b border-[var(--year-by-year-table-line)]">
+                            <th className="text-left py-2 px-1 font-bold">Year</th>
+                            <th className="text-right py-2 px-3 font-bold">Starting Balance</th>
+                            <th className="text-right py-2 px-3 font-bold">Contributions</th>
+                            <th className="text-right py-2 px-3 font-bold text-lagunita">Interest Earned</th>
+                            <th className="text-right py-2 px-1 font-bold">Ending Balance</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {yearlyBreakdown.map((year) => (
+                            <tr key={year.year} className="border-b border-[var(--year-by-year-table-line)] hover:bg-[var(--muted)]">
+                              <td className="py-2 px-1 font-bold">
+                                {year.year}
+                              </td>
+                              <td className="py-2 px-3 text-right">
+                                ${Math.round(year.startingBalance).toLocaleString()}
+                              </td>
+                              <td className="py-2 px-3 text-right">
+                                ${Math.round(year.contributions).toLocaleString()}
+                              </td>
+                              <td className="py-2 px-3 text-right font-bold text-lagunita">
+                                ${Math.round(year.interestEarned).toLocaleString()}
+                              </td>
+                              <td className="py-2 px-1 text-right font-bold">
+                                ${Math.round(year.endingBalance).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
         </div>
       </div>
     </div>
