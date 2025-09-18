@@ -176,7 +176,7 @@ export default function SavingsCalculator() {
 
       while (balance < savingsGoal && periods < 1200) {
         // Calculate total contribution for this compounding period
-        let contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
+        const contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
         balance = balance * (1 + ratePerPeriod) + contributionThisPeriod;
         periods++;
       }
