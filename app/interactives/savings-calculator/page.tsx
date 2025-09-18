@@ -460,6 +460,7 @@ export default function SavingsCalculator() {
                     id="interest-rate"
                     type="number"
                     step="0.1"
+                    min="0.1"
                     value={interestRate}
                     onChange={(e) => setInterestRate(Number(e.target.value))}
                     className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita"
