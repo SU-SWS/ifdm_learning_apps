@@ -75,11 +75,20 @@ export default function SavingsCalculator() {
         let yearlyContributions = 0;
         let yearlyInterest = 0;
 
-        for (let period = 1; period <= periodsInThisYear; period++) {
-          const interestThisPeriod = balance * ratePerPeriod;
-          yearlyInterest += interestThisPeriod;
-          balance += interestThisPeriod + contribution;
-          yearlyContributions += contribution;
+        if (periodsPerYear === 1) {
+          // Annual compounding: add all contributions, then apply interest once
+          yearlyContributions = contribution * periodsInThisYear;
+          balance += yearlyContributions;
+          yearlyInterest = balance * ratePerPeriod;
+          balance += yearlyInterest;
+        } else {
+          // Other compounding: add interest and contribution each period
+          for (let period = 1; period <= periodsInThisYear; period++) {
+            const interestThisPeriod = balance * ratePerPeriod;
+            yearlyInterest += interestThisPeriod;
+            balance += interestThisPeriod + contribution;
+            yearlyContributions += contribution;
+          }
         }
 
         breakdown.push({
