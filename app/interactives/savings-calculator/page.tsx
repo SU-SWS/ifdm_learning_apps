@@ -613,16 +613,16 @@ export default function SavingsCalculator() {
                                 {year.year}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                ${Math.round(year.startingBalance).toLocaleString()}
+                                ${year.startingBalance.toFixed(2).toLocaleString()}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                ${Math.round(year.contributions).toLocaleString()}
+                                ${year.contributions.toFixed(2).toLocaleString()}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
-                                ${Math.round(year.interestEarned).toLocaleString()}
+                                ${year.interestEarned.toFixed(2).toLocaleString()}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
-                                ${Math.round(year.endingBalance).toLocaleString()}
+                                ${year.endingBalance.toFixed(2).toLocaleString()}
                               </td>
                             </tr>
                           ))}
