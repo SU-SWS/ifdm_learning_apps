@@ -63,32 +63,33 @@ export default function SavingsCalculator() {
 
   // Updated breakdown to use compounding frequency
   const calculateYearlyBreakdown = useCallback(
-    (contribution: number, totalPeriods: number) => {
+    (contribution: number, totalMonths: number) => {
       const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
       const breakdown: YearlyBreakdown[] = [];
       let balance = currentBalance;
-      const totalYears = Math.ceil(totalPeriods / periodsPerYear);
+      const totalYears = Math.ceil(totalMonths / 12);
 
       for (let year = 1; year <= totalYears; year++) {
         const startingBalance = balance;
-        const periodsInThisYear = Math.min(periodsPerYear, totalPeriods - (year - 1) * periodsPerYear);
         let yearlyContributions = 0;
         let yearlyInterest = 0;
+        let periodMonth = 0;
+        let maxMonths = 12;
 
-        if (periodsPerYear === 1) {
-          // Annual compounding: add all contributions, then apply interest once
-          yearlyContributions = contribution * periodsInThisYear;
-          balance += yearlyContributions;
-          yearlyInterest = balance * ratePerPeriod;
-          balance += yearlyInterest;
-        } else {
-          // Other compounding: add interest and contribution each period
-          for (let period = 1; period <= periodsInThisYear; period++) {
+        if (year === totalYears) {
+          maxMonths = totalMonths - ((totalYears - 1) * 12);
+        }
+
+        for (let month = 0; month < maxMonths; month++) {
+          periodMonth++;
+          balance += contribution;
+          yearlyContributions += contribution;
+          if (periodMonth >= 12 / periodsPerYear) {
             const interestThisPeriod = balance * ratePerPeriod;
             yearlyInterest += interestThisPeriod;
-            balance += interestThisPeriod + contribution;
-            yearlyContributions += contribution;
-          }
+            balance += interestThisPeriod;
+            periodMonth = 0;
+          }       
         }
 
         breakdown.push({
@@ -102,7 +103,7 @@ export default function SavingsCalculator() {
 
       return breakdown;
     },
-    [compounding, interestRate, currentBalance]
+    [compounding, interestRate, currentBalance, timeYears, timeMonths]
   );
 
   const calculateResults = useCallback(() => {
@@ -130,7 +131,7 @@ export default function SavingsCalculator() {
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
         });
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
+        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalTimeInMonths));
       } else {
         // Calculate the monthly contribution needed.
         const contributionPerPeriod =
@@ -145,7 +146,7 @@ export default function SavingsCalculator() {
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
         });
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
+        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalTimeInMonths));
       }
 
     // Calculate time to goal.
@@ -172,14 +173,13 @@ export default function SavingsCalculator() {
       while (balance < savingsGoal && periods < 1200) {
         periodMonth++;
         month++;
+        balance += monthlyContribution;
         // Apply any interest if in a compounding period.
         if (periodMonth >= 12 / periodsPerYear) {
           balance = balance * (1 + ratePerPeriod);
           periodMonth = 0;
           periods++;
-        }
-        // Apply monthly contribution this month, after calculating any interest.
-        balance += monthlyContribution;
+        }        
       }
 
       const months = month;
@@ -192,7 +192,7 @@ export default function SavingsCalculator() {
         finalBalance: balance,
         timeInMonths: months,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, periods));
+      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, months));
 
     // Calculate Future Balance.
     // This gives you the future balance of your savings after a set time
@@ -203,17 +203,19 @@ export default function SavingsCalculator() {
       let month = 0;
       let balance = currentBalance;
 
-      while (balance < savingsGoal && month < totalTimeInMonths) {
+      while (month < totalTimeInMonths) {
         periodMonth++;
         month++;
+        // Apply monthly contribution this month.
+        balance += monthlyContribution;
         // Apply any interest if in a compounding period.
         if (periodMonth >= 12 / periodsPerYear) {
+          console.log("Month " + month + ": Applying interest: " + ratePerPeriod);
           balance = balance * (1 + ratePerPeriod);
+          console.log(month + " Ending Balance: " + balance.toFixed(2));
           periodMonth = 0;
           periods++;
         }
-        // Apply monthly contribution this month, after calculating any interest.
-        balance += monthlyContribution;
       }
 
       const months = month;
@@ -227,7 +229,7 @@ export default function SavingsCalculator() {
         finalBalance: finalBalance,
         timeInMonths: totalTimeInMonths,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, totalPeriods));
+      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, month));
     }
   }, [
     mode,
