@@ -167,18 +167,25 @@ export default function SavingsCalculator() {
         return;
       }
 
-      // Use iterative approach to find time needed
       let periods = 1;
+      let periodMonth = 0;
+      let month = 0;
       let balance = currentBalance;
 
       while (balance < savingsGoal && periods < 1200) {
-        // Calculate total contribution for this compounding period
-        const contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
-        balance = balance * (1 + ratePerPeriod) + contributionThisPeriod;
-        periods++;
+        periodMonth++;
+        month++;
+        // Apply any interest if in a compounding period.
+        if (periodMonth >= 12 / periodsPerYear) {
+          balance = balance * (1 + ratePerPeriod);
+          periodMonth = 0;
+          periods++;
+        }
+        // Apply monthly contribution this month, after calculating any interest.
+        balance += monthlyContribution;
       }
 
-      const months = Math.round(periods * (12 / periodsPerYear));
+      const months = month;
       const totalDeposited = currentBalance + monthlyContribution * months;
 
       setResults({
