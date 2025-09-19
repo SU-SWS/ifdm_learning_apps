@@ -135,9 +135,6 @@ export default function SavingsCalculator() {
         // Calculate the monthly contribution needed.
         const contributionPerPeriod =
           remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-          console.log(remainingAmount);
-          console.log(((Math.pow(1 + ratePerPeriod, totalPeriods) - 1)));
-          console.log(ratePerPeriod);
         const monthlyNeeded = contributionPerPeriod / (12 / periodsPerYear);
         const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
 
@@ -201,12 +198,27 @@ export default function SavingsCalculator() {
     // This gives you the future balance of your savings after a set time
     // period with a set monthly contribution.
     } else if (mode === "future-balance") {
-      // Calculate future balance with current monthly contribution
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
-      const futureValueOfAnnuity =
-        monthlyContribution * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + monthlyContribution * totalPeriods;
+      let periods = 1;
+      let periodMonth = 0;
+      let month = 0;
+      let balance = currentBalance;
+
+      while (balance < savingsGoal && month < totalTimeInMonths) {
+        periodMonth++;
+        month++;
+        // Apply any interest if in a compounding period.
+        if (periodMonth >= 12 / periodsPerYear) {
+          balance = balance * (1 + ratePerPeriod);
+          periodMonth = 0;
+          periods++;
+        }
+        // Apply monthly contribution this month, after calculating any interest.
+        balance += monthlyContribution;
+      }
+
+      const months = month;
+      const finalBalance = balance;
+      const totalDeposited = currentBalance + monthlyContribution * months;
 
       setResults({
         monthlyContribution: monthlyContribution,
