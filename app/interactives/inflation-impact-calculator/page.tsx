@@ -53,11 +53,11 @@ export default function InflationCalculator() {
               {/* Future Value Input */}
               <div className="space-y-2 relative">
                 <Label htmlFor="initial-price" className="text-md font-medium">
-                  Initial amount ($):
+                  Initial price ($):
                 </Label>
 
                 <Input
-                  id="initial-amount"
+                  id="initial-price"
                   type="number"
                   value={initialPrice === 0 ? "" : initialPrice}
                   

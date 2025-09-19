@@ -209,7 +209,7 @@ const InterestRateVisual = () => {
         <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
           <div className="flex-1 min-w-[150px]">
             <label className="block text-md font-medium text-[var(--foreground)] mb-1">
-              Time Period (years):
+              Time period (years):
             </label>
             <div className="relative">
               <input
@@ -282,8 +282,8 @@ const InterestRateVisual = () => {
           <div className="lg:grid lg:grid-cols-2 lg:gap-15">
             <div className="innerwrapper">
               <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
-                <div className="w-[50%] p-4 text-black rounded-l-lg bg-grey-med-dark">
-                  Initial Amount:
+                <div className="w-[50%] p-4 text-black font-bold rounded-l-lg bg-grey-med-dark">
+                  Initial amount:
                 </div>
                 <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
                   ${amount.toLocaleString()}
@@ -298,7 +298,7 @@ const InterestRateVisual = () => {
                     mode === "saving" ? "bg-palo-verde" : "bg-berry"
                   }`}
                 >
-                  {mode === "saving" ? "Interest Earned" : "Interest Paid"}:
+                  {mode === "saving" ? "Interest earned" : "Interest paid"}:
                 </div>
                 <div
                   className={`w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold overflow-hidden text-ellipsis ${
@@ -315,7 +315,7 @@ const InterestRateVisual = () => {
               </div>
               <div className="flex flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
                 <div className="w-[50%] p-4 font-bold text-white bg-navy rounded-l-lg">
-                  Final Amount:
+                  Final amount:
                 </div>
                 <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
                   ${totalAmount.toLocaleString(undefined, {
