@@ -205,6 +205,9 @@ export default function SavingsCalculator() {
     calculateYearlyBreakdown,
   ]);
 
+  // Check for invalid inputs
+  const isInvalid = (value: number) => isNaN(value) || !isFinite(value);
+
   useEffect(() => {
     calculateResults();
   }, [calculateResults]);
@@ -475,7 +478,11 @@ export default function SavingsCalculator() {
                     value={interestRate === 0 ? "" : interestRate}
                     placeholder="Enter rate"
                     onChange={(e) => setInterestRate(Number(e.target.value))}
-                    className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita"
+                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita ${
+                      interestRate === 0
+                        ? "placeholder:text-berry bg-berry-light"
+                        : "placeholder:text-lagunita"
+                    }`}
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                     <button
@@ -526,8 +533,14 @@ export default function SavingsCalculator() {
               {mode === "monthly-savings" && (
                 <>
                   <CardTitle className="text-center text-md font-bold">Required monthly contribution:</CardTitle>
-                  <div className="text-4xl font-bold text-lagunita text-center">
-                    ${results.monthlyContribution.toFixed(2).toLocaleString()}
+                  <div className={`text-4xl font-bold text-center ${
+                      isInvalid(results.totalDeposited)
+                        ? "text-berry"
+                        : "text-lagunita"
+                    }`}>
+                      {isInvalid(results.totalDeposited)
+                      ? "$0"
+                      : `$${results.monthlyContribution.toFixed(2).toLocaleString()}`}
                   </div>
                 </>
               )}
@@ -544,9 +557,15 @@ export default function SavingsCalculator() {
               {mode === "future-balance" && (
                 <>
                 <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
-                <div className="text-4xl font-bold text-lagunita text-center">
-                  ${results.finalBalance.toFixed(2).toLocaleString()}
-                </div>
+                <div className={`text-4xl font-bold text-center ${
+                      isInvalid(results.finalBalance)
+                        ? "text-berry"
+                        : "text-lagunita"
+                    }`}>
+                      {isInvalid(results.finalBalance)
+                      ? "$0"
+                      : `$${results.finalBalance.toFixed(2).toLocaleString()}`}
+                  </div>
                 </>
               )}
             </CardHeader>
@@ -560,7 +579,9 @@ export default function SavingsCalculator() {
                         Total deposited:
                       </div>
                       <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                        ${results.totalDeposited.toFixed(2).toLocaleString()}
+                        {isInvalid(results.totalDeposited)
+                        ? "$0"
+                        : `$${results.totalDeposited.toFixed(2).toLocaleString()}`}
                       </div>
                     </div>
                     <div className="flex flex-row mb-1 bg-lagunita-lighter rounded-lg">
@@ -569,7 +590,9 @@ export default function SavingsCalculator() {
                       </div>
                       <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
                       >
-                        ${results.interestEarned.toFixed(2).toLocaleString()}
+                        {(isInvalid(results.interestEarned) || results.interestEarned < 0)
+                        ? "$0"
+                        : `$${results.interestEarned.toFixed(2).toLocaleString()}`}
                       </div>
                     </div>
                     {mode !== "future-balance" && (
@@ -625,16 +648,24 @@ export default function SavingsCalculator() {
                                 {year.year}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                ${year.startingBalance.toFixed(2).toLocaleString()}
+                                {(isInvalid(year.startingBalance) || year.startingBalance < 0)
+                                ? "$0"
+                                : `$${year.startingBalance.toFixed(2).toLocaleString()}`}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                ${year.contributions.toFixed(2).toLocaleString()}
+                                {(isInvalid(year.contributions) || year.contributions < 0)
+                                ? "$0"
+                                : `$${year.contributions.toFixed(2).toLocaleString()}`}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
-                                ${year.interestEarned.toFixed(2).toLocaleString()}
+                                {(isInvalid(year.interestEarned) || year.interestEarned < 0)
+                                ? "$0"
+                                : `$${year.interestEarned.toFixed(2).toLocaleString()}`}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
-                                ${year.endingBalance.toFixed(2).toLocaleString()}
+                                {(isInvalid(year.endingBalance) || year.endingBalance < 0)
+                                ? "$0"
+                                : `$${year.endingBalance.toFixed(2).toLocaleString()}`}
                               </td>
                             </tr>
                           ))}
