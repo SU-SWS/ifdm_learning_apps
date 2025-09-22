@@ -419,7 +419,7 @@ export default function SavingsCalculator() {
                         <Input
                           type="number"
                           value={timeMonths === 0 ? "" : timeMonths}
-                          placeholder="Years"
+                          placeholder="Months"
                           onChange={(e) =>
                             setTimeMonths(
                               Math.min(MAX_MONTHS, Math.max(0, parseInt(e.target.value) || 0))
