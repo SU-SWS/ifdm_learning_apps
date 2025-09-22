@@ -163,9 +163,9 @@ export default function SavingsCalculator() {
       }
 
       const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
-      let numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
-      let denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
-      let periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
+      const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
+      const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
+      const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
       const months = Math.round(periodsToGoal * (12 / periodsPerYear))
 
       // Calculate final balance now with calculated period data.
