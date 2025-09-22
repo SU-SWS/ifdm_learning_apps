@@ -314,8 +314,9 @@ export default function SavingsCalculator() {
                     id="current-balance"
                     type="number"
                     value={currentBalance === 0 ? "" : currentBalance}
-                    placeholder="Current savings balance"
+                    placeholder="Current savings balance (leave blank for 0)"
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
+
                     className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
