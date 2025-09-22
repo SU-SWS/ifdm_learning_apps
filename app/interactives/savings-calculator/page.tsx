@@ -75,20 +75,11 @@ export default function SavingsCalculator() {
         let yearlyContributions = 0;
         let yearlyInterest = 0;
 
-        if (periodsPerYear === 1) {
-          // Annual compounding: add all contributions, then apply interest once
-          yearlyContributions = contribution * periodsInThisYear;
-          balance += yearlyContributions;
-          yearlyInterest = balance * ratePerPeriod;
-          balance += yearlyInterest;
-        } else {
-          // Other compounding: add interest and contribution each period
-          for (let period = 1; period <= periodsInThisYear; period++) {
-            const interestThisPeriod = balance * ratePerPeriod;
-            yearlyInterest += interestThisPeriod;
-            balance += interestThisPeriod + contribution;
-            yearlyContributions += contribution;
-          }
+        for (let period = 1; period <= periodsInThisYear; period++) {
+          const interestThisPeriod = balance * ratePerPeriod;
+          yearlyInterest += interestThisPeriod;
+          balance += interestThisPeriod + contribution;
+          yearlyContributions += contribution;
         }
 
         breakdown.push({
@@ -127,26 +118,27 @@ export default function SavingsCalculator() {
         });
         setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
       } else {
-        const monthlyNeeded =
+        const requiredContributionPerPeriod =
           remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-        const totalDeposited = currentBalance + monthlyNeeded * totalPeriods;
+        const totalDeposited = currentBalance + requiredContributionPerPeriod * totalPeriods;
 
         setResults({
-          monthlyContribution: monthlyNeeded,
+          monthlyContribution: requiredContributionPerPeriod,
           totalDeposited: totalDeposited,
           interestEarned: savingsGoal - totalDeposited,
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
         });
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
+        setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
       }
     } else if (mode === "future-balance") {
       // Calculate future balance with current monthly contribution
+      const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
       const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
       const futureValueOfAnnuity =
-        monthlyContribution * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
       const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + monthlyContribution * totalPeriods;
+      const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
 
       setResults({
         monthlyContribution: monthlyContribution,
@@ -155,7 +147,7 @@ export default function SavingsCalculator() {
         finalBalance: finalBalance,
         timeInMonths: totalTimeInMonths,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, totalPeriods));
+      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, totalPeriods));
     } else {
       // Calculate time to reach goal with current monthly contribution
       if (monthlyContribution <= 0) {
@@ -170,21 +162,27 @@ export default function SavingsCalculator() {
         return;
       }
 
-      const contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
-      let numerator = savingsGoal + (contributionThisPeriod / ratePerPeriod);
-      let denominator = currentBalance + (contributionThisPeriod / ratePerPeriod);
+      const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
+      let numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
+      let denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
       let periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
-      const months = Math.round(periodsToGoal * (12 / periodsPerYear));
-      const totalDeposited = currentBalance + (monthlyContribution * months);
+      const months = Math.round(periodsToGoal * (12 / periodsPerYear))
+
+      // Calculate final balance now with calculated period data.
+      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
+      const futureValueOfAnnuity =
+        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
+      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
+      const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
 
       setResults({
         monthlyContribution: monthlyContribution,
         totalDeposited: totalDeposited,
-        interestEarned: currentBalance - totalDeposited,
-        finalBalance: currentBalance,
+        interestEarned: finalBalance - totalDeposited,
+        finalBalance: finalBalance,
         timeInMonths: months,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, periodsToGoal));
+      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, periodsToGoal));
     }
   }, [
     mode,
