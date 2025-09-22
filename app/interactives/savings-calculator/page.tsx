@@ -75,12 +75,12 @@ export default function SavingsCalculator() {
         let yearlyContributions = 0;
         let yearlyInterest = 0;
 
-        for (let period = 1; period <= periodsInThisYear; period++) {
-          const interestThisPeriod = balance * ratePerPeriod;
-          yearlyInterest += interestThisPeriod;
-          balance += interestThisPeriod + contribution;
-          yearlyContributions += contribution;
-        }
+        const futureValueOfInitial = startingBalance * Math.pow(1 + ratePerPeriod, periodsInThisYear);
+        const futureValueOfAnnuity =
+          contribution * ((Math.pow(1 + ratePerPeriod, periodsInThisYear) - 1) / ratePerPeriod);
+        balance = futureValueOfInitial + futureValueOfAnnuity;
+        yearlyContributions = contribution * periodsInThisYear;
+        yearlyInterest = balance - (startingBalance + yearlyContributions);
 
         breakdown.push({
           year,
