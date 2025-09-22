@@ -275,7 +275,8 @@ export default function SavingsCalculator() {
                     id="savings-goal"
                     type="number"
                     min="0"
-                    value={savingsGoal}
+                    value={savingsGoal === 0 ? "" : savingsGoal}
+                    placeholder="Savings goal amount"
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
                     className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     
@@ -312,8 +313,10 @@ export default function SavingsCalculator() {
                   <Input
                     id="current-balance"
                     type="number"
-                    value={currentBalance}
+                    value={currentBalance === 0 ? "" : currentBalance}
+                    placeholder="Current savings balance (leave blank for 0)"
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
+
                     className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -345,7 +348,8 @@ export default function SavingsCalculator() {
                   <div className="relative mt-1">
                     <Input
                       type="number"
-                      value={monthlyContribution}
+                      value={monthlyContribution === 0 ? "" : monthlyContribution}
+                      placeholder="Monthly contribution"
                       onChange={(e) => setMonthlyContribution(Number(e.target.value))}
                       className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
@@ -383,7 +387,8 @@ export default function SavingsCalculator() {
                       <div className="relative">
                         <Input
                           type="number"
-                          value={timeYears}
+                          value={timeYears === 0 ? "" : timeYears}
+                          placeholder="Years"
                           onChange={(e) => setTimeYears(Number(e.target.value))}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
@@ -414,7 +419,8 @@ export default function SavingsCalculator() {
                       <div className="relative">
                         <Input
                           type="number"
-                          value={timeMonths}
+                          value={timeMonths === 0 ? "" : timeMonths}
+                          placeholder="Months"
                           onChange={(e) =>
                             setTimeMonths(
                               Math.min(MAX_MONTHS, Math.max(0, parseInt(e.target.value) || 0))
