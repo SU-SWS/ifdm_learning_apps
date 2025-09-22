@@ -170,28 +170,21 @@ export default function SavingsCalculator() {
         return;
       }
 
-      // Use iterative approach to find time needed
-      let periods = 1;
-      let balance = currentBalance;
-
-      while (balance < savingsGoal && periods < 1200) {
-        // Calculate total contribution for this compounding period
-        const contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
-        balance = balance * (1 + ratePerPeriod) + contributionThisPeriod;
-        periods++;
-      }
-
-      const months = Math.round(periods * (12 / periodsPerYear));
-      const totalDeposited = currentBalance + monthlyContribution * months;
+      const contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
+      let numerator = savingsGoal + (contributionThisPeriod / ratePerPeriod);
+      let denominator = currentBalance + (contributionThisPeriod / ratePerPeriod);
+      let periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
+      const months = Math.round(periodsToGoal * (12 / periodsPerYear));
+      const totalDeposited = currentBalance + (monthlyContribution * months);
 
       setResults({
         monthlyContribution: monthlyContribution,
         totalDeposited: totalDeposited,
-        interestEarned: balance - totalDeposited,
-        finalBalance: balance,
+        interestEarned: currentBalance - totalDeposited,
+        finalBalance: currentBalance,
         timeInMonths: months,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, periods));
+      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, periodsToGoal));
     }
   }, [
     mode,
@@ -532,7 +525,7 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Required monthly contribution:</CardTitle>
+                  <CardTitle className="text-center text-md font-bold">Payment:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited)
                         ? "text-berry"
