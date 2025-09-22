@@ -75,21 +75,12 @@ export default function SavingsCalculator() {
         let yearlyContributions = 0;
         let yearlyInterest = 0;
 
-        if (periodsPerYear === 1) {
-          // Annual compounding: add all contributions, then apply interest once
-          yearlyContributions = contribution * periodsInThisYear;
-          balance += yearlyContributions;
-          yearlyInterest = balance * ratePerPeriod;
-          balance += yearlyInterest;
-        } else {
-          // Other compounding: add interest and contribution each period
-          for (let period = 1; period <= periodsInThisYear; period++) {
-            const interestThisPeriod = balance * ratePerPeriod;
-            yearlyInterest += interestThisPeriod;
-            balance += interestThisPeriod + contribution;
-            yearlyContributions += contribution;
-          }
-        }
+        const futureValueOfInitial = startingBalance * Math.pow(1 + ratePerPeriod, periodsInThisYear);
+        const futureValueOfAnnuity =
+          contribution * ((Math.pow(1 + ratePerPeriod, periodsInThisYear) - 1) / ratePerPeriod);
+        balance = futureValueOfInitial + futureValueOfAnnuity;
+        yearlyContributions = contribution * periodsInThisYear;
+        yearlyInterest = balance - (startingBalance + yearlyContributions);
 
         breakdown.push({
           year,
@@ -127,26 +118,27 @@ export default function SavingsCalculator() {
         });
         setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
       } else {
-        const monthlyNeeded =
+        const requiredContributionPerPeriod =
           remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-        const totalDeposited = currentBalance + monthlyNeeded * totalPeriods;
+        const totalDeposited = currentBalance + requiredContributionPerPeriod * totalPeriods;
 
         setResults({
-          monthlyContribution: monthlyNeeded,
+          monthlyContribution: requiredContributionPerPeriod,
           totalDeposited: totalDeposited,
           interestEarned: savingsGoal - totalDeposited,
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
         });
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
+        setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
       }
     } else if (mode === "future-balance") {
       // Calculate future balance with current monthly contribution
+      const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
       const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
       const futureValueOfAnnuity =
-        monthlyContribution * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
       const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + monthlyContribution * totalPeriods;
+      const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
 
       setResults({
         monthlyContribution: monthlyContribution,
@@ -155,7 +147,7 @@ export default function SavingsCalculator() {
         finalBalance: finalBalance,
         timeInMonths: totalTimeInMonths,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, totalPeriods));
+      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, totalPeriods));
     } else {
       // Calculate time to reach goal with current monthly contribution
       if (monthlyContribution <= 0) {
@@ -170,28 +162,27 @@ export default function SavingsCalculator() {
         return;
       }
 
-      // Use iterative approach to find time needed
-      let periods = 1;
-      let balance = currentBalance;
+      const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
+      const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
+      const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
+      const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
+      const months = Math.round(periodsToGoal * (12 / periodsPerYear))
 
-      while (balance < savingsGoal && periods < 1200) {
-        // Calculate total contribution for this compounding period
-        const contributionThisPeriod = monthlyContribution * (12 / periodsPerYear);
-        balance = balance * (1 + ratePerPeriod) + contributionThisPeriod;
-        periods++;
-      }
-
-      const months = Math.round(periods * (12 / periodsPerYear));
-      const totalDeposited = currentBalance + monthlyContribution * months;
+      // Calculate final balance now with calculated period data.
+      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
+      const futureValueOfAnnuity =
+        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
+      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
+      const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
 
       setResults({
         monthlyContribution: monthlyContribution,
         totalDeposited: totalDeposited,
-        interestEarned: balance - totalDeposited,
-        finalBalance: balance,
+        interestEarned: finalBalance - totalDeposited,
+        finalBalance: finalBalance,
         timeInMonths: months,
       });
-      setYearlyBreakdown(calculateYearlyBreakdown(monthlyContribution, periods));
+      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, periodsToGoal));
     }
   }, [
     mode,
@@ -532,7 +523,7 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Required monthly contribution:</CardTitle>
+                  <CardTitle className="text-center text-md font-bold">Payment:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited)
                         ? "text-berry"
