@@ -25,7 +25,7 @@ export default function InflationCalculator() {
     if (rate <= 2.9) return "Low"
     if (rate <= 6) return "Moderate"
     if (rate <= 10) return "High"
-    return "Very High"
+    return "Very high"
   }
 
   const getInflationColor = (rate: number) => {
