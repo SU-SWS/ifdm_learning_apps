@@ -22,16 +22,16 @@ export default function InflationCalculator() {
   }, [initialPrice, inflationRate, timePeriod])
 
   const getInflationLabel = (rate: number) => {
-    if (rate <= 2) return "Low"
-    if (rate <= 3.5) return "Moderate"
-    if (rate <= 6) return "High"
-    return "Very High"
+    if (rate <= 2.9) return "Low"
+    if (rate <= 6) return "Moderate"
+    if (rate <= 10) return "High"
+    return "Very high"
   }
 
   const getInflationColor = (rate: number) => {
-    if (rate <= 2) return "bg-badge-green" // Green
-    if (rate <= 3.5) return "bg-badge-yellow" // Yellow
-    if (rate <= 6) return "bg-badge-orange" // Orange
+    if (rate <= 2.9) return "bg-badge-green" // Green
+    if (rate <= 6) return "bg-badge-yellow" // Yellow
+    if (rate <= 10) return "bg-badge-orange" // Orange
     return "bg-badge-red" // Red
   }
 
