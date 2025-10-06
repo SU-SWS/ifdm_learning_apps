@@ -612,7 +612,7 @@ export default function SavingsCalculator() {
           </Card>
         </div>
         {/* Year by Year section */}
-        <div className="hidden lg:block flex-1 mt-6 flex-row mb-1 bg-[var(--year-by-year-table)] rounded-lg border border-grey-border">
+        <div className="hidden min-[600px]:block flex-1 mt-6 flex-row mb-1 bg-[var(--year-by-year-table)] rounded-lg border border-grey-border">
           <div className="p-4">
               <div
                 onClick={() => setShowBreakdown(!showBreakdown)}
