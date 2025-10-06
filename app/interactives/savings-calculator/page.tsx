@@ -108,15 +108,15 @@ export default function SavingsCalculator() {
       const remainingAmount = savingsGoal - futureValueOfInitial;
 
       if (remainingAmount <= 0) {
-        const monthlyNeeded = 0;
+        const contributionNeeded = 0;
         setResults({
-          contributionPerPeriod: monthlyNeeded,
+          contributionPerPeriod: contributionNeeded,
           totalDeposited: currentBalance,
           interestEarned: savingsGoal - currentBalance,
           finalBalance: savingsGoal,
           timeInMonths: totalTimeInMonths,
         });
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
+        setYearlyBreakdown(calculateYearlyBreakdown(contributionNeeded, totalPeriods));
       } else {
         const requiredContributionPerPeriod =
           remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
@@ -132,7 +132,7 @@ export default function SavingsCalculator() {
         setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
       }
     } else if (mode === "future-balance") {
-      // Calculate future balance with current monthly contribution
+      // Calculate future balance with current contribution
       const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
       const futureValueOfAnnuity =
         contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
