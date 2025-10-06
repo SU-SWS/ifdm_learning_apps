@@ -40,11 +40,7 @@ export default function InflationCalculator() {
       <ThemeToggle />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-4">
-          <div className="flex gap-2 mb-2">
-            <h1 className="sr-only mb-2">Inflation Impact Calculator</h1>
-          </div>
-        </div>
+        <h1 className="sr-only mb-2">Inflation Impact Calculator</h1>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Parameters Panel */}
