@@ -219,7 +219,7 @@ export default function SavingsCalculator() {
             onClick={() => setMode("monthly-savings")}
           >
             <FaDollarSign className="hidden sm:block h-5 w-5 mr-2" />
-            Monthly Savings
+            Savings
           </Button>
           <Button
             variant={mode === "time-to-goal" ? "default" : "outline"}
@@ -336,7 +336,7 @@ export default function SavingsCalculator() {
 
             {mode !== "monthly-savings" && (
               <div>
-                <Label className="font-medium">Monthly contribution:</Label>
+                <Label className="font-medium">Payment per period:</Label>
                 <div className="relative mt-1">
                   <Input
                     type="number"
@@ -521,7 +521,7 @@ export default function SavingsCalculator() {
           <CardHeader className="pb-2">
             {mode === "monthly-savings" && (
               <>
-                <CardTitle className="text-center text-md font-bold">Payment:</CardTitle>
+                <CardTitle className="text-center text-md font-bold">Payment per period:</CardTitle>
                 <div className={`text-4xl font-bold text-center ${
                     isInvalid(results.totalDeposited)
                       ? "text-berry"
