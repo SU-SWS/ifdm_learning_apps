@@ -2,7 +2,7 @@
 
 ## Deployment
 
-The app deploys to https://ifdm-learning.stanford.edu/ via GitHub Pages. The deploy script will automatically run the build step and generate the static files.
+The app deploys to https://ifdm-learning.stanford.edu/ via GitHub Pages and the `gh-pages` branch. The deploy script will automatically run the build step and generate the static files.
 
 To deploy to GitHub Pages use the following command:
 - `yarn deploy`

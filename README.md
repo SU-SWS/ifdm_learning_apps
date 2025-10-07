@@ -37,6 +37,3 @@ Please see documentation on deployment and embedding here: [deployment.md](docs/
 1. Run the development server
     - `yarn dev`
 1. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
-
-You can develop freely while the application is running.
-
