@@ -6,71 +6,37 @@ This project is an educational web app prototype supporting early-career profess
 
 The app reinforces key lessons from IFDM’s **four learning modules**, each with four sub-lessons, and will be embedded within the **Mighty Networks** platform.
 
-This repository serves as source/hosting for an interactive learning tool, using Claude's prototype as a starting point. The goal is to validate how educational content can be embedded, presented, and interacted with via GitHub Pages.
-
-> Live prototype: [https://hcoeacyt.manus.space/](https://hcoeacyt.manus.space/)  
-> Claude Prototype: [Claude Link](https://claude.site/artifacts/5b6a466d-81a3-4234-b166-ffebe469f809)
+This repository serves as source/hosting for an interactive learning tool. The goal is to validate how educational content can be embedded, presented, and interacted with via GitHub Pages.
 
 ---
 
 ## Tech Stack
 
-- HTML, CSS, JavaScript, React (based on Claude prototype)
+- HTML, CSS, JavaScript, React, Next.js
 - GitHub Pages for hosting
 - Potential Zapier workflows for integration (Mighty Networks)
 
 ---
 
-## Resources & References
-
-- [IFDM Home](https://ifdm.stanford.edu)
-- [Notes from David & Jen’s meeting](https://docs.google.com/document/d/1bt9eoo_rSJIFA3zOv2Z-w0CpIXLkW8h2d3SPKFPxug8/edit?tab=t.0#heading=h.w444hwwdu051)
-- Pinecone app inspiration (by Stanford)
-- Claude prototype artifacts and codebase
-
----
-
-## Contact
-
-For questions or ideas, please reach out to sws-developers@lists.stanford.edu or submit an issue in this repo.
-
----
-
-## Building
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
----
-
 ## Deployment
 
-Please see documentation on deployment here: [implmentation.md](docs/implmentation.md)
+Please see documentation on deployment and embedding here: [deployment.md](docs/deployment.md)
 
-## Getting Started
+## Local Setup
 
-First, run the development server:
+1. Clone this repo locally.
+    - `git clone git@github.com:SU-SWS/ifdm_learning_apps.git`
+    - `cd ifdm_learning_apps`
+1. Install and use the specified node version.
+    - `nvm install`
+    - `nvm use`
+    - When developing later, don't forget to run `nvm use` again in case you've switched versions for another project.    
+1. Install the packages with yarn
+    - `yarn install`
+    - If you do not have yarn installed for the node version you may need to install it first: `npm install -g yarn` 
+1. Run the development server
+    - `yarn dev`
+1. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+You can develop freely while the application is running.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
----
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
