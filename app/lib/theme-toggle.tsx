@@ -10,24 +10,40 @@ const themes = [
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState("light");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.documentElement.classList.toggle("light", theme === "light");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  useEffect(() => {
+    setMounted(true);
     const saved = localStorage.getItem("theme") || "light";
     setTheme(saved);
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      document.documentElement.classList.toggle("light", theme === "light");
+      localStorage.setItem("theme", theme);
+    }
+  }, [theme, mounted]);
+
+  // Don't render until component is mounted on client
+  if (!mounted) {
+    return (
+      <div className="flex gap-2 items-center justify-end mb-4">
+        <div className="px-3 py-1 rounded border bg-grey-light w-11 h-8"></div>
+        <div className="px-3 py-1 rounded border bg-grey-light w-11 h-8"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-2 items-center justify-end mb-4">
       {themes.map((t) => (
         <button
           key={t.value}
-          className={`px-3 py-1 rounded border flex items-center justify-center ${theme === t.value ? "bg-lagunita text-white" : "bg-grey-light text-black"}`}
+          className={`px-3 py-1 rounded border flex items-center justify-center ${
+            theme === t.value ? "bg-lagunita text-white" : "bg-grey-light text-black"
+          }`}
           onClick={() => setTheme(t.value)}
           aria-label={t.label}
         >

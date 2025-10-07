@@ -205,18 +205,10 @@ export default function SavingsCalculator() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="py-6">
+      <div>
         <ThemeToggle />
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <h1 className="sr-only">Savings Calculator</h1>
-          </div>
-          <p className="text-[var(--foreground)] text-lg">
-            Plan your savings goals with compound interest and regular contributions. See how your money grows over time.
-          </p>
-        </div>
-
+        <h1 className="sr-only">Savings Calculator</h1>
         {/* Mode Selection */}
         <div className="mb-8">
           <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">Solve for:</h2>

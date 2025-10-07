@@ -52,11 +52,7 @@ export default function PresentValueCalculator() {
     <div className=" p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex gap-2 mb-2">
-            <h1 className="sr-only mb-2">Present Value Calculator</h1>
-          </div>
-        </div>
+        <h1 className="sr-only mb-2">Present Value Calculator</h1>
         <ThemeToggle />
         <div className="flex flex-col md:flex-row gap-8">
           {/* Parameters Panel */}

@@ -52,13 +52,12 @@ const InterestRateVisual = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="sr-only mb-2">
+      <ThemeToggle />
+      <h1 className="sr-only">
         Interest Calculator
       </h1>
-
       {/* Interactive calculator */}
-      <div className="py-6">
-        <ThemeToggle />
+      <div className="mb-8">
         <div className="flex flex-col mb-6">
           <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
 
