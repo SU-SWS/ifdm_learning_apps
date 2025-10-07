@@ -255,7 +255,7 @@ export default function SavingsCalculator() {
           <Card className="">
             <CardHeader>
               {mode === "monthly-savings" && (
-                <p className="font-semibold">How much do I need to save each month to reach my goal?</p>
+                <p className="font-semibold">How much do I need to save each period to reach my goal?</p>
               )}
 
               {mode === "time-to-goal" && (
