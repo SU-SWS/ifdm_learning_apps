@@ -14,7 +14,7 @@ type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
 type CompoundingFrequency = "monthly" | "quarterly" | "annually" | "semi-annually"
 
 interface CalculationResults {
-  monthlyContribution: number
+  contributionPerPeriod: number
   totalDeposited: number
   interestEarned: number
   finalBalance: number
@@ -47,12 +47,12 @@ export default function SavingsCalculator() {
   const [timeMonths, setTimeMonths] = useState(3)
   const [interestRate, setInterestRate] = useState(5.0)
   const [compounding, setCompounding] = useState<CompoundingFrequency>("monthly")
-  const [monthlyContribution, setMonthlyContribution] = useState(203)
+  const [contributionPerPeriod, setcontributionPerPeriod] = useState(203)
   const [showBreakdown, setShowBreakdown] = useState(false)
   const MAX_MONTHS = 11;
 
   const [results, setResults] = useState<CalculationResults>({
-    monthlyContribution: 203,
+    contributionPerPeriod: 203,
     totalDeposited: 7424,
     interestEarned: 576,
     finalBalance: 8000,
@@ -107,33 +107,44 @@ export default function SavingsCalculator() {
       const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
       const remainingAmount = savingsGoal - futureValueOfInitial;
 
-      if (remainingAmount <= 0) {
-        const monthlyNeeded = 0;
-        setResults({
-          monthlyContribution: monthlyNeeded,
-          totalDeposited: currentBalance,
-          interestEarned: savingsGoal - currentBalance,
-          finalBalance: savingsGoal,
-          timeInMonths: totalTimeInMonths,
-        });
-        setYearlyBreakdown(calculateYearlyBreakdown(monthlyNeeded, totalPeriods));
-      } else {
-        const requiredContributionPerPeriod =
-          remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-        const totalDeposited = currentBalance + requiredContributionPerPeriod * totalPeriods;
+        if (remainingAmount <= 0) {
+          const contributionNeeded = 0;
+          setResults({
+            contributionPerPeriod: contributionNeeded,
+            totalDeposited: currentBalance,
+            interestEarned: savingsGoal - currentBalance,
+            finalBalance: savingsGoal,
+            timeInMonths: totalTimeInMonths,
+          });
+          setYearlyBreakdown(calculateYearlyBreakdown(contributionNeeded, totalPeriods));
+        } else if (totalPeriods < 1) {
+          // If time to goal is less than one compounding period, ignore interest
+          const requiredContributionPerPeriod = savingsGoal - currentBalance;
+          const totalDeposited = currentBalance + requiredContributionPerPeriod;
+          setResults({
+            contributionPerPeriod: requiredContributionPerPeriod,
+            totalDeposited: totalDeposited,
+            interestEarned: 0,
+            finalBalance: savingsGoal,
+            timeInMonths: totalTimeInMonths,
+          });
+          setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
+        } else {
+          const requiredContributionPerPeriod =
+            remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+          const totalDeposited = currentBalance + requiredContributionPerPeriod * totalPeriods;
 
-        setResults({
-          monthlyContribution: requiredContributionPerPeriod,
-          totalDeposited: totalDeposited,
-          interestEarned: savingsGoal - totalDeposited,
-          finalBalance: savingsGoal,
-          timeInMonths: totalTimeInMonths,
-        });
-        setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
-      }
+          setResults({
+            contributionPerPeriod: requiredContributionPerPeriod,
+            totalDeposited: totalDeposited,
+            interestEarned: savingsGoal - totalDeposited,
+            finalBalance: savingsGoal,
+            timeInMonths: totalTimeInMonths,
+          });
+          setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
+        }
     } else if (mode === "future-balance") {
-      // Calculate future balance with current monthly contribution
-      const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
+      // Calculate future balance with current contribution
       const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
       const futureValueOfAnnuity =
         contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
@@ -141,7 +152,7 @@ export default function SavingsCalculator() {
       const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
 
       setResults({
-        monthlyContribution: monthlyContribution,
+        contributionPerPeriod: contributionPerPeriod,
         totalDeposited: totalDeposited,
         interestEarned: finalBalance - totalDeposited,
         finalBalance: finalBalance,
@@ -149,10 +160,10 @@ export default function SavingsCalculator() {
       });
       setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, totalPeriods));
     } else {
-      // Calculate time to reach goal with current monthly contribution
-      if (monthlyContribution <= 0) {
+      // Calculate time to reach goal with current contribution
+      if (contributionPerPeriod <= 0) {
         setResults({
-          monthlyContribution: monthlyContribution,
+          contributionPerPeriod: contributionPerPeriod,
           totalDeposited: currentBalance,
           interestEarned: 0,
           finalBalance: currentBalance,
@@ -162,7 +173,6 @@ export default function SavingsCalculator() {
         return;
       }
 
-      const contributionPerPeriod = monthlyContribution * (12 / periodsPerYear);
       const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
       const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
       const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
@@ -176,7 +186,7 @@ export default function SavingsCalculator() {
       const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
 
       setResults({
-        monthlyContribution: monthlyContribution,
+        contributionPerPeriod: contributionPerPeriod,
         totalDeposited: totalDeposited,
         interestEarned: finalBalance - totalDeposited,
         finalBalance: finalBalance,
@@ -192,7 +202,7 @@ export default function SavingsCalculator() {
     timeMonths,
     interestRate,
     compounding,
-    monthlyContribution,
+    contributionPerPeriod,
     calculateYearlyBreakdown,
   ]);
 
@@ -340,9 +350,9 @@ export default function SavingsCalculator() {
                   <div className="relative mt-1">
                     <Input
                       type="number"
-                      value={monthlyContribution === 0 ? "" : monthlyContribution}
+                      value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
                       placeholder="Monthly contribution"
-                      onChange={(e) => setMonthlyContribution(Number(e.target.value))}
+                      onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
                       className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -350,7 +360,7 @@ export default function SavingsCalculator() {
                         type="button"
                         tabIndex={-1}
                         aria-label="Increase amount"
-                        onClick={() => setMonthlyContribution((prev) => Math.max(0, prev + 1))}
+                        onClick={() => setcontributionPerPeriod((prev) => Math.max(0, prev + 1))}
                         className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                       >
                         <BiSolidUpArrow size={24} />
@@ -359,7 +369,7 @@ export default function SavingsCalculator() {
                         type="button"
                         tabIndex={-1}
                         aria-label="Decrease amount"
-                        onClick={() => setMonthlyContribution((prev) => Math.max(0, prev - 1))}
+                        onClick={() => setcontributionPerPeriod((prev) => Math.max(0, prev - 1))}
                         className="hover:text-grey-med-dark focus:outline-none"
                       >
                         <BiSolidDownArrow size={24} />
@@ -529,7 +539,7 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.totalDeposited)
                       ? "$0"
-                      : `$${results.monthlyContribution.toFixed(2).toLocaleString()}`}
+                      : `$${results.contributionPerPeriod.toFixed(2).toLocaleString()}`}
                   </div>
                 </>
               )}
