@@ -4,8 +4,18 @@
 
 The app deploys to https://ifdm-learning.stanford.edu/ via GitHub Pages and the `gh-pages` branch. The deploy script will automatically run the build step and generate the static files.
 
-To deploy to GitHub Pages use the following command:
-- `yarn deploy`
+### Deployment Steps
+
+1. Ensure you are on the latest `1.x` branch code:
+	- `git checkout 1.x && git fetch && git pull`
+2. Make sure you are using the correct Node version:
+	- If you use nvm and are not already on the correct version, run: `nvm use`
+3. (Optional) Test the build locally before deploying:
+	- `yarn build`
+4. Deploy to GitHub Pages:
+	- `yarn deploy`
+5. After deploying, verify the deployment:
+	- Visit https://github.com/SU-SWS/ifdm_learning_apps/deployments to confirm the deployment ran successfully.
 
 ---
 
