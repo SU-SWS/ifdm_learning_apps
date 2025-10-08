@@ -2,7 +2,7 @@
 
 ## Deployment
 
-The app deploys to https://ifdm-learning.stanford.edu/ via GitHub Pages and the `gh-pages` branch. The deploy script will automatically run the build step and generate the static files.
+The app deploys to https://ifdm-learning.stanford.edu/ via GitHub Pages and the `gh-pages` branch. The deploy script will automatically run the build step and generate the static files based on your local `1.x` branch code. Make sure you are on the latest `1.x` branch before deploying.
 
 ### Deployment Steps
 
