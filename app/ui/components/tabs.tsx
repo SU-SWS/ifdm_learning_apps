@@ -18,7 +18,7 @@ export const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(({ class
   <RadixTabs.List
     ref={ref}
     className={cn(
-      "inline-flex items-center rounded-md bg-transparent p-1 gap-2",
+      "inline-flex items-center rounded-md bg-transparent p-1 gap-2 text-lagunita",
       className
     )}
     {...props}
@@ -31,8 +31,8 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
   <RadixTabs.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lagunita disabled:opacity-50",
-      "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100",
+      "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal inline-flex items-center justify-center whitespace-nowrap rounded-md font-bold ring-offset-background transition-colors", 
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:bg-lagunita data-[state=active]:text-white",
       className
     )}

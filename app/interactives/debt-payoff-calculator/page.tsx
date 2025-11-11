@@ -264,18 +264,18 @@ export default function DebtPayoffCalculator() {
 
                 <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                   <CardHeader className="">
-                    <CardTitle className="text-emerald-900">Your Payoff Summary</CardTitle>
+                    <CardTitle className="text-navy">Your Payoff Summary</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-6">
                     <div className="rounded-lg p-6 mb-6 text-center">
-                      <p className="text-sm text-emerald-700 uppercase tracking-wide mb-2">Time to Pay Off</p>
-                      <p className="text-4xl font-bold text-emerald-900 mb-2">{formatTime(payoffResult.timeInMonths)}</p>
-                      <p className="text-emerald-700">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
+                      <p className="text-sm text-navy uppercase tracking-wide mb-2">Time to Pay Off</p>
+                      <p className="text-4xl font-bold text-navy mb-2">{formatTime(payoffResult.timeInMonths)}</p>
+                      <p className="text-navy">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-white rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                        <div className="flex items-center gap-2 mb-2 text-navy">
                           <TrendingDownIcon className="w-4 h-4" />
                           <p className="text-sm font-medium">Total Interest</p>
                         </div>
@@ -283,7 +283,7 @@ export default function DebtPayoffCalculator() {
                       </div>
 
                       <div className="bg-white rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                        <div className="flex items-center gap-2 mb-2 text-navy">
                           <DollarSignIcon className="w-4 h-4" />
                           <p className="text-sm font-medium">Total Amount Paid</p>
                         </div>
@@ -291,11 +291,11 @@ export default function DebtPayoffCalculator() {
                       </div>
 
                       <div className="rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                        <div className="flex items-center gap-2 mb-2 text-navy">
                           <SparklesIcon className="w-4 h-4" />
                           <p className="text-sm font-medium">Interest Saved</p>
                         </div>
-                        <p className="text-2xl font-bold text-emerald-900">{formatCurrency(payoffResult.interestSaved)}</p>
+                        <p className="text-2xl font-bold text-navy">{formatCurrency(payoffResult.interestSaved)}</p>
                       </div>
                       <p className="text-center text-sm text-muted-foreground mt-6">
                         You&#39;re turning your loan into a plan. A little extra now means freedom sooner.
@@ -413,16 +413,16 @@ export default function DebtPayoffCalculator() {
                   </CardHeader>
                   <CardContent className="pt-6">
                     <div className="rounded-lg p-6 mb-6 text-center">
-                      <p className="text-sm text-emerald-700 uppercase tracking-wide mb-2">Required Payment Per Period</p>
-                      <p className="text-4xl font-bold text-emerald-900 mb-2">
+                      <p className="text-sm text-navy uppercase tracking-wide mb-2">Required Payment Per Period</p>
+                      <p className="text-4xl font-bold text-navy mb-2">
                         {formatCurrency(requiredPaymentResult.requiredPayment)}
                       </p>
-                      <p className="text-emerald-700">To pay off in {formatTime(targetYears * 12 + targetMonths)}</p>
+                      <p className="text-navy">To pay off in {formatTime(targetYears * 12 + targetMonths)}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-white rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                        <div className="flex items-center gap-2 mb-2 text-navy">
                           <TrendingDownIcon className="w-4 h-4" />
                           <p className="text-sm font-medium">Total Interest</p>
                         </div>
@@ -432,7 +432,7 @@ export default function DebtPayoffCalculator() {
                       </div>
 
                       <div className="bg-white rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                        <div className="flex items-center gap-2 mb-2 text-navy">
                           <DollarSignIcon className="w-4 h-4" />
                           <p className="text-sm font-medium">Total Amount Paid</p>
                         </div>
