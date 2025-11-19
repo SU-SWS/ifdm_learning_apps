@@ -60,6 +60,11 @@ export default function InfoPopover({
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Anchor asChild>
+			<div className="row">
+				<Popover.Trigger className="hidden">Trigger</Popover.Trigger>
+			</div>
+		</Popover.Anchor>
       <Popover.Trigger asChild>
         <button
           ref={triggerRef}
@@ -79,7 +84,8 @@ export default function InfoPopover({
         <Popover.Content
           side="right"
           align="center"
-          className="z-50 w-72 rounded-md border bg-white dark:bg-[#0b1220] p-4 shadow-lg"
+          className="z-50 w-72 rounded-md border-2 border-lagunita dark:bg-[#0b1220] m-6 p-4 shadow-lg 
+          bg-[var(--card-background)] rounded-3xl"
           onPointerEnter={openWithHover}
           onPointerLeave={() => closeWithHoverDelay(150)}
           onFocus={clearHoverTimeout}
@@ -101,12 +107,12 @@ export default function InfoPopover({
             </div>
 
             <div className="mt-3 flex justify-end">
-              <button
+              <a
                 onClick={() => setOpen(false)}
-                className="text-sm px-3 py-1 rounded bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-lagunita"
+                className="text-sm font-semibold pointer px-3 py-1 underline dark:bg-slate-700 hover:no-underline dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-lagunita"
               >
                 Close
-              </button>
+              </a>
             </div>
           </div>
           <Popover.Arrow className="fill-white dark:fill-[#0b1220]" />

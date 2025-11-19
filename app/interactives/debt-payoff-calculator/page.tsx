@@ -567,6 +567,9 @@ export default function DebtPayoffCalculator() {
                           </Label>
                         </div>
                       </div>
+                      <div className="text-md font-semibold text-lagunita">
+                        Total: {targetYears} year{targetYears !== 1 ? "s" : ""} {targetMonths} month{targetMonths !== 1 ? "s" : ""}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
