@@ -6,10 +6,10 @@ import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
 import { CustomSlider } from "@/app/ui/components/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
-import { InfoIcon } from "lucide-react"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import { FaAngleDown } from "react-icons/fa";
 import ThemeToggle from "@/app/lib/theme-toggle";
+import InfoPopover from "@/app/ui/components/popover";
 
 type CompoundingFrequency = "monthly" | "quarterly" | "semi-annually" | "annually"
 
@@ -167,7 +167,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="debt-amount" className="font-medium">Debt amount</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Debt amount">This is your total balance owed or what you would like to pay off.</InfoPopover>
                       </div>
                       <div className="relative">
                         <Input
@@ -203,7 +203,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="interest-rate" className="font-medium">Annual interest rate (%)</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Annual interest rate (%)">This is the annual percentage rate (APR) charged by your lender.</InfoPopover>
                       </div>
                       <div className="relative">
                         <Input
@@ -240,26 +240,27 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2 relative">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="compounding" className="font-medium">Compounding frequency</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Compounding frequency"> How often interest is applied and payments are made. Most loans compound monthly.</InfoPopover>
                       </div>
                       <div className="flex items-center gap-2">
                         <select
                           value={compoundingFrequency}
                           onChange={(e) => setCompoundingFrequency(e.target.value as CompoundingFrequency)}
                           id="compounding-select"
+                          aria-describedby="compounding-desc"
                           className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                         >
-                          <button id="compounding">
-                            {compoundingFrequency}
-                          </button>
-                            <option value="monthly">Monthly</option>
-                            <option value="quarterly">Quarterly</option>
-                            <option value="semi-annually">Semi-Annually</option>
-                            <option value="annually">Annually</option>
+                          <option value="monthly">Monthly</option>
+                          <option value="quarterly">Quarterly</option>
+                          <option value="semi-annually">Semi-Annually</option>
+                          <option value="annually">Annually</option>
                         </select>
                         <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
                           <FaAngleDown />
                         </div>
+                      </div>
+                      <div id="compounding-desc" className="sr-only">
+                            Current selection: {compoundingFrequency}
                       </div>
                       <p className="text-sm">
                         The compounding frequency is equal to your payment frequency. For example, in the monthly case, you
@@ -270,7 +271,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="payment" className="font-medium">Payment per compounding period</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Payment per compounding period">This is your frequency of payment and how often the interest is applied. For example, each month or each year.</InfoPopover>
                       </div>
                       <div className="relative">
                         <Input
@@ -308,7 +309,7 @@ export default function DebtPayoffCalculator() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(additionalPayment)}</Label>
-                          <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                          <InfoPopover title="Additional payment per period (optional)">Enter a fixed extra amount you plan to pay each month.</InfoPopover>
                         </div>
                       </div>
                       <CustomSlider
@@ -387,7 +388,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="debt-amount-2" className="font-medium">Debt amount</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Debt amount">This is your total balance owed or what you would like to pay off.</InfoPopover>
                       </div>
                       <div className="relative">
                         <Input
@@ -423,7 +424,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2 relative">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="interest-rate-2" className="font-medium">Annual interest rate (%)</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Annual interest rate (%)">This is the annual percentage rate (APR) charged by your lender.</InfoPopover>
                       </div>
                       <div className="relative">
                         <Input
@@ -460,7 +461,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="compounding-2" className="font-medium">Compounding frequency</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Compounding frequency">How often interest is applied and payments are made. Most loans compound monthly.</InfoPopover>
                       </div>
                       <div className="flex items-center gap-2">
                         <select
@@ -468,20 +469,20 @@ export default function DebtPayoffCalculator() {
                         onChange={(e) => setCompoundingFrequency(e.target.value as CompoundingFrequency)}
                         id="compounding-select-2"
                         className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
+                        aria-describedby="compounding-desc-2"
                       >
-                        <button id="compounding-2">
-                          {compoundingFrequency}
-                        </button>
-                          <option value="monthly">Monthly</option>
-                          <option value="quarterly">Quarterly</option>
-                          <option value="semi-annually">Semi-Annually</option>
-                          <option value="annually">Annually</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="semi-annually">Semi-Annually</option>
+                        <option value="annually">Annually</option>
                       </select>
                         <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
                           <FaAngleDown />
                         </div>
                       </div>
-                      
+                      <div id="compounding-desc-2" className="sr-only">
+                          Current selection: {compoundingFrequency}
+                      </div>
                       <p className="text-sm">
                         The compounding frequency is equal to your payment frequency. For example, in the monthly case, you
                         make 12 debt payments per year.
@@ -491,7 +492,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label className="font-medium">Target time to payoff</Label>
-                        <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                        <InfoPopover title="Target time to payoff">How long do you want to take to pay off this debt?</InfoPopover>
                       </div>
                       <div className="flex flex-row gap-4 w-full">
                         <div className="flex flex-row w-1/2 gap-2 items-center">
