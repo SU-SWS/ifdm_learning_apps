@@ -155,7 +155,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --text-navy: oklch(0.985 0 0);
-  --additional-background: rgba(35, 35, 35, 1);
+  --additional-background: rgb(52, 51, 51);
 }
 
 @layer base {
