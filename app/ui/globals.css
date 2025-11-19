@@ -54,6 +54,7 @@
   --color-grey-med-dark: rgba(215, 215, 215, 1);
   --color-grey-light: rgba(251, 251, 255, 1);
   --color-grey-border: rgba(207, 207, 207, 1);
+  --color-pinecone: rgba(233, 255, 251, 1);
 
   --color-badge-green: rgba(135, 205, 168, 1);
   --color-badge-yellow: rgba(253, 225, 131, 1);
@@ -72,6 +73,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
+  --popover-link: rgba(0, 124, 146, 1);
+  --popover-link-hover:  oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
@@ -107,7 +110,6 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --text-navy:  rgba(14, 59, 79, 1);
-  --additional-background: rgba(233, 255, 251, 1);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
 }
@@ -120,6 +122,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
+  --popover-link: rgba(107, 155, 172, 1);
+  --popover-link-hover: rgba(233, 255, 251, 1);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: rgba(35, 35, 35, 1);

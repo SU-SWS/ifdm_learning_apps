@@ -14,67 +14,35 @@ export default function InfoPopover({
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const hoverTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     if (open && contentRef.current) contentRef.current.focus();
   }, [open]);
 
-  useEffect(() => {
-    return () => {
-      if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
-    };
-  }, []);
-
-  const clearHoverTimeout = () => {
-    if (hoverTimeout.current) {
-      window.clearTimeout(hoverTimeout.current);
-      hoverTimeout.current = null;
-    }
-  };
-
-  const openWithHover = () => {
-    clearHoverTimeout();
-    setOpen(true);
-  };
-
-  const closeWithHoverDelay = (delay = 150) => {
-    clearHoverTimeout();
-    hoverTimeout.current = window.setTimeout(() => setOpen(false), delay);
-  };
-
-  // robust blur handler: use a microtask to check document.activeElement because relatedTarget can be null
-  const handlePotentialClose = () => {
+  // Close when focus leaves both trigger and content
+  const handleContentBlur = () => {
     // run after focus events settle
     setTimeout(() => {
       const active = document.activeElement;
       const insideContent = contentRef.current?.contains(active) ?? false;
       const insideTrigger = triggerRef.current?.contains(active) ?? false;
-      if (!insideContent && !insideTrigger) {
-        closeWithHoverDelay(0);
-      } else {
-        clearHoverTimeout();
-      }
+      if (!insideContent && !insideTrigger) setOpen(false);
     }, 0);
   };
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Anchor asChild>
-			<div className="row">
-				<Popover.Trigger className="hidden">Trigger</Popover.Trigger>
-			</div>
-		</Popover.Anchor>
+        <div className="row">
+          <Popover.Trigger className="hidden">Trigger</Popover.Trigger>
+        </div>
+      </Popover.Anchor>
       <Popover.Trigger asChild>
         <button
           ref={triggerRef}
           type="button"
           aria-label={title}
-          className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-lagunita"
-          onPointerEnter={openWithHover}
-          onPointerLeave={() => closeWithHoverDelay(150)}
-          // remove unconditional onFocus to avoid re-opening after Escape
-          // rely on keyboard opening via Enter/Space which Radix handles
+          className="p-1 rounded-md hover:bg-gray-100 cursor-pointer dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-lagunita"
         >
           <InfoIcon className="w-4 h-4 text-muted-foreground" />
         </button>
@@ -84,12 +52,8 @@ export default function InfoPopover({
         <Popover.Content
           side="right"
           align="center"
-          className="z-50 w-72 rounded-md border-2 border-lagunita dark:bg-[#0b1220] m-6 p-4 shadow-lg 
-          bg-[var(--card-background)] rounded-3xl"
-          onPointerEnter={openWithHover}
-          onPointerLeave={() => closeWithHoverDelay(150)}
-          onFocus={clearHoverTimeout}
-          onBlur={handlePotentialClose}
+          className="z-50 w-72 rounded-md border-2 border-lagunita  m-6 p-4 shadow-lg bg-[var(--card-background)] rounded-3xl"
+          onBlur={handleContentBlur}
         >
           <div
             ref={contentRef}
@@ -108,8 +72,10 @@ export default function InfoPopover({
 
             <div className="mt-3 flex justify-end">
               <a
+                type="button"
                 onClick={() => setOpen(false)}
-                className="text-sm font-semibold pointer px-3 py-1 underline dark:bg-slate-700 hover:no-underline dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-lagunita"
+                className="text-sm font-semibold px-3 py-1 underline text-[var(--popover-link)] hover:text-[var(--popover-link-hover)] hover:no-underline  
+                cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-lagunita"
               >
                 Close
               </a>

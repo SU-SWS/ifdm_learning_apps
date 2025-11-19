@@ -305,7 +305,7 @@ export default function DebtPayoffCalculator() {
                       </div>
                     </div>
 
-                    <div className="space-y-4 p-4 bg-[var(--additional-background)] border-1 border-grey-border rounded-lg">
+                    <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(additionalPayment)}</Label>
