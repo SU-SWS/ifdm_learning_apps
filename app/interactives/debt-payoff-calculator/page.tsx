@@ -153,7 +153,7 @@ export default function DebtPayoffCalculator() {
         <div className="mb-8">
 
         <Tabs defaultValue="time" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="flex flex-col sm:grid w-full sm:grid-cols-2 mb-6">
             <TabsTrigger value="time">Calculate Time to Pay Off Debt</TabsTrigger>
             <TabsTrigger value="payment">Calculate Required Payment</TabsTrigger>
           </TabsList>
@@ -166,7 +166,7 @@ export default function DebtPayoffCalculator() {
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="debt-amount">Debt Amount</Label>
+                        <Label htmlFor="debt-amount" className="font-medium">Debt amount</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="relative">
@@ -200,9 +200,9 @@ export default function DebtPayoffCalculator() {
                       </div>
                     </div>
 
-                    <div className="">
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="interest-rate">Annual Interest Rate (%)</Label>
+                        <Label htmlFor="interest-rate" className="font-medium">Annual interest rate (%)</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="relative">
@@ -239,7 +239,7 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2 relative">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="compounding">Compounding Frequency</Label>
+                        <Label htmlFor="compounding" className="font-medium">Compounding frequency</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="flex items-center gap-2">
@@ -261,7 +261,7 @@ export default function DebtPayoffCalculator() {
                           <FaAngleDown />
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm">
                         The compounding frequency is equal to your payment frequency. For example, in the monthly case, you
                         make 12 debt payments per year.
                       </p>
@@ -269,7 +269,7 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="payment">Payment per Compounding Period</Label>
+                        <Label htmlFor="payment" className="font-medium">Payment per compounding period</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="relative">
@@ -307,7 +307,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-4 p-4 bg-[var(--additional-background)] border-1 border-grey-border rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Label>Additional Payment Per Period (optional): {formatCurrency(additionalPayment)}</Label>
+                          <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(additionalPayment)}</Label>
                           <InfoIcon className="w-4 h-4 text-muted-foreground" />
                         </div>
                       </div>
@@ -318,11 +318,11 @@ export default function DebtPayoffCalculator() {
                         step={10}
                         className="w-full"
                       />
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm font-medium">
                         <span>$0</span>
                         <span>$10,000</span>
                       </div>
-                      <p className="text-lg">
+                      <p className="text-sm">
                         Each steady extra payment reduces your total interest.
                       </p>
                     </div>
@@ -331,13 +331,13 @@ export default function DebtPayoffCalculator() {
 
                 <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                   <CardHeader>
-                    <CardTitle className="text-[var(--text-navy)] text-2xl text-center font-bold">Your Payoff Summary</CardTitle>
+                    <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">Your payoff summary</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="rounded-lg mb-6 text-center">
-                      <p className="text-lg font-semibold text-[var(--text-navy)] tracking-wide">Time to Pay Off</p>
-                      <p className="text-4xl font-bold text-lagunita mb-2">{formatTime(payoffResult.timeInMonths)}</p>
-                      <p className="text-lg font-semibold text-lagunita">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
+                      <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">Time to pay off</p>
+                      <p className="text-3xl font-bold text-lagunita mb-2">{formatTime(payoffResult.timeInMonths)}</p>
+                      <p className="text-medium font-semibold text-lagunita">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
                     </div>
 
                     <div className="innerwrapper">
@@ -368,7 +368,7 @@ export default function DebtPayoffCalculator() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-center text-lg font-semibold pt-6 text-[var(--text-navy)]">
+                    <p className="text-center text-medium font-semibold pt-6 text-[var(--text-navy)]">
                       You&#39;re turning your loan into a plan. A little extra now means freedom sooner.
                     </p>
                   </CardContent>
@@ -386,7 +386,7 @@ export default function DebtPayoffCalculator() {
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="debt-amount-2">Debt Amount</Label>
+                        <Label htmlFor="debt-amount-2" className="font-medium">Debt amount</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="relative">
@@ -422,7 +422,7 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2 relative">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="interest-rate-2">Annual Interest Rate (%)</Label>
+                        <Label htmlFor="interest-rate-2" className="font-medium">Annual interest rate (%)</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="relative">
@@ -459,7 +459,7 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="compounding-2">Compounding Frequency</Label>
+                        <Label htmlFor="compounding-2" className="font-medium">Compounding frequency</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="flex items-center gap-2">
@@ -467,7 +467,7 @@ export default function DebtPayoffCalculator() {
                         value={compoundingFrequency}
                         onChange={(e) => setCompoundingFrequency(e.target.value as CompoundingFrequency)}
                         id="compounding-select-2"
-                        className="border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
+                        className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
                       >
                         <button id="compounding-2">
                           {compoundingFrequency}
@@ -482,7 +482,7 @@ export default function DebtPayoffCalculator() {
                         </div>
                       </div>
                       
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm">
                         The compounding frequency is equal to your payment frequency. For example, in the monthly case, you
                         make 12 debt payments per year.
                       </p>
@@ -490,76 +490,80 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label>Target Payoff Time</Label>
+                        <Label className="font-medium">Target time to payoff</Label>
                         <InfoIcon className="w-4 h-4 text-muted-foreground" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 relative">
-                          <Label htmlFor="target-years" className="text-sm text-muted-foreground">
+                      <div className="flex flex-row gap-4 w-full">
+                        <div className="flex flex-row w-1/2 gap-2 items-center">
+                          <div className="relative grow">
+                            <Input
+                              id="target-years"
+                              type="number"
+                              min="0"
+                              value={targetYears}
+                              onChange={(e) => setTargetYears(Number(e.target.value))}
+                              className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label="Increase amount"
+                                onClick={() => setTargetYears((prev) => Math.max(0, prev + 1))}
+                                className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                              >
+                                <BiSolidUpArrow size={24} />
+                              </button>
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label="Decrease amount"
+                                onClick={() => setTargetYears((prev) => Math.max(0, prev - 1))}
+                                className="hover:text-grey-med-dark focus:outline-none"
+                              >
+                                <BiSolidDownArrow size={24} />
+                              </button>
+                            </div>
+                          </div>
+                          <Label htmlFor="target-years" className="text-sm text-muted-foreground flex-none">
                             Years
                           </Label>
-                          <Input
-                            id="target-years"
-                            type="number"
-                            min="0"
-                            value={targetYears}
-                            onChange={(e) => setTargetYears(Number(e.target.value))}
-                            className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Increase amount"
-                              onClick={() => setTargetYears((prev) => Math.max(0, prev + 1))}
-                              className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                            >
-                              <BiSolidUpArrow size={24} />
-                            </button>
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Decrease amount"
-                              onClick={() => setTargetYears((prev) => Math.max(0, prev - 1))}
-                              className="hover:text-grey-med-dark focus:outline-none"
-                            >
-                              <BiSolidDownArrow size={24} />
-                            </button>
-                          </div>
                         </div>
-                        <div className="space-y-2 relative">
-                          <Label htmlFor="target-months" className="text-sm text-muted-foreground">
+                        <div className="flex flex-row w-1/2 gap-2 items-center">
+                          <div className="relative grow">
+                            <Input
+                              id="target-months"
+                              type="number"
+                              min="0"
+                              max="11"
+                              value={targetMonths}
+                              onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value))))}
+                              className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label="Increase amount"
+                                onClick={() => setTargetMonths((prev) => Math.max(0, prev + 1))}
+                                className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                              >
+                                <BiSolidUpArrow size={24} />
+                              </button>
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label="Decrease amount"
+                                onClick={() => setTargetMonths((prev) => Math.max(0, prev - 1))}
+                                className="hover:text-grey-med-dark focus:outline-none"
+                              >
+                                <BiSolidDownArrow size={24} />
+                              </button>
+                            </div>
+                          </div>
+                          <Label htmlFor="target-months" className="text-sm text-muted-foreground flex-none">
                             Months
                           </Label>
-                          <Input
-                            id="target-months"
-                            type="number"
-                            min="0"
-                            max="11"
-                            value={targetMonths}
-                            onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value))))}
-                            className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Increase amount"
-                              onClick={() => setTargetMonths((prev) => Math.max(0, prev + 1))}
-                              className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                            >
-                              <BiSolidUpArrow size={24} />
-                            </button>
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Decrease amount"
-                              onClick={() => setTargetMonths((prev) => Math.max(0, prev - 1))}
-                              className="hover:text-grey-med-dark focus:outline-none"
-                            >
-                              <BiSolidDownArrow size={24} />
-                            </button>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -568,11 +572,11 @@ export default function DebtPayoffCalculator() {
 
                 <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                   <CardHeader className="">
-                    <CardTitle className="text-[var(--text-navy)] text-2xl text-center font-bold">Required Payment</CardTitle>
+                    <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">Required payment</CardTitle>
                   </CardHeader>
                   <CardContent className="">
                     <div className="rounded-lg mb-6 text-center">
-                      <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">Payment Per Period</p>
+                      <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">Payment per period</p>
                       <p className="text-4xl font-bold text-lagunita mb-2">
                         {formatCurrency(requiredPaymentResult.requiredPayment)}
                       </p>
@@ -598,7 +602,7 @@ export default function DebtPayoffCalculator() {
                         </div>
                       </div>
                       </div>
-                      <p className="text-center text-lg font-semibold pt-6 text-[var(--text-navy)]">
+                      <p className="text-center text-medium font-semibold pt-6 text-[var(--text-navy)]">
                         You&#39;re turning your loan into a plan. A little extra now means freedom sooner.
                       </p>
                   </CardContent>

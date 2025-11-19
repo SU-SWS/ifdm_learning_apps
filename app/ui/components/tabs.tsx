@@ -31,8 +31,8 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
   <RadixTabs.Trigger
     ref={ref}
     className={cn(
-      "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal inline-flex items-center justify-center whitespace-nowrap rounded-md font-bold ring-offset-background transition-colors", 
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal items-center justify-center rounded-md font-bold ring-offset-background transition-colors", 
+      "flex-none w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:bg-lagunita data-[state=active]:text-white",
       className
     )}
