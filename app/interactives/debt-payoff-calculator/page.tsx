@@ -173,8 +173,9 @@ export default function DebtPayoffCalculator() {
                         <Input
                           id="debt-amount"
                           type="number"
-                          value={debtAmount}
-                          onChange={(e) => setDebtAmount(Number(e.target.value))}
+                          min="1"
+                          value={debtAmount === 0 ? "" : debtAmount}
+                          onChange={(e) => setDebtAmount(Number(e.target.value) || 0)}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -210,8 +211,9 @@ export default function DebtPayoffCalculator() {
                           id="interest-rate"
                           type="number"
                           step="0.1"
-                          value={interestRate}
-                          onChange={(e) => setInterestRate(Number(e.target.value))}
+                          value={interestRate === 0 ? "" : interestRate}
+                          onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                          min="0.1"
                           className="relative font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -278,8 +280,8 @@ export default function DebtPayoffCalculator() {
                           id="payment"
                           type="number"
                           step="0.01"
-                          value={payment}
-                          onChange={(e) => setPayment(Number(e.target.value))}
+                          value={payment === 0 ? "" : payment}
+                          onChange={(e) => setPayment(Number(e.target.value) || 0)}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -312,16 +314,35 @@ export default function DebtPayoffCalculator() {
                           <InfoPopover title="Additional payment per period (optional)">Enter a fixed extra amount you plan to pay each month.</InfoPopover>
                         </div>
                       </div>
-                      <CustomSlider
-                        value={[additionalPayment]}
-                        onValueChange={(value) => setAdditionalPayment(value[0])}
-                        max={10000}
-                        step={10}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-sm font-medium">
-                        <span>$0</span>
-                        <span>$10,000</span>
+                      <div className="relative">
+                        <Input
+                          id="addtlpayment"
+                          type="number"
+                          step="0.01"
+                          value={additionalPayment === 0 ? "" : additionalPayment}
+                          onChange={(e) => setAdditionalPayment(Number(e.target.value) || 0)}
+                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => setAdditionalPayment((prev) => Math.max(0, prev + 1))}
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => setAdditionalPayment((prev) => Math.max(0, prev - 1))}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                       <p className="text-sm">
                         Each steady extra payment reduces your total interest.
@@ -394,8 +415,9 @@ export default function DebtPayoffCalculator() {
                         <Input
                           id="debt-amount-2"
                           type="number"
-                          value={debtAmount}
-                          onChange={(e) => setDebtAmount(Number(e.target.value))}
+                          value={debtAmount === 0 ? "" : debtAmount}
+                          onChange={(e) => setDebtAmount(Number(e.target.value) || 0)}
+                          min="1"
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -431,8 +453,9 @@ export default function DebtPayoffCalculator() {
                           id="interest-rate-2"
                           type="number"
                           step="0.1"
-                          value={interestRate}
-                          onChange={(e) => setInterestRate(Number(e.target.value))}
+                          value={interestRate === 0 ? "" : interestRate}
+                          onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                          min="0.1"
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -501,8 +524,8 @@ export default function DebtPayoffCalculator() {
                               id="target-years"
                               type="number"
                               min="0"
-                              value={targetYears}
-                              onChange={(e) => setTargetYears(Number(e.target.value))}
+                              value={targetYears === 0 ? "" : targetYears}
+                              onChange={(e) => setTargetYears(Number(e.target.value) || 0)}
                               className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -537,8 +560,8 @@ export default function DebtPayoffCalculator() {
                               type="number"
                               min="0"
                               max="11"
-                              value={targetMonths}
-                              onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value))))}
+                              value={targetMonths === 0 ? "" : targetMonths}
+                              onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value)) || 0))}
                               className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
