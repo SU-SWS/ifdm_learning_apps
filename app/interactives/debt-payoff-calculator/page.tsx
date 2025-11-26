@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
-import { CustomSlider } from "@/app/ui/components/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import { FaAngleDown } from "react-icons/fa";
@@ -32,9 +31,9 @@ export default function DebtPayoffCalculator() {
   const [interestRate, setInterestRate] = useState(4)
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("monthly")
   const [payment, setPayment] = useState(303.74)
-  const [additionalPayment, setAdditionalPayment] = useState(0)
+  const [additionalPayment, setAdditionalPayment] = useState<number | "">(0)
   const [targetYears, setTargetYears] = useState(10)
-  const [targetMonths, setTargetMonths] = useState(0)
+  const [targetMonths, setTargetMonths] = useState(11)
 
   const getCompoundingPeriodsPerYear = (frequency: CompoundingFrequency): number => {
     switch (frequency) {
@@ -54,7 +53,8 @@ export default function DebtPayoffCalculator() {
     const annualRate = interestRate / 100
     const periodsPerYear = getCompoundingPeriodsPerYear(compoundingFrequency)
     const periodicRate = annualRate / periodsPerYear
-    const totalPayment = payment + additionalPayment
+    const addlPayment = typeof additionalPayment === "number" ? additionalPayment : 0
+    const totalPayment = payment + addlPayment
 
     if (totalPayment <= principal * periodicRate) {
       // Payment doesn't cover interest
@@ -75,7 +75,7 @@ export default function DebtPayoffCalculator() {
 
     // Calculate interest saved with additional payment
     let interestSaved = 0
-    if (additionalPayment > 0) {
+    if (addlPayment > 0) {
       const basePayment = payment
       const baseNumPeriods = -Math.log(1 - (principal * periodicRate) / basePayment) / Math.log(1 + periodicRate)
       const baseTotalPaid = basePayment * baseNumPeriods
@@ -310,7 +310,7 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(additionalPayment)}</Label>
+                          <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(typeof additionalPayment === "number" ? additionalPayment : 0)}</Label>
                           <InfoPopover title="Additional payment per period (optional)">Enter a fixed extra amount you plan to pay each month.</InfoPopover>
                         </div>
                       </div>
@@ -319,8 +319,10 @@ export default function DebtPayoffCalculator() {
                           id="addtlpayment"
                           type="number"
                           step="0.01"
-                          value={additionalPayment === 0 ? "" : additionalPayment}
-                          onChange={(e) => setAdditionalPayment(Number(e.target.value) || 0)}
+                          min="0"
+                          value={additionalPayment}
+                          onChange={(e) => setAdditionalPayment(e.target.value === "" ? "" : Number(e.target.value))}
+                          onBlur={(e) => setAdditionalPayment(e.target.value === "" ? 0 : Number(e.target.value))}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -328,7 +330,7 @@ export default function DebtPayoffCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={() => setAdditionalPayment((prev) => Math.max(0, prev + 1))}
+                            onClick={() => setAdditionalPayment((prev) => Math.max(0, (typeof prev === "number" ? prev : 0) + 1))}
                             className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidUpArrow size={24} />
@@ -337,7 +339,7 @@ export default function DebtPayoffCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={() => setAdditionalPayment((prev) => Math.max(0, prev - 1))}
+                            onClick={() => setAdditionalPayment((prev) => Math.max(0, (typeof prev === "number" ? prev : 0) - 1))}
                             className="hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidDownArrow size={24} />
@@ -569,7 +571,7 @@ export default function DebtPayoffCalculator() {
                                 type="button"
                                 tabIndex={-1}
                                 aria-label="Increase amount"
-                                onClick={() => setTargetMonths((prev) => Math.max(0, prev + 1))}
+                                onClick={() => setTargetMonths((prev) => Math.min(11, prev + 1))}
                                 className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                               >
                                 <BiSolidUpArrow size={24} />
