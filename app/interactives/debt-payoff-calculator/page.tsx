@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
-import { CustomSlider } from "@/app/ui/components/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import { FaAngleDown } from "react-icons/fa";
@@ -32,9 +31,9 @@ export default function DebtPayoffCalculator() {
   const [interestRate, setInterestRate] = useState(4)
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("monthly")
   const [payment, setPayment] = useState(303.74)
-  const [additionalPayment, setAdditionalPayment] = useState(0)
+  const [additionalPayment, setAdditionalPayment] = useState<number | "">(0)
   const [targetYears, setTargetYears] = useState(10)
-  const [targetMonths, setTargetMonths] = useState(0)
+  const [targetMonths, setTargetMonths] = useState(11)
 
   const getCompoundingPeriodsPerYear = (frequency: CompoundingFrequency): number => {
     switch (frequency) {
@@ -54,7 +53,8 @@ export default function DebtPayoffCalculator() {
     const annualRate = interestRate / 100
     const periodsPerYear = getCompoundingPeriodsPerYear(compoundingFrequency)
     const periodicRate = annualRate / periodsPerYear
-    const totalPayment = payment + additionalPayment
+    const addlPayment = typeof additionalPayment === "number" ? additionalPayment : 0
+    const totalPayment = payment + addlPayment
 
     if (totalPayment <= principal * periodicRate) {
       // Payment doesn't cover interest
@@ -75,7 +75,7 @@ export default function DebtPayoffCalculator() {
 
     // Calculate interest saved with additional payment
     let interestSaved = 0
-    if (additionalPayment > 0) {
+    if (addlPayment > 0) {
       const basePayment = payment
       const baseNumPeriods = -Math.log(1 - (principal * periodicRate) / basePayment) / Math.log(1 + periodicRate)
       const baseTotalPaid = basePayment * baseNumPeriods
@@ -173,8 +173,9 @@ export default function DebtPayoffCalculator() {
                         <Input
                           id="debt-amount"
                           type="number"
-                          value={debtAmount}
-                          onChange={(e) => setDebtAmount(Number(e.target.value))}
+                          min="1"
+                          value={debtAmount === 0 ? "" : debtAmount}
+                          onChange={(e) => setDebtAmount(Number(e.target.value) || 0)}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -210,9 +211,10 @@ export default function DebtPayoffCalculator() {
                           id="interest-rate"
                           type="number"
                           step="0.1"
-                          value={interestRate}
-                          onChange={(e) => setInterestRate(Number(e.target.value))}
-                          className="relative font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          value={interestRate === 0 ? "" : interestRate}
+                          onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                          min="0.1"
+                          className="relative font-bold block w-full text-lagunita rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -278,8 +280,8 @@ export default function DebtPayoffCalculator() {
                           id="payment"
                           type="number"
                           step="0.01"
-                          value={payment}
-                          onChange={(e) => setPayment(Number(e.target.value))}
+                          value={payment === 0 ? "" : payment}
+                          onChange={(e) => setPayment(Number(e.target.value) || 0)}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -308,20 +310,41 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(additionalPayment)}</Label>
+                          <Label className="text-medium font-bold">Additional payment per period (optional): {formatCurrency(typeof additionalPayment === "number" ? additionalPayment : 0)}</Label>
                           <InfoPopover title="Additional payment per period (optional)">Enter a fixed extra amount you plan to pay each month.</InfoPopover>
                         </div>
                       </div>
-                      <CustomSlider
-                        value={[additionalPayment]}
-                        onValueChange={(value) => setAdditionalPayment(value[0])}
-                        max={10000}
-                        step={10}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-sm font-medium">
-                        <span>$0</span>
-                        <span>$10,000</span>
+                      <div className="relative">
+                        <Input
+                          id="addtlpayment"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={additionalPayment}
+                          onChange={(e) => setAdditionalPayment(e.target.value === "" ? "" : Number(e.target.value))}
+                          onBlur={(e) => setAdditionalPayment(e.target.value === "" ? 0 : Number(e.target.value))}
+                          className="font-bold text-lagunita block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => setAdditionalPayment((prev) => Math.max(0, (typeof prev === "number" ? prev : 0) + 1))}
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => setAdditionalPayment((prev) => Math.max(0, (typeof prev === "number" ? prev : 0) - 1))}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                       <p className="text-sm">
                         Each steady extra payment reduces your total interest.
@@ -394,8 +417,9 @@ export default function DebtPayoffCalculator() {
                         <Input
                           id="debt-amount-2"
                           type="number"
-                          value={debtAmount}
-                          onChange={(e) => setDebtAmount(Number(e.target.value))}
+                          value={debtAmount === 0 ? "" : debtAmount}
+                          onChange={(e) => setDebtAmount(Number(e.target.value) || 0)}
+                          min="1"
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -431,9 +455,10 @@ export default function DebtPayoffCalculator() {
                           id="interest-rate-2"
                           type="number"
                           step="0.1"
-                          value={interestRate}
-                          onChange={(e) => setInterestRate(Number(e.target.value))}
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          value={interestRate === 0 ? "" : interestRate}
+                          onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                          min="0.1"
+                          className="font-bold text-lagunita block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -501,8 +526,8 @@ export default function DebtPayoffCalculator() {
                               id="target-years"
                               type="number"
                               min="0"
-                              value={targetYears}
-                              onChange={(e) => setTargetYears(Number(e.target.value))}
+                              value={targetYears === 0 ? "" : targetYears}
+                              onChange={(e) => setTargetYears(Number(e.target.value) || 0)}
                               className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -537,8 +562,8 @@ export default function DebtPayoffCalculator() {
                               type="number"
                               min="0"
                               max="11"
-                              value={targetMonths}
-                              onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value))))}
+                              value={targetMonths === 0 ? "" : targetMonths}
+                              onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value)) || 0))}
                               className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -546,7 +571,7 @@ export default function DebtPayoffCalculator() {
                                 type="button"
                                 tabIndex={-1}
                                 aria-label="Increase amount"
-                                onClick={() => setTargetMonths((prev) => Math.max(0, prev + 1))}
+                                onClick={() => setTargetMonths((prev) => Math.min(11, prev + 1))}
                                 className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                               >
                                 <BiSolidUpArrow size={24} />

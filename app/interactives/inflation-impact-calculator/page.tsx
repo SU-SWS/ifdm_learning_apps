@@ -56,7 +56,6 @@ export default function InflationCalculator() {
                   id="initial-price"
                   type="number"
                   value={initialPrice === 0 ? "" : initialPrice}
-                  
                   onChange={(e) => setInitialPrice(Number(e.target.value) || 0)}
                   className="bg-[var(--input-background)] text-[var(--input-text)] bg-[var(--input-border)] text-md font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="1"
