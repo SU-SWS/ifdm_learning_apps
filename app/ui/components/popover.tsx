@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, X } from "lucide-react";
 
 export default function InfoPopover({
   title = "Info",
@@ -32,11 +32,7 @@ export default function InfoPopover({
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Anchor asChild>
-        <div className="row">
-          <Popover.Trigger className="hidden">Trigger</Popover.Trigger>
-        </div>
-      </Popover.Anchor>
+      
       <Popover.Trigger asChild>
         <button
           ref={triggerRef}
@@ -47,12 +43,11 @@ export default function InfoPopover({
           <InfoIcon className="w-4 h-4 text-muted-foreground" />
         </button>
       </Popover.Trigger>
-
       <Popover.Portal>
         <Popover.Content
-          side="right"
+          side="bottom"
           align="center"
-          className="z-50 w-72 rounded-md border-2 border-lagunita  m-6 p-4 shadow-lg bg-[var(--card-background)] rounded-3xl"
+          className="z-50 w-72 center rounded-md border-2 border-lagunita  m-6 p-4 pt-1 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] bg-[var(--card-background)] rounded-3xl"
           onBlur={handleContentBlur}
         >
           <div
@@ -63,25 +58,21 @@ export default function InfoPopover({
             aria-describedby="info-popover-body"
             className="outline-none"
           >
+            <a
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex flex-row justify-end text-sm font-semibold p-0 mr-[-1em] underline text-[var(--popover-link)] hover:text-[var(--popover-link-hover)] hover:no-underline  
+              cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-lagunita"
+            >
+              <X className="w-6 h-6 text-lagunita font-bold" />
+            </a>
             <h3 id="info-popover-title" className="font-semibold text-sm mb-1 text-[var(--foreground)]">
               {title}
             </h3>
             <div id="info-popover-body" className="text-sm text-[var(--foreground)]">
               {children}
             </div>
-
-            <div className="mt-3 flex justify-end">
-              <a
-                type="button"
-                onClick={() => setOpen(false)}
-                className="text-sm font-semibold px-3 py-1 underline text-[var(--popover-link)] hover:text-[var(--popover-link-hover)] hover:no-underline  
-                cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-lagunita"
-              >
-                Close
-              </a>
-            </div>
           </div>
-          <Popover.Arrow className="fill-white dark:fill-[#0b1220]" />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
