@@ -45,9 +45,9 @@ export default function InfoPopover({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          side="bottom"
+          side="top"
           align="center"
-          className="z-50 w-72 center rounded-md border-2 border-lagunita  m-6 p-4 pt-1 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] bg-[var(--card-background)] rounded-3xl"
+          className="z-50 w-72 center rounded-md border-2 border-lagunita m-auto p-4 pt-1 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] bg-[var(--card-background)] rounded-3xl"
           onBlur={handleContentBlur}
         >
           <div
