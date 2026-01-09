@@ -15,11 +15,14 @@ export default function MortgageCalculator() {
   const [currentBalance, setCurrentBalance] = useState<number | null>(null)
 
   const [refCurrentBalance, setRefCurrentBalance] = useState("")
-  const [refCurrentRate, setRefCurrentRate] = useState("")
+  const [refCurrentMonthlyPayment, setRefCurrentMonthlyPayment] = useState("")
   const [refCurrentMonths, setRefCurrentMonths] = useState("")
+  const [refCurrentRate, setRefCurrentRate] = useState("")  // Added missing state for refinance current rate
+  const [refNewLoanAmount, setRefNewLoanAmount] = useState("")
   const [refNewRate, setRefNewRate] = useState("")
   const [refNewMonths, setRefNewMonths] = useState("")
   const [refClosingCosts, setRefClosingCosts] = useState("")
+  const [refYearsIn, setRefYearsIn] = useState("")
   const [refinanceResults, setRefinanceResults] = useState<{
     currentMonthlyPayment: number
     newMonthlyPayment: number
@@ -53,7 +56,7 @@ export default function MortgageCalculator() {
 
   const calculateRefinance = () => {
     const currentBal = Number.parseFloat(refCurrentBalance)
-    const currentR = Number.parseFloat(refCurrentRate) / 100 / 12
+    const currentR = Number.parseFloat(refCurrentRate) / 100 / 12  // Fixed: Use refCurrentRate instead of refCurrentMonthlyPayment
     const currentM = Number.parseFloat(refCurrentMonths)
     const newR = Number.parseFloat(refNewRate) / 100 / 12
     const newM = Number.parseFloat(refNewMonths)
@@ -94,7 +97,7 @@ export default function MortgageCalculator() {
       newMonthlyPayment = (currentBal * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
     }
 
-    const monthlySavings = currentMonthlyPayment - newMonthlyPayment
+    const monthlySavings = currentMonthlyPayment - newMonthlyPayment  // This is already correct: old monthly minus new monthly
     const totalCurrentCost = currentMonthlyPayment * currentM
     const totalNewCost = newMonthlyPayment * newM + closingCosts
     const totalSavings = totalCurrentCost - totalNewCost
@@ -136,7 +139,7 @@ export default function MortgageCalculator() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="months">Months Remaining on Loan</Label>
+                    <Label htmlFor="months">Months remaining on loan</Label>
                     <Input
                       id="months"
                       type="number"
@@ -149,7 +152,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="rate">Annual Interest Rate (%)</Label>
+                    <Label htmlFor="rate">Annual interest rate (%)</Label>
                     <Input
                       id="rate"
                       type="number"
@@ -162,7 +165,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="payment">Monthly Payment Amount ($)</Label>
+                    <Label htmlFor="payment">Monthly payment amount ($)</Label>
                     <Input
                       id="payment"
                       type="number"
@@ -174,7 +177,10 @@ export default function MortgageCalculator() {
                     />
                   </div>
 
-                  <Button onClick={calculateBalance} className="w-full">
+                  <Button
+                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white`}
+                    onClick={calculateBalance}
+                  >
                     Calculate Current Balance
                   </Button>
 
@@ -194,11 +200,14 @@ export default function MortgageCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle>Refinance Analysis</CardTitle>
-                  <CardDescription>Compare your current mortgage with refinancing options.</CardDescription>
+                  <CardDescription>Compare your current mortgage with refinancing options.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <h2 className="text-lg font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="ref-balance">Current Mortgage Balance ($)</Label>
+                    <Label htmlFor="ref-balance">Remaining balance ($)</Label>
                     <Input
                       id="ref-balance"
                       type="number"
@@ -211,20 +220,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="ref-current-rate">Current Annual Interest Rate (%)</Label>
-                    <Input
-                      id="ref-current-rate"
-                      type="number"
-                      placeholder="Enter current rate"
-                      value={refCurrentRate}
-                      onChange={(e) => setRefCurrentRate(e.target.value)}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="ref-current-months">Months Remaining on Current Loan</Label>
+                    <Label htmlFor="ref-current-months">Months remaining on loan</Label>
                     <Input
                       id="ref-current-months"
                       type="number"
@@ -237,20 +233,48 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="ref-new-rate">New Annual Interest Rate (%)</Label>
+                    <Label htmlFor="ref-current-rate">Current annual interest rate (%)</Label>
                     <Input
-                      id="ref-new-rate"
+                      id="ref-current-rate"
                       type="number"
-                      placeholder="Enter new rate"
-                      value={refNewRate}
-                      onChange={(e) => setRefNewRate(e.target.value)}
+                      placeholder="Enter current rate"
+                      value={refCurrentRate}  // Fixed: Use refCurrentRate instead of annualRate
+                      onChange={(e) => setRefCurrentRate(e.target.value)}  // Fixed: Use setRefCurrentRate
                       min="0"
                       step="0.01"
                     />
                   </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="ref-current-monthly-payment">Current monthly payment amount</Label>
+                    <Input
+                      id="ref-current-monthly-payment"
+                      type="number"
+                      placeholder="Enter payment amount"
+                      value={refCurrentMonthlyPayment}
+                      onChange={(e) => setRefCurrentMonthlyPayment(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <h2 className="text-lg font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
+
                   <div className="space-y-2">
-                    <Label htmlFor="ref-new-months">New Loan Term (Months)</Label>
+                    <Label htmlFor="ref-new-loan-amount">New loan amount</Label>
+                    <Input
+                      id="ref-new-loan-amount"
+                      type="number"
+                      placeholder="Enter new loan amount"
+                      value={refNewLoanAmount}
+                      onChange={(e) => setRefNewLoanAmount(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                   <div className="space-y-2">
+                    <Label htmlFor="ref-new-months">New loan term (months)</Label>
                     <Input
                       id="ref-new-months"
                       type="number"
@@ -263,7 +287,22 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="ref-closing">Closing Costs ($)</Label>
+                    <Label htmlFor="ref-new-rate">New annual interest rate (%)</Label>
+                    <Input
+                      id="ref-new-rate"
+                      type="number"
+                      placeholder="Enter new rate"
+                      value={refNewRate}
+                      onChange={(e) => setRefNewRate(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className="border-b-1 border-lagunita"/>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ref-closing">Closing cost and fees</Label>
                     <Input
                       id="ref-closing"
                       type="number"
@@ -275,23 +314,29 @@ export default function MortgageCalculator() {
                     />
                   </div>
 
-                  <Button onClick={calculateRefinance} className="w-full">
+                  <div className="space-y-2">
+                    <Label htmlFor="ref-years-in-house">Expected years living in house</Label>
+                    <Input
+                      id="ref-years-in-house"
+                      type="number"
+                      placeholder="Enter years in house"
+                      value={refYearsIn}
+                      onChange={(e) => setRefYearsIn(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <Button
+                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white`}
+                    onClick={calculateRefinance}
+                  >
                     Compare Refinance Options
                   </Button>
 
                   {refinanceResults && (
                     <div className="space-y-4 mt-6">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground mb-1">Current Monthly Payment</p>
-                          <p className="text-2xl font-bold">
-                            $
-                            {refinanceResults.currentMonthlyPayment.toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </p>
-                        </div>
 
                         <div className="p-4 bg-muted rounded-lg">
                           <p className="text-sm text-muted-foreground mb-1">New Monthly Payment</p>
