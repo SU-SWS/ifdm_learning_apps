@@ -201,7 +201,7 @@ export default function MortgageCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle>Refinance Analysis</CardTitle>
-                  <CardDescription>Compare your current mortgage with refinancing options.
+                  <CardDescription>Analyze if refinancing makes financial sense for your situation.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -314,7 +314,7 @@ export default function MortgageCalculator() {
                       <div className="my-6 border-b-1 border-lagunita"/>
 
                       <div className="mb-5">
-                        <Label className="font-semibold" htmlFor="ref-closing">Closing cost and fees</Label>
+                        <Label className="font-semibold" htmlFor="ref-closing">Closing cost & fees</Label>
                         <Input
                           id="ref-closing"
                           type="number"
@@ -346,8 +346,8 @@ export default function MortgageCalculator() {
                   {refinanceResults && (
                     <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left">
 
-                      <div className="">
-                        <p className="font-semibold text-lagunita mt-4 mb-2">New monthly payment</p>
+                      <div className="text-left">
+                        <p className="font-semibold text-lagunita mt-4  mb-2">New monthly payment</p>
                         <p className="text-2xl p-4 bg-lagunita-lighter text-black border-1 border-lagunita rounded-lg font-bold">
                           $
                           {refinanceResults.newMonthlyPayment.toLocaleString("en-US", {
@@ -357,7 +357,7 @@ export default function MortgageCalculator() {
                         </p>
                       </div>
 
-                      <div className="">
+                      <div className="text-left">
                         <p className="font-semibold text-lagunita mt-4 mb-2">Difference in monthly payment</p>
                           <p className="text-2xl p-4 text-black bg-lagunita-lighter border-1 border-lagunita rounded-lg font-bold">
                           $
