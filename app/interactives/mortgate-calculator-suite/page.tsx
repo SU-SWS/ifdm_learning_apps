@@ -143,12 +143,14 @@ export default function MortgageCalculator() {
                     <Input
                       id="months"
                       type="number"
-                      placeholder="Enter months"
+                      placeholder="-"
                       value={monthsRemaining}
                       onChange={(e) => setMonthsRemaining(e.target.value)}
                       min="0"
                       step="1"
+                      className="text-black font-bold"
                     />
+                    <p className="mt-3 text-[14px]">{monthsRemaining || "0"} months = {(Number.parseFloat(monthsRemaining || "0") / 12).toFixed(1)} years</p>
                   </div>
 
                   <div className="mb-5">
@@ -156,11 +158,12 @@ export default function MortgageCalculator() {
                     <Input
                       id="rate"
                       type="number"
-                      placeholder="Enter annual rate"
+                      placeholder="-"
                       value={annualRate}
                       onChange={(e) => setAnnualRate(e.target.value)}
                       min="0"
                       step="0.01"
+                      className="text-lagunita font-bold"
                     />
                   </div>
 
@@ -169,7 +172,7 @@ export default function MortgageCalculator() {
                     <Input
                       id="payment"
                       type="number"
-                      placeholder="Enter monthly payment"
+                      placeholder="-"
                       value={monthlyPayment}
                       onChange={(e) => setMonthlyPayment(e.target.value)}
                       min="0"
@@ -211,11 +214,12 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-balance"
                           type="number"
-                          placeholder="Enter current balance"
+                          placeholder="-"
                           value={refCurrentBalance}
                           onChange={(e) => setRefCurrentBalance(e.target.value)}
                           min="0"
                           step="0.01"
+                          className="text-black font-bold"
                         />
                       </div>
 
@@ -224,24 +228,26 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-current-months"
                           type="number"
-                          placeholder="Enter months remaining"
+                          placeholder="-"
                           value={refCurrentMonths}
                           onChange={(e) => setRefCurrentMonths(e.target.value)}
                           min="0"
                           step="1"
+                          className="text-black font-bold"
                         />
                       </div>
 
                       <div className="mb-5">
-                        <Label className="font-semibold" htmlFor="ref-current-rate">Current annual interest rate (%)</Label>
+                        <Label className="font-semibold" htmlFor="ref-current-rate">Current interest rate (%)</Label>
                         <Input
                           id="ref-current-rate"
                           type="number"
-                          placeholder="Enter current rate"
+                          placeholder="-"
                           value={refCurrentRate}  // Fixed: Use refCurrentRate instead of annualRate
                           onChange={(e) => setRefCurrentRate(e.target.value)}  // Fixed: Use setRefCurrentRate
                           min="0"
                           step="0.01"
+                          className="text-lagunita font-bold"
                         />
                       </div>
 
@@ -250,11 +256,12 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-current-monthly-payment"
                           type="number"
-                          placeholder="Enter payment amount"
+                          placeholder="-"
                           value={refCurrentMonthlyPayment}
                           onChange={(e) => setRefCurrentMonthlyPayment(e.target.value)}
                           min="0"
                           step="0.01"
+                          className="text-black font-bold"
                         />
                       </div>
                     </div>
@@ -266,11 +273,12 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-new-loan-amount"
                           type="number"
-                          placeholder="Enter new loan amount"
+                          placeholder="-"
                           value={refNewLoanAmount}
                           onChange={(e) => setRefNewLoanAmount(e.target.value)}
                           min="0"
                           step="0.01"
+                          className="text-black font-bold"
                         />
                       </div>
 
@@ -279,12 +287,14 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-new-months"
                           type="number"
-                          placeholder="Enter new term"
+                          placeholder="-"
                           value={refNewMonths}
                           onChange={(e) => setRefNewMonths(e.target.value)}
                           min="0"
                           step="1"
+                          className="text-black font-bold"
                         />
+                        <p className="mt-3 text-[14px]">{refNewMonths || "0"} months = {(Number.parseFloat(refNewMonths || "0") / 12).toFixed(1)} years</p>
                       </div>
 
                       <div className="mb-5">
@@ -292,11 +302,12 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-new-rate"
                           type="number"
-                          placeholder="Enter new rate"
+                          placeholder="-"
                           value={refNewRate}
                           onChange={(e) => setRefNewRate(e.target.value)}
                           min="0"
                           step="0.01"
+                          className="text-lagunita font-bold"
                         />
                       </div>
 
@@ -307,11 +318,12 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-closing"
                           type="number"
-                          placeholder="Enter closing costs"
+                          placeholder="-"
                           value={refClosingCosts}
                           onChange={(e) => setRefClosingCosts(e.target.value)}
                           min="0"
                           step="0.01"
+                          className="text-black font-bold"
                         />
                       </div>
 
@@ -320,11 +332,12 @@ export default function MortgageCalculator() {
                         <Input
                           id="ref-years-in-house"
                           type="number"
-                          placeholder="Enter years in house"
+                          placeholder="-"
                           value={refYearsIn}
                           onChange={(e) => setRefYearsIn(e.target.value)}
                           min="0"
                           step="0.01"
+                          className="text-black font-bold"
                         />
                       </div>
                     </div>
