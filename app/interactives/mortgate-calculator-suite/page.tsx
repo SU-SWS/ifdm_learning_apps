@@ -119,12 +119,12 @@ export default function MortgageCalculator() {
       <div>
         <ThemeToggle />
         {/* Header */}
-        <h1 className="sr-only">Debt Payoff Calculator</h1>
+        <h1 className="sr-only">Mortgage Calculator Suite</h1>
         {/* Mode Selection */}
         <div className="mb-8">
 
           <Tabs defaultValue="current-balance" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 p-0 gap-4">
               <TabsTrigger value="current-balance">Current Balance</TabsTrigger>
               <TabsTrigger value="refinance">Refinance Analysis</TabsTrigger>
             </TabsList>
@@ -206,7 +206,7 @@ export default function MortgageCalculator() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="md:grid md:grid-cols-2 gap-4">
-                    <div className="p-4">
+                    <div className="pr-4">
                       <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
                   
                       <div className="mb-5">
@@ -265,7 +265,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
                     </div>
-                    <div className="p-4">
+                    <div className="pl-0">
                       <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
 
                       <div className="mb-5">
