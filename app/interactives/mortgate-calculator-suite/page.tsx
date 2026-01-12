@@ -97,11 +97,11 @@ export default function MortgageCalculator() {
       newMonthlyPayment = (currentBal * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
     }
 
-    const monthlySavings = currentMonthlyPayment - newMonthlyPayment  // This is already correct: old monthly minus new monthly
+    const monthlySavings = newMonthlyPayment - currentMonthlyPayment  // Difference: new minus current
     const totalCurrentCost = currentMonthlyPayment * currentM
     const totalNewCost = newMonthlyPayment * newM + closingCosts
     const totalSavings = totalCurrentCost - totalNewCost
-    const breakEvenMonths = monthlySavings > 0 ? closingCosts / monthlySavings : 0
+    const breakEvenMonths = monthlySavings < 0 ? closingCosts / (-monthlySavings) : 0
 
     setRefinanceResults({
       currentMonthlyPayment,
@@ -138,7 +138,7 @@ export default function MortgageCalculator() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-2">
+                  <div className="mb-5">
                     <Label className="font-semibold" htmlFor="months">Months remaining on loan</Label>
                     <Input
                       id="months"
@@ -151,7 +151,7 @@ export default function MortgageCalculator() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="mb-5">
                     <Label className="font-semibold" htmlFor="rate">Annual interest rate (%)</Label>
                     <Input
                       id="rate"
@@ -164,7 +164,7 @@ export default function MortgageCalculator() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="mb-5">
                     <Label className="font-semibold" htmlFor="payment">Monthly payment amount ($)</Label>
                     <Input
                       id="payment"
@@ -185,7 +185,7 @@ export default function MortgageCalculator() {
                     </div>
                   )}
                   <Button
-                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white`}
+                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white w-full md:w-auto`}
                     onClick={currentBalance !== null ? () => { setCurrentBalance(null); setMonthsRemaining(""); setAnnualRate(""); setMonthlyPayment(""); } : calculateBalance}
                   >
                     {currentBalance !== null ? "Reset" : "Calculate Current Balance"}
@@ -204,9 +204,9 @@ export default function MortgageCalculator() {
                 <CardContent className="space-y-6">
                   <div className="md:grid md:grid-cols-2 gap-4">
                     <div className="p-4">
-                      <h2 className="mb-4 text-lg font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
+                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
                   
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-balance">Remaining balance ($)</Label>
                         <Input
                           id="ref-balance"
@@ -219,7 +219,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-current-months">Months remaining on loan</Label>
                         <Input
                           id="ref-current-months"
@@ -232,7 +232,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-current-rate">Current annual interest rate (%)</Label>
                         <Input
                           id="ref-current-rate"
@@ -245,7 +245,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-current-monthly-payment">Current monthly payment amount</Label>
                         <Input
                           id="ref-current-monthly-payment"
@@ -259,9 +259,9 @@ export default function MortgageCalculator() {
                       </div>
                     </div>
                     <div className="p-4">
-                      <h2 className="mb-4 text-lg font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
+                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-new-loan-amount">New loan amount</Label>
                         <Input
                           id="ref-new-loan-amount"
@@ -274,7 +274,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-new-months">New loan term (months)</Label>
                         <Input
                           id="ref-new-months"
@@ -287,7 +287,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-new-rate">New annual interest rate (%)</Label>
                         <Input
                           id="ref-new-rate"
@@ -302,7 +302,7 @@ export default function MortgageCalculator() {
 
                       <div className="my-6 border-b-1 border-lagunita"/>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-closing">Closing cost and fees</Label>
                         <Input
                           id="ref-closing"
@@ -315,7 +315,7 @@ export default function MortgageCalculator() {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="mb-5">
                         <Label className="font-semibold" htmlFor="ref-years-in-house">Expected years living in house</Label>
                         <Input
                           id="ref-years-in-house"
@@ -332,23 +332,21 @@ export default function MortgageCalculator() {
 
                   {refinanceResults && (
                     <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left">
-                      <div className="grid grid-cols-2 gap-4">
 
-                        <div className="">
-                          <p className="font-semibold text-lagunita">New Monthly Payment</p>
-                          <p className="text-2xl p-4 bg-muted rounded-lg font-bold">
-                            $
-                            {refinanceResults.newMonthlyPayment.toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </p>
-                        </div>
+                      <div className="">
+                        <p className="font-semibold text-lagunita mt-4 mb-2">New monthly payment</p>
+                        <p className="text-2xl p-4 bg-lagunita-lighter text-black border-1 border-lagunita rounded-lg font-bold">
+                          $
+                          {refinanceResults.newMonthlyPayment.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </p>
                       </div>
 
-                      <div className="p-4 bg-primary/10 rounded-lg border-2 border-primary">
-                        <p className="text-sm text-muted-foreground mb-1">Monthly Savings</p>
-                        <p className="text-3xl font-bold text-primary">
+                      <div className="">
+                        <p className="font-semibold text-lagunita mt-4 mb-2">Difference in monthly payment</p>
+                          <p className="text-2xl p-4 text-black bg-lagunita-lighter border-1 border-lagunita rounded-lg font-bold">
                           $
                           {refinanceResults.monthlySavings.toLocaleString("en-US", {
                             minimumFractionDigits: 2,
@@ -357,33 +355,9 @@ export default function MortgageCalculator() {
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground mb-1">Total Current Cost</p>
-                          <p className="text-lg font-semibold">
-                            $
-                            {refinanceResults.totalCurrentCost.toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </p>
-                        </div>
-
-                        <div className="p-4 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground mb-1">Total New Cost</p>
-                          <p className="text-lg font-semibold">
-                            $
-                            {refinanceResults.totalNewCost.toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-muted rounded-lg">
-                        <p className="text-sm text-muted-foreground mb-1">Total Lifetime Savings</p>
-                        <p className="text-2xl font-bold">
+                      <div className="">
+                        <p className="text-md font-bold mt-4 mb-2">Refinancing saves you</p>
+                           <p className="text-4xl font-bold text-lagunita">
                           $
                           {refinanceResults.totalSavings.toLocaleString("en-US", {
                             minimumFractionDigits: 2,
@@ -391,19 +365,11 @@ export default function MortgageCalculator() {
                           })}
                         </p>
                       </div>
-
-                      <div className="p-4 bg-muted rounded-lg">
-                        <p className="text-sm text-muted-foreground mb-1">Break-Even Point</p>
-                        <p className="text-xl font-semibold">{refinanceResults.breakEvenMonths.toFixed(1)} months</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Time needed to recover closing costs through monthly savings
-                        </p>
-                      </div>
                     </div>
                   )}
 
                   <Button
-                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white`}
+                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white w-full md:w-auto`}
                     onClick={refinanceResults ? () => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); } : calculateRefinance}
                   >
                     {refinanceResults ? "Reset" : "Compare Refinance Options"}
