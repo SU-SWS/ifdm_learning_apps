@@ -381,12 +381,29 @@ export default function MortgageCalculator() {
                     </div>
                   )}
 
-                  <Button
-                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white w-full md:w-auto`}
-                    onClick={refinanceResults ? () => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); } : calculateRefinance}
-                  >
-                    {refinanceResults ? "Reset" : "Compare Refinance Options"}
-                  </Button>
+                  {refinanceResults ? (
+                    <div className="flex gap-4 w-full md:w-auto">
+                      <Button
+                        className={`h-18 whitespace-normal bg-lagunita hover:bg-lagunita text-white flex-1 md:flex-none`}
+                        onClick={calculateRefinance}
+                      >
+                        Recalculate
+                      </Button>
+                      <Button
+                        className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white flex-1 md:flex-none`}
+                        onClick={() => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); }}
+                      >
+                        Reset
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white w-full md:w-auto`}
+                      onClick={calculateRefinance}
+                    >
+                      Compare Refinance Options
+                    </Button>
+                  )}
 
                 </CardContent>
               </Card>
