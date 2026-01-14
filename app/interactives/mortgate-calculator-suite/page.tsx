@@ -369,10 +369,10 @@ export default function MortgageCalculator() {
                       </div>
 
                       <div className="">
-                        <p className="text-md font-bold mt-4 mb-2">Refinancing saves you</p>
+                        <p className="text-md font-bold mt-4 mb-2">{refinanceResults.totalSavings >= 0 ? "Refinancing saves you" : "Refinancing costs you"}</p>
                            <p className="text-4xl font-bold text-lagunita">
                           $
-                          {refinanceResults.totalSavings.toLocaleString("en-US", {
+                          {Math.abs(refinanceResults.totalSavings).toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
