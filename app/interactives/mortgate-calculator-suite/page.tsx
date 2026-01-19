@@ -7,6 +7,8 @@ import { Input } from "@/app/ui/components/input"
 import { Button } from "@/app/ui/components/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 import ThemeToggle from "@/app/lib/theme-toggle";
+import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+
 
 export default function MortgageCalculator() {
   const [monthsRemaining, setMonthsRemaining] = useState("")
@@ -97,7 +99,7 @@ export default function MortgageCalculator() {
       newMonthlyPayment = (currentBal * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
     }
 
-    const monthlySavings = newMonthlyPayment - currentMonthlyPayment  // Difference: new minus current
+    const monthlySavings = currentMonthlyPayment - newMonthlyPayment
     const totalCurrentCost = currentMonthlyPayment * currentM
     const totalNewCost = newMonthlyPayment * newM + closingCosts
     const totalSavings = totalCurrentCost - totalNewCost
@@ -138,7 +140,7 @@ export default function MortgageCalculator() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="mb-5">
+                  <div className="relative">
                     <Label className="font-semibold" htmlFor="months">Months remaining on loan</Label>
                     <Input
                       id="months"
@@ -148,12 +150,40 @@ export default function MortgageCalculator() {
                       onChange={(e) => setMonthsRemaining(e.target.value)}
                       min="0"
                       step="1"
-                      className="text-black font-bold"
+                      className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Increase amount"
+                        onClick={() => {
+                          const current = Number.parseFloat(monthsRemaining || "0");
+                          setMonthsRemaining((current + 1).toString());
+                        }}
+                        className="mb-[-5px] mt-[-5px] hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidUpArrow size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Decrease amount"
+                        onClick={() => {
+                          const current = Number.parseFloat(monthsRemaining || "0");
+                          if (current > 0) {
+                            setMonthsRemaining((current - 1).toString());
+                          }
+                        }}
+                        className="hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidDownArrow size={24} />
+                      </button>
+                    </div>
                     <p className="mt-3 text-[14px]">{monthsRemaining || "0"} months = {(Number.parseFloat(monthsRemaining || "0") / 12).toFixed(1)} years</p>
                   </div>
 
-                  <div className="mb-5">
+                  <div className="relative">
                     <Label className="font-semibold" htmlFor="rate">Annual interest rate (%)</Label>
                     <Input
                       id="rate"
@@ -162,12 +192,38 @@ export default function MortgageCalculator() {
                       value={annualRate}
                       onChange={(e) => setAnnualRate(e.target.value)}
                       min="0"
-                      step="0.01"
-                      className="text-lagunita font-bold"
+                      step="0.1"
+                      className="text-lagunita font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Increase amount"
+                        onClick={() => {
+                          const current = Number.parseFloat(annualRate || "0");
+                          setAnnualRate((current + 0.1).toFixed(1));
+                        }}
+                        className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidUpArrow size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Decrease amount"
+                        onClick={() => {
+                          const current = Number.parseFloat(annualRate || "0");
+                          setAnnualRate(Math.max(0, current - 0.1).toFixed(1));
+                        }}
+                        className="hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidDownArrow size={24} />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="mb-5">
+                  <div className="relative">
                     <Label className="font-semibold" htmlFor="payment">Monthly payment amount ($)</Label>
                     <Input
                       id="payment"
@@ -177,7 +233,36 @@ export default function MortgageCalculator() {
                       onChange={(e) => setMonthlyPayment(e.target.value)}
                       min="0"
                       step="0.01"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Increase amount"
+                        onClick={() => {
+                          const current = Number.parseFloat(monthlyPayment || "0");
+                          setMonthlyPayment((current + 1).toFixed(2));
+                        }}
+                        className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidUpArrow size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Decrease amount"
+                        onClick={() => {
+                          const current = Number.parseFloat(monthlyPayment || "0");
+                          if (current > 0) {
+                            setMonthlyPayment((current - 1).toFixed(2));
+                          }
+                        }}
+                        className="hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidDownArrow size={24} />
+                      </button>
+                    </div>
                   </div>
                   {currentBalance !== null && (
                     <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left"> 
@@ -209,7 +294,7 @@ export default function MortgageCalculator() {
                     <div className="pr-4">
                       <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
                   
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-balance">Remaining balance ($)</Label>
                         <Input
                           id="ref-balance"
@@ -219,11 +304,39 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefCurrentBalance(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              const current = Number.parseFloat(refCurrentBalance || "0");
+                              setRefCurrentBalance((current + 1).toFixed(2));
+                            }}
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              const current = Number.parseFloat(monthlyPayment || "0");
+                              if (current > 0) {
+                                setMonthlyPayment((current - 1).toFixed(2));
+                              }
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-current-months">Months remaining on loan</Label>
                         <Input
                           id="ref-current-months"
@@ -233,25 +346,77 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefCurrentMonths(e.target.value)}
                           min="0"
                           step="1"
-                          className="text-black font-bold"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refCurrentMonths || "0");
+                              setRefCurrentMonths((current + 1).toString());
+                            }}
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refCurrentMonths || "0");
+                              setRefCurrentMonths(Math.max(0, current - 1).toString());
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-current-rate">Current interest rate (%)</Label>
                         <Input
                           id="ref-current-rate"
                           type="number"
                           placeholder="-"
-                          value={refCurrentRate}  // Fixed: Use refCurrentRate instead of annualRate
-                          onChange={(e) => setRefCurrentRate(e.target.value)}  // Fixed: Use setRefCurrentRate
+                          value={refCurrentRate}
+                          onChange={(e) => setRefCurrentRate(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-lagunita font-bold"
+                          className="text-lagunita font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={(e => setRefCurrentRate((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return (current + 0.1).toFixed(1);
+                            }))}
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={(e => setRefCurrentRate((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return Math.max(0, current - 0.1).toFixed(1);
+                            }))}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-current-monthly-payment">Current monthly payment amount</Label>
                         <Input
                           id="ref-current-monthly-payment"
@@ -261,14 +426,40 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefCurrentMonthlyPayment(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={(e => setRefCurrentMonthlyPayment((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return (current + 1).toFixed(2);
+                            }))}
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={(e => setRefCurrentMonthlyPayment((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return Math.max(0, current - 0.1).toFixed(1);
+                            }))}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="pl-0">
                       <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-new-loan-amount">New loan amount</Label>
                         <Input
                           id="ref-new-loan-amount"
@@ -278,11 +469,37 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefNewLoanAmount(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={(e) => setRefNewLoanAmount((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return (current + 1).toFixed(2);
+                            })}
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={(e) => setRefNewLoanAmount((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return Math.max(0, current - 1).toFixed(2);
+                            })}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-new-months">New loan term (months)</Label>
                         <Input
                           id="ref-new-months"
@@ -292,12 +509,38 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefNewMonths(e.target.value)}
                           min="0"
                           step="1"
-                          className="text-black font-bold"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refNewMonths || "0");
+                              setRefNewMonths((current + 1).toString());
+                            }}
+                            className="mt-[-6px] mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refNewMonths || "0");
+                              setRefNewMonths(Math.max(0, current - 1).toString());
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                         <p className="mt-3 text-[14px]">{refNewMonths || "0"} months = {(Number.parseFloat(refNewMonths || "0") / 12).toFixed(1)} years</p>
                       </div>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-new-rate">New annual interest rate (%)</Label>
                         <Input
                           id="ref-new-rate"
@@ -306,14 +549,40 @@ export default function MortgageCalculator() {
                           value={refNewRate}
                           onChange={(e) => setRefNewRate(e.target.value)}
                           min="0"
-                          step="0.01"
-                          className="text-lagunita font-bold"
+                          step="0.1"
+                          className="text-lagunita font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={(e) => setRefNewRate((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return (current + 0.1).toFixed(1);
+                            })} 
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={(e) => setRefNewRate((prev) => {
+                              const current = Number.parseFloat(prev || "0");
+                              return Math.max(0, current - 0.1).toFixed(1);
+                            })}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="my-6 border-b-1 border-lagunita"/>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-closing">Closing cost & fees</Label>
                         <Input
                           id="ref-closing"
@@ -323,11 +592,37 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefClosingCosts(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refClosingCosts || "0");
+                              setRefClosingCosts((current + 1).toString());
+                            }} 
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refClosingCosts || "0");
+                              setRefClosingCosts(Math.max(0, current - 1).toString());
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="mb-5">
+                      <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-years-in-house">Expected years living in house</Label>
                         <Input
                           id="ref-years-in-house"
@@ -336,9 +631,35 @@ export default function MortgageCalculator() {
                           value={refYearsIn}
                           onChange={(e) => setRefYearsIn(e.target.value)}
                           min="0"
-                          step="0.01"
-                          className="text-black font-bold"
+                          step="1"
+                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refYearsIn || "0");
+                              setRefYearsIn((current + 1).toString());
+                            }} 
+                            className="mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              const current = Number.parseInt(refYearsIn || "0");
+                              setRefYearsIn(Math.max(0, current - 1).toString());
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
