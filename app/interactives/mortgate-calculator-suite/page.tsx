@@ -9,6 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/ta
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 
+const formatCurrency = (amount: number) => 
+  amount.toLocaleString("en-US", { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  })
 
 export default function MortgageCalculator() {
   const [monthsRemaining, setMonthsRemaining] = useState("")
@@ -33,6 +38,7 @@ export default function MortgageCalculator() {
     totalNewCost: number
     totalSavings: number
     breakEvenMonths: number
+    breakEvenMessage: string 
   } | null>(null)
 
   const calculateBalance = () => {
@@ -92,18 +98,66 @@ export default function MortgageCalculator() {
     }
 
     // Calculate new monthly payment
+    const newLoanAmount = Number.parseFloat(refNewLoanAmount)
+
+    // Validate newLoanAmount in your validation section
+    if (
+      isNaN(currentBal) ||
+      isNaN(currentR) ||
+      isNaN(currentM) ||
+      isNaN(newLoanAmount) ||  // ✅ Add this
+      isNaN(newR) ||
+      isNaN(newM) ||
+      isNaN(closingCosts) ||
+      currentBal <= 0 ||
+      currentR < 0 ||
+      currentM <= 0 ||
+      newLoanAmount <= 0 ||  // ✅ Add this
+      newR < 0 ||
+      newM <= 0 ||
+      closingCosts < 0
+    ) {
+      alert("Please enter valid numbers")
+      return
+    }
+
+    // Calculate new monthly payment
     let newMonthlyPayment: number
     if (newR === 0) {
-      newMonthlyPayment = currentBal / newM
+      newMonthlyPayment = newLoanAmount / newM  // ✅ Use newLoanAmount
     } else {
-      newMonthlyPayment = (currentBal * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
+      newMonthlyPayment = (newLoanAmount * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)  // ✅ Use newLoanAmount
     }
 
     const monthlySavings = currentMonthlyPayment - newMonthlyPayment
     const totalCurrentCost = currentMonthlyPayment * currentM
     const totalNewCost = newMonthlyPayment * newM + closingCosts
     const totalSavings = totalCurrentCost - totalNewCost
-    const breakEvenMonths = monthlySavings < 0 ? closingCosts / (-monthlySavings) : 0
+
+    let breakEvenMonths: number
+    let breakEvenMessage: string
+
+    if (monthlySavings > 0) {
+      // Case 1: Lower monthly payment
+      breakEvenMonths = closingCosts / monthlySavings
+      breakEvenMessage = `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
+    } else if (monthlySavings < 0) {
+      // Case 2: Higher monthly payment
+      // Only makes sense if total savings over loan term is positive
+      if (totalSavings > 0) {
+        breakEvenMonths = closingCosts / (-monthlySavings)
+        breakEvenMessage = `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
+      } else {
+        breakEvenMonths = Infinity
+        breakEvenMessage = "This refinance costs more overall - not recommended"
+      }
+    } else {
+      // Case 3: Same monthly payment
+      breakEvenMonths = totalSavings > 0 ? 0 : Infinity
+      breakEvenMessage = totalSavings > 0 
+        ? "Same monthly payment, but you save on total interest" 
+        : "No financial benefit"
+    }
 
     setRefinanceResults({
       currentMonthlyPayment,
@@ -113,6 +167,7 @@ export default function MortgageCalculator() {
       totalNewCost,
       totalSavings,
       breakEvenMonths,
+      breakEvenMessage, // Add this to state type
     })
   }
 
@@ -324,10 +379,8 @@ export default function MortgageCalculator() {
                             tabIndex={-1}
                             aria-label="Decrease amount"
                             onClick={() => {
-                              const current = Number.parseFloat(monthlyPayment || "0");
-                              if (current > 0) {
-                                setMonthlyPayment((current - 1).toFixed(2));
-                              }
+                              const current = Number.parseFloat(refCurrentBalance || "0");
+                              setRefCurrentBalance(Math.max(0,current - 1).toFixed(2));
                             }}
                             className="hover:text-grey-med-dark focus:outline-none"
                           >
@@ -520,7 +573,7 @@ export default function MortgageCalculator() {
                               const current = Number.parseInt(refNewMonths || "0");
                               setRefNewMonths((current + 1).toString());
                             }}
-                            className="mt-[-6px] mb-[-5px] mt-6 hover:text-grey-med-dark focus:outline-none"
+                            className="mt-[-6px] mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidUpArrow size={24} />
                           </button>
@@ -666,37 +719,49 @@ export default function MortgageCalculator() {
 
                   {refinanceResults && (
                     <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left">
-
+                      
                       <div className="text-left">
-                        <p className="font-semibold text-lagunita mt-4  mb-2">New monthly payment</p>
+                        <p className="font-semibold text-lagunita mt-4 mb-2">New monthly payment</p>
                         <p className="text-2xl p-4 bg-lagunita-lighter text-black border-1 border-lagunita rounded-lg font-bold">
-                          $
-                          {refinanceResults.newMonthlyPayment.toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                          ${formatCurrency(refinanceResults.newMonthlyPayment)}
                         </p>
                       </div>
 
                       <div className="text-left">
-                        <p className="font-semibold text-lagunita mt-4 mb-2">Difference in monthly payment</p>
-                          <p className="text-2xl p-4 text-black bg-lagunita-lighter border-1 border-lagunita rounded-lg font-bold">
-                          $
-                          {refinanceResults.monthlySavings.toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                        <p className="font-semibold text-lagunita mt-4 mb-2">
+                          {refinanceResults.monthlySavings >= 0 ? "Monthly savings" : "Monthly increase"}
+                        </p>
+                        <p className={`text-2xl p-4 border-1 rounded-lg font-bold ${
+                          refinanceResults.monthlySavings >= 0 
+                            ? "bg-lagunita-lighter text-black border-1 border-lagunita" 
+                            : "bg-berry-light border-berry text-black"
+                        }`}>
+                          {refinanceResults.monthlySavings >= 0 ? "+" : "-"}$
+                          {formatCurrency(Math.abs(refinanceResults.monthlySavings))}
                         </p>
                       </div>
+
+                      {/* <div className="text-left">
+                        <p className="font-semibold text-lagunita mt-4 mb-2">Break-even analysis</p>
+                        <p className="text-lg p-4 bg-lagunita-lighter border-1 border-lagunita rounded-lg">
+                          {refinanceResults.breakEvenMessage}
+                        </p>
+                        {refinanceResults.breakEvenMonths > 0 && refinanceResults.breakEvenMonths !== Infinity && (
+                          <p className="mt-2 text-sm text-gray-600">
+                            ({refinanceResults.breakEvenMonths.toFixed(1)} months = {(refinanceResults.breakEvenMonths / 12).toFixed(1)} years)
+                          </p>
+                        )}
+                      </div> */}
 
                       <div className="">
-                        <p className="text-md font-bold mt-4 mb-2">{refinanceResults.totalSavings >= 0 ? "Refinancing saves you" : "Refinancing costs you"}</p>
-                           <p className="text-4xl font-bold text-lagunita">
-                          $
-                          {Math.abs(refinanceResults.totalSavings).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                        <p className="text-md font-bold mt-4 mb-2">
+                          {refinanceResults.totalSavings >= 0 ? "Refinancing saves you" : "Refinancing costs you"}
+                        </p>
+                        <p className={`text-4xl font-bold ${
+                          refinanceResults.totalSavings >= 0 ? "text-lagunita" : "text-berry"
+                        }`}>
+                          {refinanceResults.totalSavings >= 0 ? "" : "-"}$
+                          {formatCurrency(Math.abs(refinanceResults.totalSavings))}
                         </p>
                       </div>
                     </div>
