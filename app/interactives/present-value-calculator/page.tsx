@@ -46,7 +46,6 @@ export default function PresentValueCalculator() {
   const displayYear = isAnimating ? animatedYear : timePeriod[0]
   const presentValue = calculatePresentValue(displayYear)
   const discountAmount = futureValue - presentValue
-  const valueRetained = (presentValue / futureValue) * 100
 
   return (
     <div className=" p-6 max-w-5xl mx-auto">
@@ -197,16 +196,6 @@ export default function PresentValueCalculator() {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       })}
-                      </div>
-                    </div>
-                    <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
-                      <div
-                          className="w-[50%] h-full text-md p-4 font-bold text-black bg-grey-med-dark rounded-l-lg">
-                        Value retained:
-                      </div>
-                      <div
-                          className="w-[50%] h-full text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                        {valueRetained.toFixed(1)}%
                       </div>
                     </div>
                   </div>
