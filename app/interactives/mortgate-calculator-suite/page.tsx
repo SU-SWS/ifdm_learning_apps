@@ -741,18 +741,6 @@ export default function MortgageCalculator() {
                         </p>
                       </div>
 
-                      {/* <div className="text-left">
-                        <p className="font-semibold text-lagunita mt-4 mb-2">Break-even analysis</p>
-                        <p className="text-lg p-4 bg-lagunita-lighter border-1 border-lagunita rounded-lg">
-                          {refinanceResults.breakEvenMessage}
-                        </p>
-                        {refinanceResults.breakEvenMonths > 0 && refinanceResults.breakEvenMonths !== Infinity && (
-                          <p className="mt-2 text-sm text-gray-600">
-                            ({refinanceResults.breakEvenMonths.toFixed(1)} months = {(refinanceResults.breakEvenMonths / 12).toFixed(1)} years)
-                          </p>
-                        )}
-                      </div> */}
-
                       <div className="">
                         <p className="text-md font-bold mt-4 mb-2">
                           {refinanceResults.totalSavings >= 0 ? "Refinancing saves you" : "Refinancing costs you"}
