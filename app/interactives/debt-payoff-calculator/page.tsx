@@ -613,20 +613,20 @@ export default function DebtPayoffCalculator() {
                     </div>
 
                     <div className="innerwrapper">
-                      <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
-                        <div className="w-[50%] p-4 font-bold rounded-l-lg text-white bg-navy">
+                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                        <div className="w-full sm:w-[50%] p-4 font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none text-white bg-navy">
                           Total interest:
                         </div>
-                        <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                           {formatCurrency(requiredPaymentResult.totalInterest)}
                         </div>
                       </div>
 
-                      <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
-                        <div className="w-[50%] p-4 text-black font-bold rounded-l-lg bg-grey-med-dark">
+                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                        <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                           Total amount paid:
                         </div>
-                        <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                           {formatCurrency(requiredPaymentResult.totalAmountPaid)}
                         </div>
                       </div>
