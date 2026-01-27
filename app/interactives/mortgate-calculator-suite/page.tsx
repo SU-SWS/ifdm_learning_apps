@@ -181,9 +181,9 @@ export default function MortgageCalculator() {
         <div className="mb-8">
 
           <Tabs defaultValue="current-balance" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 p-0 gap-4">
-              <TabsTrigger value="current-balance">Current Balance</TabsTrigger>
-              <TabsTrigger value="refinance">Refinance Analysis</TabsTrigger>
+            <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
+              <TabsTrigger value="current-balance" className="cursor-pointer hover:bg-gray-200">Current Balance</TabsTrigger>
+              <TabsTrigger value="refinance" className="cursor-pointer hover:bg-gray-200">Refinance Analysis</TabsTrigger>
             </TabsList>
 
             <TabsContent value="current-balance">
@@ -328,7 +328,7 @@ export default function MortgageCalculator() {
                     </div>
                   )}
                   <Button
-                    className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white w-full md:w-auto`}
+                    className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-gray-200 hover:text-lagunita text-white w-full md:w-auto`}
                     onClick={currentBalance !== null ? () => { setCurrentBalance(null); setMonthsRemaining(""); setAnnualRate(""); setMonthlyPayment(""); } : calculateBalance}
                   >
                     {currentBalance !== null ? "Reset" : "Calculate Current Balance"}
@@ -758,13 +758,13 @@ export default function MortgageCalculator() {
                   {refinanceResults ? (
                     <div className="flex gap-4 w-full md:w-auto">
                       <Button
-                        className={`h-18 whitespace-normal bg-lagunita hover:bg-lagunita text-white flex-1 md:flex-none`}
+                        className={`h-18 whitespace-normal cursor-pointer bg-lagunita hover:bg-gray-200 hover:text-lagunita text-white flex-1 md:flex-none`}
                         onClick={calculateRefinance}
                       >
                         Recalculate
                       </Button>
                       <Button
-                        className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white flex-1 md:flex-none`}
+                        className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-gray-200 hover:text-lagunita text-white flex-1 md:flex-none`}
                         onClick={() => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); }}
                       >
                         Reset
@@ -772,7 +772,7 @@ export default function MortgageCalculator() {
                     </div>
                   ) : (
                     <Button
-                      className={`h-18 whitespace-normal bg-navy hover:bg-grey-700 text-white w-full md:w-auto`}
+                      className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-gray-200 hover:text-lagunita text-white w-full md:w-auto`}
                       onClick={calculateRefinance}
                     >
                       Compare Refinance Options
