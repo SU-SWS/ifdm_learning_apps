@@ -539,7 +539,7 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.totalDeposited)
                       ? "$0"
-                      : `$${results.contributionPerPeriod.toFixed(2).toLocaleString()}`}
+                      : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
               )}
@@ -563,7 +563,7 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.finalBalance)
                       ? "$0"
-                      : `$${results.finalBalance.toFixed(2).toLocaleString()}`}
+                      : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
               )}
@@ -580,7 +580,7 @@ export default function SavingsCalculator() {
                       <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                         {isInvalid(results.totalDeposited)
                         ? "$0"
-                        : `$${results.totalDeposited.toFixed(2).toLocaleString()}`}
+                        : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     <div className="flex flex-row mb-1 bg-lagunita-lighter rounded-lg">
@@ -591,7 +591,7 @@ export default function SavingsCalculator() {
                       >
                         {(isInvalid(results.interestEarned) || results.interestEarned < 0)
                         ? "$0"
-                        : `$${results.interestEarned.toFixed(2).toLocaleString()}`}
+                        : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     {mode !== "future-balance" && (
@@ -600,7 +600,7 @@ export default function SavingsCalculator() {
                         Final balance:
                       </div>
                       <div className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        ${results.finalBalance.toFixed(2).toLocaleString()}
+                        {`$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     )}
@@ -649,22 +649,22 @@ export default function SavingsCalculator() {
                               <td className="py-2 px-3 text-right">
                                 {(isInvalid(year.startingBalance) || year.startingBalance < 0)
                                 ? "$0"
-                                : `$${year.startingBalance.toFixed(2).toLocaleString()}`}
+                                : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right">
                                 {(isInvalid(year.contributions) || year.contributions < 0)
                                 ? "$0"
-                                : `$${year.contributions.toFixed(2).toLocaleString()}`}
+                                : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
                                 {(isInvalid(year.interestEarned) || year.interestEarned < 0)
                                 ? "$0"
-                                : `$${year.interestEarned.toFixed(2).toLocaleString()}`}
+                                : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
                                 {(isInvalid(year.endingBalance) || year.endingBalance < 0)
                                 ? "$0"
-                                : `$${year.endingBalance.toFixed(2).toLocaleString()}`}
+                                : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                             </tr>
                           ))}

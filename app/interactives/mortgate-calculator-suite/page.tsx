@@ -758,13 +758,13 @@ export default function MortgageCalculator() {
                   {refinanceResults ? (
                     <div className="flex gap-4 w-full md:w-auto">
                       <Button
-                        className={`h-18 whitespace-normal cursor-pointer bg-lagunita hover:bg-gray-200 hover:text-lagunita text-white flex-1 md:flex-none`}
+                        className={`h-18 whitespace-normal cursor-pointer bg-lagunita border-2-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
                         onClick={calculateRefinance}
                       >
                         Recalculate
                       </Button>
                       <Button
-                        className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-gray-200 hover:text-lagunita text-white flex-1 md:flex-none`}
+                        className={`h-18 whitespace-normal bg-navy cursor-pointer border-2-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
                         onClick={() => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); }}
                       >
                         Reset

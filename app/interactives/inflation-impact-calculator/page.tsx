@@ -151,7 +151,7 @@ export default function InflationCalculator() {
                           Future price:
                         </div>
                         <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
-                          ${futureValue.toFixed(2)}
+                          {`$${futureValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         </div>
                       </div>
                     </div>

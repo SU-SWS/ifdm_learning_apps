@@ -64,6 +64,7 @@ const InterestRateVisual = () => {
           <div className="flex-1 flex gap-4">
             <button
               className={`
+                group
                 min-w-[150px] flex-1 py-2 px-3 text-md font-bold 
                 rounded-lg border-1 border-palo-verde 
                 hover:bg-[var(--button-green)]
@@ -74,14 +75,14 @@ const InterestRateVisual = () => {
               <div className="flex-1 flex gap-3 align-center justify-center">
                 <div
                   className={`text-3xl self-center ${
-                    mode === "saving" ? "text-white" : "text-palo-verde"
+                    mode === "saving" ? "text-white" : "text-palo-verde group-hover:text-white"
                   }`}
                 >
                   <FaPiggyBank />
                 </div>
                 <div
                   className={`self-center ${
-                    mode === "saving" ? "text-white" : "text-[var(--foreground)]"
+                    mode === "saving" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"
                   }`}
                 >
                   Saving
