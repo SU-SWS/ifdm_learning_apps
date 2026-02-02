@@ -63,11 +63,12 @@ const InterestRateVisual = () => {
 
           <div className="flex-1 flex gap-4">
             <button
-              className={`min-w-[150px] flex-1 py-2 px-3 text-md font-bold ${
-                mode === "saving"
-                  ? "bg-palo-verde rounded-lg border-1 border-palo-verde"
-                  : "rounded-lg border-1 border-palo-verde"
-              }`}
+              className={`
+                min-w-[150px] flex-1 py-2 px-3 text-md font-bold 
+                rounded-lg border-1 border-palo-verde 
+                hover:bg-[var(--button-green)]
+                ${mode === "saving" ? "bg-palo-verde" : ""}
+              `}
               onClick={() => setMode("saving")}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
@@ -88,24 +89,26 @@ const InterestRateVisual = () => {
               </div>
             </button>
             <button
-              className={` min-w-[150px] flex-1 py-2 px-3 text-md font-bold ${
-                mode === "borrowing"
-                  ? "bg-berry rounded-lg border-1 border-berry"
-                  : "rounded-lg border-1 border-berry"
-              }`}
+              className={`
+                group
+                min-w-[150px] flex-1 py-2 px-3 text-md font-bold 
+                rounded-lg border-1 border-berry 
+                hover:bg-[var(--button-berry)]
+                ${mode === "borrowing" ? "bg-berry" : ""}
+              `}
               onClick={() => setMode("borrowing")}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
                 <div
                   className={`text-3xl self-center ${
-                    mode === "borrowing" ? "text-white" : "text-berry"
+                    mode === "borrowing" ? "text-white" : "text-berry group-hover:text-white"
                   }`}
                 >
                   <FaArrowTrendDown />
                 </div>
                 <div
-                  className={` self-center ${
-                    mode === "borrowing" ? "text-white" : "text-[var(--foreground)]"
+                  className={`self-center ${
+                    mode === "borrowing" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"
                   }`}
                 >
                   Borrowing

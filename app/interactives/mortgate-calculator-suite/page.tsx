@@ -182,8 +182,8 @@ export default function MortgageCalculator() {
 
           <Tabs defaultValue="current-balance" className="w-full">
             <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
-              <TabsTrigger value="current-balance" className="cursor-pointer hover:bg-gray-200">Current Balance</TabsTrigger>
-              <TabsTrigger value="refinance" className="cursor-pointer hover:bg-gray-200">Refinance Analysis</TabsTrigger>
+              <TabsTrigger value="current-balance" className="cursor-pointer">Current Balance</TabsTrigger>
+              <TabsTrigger value="refinance" className="cursor-pointer">Refinance Analysis</TabsTrigger>
             </TabsList>
 
             <TabsContent value="current-balance">
@@ -328,7 +328,7 @@ export default function MortgageCalculator() {
                     </div>
                   )}
                   <Button
-                    className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-gray-200 hover:text-lagunita text-white w-full md:w-auto`}
+                    className={`h-18 whitespace-normal bg-navy border-2-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto`}
                     onClick={currentBalance !== null ? () => { setCurrentBalance(null); setMonthsRemaining(""); setAnnualRate(""); setMonthlyPayment(""); } : calculateBalance}
                   >
                     {currentBalance !== null ? "Reset" : "Calculate Current Balance"}
@@ -446,7 +446,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={(e => setRefCurrentRate((prev) => {
+                            onClick={(() => setRefCurrentRate((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return (current + 0.1).toFixed(1);
                             }))}
@@ -458,7 +458,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={(e => setRefCurrentRate((prev) => {
+                            onClick={(() => setRefCurrentRate((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return Math.max(0, current - 0.1).toFixed(1);
                             }))}
@@ -486,7 +486,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={(e => setRefCurrentMonthlyPayment((prev) => {
+                            onClick={(() => setRefCurrentMonthlyPayment((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return (current + 1).toFixed(2);
                             }))}
@@ -498,7 +498,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={(e => setRefCurrentMonthlyPayment((prev) => {
+                            onClick={(() => setRefCurrentMonthlyPayment((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return Math.max(0, current - 0.1).toFixed(1);
                             }))}
@@ -529,7 +529,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={(e) => setRefNewLoanAmount((prev) => {
+                            onClick={() => setRefNewLoanAmount((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return (current + 1).toFixed(2);
                             })}
@@ -541,7 +541,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={(e) => setRefNewLoanAmount((prev) => {
+                            onClick={() => setRefNewLoanAmount((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return Math.max(0, current - 1).toFixed(2);
                             })}
@@ -610,7 +610,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={(e) => setRefNewRate((prev) => {
+                            onClick={() => setRefNewRate((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return (current + 0.1).toFixed(1);
                             })} 
@@ -622,7 +622,7 @@ export default function MortgageCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={(e) => setRefNewRate((prev) => {
+                            onClick={() => setRefNewRate((prev) => {
                               const current = Number.parseFloat(prev || "0");
                               return Math.max(0, current - 0.1).toFixed(1);
                             })}
@@ -772,7 +772,7 @@ export default function MortgageCalculator() {
                     </div>
                   ) : (
                     <Button
-                      className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-gray-200 hover:text-lagunita text-white w-full md:w-auto`}
+                      className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto`}
                       onClick={calculateRefinance}
                     >
                       Compare Refinance Options
