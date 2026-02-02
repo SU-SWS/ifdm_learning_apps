@@ -225,7 +225,7 @@ export default function SavingsCalculator() {
           <div className="grid grid-cols-3 gap-2">
             <Button
               variant={mode === "monthly-savings" ? "default" : "outline"}
-              className={`h-18 whitespace-normal ${mode === "monthly-savings" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "monthly-savings" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("monthly-savings")}
             >
               <FaDollarSign className="hidden sm:block h-5 w-5 mr-2" />
@@ -233,7 +233,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "time-to-goal" ? "default" : "outline"}
-              className={`h-18 whitespace-normal ${mode === "time-to-goal" ? "bg-navy text-white hover:bg-lagunita" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "time-to-goal" ? "bg-navy text-white hover:bg-lagunita" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("time-to-goal")}
             >
               <FaRegCalendar className="hidden sm:block h-5 w-5 mr-2" />
@@ -241,7 +241,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "future-balance" ? "default" : "outline"}
-              className={`h-18 whitespace-normal ${mode === "future-balance" ? "bg-palo-verde text-white hover:bg-[var(--button-green)]" : "bg-[var(--results-white-background)] hover:bg-[var(--button-green)] hover:text-white"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "future-balance" ? "bg-palo-verde text-white hover:bg-[var(--button-green)]" : "bg-[var(--results-white-background)] hover:bg-[var(--button-green)] hover:text-white"}`}
               onClick={() => setMode("future-balance")}
             >
               <FaArrowTrendUp className="hidden sm:block h-5 w-5 mr-2" />
@@ -573,21 +573,21 @@ export default function SavingsCalculator() {
               <div className="pt-6">
                 <div className="rounded-lg">
                   <div className="innerwrapper">
-                    <div className="flex flex-row mb-1 rounded-lg bg-[var(--results-white-background)]">
-                      <div className="w-[50%] p-4 text-black font-bold rounded-l-lg bg-grey-med-dark">
+                    <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                      <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                         Total deposited:
                       </div>
-                      <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                      <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                         {isInvalid(results.totalDeposited)
                         ? "$0"
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
-                    <div className="flex flex-row mb-1 bg-lagunita-lighter rounded-lg">
-                      <div className="w-[50%] text-md p-4 rounded-l-lg bg-lagunita font-bold text-white">
+                    <div className="flex flex-col sm:flex-row mb-1 bg-lagunita-lighter rounded-lg">
+                      <div className="w-full sm:w-[50%] text-md p-4 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-lagunita font-bold text-white">
                         Interest earned:
                       </div>
-                      <div className="w-[50%] text-lg-title p-4 self-center rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
+                      <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
                       >
                         {(isInvalid(results.interestEarned) || results.interestEarned < 0)
                         ? "$0"
@@ -595,12 +595,12 @@ export default function SavingsCalculator() {
                       </div>
                     </div>
                     {mode !== "future-balance" && (
-                    <div className="flex flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
-                      <div className="w-[50%] text-md p-4 font-bold text-white bg-navy rounded-l-lg flex items-center">
+                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-blue-background)] rounded-lg">
+                      <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
                       </div>
-                      <div className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        {`$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
+                        ${results.finalBalance.toFixed(2).toLocaleString()}
                       </div>
                     </div>
                     )}

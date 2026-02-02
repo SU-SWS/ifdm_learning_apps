@@ -160,23 +160,23 @@ export default function PresentValueCalculator() {
                 {/* Results section */}
                 <div className="rounded-lg">
                   <div className="innerwrapper">
-                    <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
+                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] text-md  p-4 font-bold text-black rounded-l-lg bg-grey-med-dark items-center">
+                          className="w-full sm:w-[50%] text-md  p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
                         Future value:
                       </div>
                       <div
-                          className="w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                          className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                         ${futureValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                       </div>
                     </div>
-                    <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
+                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] text-md p-4 text-black font-bold rounded-l-lg bg-grey-med-dark">
+                          className="w-full sm:w-[50%] text-md p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                         Present value:
                       </div>
                       <div
-                          className="w-[50%] text-lg-title p-4 self-center rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
+                          className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
                       >
                         ${presentValue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
 
@@ -185,13 +185,13 @@ export default function PresentValueCalculator() {
                     <div className="flex flex-col my-3">
                       <hr/>
                     </div>
-                    <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
+                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div
-                          className="w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-l-lg flex items-center">
+                          className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Discount amount:
                       </div>
                       <div
-                          className="w-[50%] text-lg-title p-4 rounded-r-lg font-bold text-berry overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                          className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold text-berry overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                         -${discountAmount.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
