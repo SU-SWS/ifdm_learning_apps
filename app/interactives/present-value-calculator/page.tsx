@@ -128,7 +128,7 @@ export default function PresentValueCalculator() {
 
               {/* Watch Time Impact Button */}
               <Button
-                className="w-full py-[35px] px-[30px] font-bold bg-berry hover:bg-gray-800 text-white"
+                className="w-full py-[35px] px-[30px] font-bold bg-berry hover:bg-[var(--button-berry)] text-white"
                 onClick={handleWatchClick}
                 disabled={isAnimating}
                 size="watch"

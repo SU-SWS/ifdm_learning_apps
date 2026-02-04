@@ -62,6 +62,7 @@
   --color-badge-orange: rgba(253, 141, 67, 1);
   --text-lg-title: 20px;
   --color-border-dark: rgba(80, 80, 80, 1);
+  --button-green: rgba(30, 113, 102, 1);
 }
 
 :root {
@@ -112,6 +113,8 @@
   --text-navy:  rgba(14, 59, 79, 1);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --button-green:  rgba(30, 113, 102, 1);
+  --button-berry: rgba(151, 24, 87, 1);
 }
 
 .dark {
@@ -160,6 +163,8 @@
   --sidebar-ring: oklch(0.556 0 0);
   --text-navy: oklch(0.985 0 0);
   --additional-background: rgb(52, 51, 51);
+  --button-green:  rgba(30, 113, 102, 1);
+  --button-berry: rgba(151, 24, 87, 1);
 }
 
 @layer base {

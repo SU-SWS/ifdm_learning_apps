@@ -225,7 +225,7 @@ export default function SavingsCalculator() {
           <div className="grid grid-cols-3 gap-2">
             <Button
               variant={mode === "monthly-savings" ? "default" : "outline"}
-              className={`h-18 whitespace-normal ${mode === "monthly-savings" ? "bg-lagunita hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "monthly-savings" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("monthly-savings")}
             >
               <FaDollarSign className="hidden sm:block h-5 w-5 mr-2" />
@@ -233,7 +233,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "time-to-goal" ? "default" : "outline"}
-              className={`h-18 whitespace-normal ${mode === "time-to-goal" ? "bg-navy hover:bg-grey-700 text-white" : "bg-[var(--results-white-background)]"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "time-to-goal" ? "bg-navy text-white hover:bg-lagunita" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("time-to-goal")}
             >
               <FaRegCalendar className="hidden sm:block h-5 w-5 mr-2" />
@@ -241,7 +241,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "future-balance" ? "default" : "outline"}
-              className={`h-18 whitespace-normal ${mode === "future-balance" ? "bg-palo-verde hover:bg-grey-700" : "bg-[var(--results-white-background)]"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "future-balance" ? "bg-palo-verde text-white hover:bg-[var(--button-green)]" : "bg-[var(--results-white-background)] hover:bg-[var(--button-green)] hover:text-white"}`}
               onClick={() => setMode("future-balance")}
             >
               <FaArrowTrendUp className="hidden sm:block h-5 w-5 mr-2" />
@@ -351,7 +351,7 @@ export default function SavingsCalculator() {
                     <Input
                       type="number"
                       value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
-                      placeholder="Monthly contribution"
+                      placeholder="0"
                       onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
                       className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
@@ -539,7 +539,7 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.totalDeposited)
                       ? "$0"
-                      : `$${results.contributionPerPeriod.toFixed(2).toLocaleString()}`}
+                      : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
               )}
@@ -563,7 +563,7 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.finalBalance)
                       ? "$0"
-                      : `$${results.finalBalance.toFixed(2).toLocaleString()}`}
+                      : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
               )}
@@ -580,7 +580,7 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                         {isInvalid(results.totalDeposited)
                         ? "$0"
-                        : `$${results.totalDeposited.toFixed(2).toLocaleString()}`}
+                        : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row mb-1 bg-lagunita-lighter rounded-lg">
@@ -591,7 +591,7 @@ export default function SavingsCalculator() {
                       >
                         {(isInvalid(results.interestEarned) || results.interestEarned < 0)
                         ? "$0"
-                        : `$${results.interestEarned.toFixed(2).toLocaleString()}`}
+                        : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     {mode !== "future-balance" && (
@@ -600,7 +600,7 @@ export default function SavingsCalculator() {
                         Final balance:
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        ${results.finalBalance.toFixed(2).toLocaleString()}
+                        ${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                     </div>
                     )}
@@ -649,22 +649,22 @@ export default function SavingsCalculator() {
                               <td className="py-2 px-3 text-right">
                                 {(isInvalid(year.startingBalance) || year.startingBalance < 0)
                                 ? "$0"
-                                : `$${year.startingBalance.toFixed(2).toLocaleString()}`}
+                                : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right">
                                 {(isInvalid(year.contributions) || year.contributions < 0)
                                 ? "$0"
-                                : `$${year.contributions.toFixed(2).toLocaleString()}`}
+                                : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
                                 {(isInvalid(year.interestEarned) || year.interestEarned < 0)
                                 ? "$0"
-                                : `$${year.interestEarned.toFixed(2).toLocaleString()}`}
+                                : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
                                 {(isInvalid(year.endingBalance) || year.endingBalance < 0)
                                 ? "$0"
-                                : `$${year.endingBalance.toFixed(2).toLocaleString()}`}
+                                : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                             </tr>
                           ))}

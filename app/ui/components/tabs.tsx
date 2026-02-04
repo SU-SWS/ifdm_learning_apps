@@ -28,12 +28,13 @@ export const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(({ class
 TabsList.displayName = "TabsList";
 
 export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(({ className, children, ...props }, ref) => (
-  <RadixTabs.Trigger
+   <RadixTabs.Trigger
     ref={ref}
     className={cn(
       "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal items-center justify-center rounded-md font-bold ring-offset-background transition-colors", 
       "flex-none w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:bg-lagunita data-[state=active]:text-white",
+      "hover:bg-navy hover:text-white", 
       className
     )}
     {...props}
