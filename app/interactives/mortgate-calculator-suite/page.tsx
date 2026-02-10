@@ -736,8 +736,7 @@ export default function MortgageCalculator() {
                             ? "bg-lagunita-lighter text-black border-1 border-lagunita" 
                             : "bg-berry-light border-berry text-black"
                         }`}>
-                          {refinanceResults.monthlySavings >= 0 ? "+" : "-"}$
-                          {formatCurrency(Math.abs(refinanceResults.monthlySavings))}
+                          ${formatCurrency(Math.abs(refinanceResults.monthlySavings))}
                         </p>
                       </div>
 
@@ -748,8 +747,7 @@ export default function MortgageCalculator() {
                         <p className={`text-4xl font-bold ${
                           refinanceResults.totalSavings >= 0 ? "text-lagunita" : "text-berry"
                         }`}>
-                          {refinanceResults.totalSavings >= 0 ? "" : "-"}$
-                          {formatCurrency(Math.abs(refinanceResults.totalSavings))}
+                          ${formatCurrency(Math.abs(refinanceResults.totalSavings))}
                         </p>
                       </div>
                     </div>
@@ -758,13 +756,13 @@ export default function MortgageCalculator() {
                   {refinanceResults ? (
                     <div className="flex gap-4 w-full md:w-auto">
                       <Button
-                        className={`h-18 whitespace-normal cursor-pointer bg-lagunita border-2-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
+                        className={`h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
                         onClick={calculateRefinance}
                       >
                         Recalculate
                       </Button>
                       <Button
-                        className={`h-18 whitespace-normal bg-navy cursor-pointer border-2-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
+                        className={`h-18 whitespace-normal bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
                         onClick={() => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); }}
                       >
                         Reset
