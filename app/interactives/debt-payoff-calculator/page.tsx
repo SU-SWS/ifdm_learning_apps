@@ -632,7 +632,7 @@ export default function DebtPayoffCalculator() {
                       </div>
                       </div>
                       <p className="text-center text-medium font-semibold pt-6 text-[var(--text-navy)]">
-                        You&#39;re turning your loan into a plan. A little extra now means freedom sooner.
+                        You&#39;re turning your loan into a plan.
                       </p>
                   </CardContent>
                 </Card>
