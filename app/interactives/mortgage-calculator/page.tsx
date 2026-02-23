@@ -385,7 +385,7 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-sm font-medium">Estimated home price</p>
-                        <p className="text-3xl font-bold text-lagunita">{formatCurrency(Number(results.homePrice))}</p>
+                        <p className="text-3xl font-bold text-lagunita">{formatCurrency(Number(results.homePrice || 0))}</p>
                       </div>
 
                       <div className="rounded-lg">
@@ -396,7 +396,7 @@ export default function MortgageCalculator() {
                               Down payment:
                             </div>
                             <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                              {formatCurrency(results.downPayment)}
+                              {formatCurrency(results.downPayment || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -407,7 +407,7 @@ export default function MortgageCalculator() {
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
                             >
-                              {formatCurrency(results.loanAmount)}
+                              {formatCurrency(results.loanAmount || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col my-3">
@@ -421,7 +421,7 @@ export default function MortgageCalculator() {
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyMortgage)}
+                              {formatCurrency(results.monthlyMortgage || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -431,7 +431,7 @@ export default function MortgageCalculator() {
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyTax)}
+                              {formatCurrency(results.monthlyTax || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -441,7 +441,7 @@ export default function MortgageCalculator() {
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyInsurance)}
+                              {formatCurrency(results.monthlyInsurance || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -451,7 +451,7 @@ export default function MortgageCalculator() {
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.hoaDues)}
+                              {formatCurrency(results.hoaDues || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -461,7 +461,7 @@ export default function MortgageCalculator() {
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.totalMonthlyHousingCost)}
+                              {formatCurrency(results.totalMonthlyHousingCost || 0)}
                             </div>
                           </div>
                           <div className="space-y-6">
@@ -570,6 +570,8 @@ export default function MortgageCalculator() {
                   <input
                     type="number"
                     step="0.1"
+                    placeholder="-"
+                    min="0"
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
                     className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
@@ -771,7 +773,7 @@ export default function MortgageCalculator() {
                               Down payment:
                             </div>
                             <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                              {formatCurrency(results.downPayment)}
+                              {formatCurrency(results.downPayment || 0)}
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
