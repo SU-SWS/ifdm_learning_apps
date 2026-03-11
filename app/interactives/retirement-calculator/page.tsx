@@ -4,12 +4,13 @@ import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card";
+import { BiSolidError } from "react-icons/bi";
 
 interface CalculatorInputs {
   annualSpending: number
   retirementLength: number
   expectedReturn: number
-  inflationRate: number
+  currentSavings: number
 }
 
 function formatCurrency(value: number): string {
@@ -22,10 +23,10 @@ function formatCurrency(value: number): string {
 }
 
 const defaultInputs: CalculatorInputs = {
-  annualSpending: 50000,
+  annualSpending: 60000,
   retirementLength: 25,
-  expectedReturn: 7,
-  inflationRate: 3,
+  expectedReturn: 5,
+  currentSavings: 0,
 }
 
 export default function RetirementCalculator() {
@@ -34,7 +35,7 @@ export default function RetirementCalculator() {
   const [isCalculated, setIsCalculated] = useState(false)
 
   const results = useMemo(() => {
-    const realReturn = (inputs.expectedReturn - inputs.inflationRate) / 100
+    const realReturn = (inputs.expectedReturn) / 100
 
     if (realReturn <= 0) {
       const requiredBalance = inputs.annualSpending * inputs.retirementLength
@@ -77,7 +78,7 @@ export default function RetirementCalculator() {
     setActiveTab("balance")
   }
 
-  const realReturn = inputs.expectedReturn - inputs.inflationRate
+  const realReturn = inputs.expectedReturn
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -110,46 +111,76 @@ export default function RetirementCalculator() {
           </TabsList>
         </Tabs>
 
-        {!isCalculated && (
-          <div className="mb-6 p-4 bg-[#FFF3CC] rounded-lg">
-            <p className="text-[#8C5A15] font-bold">
-              First calculate your required retirement balance before viewing the Annual savings tab.
-            </p>
-          </div>
-        )}
-
         {/* Main Content */}
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Left Column - Inputs */}
           <div className="space-y-8">
-            <h2 className="text-2xl font-medium text-foreground">
-              {activeTab === "balance" ? "Required retirement balance" : "Annual savings needed"}
-            </h2>
-
-            {/* Annual Spending Input */}
-            <div className="space-y-2">
-              <label className="block text-sm text-foreground">
-                Annual spending in retirement
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-lg ">$</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={inputs.annualSpending.toLocaleString()}
-                  onChange={(e) => updateInput("annualSpending", e.target.value.replace(/,/g, ""))}
-                  className="w-full border-b border-border bg-transparent py-2 text-lg font-medium text-foreground outline-none transition-colors focus:border-primary"
-                />
+            {!isCalculated && (
+              <div className="mb-6 p-5 bg-[#FFF3CC] rounded-lg flex flex-row gap-3">
+                <BiSolidError className="mb-2 text-[#8C5A15]" size={80} />
+                <p className="text-[#8C5A15] font-bold">
+                  First calculate your required retirement balance before viewing the Annual savings tab.
+                </p>
               </div>
-              <p className="text-xs">
-                How much you expect to spend each year during retirement
-              </p>
-            </div>
+            )}
+
+            {isCalculated && (
+              <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+                <p className="font-bold mb-1">Target Retirement Balance</p>
+                <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.requiredBalance) : "—"}</p>
+              </div>  
+            )}
+
+            {activeTab === "balance" ? (
+              <>
+                {/* Required Balance Result */}
+                {/* Annual Spending Input */}
+                <div className="space-y-2">
+                  <label className="block text-sm text-foreground">
+                    Annual spending in retirement
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={inputs.annualSpending.toLocaleString()}
+                      onChange={(e) => updateInput("annualSpending", e.target.value.replace(/,/g, ""))}
+                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    />
+                  </div>
+                  <p className="text-xs">
+                    How much you plan to withdraw each year.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Annual Savings Result */}
+                {/* Annual Spending Input */}
+                <div className="space-y-2">
+                  <label className="block text-sm text-foreground">
+                    Current retirement savings
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={inputs.currentSavings.toLocaleString()}
+                      onChange={(e) => updateInput("currentSavings", e.target.value.replace(/,/g, ""))}
+                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    />
+                  </div>
+                  <p className="text-xs">
+                    How much you plan to withdraw each year.
+                  </p>
+                </div>
+              </>
+            )}
 
             {/* Retirement Length Input */}
             <div className="space-y-2">
               <label className="block text-sm text-foreground">
-                Expected length of retirement
+                Expected length of retirement (years)
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -157,16 +188,18 @@ export default function RetirementCalculator() {
                   inputMode="numeric"
                   value={inputs.retirementLength}
                   onChange={(e) => updateInput("retirementLength", e.target.value)}
-                  className="w-24 border-b border-border bg-transparent py-2 text-lg font-medium text-foreground outline-none transition-colors focus:border-primary"
+                  className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 />
-                <span className="text-lg">years</span>
               </div>
+              <p className="text-xs">
+                How much years your retirement will last.
+              </p>
             </div>
 
             {/* Expected Return Input */}
             <div className="space-y-2">
               <label className="block text-sm text-foreground">
-                Expected annual return
+                Expected annual return on investment (%)
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -174,168 +207,72 @@ export default function RetirementCalculator() {
                   inputMode="decimal"
                   value={inputs.expectedReturn}
                   onChange={(e) => updateInput("expectedReturn", e.target.value)}
-                  className="w-20 border-b border-border bg-transparent py-2 text-lg font-medium text-foreground outline-none transition-colors focus:border-primary"
+                  className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 />
-                <span className="text-lg">%</span>
               </div>
               <p className="text-xs">
-                The nominal annual return you expect on your investments
+                Annual Investment return rate during retirement.
               </p>
             </div>
 
-            {/* Inflation Rate Input */}
-            <div className="space-y-2">
-              <label className="block text-sm text-foreground">
-                Expected inflation rate
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={inputs.inflationRate}
-                  onChange={(e) => updateInput("inflationRate", e.target.value)}
-                  className="w-20 border-b border-border bg-transparent py-2 text-lg font-medium text-foreground outline-none transition-colors focus:border-primary"
-                />
-                <span className="text-lg">%</span>
-              </div>
-              <p className="text-xs">
-                The average annual inflation rate to account for rising costs
-              </p>
+            {/* Calculate and Reset Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleCalculate}
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+              >
+                Calculate
+              </button>
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+              >
+                Reset
+              </button>
             </div>
-
-            {/* Calculate and Reset Buttons - only show on balance tab */}
-            {activeTab === "balance" && (
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={handleCalculate}
-                  className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
-                >
-                  Calculate
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
-                >
-                  Reset
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Right Column - Results */}
           <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-            <h3 className="mb-6 text-lg font-medium text-foreground">Results</h3>
+            <h3 className="mb-1 text-2xl font-bold">Results</h3>
 
+            <p className="mb-5 text-sm font-medium">Your calculated retirement figures</p>
             {activeTab === "balance" ? (
               <>
                 {/* Required Balance Result */}
                 <div className="mb-8">
-                  <p className="mb-1 text-sm ">
-                    Required retirement balance
+                  <p className="mb-1 text-xl font-bold">
+                    Required Retirement Balance
                   </p>
-                  <p className="text-4xl font-medium text-foreground">
+                  <p className="text-4xl font-bold text-lagunita">
                     {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
                   </p>
-                </div>
-
-                {/* Breakdown */}
-                {isCalculated && (
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-foreground">Breakdown</h4>
-                    <div className="h-px bg-border" />
-
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-sm ">Annual spending:</span>
-                      <span className="text-sm font-medium text-foreground">
-                        {formatCurrency(inputs.annualSpending)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-sm ">Retirement length:</span>
-                      <span className="text-sm font-medium text-foreground">
-                        {inputs.retirementLength} years
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-sm ">Real return rate:</span>
-                      <span className="text-sm font-medium text-foreground">
-                        {realReturn}%
-                      </span>
-                    </div>
-
-                    <div className="h-px bg-border" />
-
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-sm font-medium text-foreground">Required balance:</span>
-                      <span className="text-sm font-medium text-foreground">
-                        {formatCurrency(results.requiredBalance)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {!isCalculated && (
-                  <p className="text-sm ">
-                    Enter your details and click Calculate to see results.
+                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for 25 years, assuming a 5% annual return during retirement.</p>
+                  <p className="mb-1 font-bold">
+                    Annual savings needed
                   </p>
-                )}
+                  <p className="text-4xl font-bold text-lagunita">
+                    {isCalculated ? formatCurrency(results.annualSavings) : "—" }
+                  </p>
+                </div>
               </>
             ) : (
               <>
                 {/* Annual Savings Result */}
                 <div className="mb-8">
-                  <p className="mb-1 text-sm ">
-                    Annual savings needed
+                  <p className="font-bold text-xl mb-1">Required Retirement Balance</p>
+                  <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.requiredBalance) : "—"}</p>
+                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for 25 years, assuming a 5% annual return during retirement.</p>
+                  <p className="mb-1 font-bold">
+                    Required Annual Savings
                   </p>
-                  <p className="text-4xl font-medium text-foreground">
+                  <p className="text-4xl font-bold text-lagunita">
                     {formatCurrency(results.annualSavings)}
                   </p>
-                </div>
-
-                {/* Monthly Breakdown */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-foreground">Monthly breakdown</h4>
-                  <div className="h-px bg-border" />
-
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-sm ">Monthly savings:</span>
-                    <span className="text-sm font-medium text-foreground">
-                      {formatCurrency(results.monthlySavings)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-sm ">Savings period:</span>
-                    <span className="text-sm font-medium text-foreground">30 years</span>
-                  </div>
-
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-sm ">Target balance:</span>
-                    <span className="text-sm font-medium text-foreground">
-                      {formatCurrency(results.requiredBalance)}
-                    </span>
-                  </div>
-
-                  <div className="h-px bg-border" />
-
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-sm font-medium text-foreground">
-                      Total annual savings:
-                    </span>
-                    <span className="text-sm font-medium text-foreground">
-                      {formatCurrency(results.annualSavings)}
-                    </span>
-                  </div>
+                  <p className="mt-3 mb-6 text-sm">Amount to save each year.</p>
                 </div>
               </>
             )}
-
-            {/* Note */}
-            <p className="mt-8 text-xs ">
-              Calculations assume a 30-year savings period before retirement, with investments growing at the real return rate (nominal return minus inflation).
-            </p>
           </div>
         </div>
       </div>
