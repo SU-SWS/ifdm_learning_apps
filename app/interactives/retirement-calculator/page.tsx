@@ -110,6 +110,14 @@ export default function RetirementCalculator() {
           </TabsList>
         </Tabs>
 
+        {!isCalculated && (
+          <div className="mb-6 p-4 bg-[#FFF3CC] rounded-lg">
+            <p className="text-[#8C5A15] font-bold">
+              First calculate your required retirement balance before viewing the Annual savings tab.
+            </p>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Left Column - Inputs */}
