@@ -52,7 +52,7 @@ export default function RetirementCalculator() {
       inputs.annualSpending *
       ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
 
-    const yearsToRetirement = 30
+    const yearsToRetirement = inputs.retirementLength
     const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, yearsToRetirement)
     const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
     const annualSavings =
@@ -202,6 +202,7 @@ export default function RetirementCalculator() {
                     <input
                       type="number"
                       min="0"
+                      placeholder="-"
                       value={inputs.currentSavings || ""}
                       onChange={(e) => updateInput("currentSavings", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -289,7 +290,7 @@ export default function RetirementCalculator() {
                 </div>
               </div>
               <p className="text-xs">
-                How much years your retirement will last.
+                How many years your retirement will last.
               </p>
             </div>
 
@@ -384,7 +385,7 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold text-lagunita">
                     {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for 25 years, assuming a 5% annual return during retirement.</p>
+                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.retirementLength}% annual return during retirement.</p>
                   <p className="mb-1 font-bold">
                     Annual savings needed
                   </p>
@@ -399,7 +400,7 @@ export default function RetirementCalculator() {
                 <div className="mb-8">
                   <p className="font-bold text-xl mb-1">Required Retirement Balance</p>
                   <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.requiredBalance) : "—"}</p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for 25 years, assuming a 5% annual return during retirement.</p>
+                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturn}% annual return during retirement.</p>
                   <p className="mb-1 font-bold">
                     Required Annual Savings
                   </p>
