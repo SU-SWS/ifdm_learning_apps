@@ -10,6 +10,7 @@ interface CalculatorInputs {
   retirementLength: number
   expectedReturn: number
   currentSavings: number
+  yearsToRetirement: number
 }
 
 function formatCurrency(value: number): string {
@@ -26,6 +27,7 @@ const defaultInputs: CalculatorInputs = {
   retirementLength: 25,
   expectedReturn: 5,
   currentSavings: 0,
+  yearsToRetirement: 30,
 }
 
 export default function RetirementCalculator() {
@@ -38,13 +40,13 @@ export default function RetirementCalculator() {
 
     if (realReturn <= 0) {
       const requiredBalance = inputs.annualSpending * inputs.retirementLength
-      const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, 30)
+      const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, inputs.yearsToRetirement)
       const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
       return {
         requiredBalance,
         targetBalance,
-        annualSavings: targetBalance / 30,
-        monthlySavings: targetBalance / 30 / 12,
+        annualSavings: inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0,
+        monthlySavings: inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement / 12 : 0,
       }
     }
 
@@ -52,12 +54,11 @@ export default function RetirementCalculator() {
       inputs.annualSpending *
       ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
 
-    const yearsToRetirement = inputs.retirementLength
-    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, yearsToRetirement)
+    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, inputs.yearsToRetirement)
     const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
     const annualSavings =
       targetBalance *
-      (realReturn / (Math.pow(1 + realReturn, yearsToRetirement) - 1))
+      (realReturn / (Math.pow(1 + realReturn, inputs.yearsToRetirement) - 1))
 
     return {
       requiredBalance: Math.round(requiredBalance),
@@ -70,10 +71,10 @@ export default function RetirementCalculator() {
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
     setInputs((prev) => ({ ...prev, [key]: numValue }))
-    // Changing most inputs invalidates the previous calculation, but
-    // currentSavings is only used for display and shouldn't clear the
-    // calculated results so the user can tweak it on the savings tab.
-    if (key !== "currentSavings") {
+    // Changing balance-tab inputs invalidates the previous calculation, but
+    // currentSavings and yearsToRetirement are savings-tab inputs that
+    // should not clear the calculated results.
+    if (key !== "currentSavings" && key !== "yearsToRetirement") {
       setIsCalculated(false)
     }
   }
@@ -134,9 +135,9 @@ export default function RetirementCalculator() {
 
             {isCalculated && (
               <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                <p className="font-bold mb-1">Target Retirement Balance</p>
+                <p className="font-bold mb-1">Target Retirement Savings</p>
                 <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.targetBalance) : "—"}</p>
-              </div>  
+              </div>
             )}
 
             {activeTab === "balance" ? (
@@ -239,7 +240,57 @@ export default function RetirementCalculator() {
                     </div>
                   </div>
                   <p className="text-xs">
-                    How much you plan to withdraw each year.
+                    How much you have already saved for retirement.
+                  </p>
+                </div>
+
+                {/* Years to Retirement Input */}
+                <div className="space-y-2">
+                  <label className="block text-sm text-foreground">
+                    Years until retirement
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="99"
+                      value={inputs.yearsToRetirement || ""}
+                      onChange={(e) => updateInput("yearsToRetirement", e.target.value)}
+                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Increase years"
+                        onClick={() =>
+                          updateInput(
+                            "yearsToRetirement",
+                            String(Math.min(99, (inputs.yearsToRetirement ?? 0) + 1))
+                          )
+                        }
+                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidUpArrow size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Decrease years"
+                        onClick={() =>
+                          updateInput(
+                            "yearsToRetirement",
+                            String(Math.max(0, (inputs.yearsToRetirement ?? 0) - 1))
+                          )
+                        }
+                        className="hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidDownArrow size={24} />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs">
+                    How many years until you plan to retire.
                   </p>
                 </div>
               </>
@@ -385,13 +436,7 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold text-lagunita">
                     {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.retirementLength}% annual return during retirement.</p>
-                  <p className="mb-1 font-bold">
-                    Annual savings needed
-                  </p>
-                  <p className="text-4xl font-bold text-lagunita">
-                    {isCalculated ? formatCurrency(results.annualSavings) : "—" }
-                  </p>
+                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturn}% annual return during retirement.</p>
                 </div>
               </>
             ) : (
@@ -407,7 +452,7 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold text-lagunita">
                     {formatCurrency(results.annualSavings)}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">Amount to save each year.</p>
+                  <p className="mt-3 mb-6 text-sm">Amount to save each year over {inputs.yearsToRetirement} years to reach your target balance, assuming a {inputs.expectedReturn}% annual return before retirement.</p>
                 </div>
               </>
             )}
