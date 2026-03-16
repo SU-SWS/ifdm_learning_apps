@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card";
+import { BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
 
 export default function MortgageCalculator() {
   const [mode, setMode] = useState('afford'); // 'afford', 'affordability', 'payment'
@@ -123,8 +124,36 @@ export default function MortgageCalculator() {
                         step="1"
                         value={monthlyPayment}
                         onChange={(e) => setMonthlyPayment(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() =>
+                            setMonthlyPayment(
+                              String((Number(monthlyPayment) ?? 0) + 1)
+                            )
+                          }
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() =>
+                            setMonthlyPayment(
+                              String((Number(monthlyPayment) ?? 0) - 1)
+                            )
+                          }
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-xs">Taxes, insurance, and HOA are separate—add estimates below to see your total cost.</p>
                   </div>
@@ -183,9 +212,44 @@ export default function MortgageCalculator() {
                             setDownPaymentPercent((value / Number(homePrice)) * 100);
                           }
                         }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() => {
+                            if (downPaymentMode === 'percentage') {
+                              setDownPaymentPercent((Number(downPaymentPercent) || 0) + 0.25);
+                            } else {
+                              const newAmount = (Number(downPaymentAmount) || 0) + 1000;
+                              setDownPaymentAmount(newAmount);
+                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() => {
+                            if (downPaymentMode === 'percentage') {
+                              setDownPaymentPercent(Math.max(0, (Number(downPaymentPercent) || 0) - 0.25));
+                            } else {
+                              const newAmount = Math.max(0, (Number(downPaymentAmount) || 0) - 1000);
+                              setDownPaymentAmount(newAmount);
+                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -200,7 +264,7 @@ export default function MortgageCalculator() {
                         min="0"
                         value={interestRate}
                         onChange={(e) => setInterestRate(e.target.value)}
-                        className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">%</span>
                     </div>
@@ -291,9 +355,44 @@ export default function MortgageCalculator() {
                               setPropertyTaxPercent((value / Number(homePrice)) * 100);
                             }
                           }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
-                        
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              if (propertyTaxMode === 'percentage') {
+                                setPropertyTaxPercent((Number(propertyTaxPercent) || 0) + 0.25);
+                              } else {
+                                const newAmount = (Number(propertyTaxAmount) || 0) + 1000;
+                                setPropertyTaxAmount(newAmount);
+                                setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                              }
+                            }}
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              if (propertyTaxMode === 'percentage') {
+                                setPropertyTaxPercent(Math.max(0, (Number(propertyTaxPercent) || 0) - 0.25));
+                              } else {
+                                const newAmount = Math.max(0, (Number(propertyTaxAmount) || 0) - 1000);
+                                setPropertyTaxAmount(newAmount);
+                                setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                              }
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -352,7 +451,7 @@ export default function MortgageCalculator() {
                               setHomeInsurancePercent((value / Number(homePrice)) * 100);
                             }
                           }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         
                       </div>
@@ -370,7 +469,7 @@ export default function MortgageCalculator() {
                           min="0"
                           value={hoaDues}
                           onChange={(e) => setHoaDues(e.target.value)}
-                          className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                          className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                     </div>
@@ -497,7 +596,7 @@ export default function MortgageCalculator() {
                         step="1"
                         value={homePrice}
                         onChange={(e) => setHomePrice(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                     <p className="text-xs">Enter the purchase price of the home.</p>
@@ -558,7 +657,7 @@ export default function MortgageCalculator() {
                             setDownPaymentPercent((value / Number(homePrice)) * 100);
                           }
                         }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>
@@ -574,7 +673,7 @@ export default function MortgageCalculator() {
                     min="0"
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
-                    className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">%</span>
                 </div>
@@ -666,7 +765,7 @@ export default function MortgageCalculator() {
                           setPropertyTaxPercent((value / Number(homePrice)) * 100);
                         }
                       }}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     
                   </div>
@@ -727,7 +826,7 @@ export default function MortgageCalculator() {
                             setHomeInsurancePercent((value / Number(homePrice)) * 100);
                           }
                         }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       
                     </div>
@@ -745,7 +844,7 @@ export default function MortgageCalculator() {
                         min="0"
                         value={hoaDues}
                         onChange={(e) => setHoaDues(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>
