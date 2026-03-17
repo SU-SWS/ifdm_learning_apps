@@ -303,7 +303,7 @@ export default function MortgageCalculator() {
                     {/*  Property Taxes */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <label className="block text-sm font-semibold">Property taxes (yearly)</label>
+                        <label className="block text-sm font-semibold">Property taxes (annual)</label>
                         <div className="flex flex-row gap-2">
                           <button
                             type="button"
@@ -516,7 +516,7 @@ export default function MortgageCalculator() {
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                             <div
                                 className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage (P&I):
+                              Mortgage Payment:
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
@@ -713,7 +713,7 @@ export default function MortgageCalculator() {
                 {/*  Property Taxes */}
                 <div className="pb-5">
                   <div className="flex flex-row pb-2 justify-between items-center">
-                    <label className="block text-sm font-semibold">Property taxes (yearly)</label>
+                    <label className="block text-sm font-semibold">Property taxes (annual)</label>
                     <div className="flex flex-row gap-2">
                       <button
                         type="button"
@@ -893,7 +893,7 @@ export default function MortgageCalculator() {
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                             <div
                                 className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage (P&I):
+                              Mortgage Payment:
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
