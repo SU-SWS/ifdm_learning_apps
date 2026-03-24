@@ -860,7 +860,7 @@ export default function MortgageCalculator() {
                     </CardHeader>
                     <CardContent className="">
                       <div className="mb-6">
-                        <p className="text-sm font-medium">Monthly mortgage payment (P&I)</p>
+                        <p className="text-sm font-medium">Monthly mortgage payment</p>
                         <p className="text-3xl font-bold text-lagunita">{formatCurrency(results.monthlyMortgage)}</p>
                       </div>
 
