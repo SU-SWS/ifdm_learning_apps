@@ -87,6 +87,7 @@ export default function MortgageCalculator() {
   }, [calculateMortgage]);
 
   const formatCurrency = (value: number) => {
+    if (!isFinite(value)) return '-';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -133,10 +134,10 @@ export default function MortgageCalculator() {
                           aria-label="Increase amount"
                           onClick={() =>
                             setMonthlyPayment(
-                              String((Number(monthlyPayment) ?? 0) + 1)
+                              String((Number(monthlyPayment) || 0) + 1)
                             )
                           }
-                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                         >
                           <BiSolidUpArrow size={24} />
                         </button>
@@ -146,7 +147,7 @@ export default function MortgageCalculator() {
                           aria-label="Decrease amount"
                           onClick={() =>
                             setMonthlyPayment(
-                              String((Number(monthlyPayment) ?? 0) - 1)
+                              String(Math.max(0, (Number(monthlyPayment) || 0) - 1))
                             )
                           }
                           className="hover:text-grey-med-dark focus:outline-none"
@@ -201,15 +202,17 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent : downPaymentAmount}
+                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
                         onChange={(e) => {
-                          const value = Number(e.target.value);
+                          const raw = e.target.value;
+                          const value = raw === '' ? 0 : Number(raw);
                           if (downPaymentMode === 'percentage') {
                             setDownPaymentPercent(value);
                           } else {
                             setDownPaymentAmount(value);
                             // Calculate percentage from dollar amount
-                            setDownPaymentPercent((value / Number(homePrice)) * 100);
+                            const price = Number(homePrice) || results.homePrice;
+                            if (price > 0) setDownPaymentPercent((value / price) * 100);
                           }
                         }}
                         className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -221,14 +224,17 @@ export default function MortgageCalculator() {
                           aria-label="Increase amount"
                           onClick={() => {
                             if (downPaymentMode === 'percentage') {
-                              setDownPaymentPercent((Number(downPaymentPercent) || 0) + 0.25);
+                              const newPercent = (Number(downPaymentPercent) || 0) + 0.25;
+                              setDownPaymentPercent(newPercent);
+                              const price = Number(homePrice) || 0;
+                              if (price > 0) setDownPaymentAmount(Math.round((newPercent / 100) * price));
                             } else {
                               const newAmount = (Number(downPaymentAmount) || 0) + 1000;
                               setDownPaymentAmount(newAmount);
                               setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
                             }
                           }}
-                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                         >
                           <BiSolidUpArrow size={24} />
                         </button>
@@ -238,7 +244,10 @@ export default function MortgageCalculator() {
                           aria-label="Decrease amount"
                           onClick={() => {
                             if (downPaymentMode === 'percentage') {
-                              setDownPaymentPercent(Math.max(0, (Number(downPaymentPercent) || 0) - 0.25));
+                              const newPercent = Math.max(0, (Number(downPaymentPercent) || 0) - 0.25);
+                              setDownPaymentPercent(newPercent);
+                              const price = Number(homePrice) || 0;
+                              if (price > 0) setDownPaymentAmount(Math.round((newPercent / 100) * price));
                             } else {
                               const newAmount = Math.max(0, (Number(downPaymentAmount) || 0) - 1000);
                               setDownPaymentAmount(newAmount);
@@ -371,7 +380,7 @@ export default function MortgageCalculator() {
                                 setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
                               }
                             }}
-                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidUpArrow size={24} />
                           </button>
@@ -646,15 +655,17 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent : downPaymentAmount}
+                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
                         onChange={(e) => {
-                          const value = Number(e.target.value);
+                          const raw = e.target.value;
+                          const value = raw === '' ? 0 : Number(raw);
                           if (downPaymentMode === 'percentage') {
                             setDownPaymentPercent(value);
                           } else {
                             setDownPaymentAmount(value);
                             // Calculate percentage from dollar amount
-                            setDownPaymentPercent((value / Number(homePrice)) * 100);
+                            const price = Number(homePrice) || results.homePrice;
+                            if (price > 0) setDownPaymentPercent((value / price) * 100);
                           }
                         }}
                         className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
