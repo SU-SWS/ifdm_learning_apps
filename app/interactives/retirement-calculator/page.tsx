@@ -71,12 +71,14 @@ export default function RetirementCalculator() {
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
     setInputs((prev) => ({ ...prev, [key]: numValue }))
-    // Changing balance-tab inputs invalidates the previous calculation, but
-    // currentSavings and yearsToRetirement are savings-tab inputs that
-    // should not clear the calculated results.
-    if (key !== "currentSavings" && key !== "yearsToRetirement") {
-      setIsCalculated(false)
-    }
+    // Only invalidate the calculation when balance-tab-only inputs change
+    // while on the balance tab. Shared inputs (expectedReturn, retirementLength)
+    // and savings-tab inputs should not reset when on the savings tab.
+    const savingsTabKeys: Array<keyof CalculatorInputs> = ["currentSavings", "yearsToRetirement"]
+    const sharedKeys: Array<keyof CalculatorInputs> = ["expectedReturn", "retirementLength"]
+    if (savingsTabKeys.includes(key)) return
+    if (sharedKeys.includes(key) && activeTab === "savings") return
+    setIsCalculated(false)
   }
 
   const handleCalculate = () => {
@@ -367,7 +369,7 @@ export default function RetirementCalculator() {
                     onClick={() =>
                       updateInput(
                         "expectedReturn",
-                        String((inputs.expectedReturn ?? 0) + 0.1)
+                        String(Math.round(((inputs.expectedReturn ?? 0) + 0.1) * 10) / 10)
                       )
                     }
                     className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
@@ -381,7 +383,7 @@ export default function RetirementCalculator() {
                     onClick={() =>
                       updateInput(
                         "expectedReturn",
-                        String(Math.max(0, (inputs.expectedReturn ?? 0) - 0.1))
+                        String(Math.max(0, Math.round(((inputs.expectedReturn ?? 0) - 0.1) * 10) / 10))
                       )
                     }
                     className="hover:text-grey-med-dark focus:outline-none"
