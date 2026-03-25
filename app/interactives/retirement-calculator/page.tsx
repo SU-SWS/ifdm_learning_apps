@@ -299,7 +299,7 @@ export default function RetirementCalculator() {
             )}
 
             {/* Retirement Length Input */}
-            <div className="space-y-2">
+            {activeTab === "balance" && <div className="space-y-2">
               <label className="block text-sm text-foreground">
                 Expected length of retirement (years)
               </label>
@@ -345,7 +345,7 @@ export default function RetirementCalculator() {
               <p className="text-xs">
                 How many years your retirement will last.
               </p>
-            </div>
+            </div>}
 
             {/* Expected Return Input */}
             <div className="space-y-2">
@@ -357,7 +357,7 @@ export default function RetirementCalculator() {
                   type="number"
                   min="0"
                   step="0.1"
-                  value={inputs.expectedReturn}
+                  value={inputs.expectedReturn || ""}
                   onChange={(e) => updateInput("expectedReturn", e.target.value)}
                   className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
