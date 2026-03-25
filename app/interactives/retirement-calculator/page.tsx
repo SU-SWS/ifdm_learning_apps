@@ -71,12 +71,14 @@ export default function RetirementCalculator() {
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
     setInputs((prev) => ({ ...prev, [key]: numValue }))
-    // Changing balance-tab inputs invalidates the previous calculation, but
-    // currentSavings and yearsToRetirement are savings-tab inputs that
-    // should not clear the calculated results.
-    if (key !== "currentSavings" && key !== "yearsToRetirement") {
-      setIsCalculated(false)
-    }
+    // Only invalidate the calculation when balance-tab-only inputs change
+    // while on the balance tab. Shared inputs (expectedReturn, retirementLength)
+    // and savings-tab inputs should not reset when on the savings tab.
+    const savingsTabKeys: Array<keyof CalculatorInputs> = ["currentSavings", "yearsToRetirement"]
+    const sharedKeys: Array<keyof CalculatorInputs> = ["expectedReturn", "retirementLength"]
+    if (savingsTabKeys.includes(key)) return
+    if (sharedKeys.includes(key) && activeTab === "savings") return
+    setIsCalculated(false)
   }
 
   const handleCalculate = () => {
@@ -297,7 +299,7 @@ export default function RetirementCalculator() {
             )}
 
             {/* Retirement Length Input */}
-            <div className="space-y-2">
+            {activeTab === "balance" && <div className="space-y-2">
               <label className="block text-sm text-foreground">
                 Expected length of retirement (years)
               </label>
@@ -343,7 +345,7 @@ export default function RetirementCalculator() {
               <p className="text-xs">
                 How many years your retirement will last.
               </p>
-            </div>
+            </div>}
 
             {/* Expected Return Input */}
             <div className="space-y-2">
@@ -355,7 +357,7 @@ export default function RetirementCalculator() {
                   type="number"
                   min="0"
                   step="0.1"
-                  value={inputs.expectedReturn}
+                  value={inputs.expectedReturn || ""}
                   onChange={(e) => updateInput("expectedReturn", e.target.value)}
                   className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
@@ -367,7 +369,7 @@ export default function RetirementCalculator() {
                     onClick={() =>
                       updateInput(
                         "expectedReturn",
-                        String((inputs.expectedReturn ?? 0) + 0.1)
+                        String(Math.round(((inputs.expectedReturn ?? 0) + 0.1) * 10) / 10)
                       )
                     }
                     className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
@@ -381,7 +383,7 @@ export default function RetirementCalculator() {
                     onClick={() =>
                       updateInput(
                         "expectedReturn",
-                        String(Math.max(0, (inputs.expectedReturn ?? 0) - 0.1))
+                        String(Math.max(0, Math.round(((inputs.expectedReturn ?? 0) - 0.1) * 10) / 10))
                       )
                     }
                     className="hover:text-grey-med-dark focus:outline-none"
