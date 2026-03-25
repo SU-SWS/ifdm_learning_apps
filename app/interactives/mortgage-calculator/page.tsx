@@ -172,7 +172,7 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent : downPaymentAmount}
+                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
                         onChange={(e) => {
                           const value = Number(e.target.value);
                           if (downPaymentMode === 'percentage') {
@@ -547,7 +547,7 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent : downPaymentAmount}
+                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
                         onChange={(e) => {
                           const value = Number(e.target.value);
                           if (downPaymentMode === 'percentage') {
