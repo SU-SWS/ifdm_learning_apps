@@ -281,7 +281,7 @@ export default function SavingsCalculator() {
                     placeholder="Savings goal amount"
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
                     className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    
+
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                     <button
@@ -346,7 +346,7 @@ export default function SavingsCalculator() {
 
               {mode !== "monthly-savings" && (
                 <div>
-                  <Label className="font-medium">Payment per period:</Label>
+                  <Label className="font-medium">Savings per period:</Label>
                   <div className="relative mt-1">
                     <Input
                       type="number"
@@ -531,7 +531,7 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Payment per period:</CardTitle>
+                  <CardTitle className="text-center text-md font-bold">Savings per period:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited)
                         ? "text-berry"
@@ -605,7 +605,7 @@ export default function SavingsCalculator() {
                     </div>
                     )}
 
-                    
+
                   </div>
                   {/* Wrapper section ends */}
                 </div>
@@ -625,7 +625,7 @@ export default function SavingsCalculator() {
                 </div>
                 <ChevronDown className={`h-8 w-8 transition-transform ${showBreakdown ? "rotate-180" : ""}`} />
               </div>
-              
+
               {showBreakdown && (
                 <Card className="mb-8">
                   <CardContent>
