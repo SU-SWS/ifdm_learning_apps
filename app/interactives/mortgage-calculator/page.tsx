@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card";
+import { BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
 
 export default function MortgageCalculator() {
   const [mode, setMode] = useState('afford'); // 'afford', 'affordability', 'payment'
@@ -86,6 +87,7 @@ export default function MortgageCalculator() {
   }, [calculateMortgage]);
 
   const formatCurrency = (value: number) => {
+    if (!isFinite(value)) return '-';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -123,8 +125,36 @@ export default function MortgageCalculator() {
                         step="1"
                         value={monthlyPayment}
                         onChange={(e) => setMonthlyPayment(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() =>
+                            setMonthlyPayment(
+                              String((Number(monthlyPayment) || 0) + 1)
+                            )
+                          }
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() =>
+                            setMonthlyPayment(
+                              String(Math.max(0, (Number(monthlyPayment) || 0) - 1))
+                            )
+                          }
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-xs">Taxes, insurance, and HOA are separate—add estimates below to see your total cost.</p>
                   </div>
@@ -172,20 +202,63 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent : downPaymentAmount}
+                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
                         onChange={(e) => {
-                          const value = Number(e.target.value);
+                          const raw = e.target.value;
+                          const value = raw === '' ? 0 : Number(raw);
                           if (downPaymentMode === 'percentage') {
                             setDownPaymentPercent(value);
                           } else {
                             setDownPaymentAmount(value);
                             // Calculate percentage from dollar amount
-                            setDownPaymentPercent((value / Number(homePrice)) * 100);
+                            const price = Number(homePrice) || results.homePrice;
+                            if (price > 0) setDownPaymentPercent((value / price) * 100);
                           }
                         }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() => {
+                            if (downPaymentMode === 'percentage') {
+                              const newPercent = (Number(downPaymentPercent) || 0) + 0.25;
+                              setDownPaymentPercent(newPercent);
+                              const price = Number(homePrice) || 0;
+                              if (price > 0) setDownPaymentAmount(Math.round((newPercent / 100) * price));
+                            } else {
+                              const newAmount = (Number(downPaymentAmount) || 0) + 1000;
+                              setDownPaymentAmount(newAmount);
+                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() => {
+                            if (downPaymentMode === 'percentage') {
+                              const newPercent = Math.max(0, (Number(downPaymentPercent) || 0) - 0.25);
+                              setDownPaymentPercent(newPercent);
+                              const price = Number(homePrice) || 0;
+                              if (price > 0) setDownPaymentAmount(Math.round((newPercent / 100) * price));
+                            } else {
+                              const newAmount = Math.max(0, (Number(downPaymentAmount) || 0) - 1000);
+                              setDownPaymentAmount(newAmount);
+                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -200,7 +273,7 @@ export default function MortgageCalculator() {
                         min="0"
                         value={interestRate}
                         onChange={(e) => setInterestRate(e.target.value)}
-                        className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">%</span>
                     </div>
@@ -239,7 +312,7 @@ export default function MortgageCalculator() {
                     {/*  Property Taxes */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <label className="block text-sm font-semibold">Property taxes (yearly)</label>
+                        <label className="block text-sm font-semibold">Property taxes (annual)</label>
                         <div className="flex flex-row gap-2">
                           <button
                             type="button"
@@ -280,7 +353,7 @@ export default function MortgageCalculator() {
                       <div className="relative">
                         <input
                           type="number"
-                          value={propertyTaxMode === 'percentage' ? propertyTaxPercent : propertyTaxAmount}
+                          value={propertyTaxMode === 'percentage' ? propertyTaxPercent || '' : propertyTaxAmount || ''}
                           onChange={(e) => {
                             const value = Number(e.target.value);
                             if (propertyTaxMode === 'percentage') {
@@ -291,9 +364,44 @@ export default function MortgageCalculator() {
                               setPropertyTaxPercent((value / Number(homePrice)) * 100);
                             }
                           }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
-                        
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              if (propertyTaxMode === 'percentage') {
+                                setPropertyTaxPercent(Math.round(((Number(propertyTaxPercent) || 0) + 0.25) * 100) / 100);
+                              } else {
+                                const newAmount = (Number(propertyTaxAmount) || 0) + 1000;
+                                setPropertyTaxAmount(newAmount);
+                                setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                              }
+                            }}
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              if (propertyTaxMode === 'percentage') {
+                                setPropertyTaxPercent(Math.max(0, Math.round(((Number(propertyTaxPercent) || 0) - 0.25) * 100) / 100));
+                              } else {
+                                const newAmount = Math.max(0, (Number(propertyTaxAmount) || 0) - 1000);
+                                setPropertyTaxAmount(newAmount);
+                                setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                              }
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -341,7 +449,7 @@ export default function MortgageCalculator() {
                       <div className="relative">
                         <input
                           type="number"
-                          value={homeInsuranceMode === 'percentage' ? homeInsurancePercent : homeInsuranceAmount}
+                          value={homeInsuranceMode === 'percentage' ? homeInsurancePercent || '' : homeInsuranceAmount || ''}
                           onChange={(e) => {
                             const value = Number(e.target.value);
                             if (homeInsuranceMode === 'percentage') {
@@ -352,7 +460,7 @@ export default function MortgageCalculator() {
                               setHomeInsurancePercent((value / Number(homePrice)) * 100);
                             }
                           }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         
                       </div>
@@ -370,7 +478,7 @@ export default function MortgageCalculator() {
                           min="0"
                           value={hoaDues}
                           onChange={(e) => setHoaDues(e.target.value)}
-                          className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                          className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                     </div>
@@ -417,7 +525,7 @@ export default function MortgageCalculator() {
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                             <div
                                 className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage (P&I):
+                              Mortgage Payment:
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
@@ -497,8 +605,36 @@ export default function MortgageCalculator() {
                         step="1"
                         value={homePrice}
                         onChange={(e) => setHomePrice(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() =>
+                            setHomePrice(
+                              String((Number(homePrice) || 0) + 1)
+                            )
+                          }
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() =>
+                            setHomePrice(
+                              String(Math.max(0, (Number(homePrice) || 0) - 1))
+                            )
+                          }
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-xs">Enter the purchase price of the home.</p>
                   </div>
@@ -547,19 +683,57 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent : downPaymentAmount}
+                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
                         onChange={(e) => {
-                          const value = Number(e.target.value);
+                          const raw = e.target.value;
+                          const value = raw === '' ? 0 : Number(raw);
                           if (downPaymentMode === 'percentage') {
                             setDownPaymentPercent(value);
                           } else {
                             setDownPaymentAmount(value);
                             // Calculate percentage from dollar amount
-                            setDownPaymentPercent((value / Number(homePrice)) * 100);
+                            const price = Number(homePrice) || results.homePrice;
+                            if (price > 0) setDownPaymentPercent((value / price) * 100);
                           }
                         }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() => {
+                            if (downPaymentMode === 'percentage') {
+                              setDownPaymentPercent(Math.round(((Number(downPaymentPercent) || 0) + 0.25) * 100) / 100);
+                            } else {
+                              const newAmount = (Number(downPaymentAmount) || 0) + 1000;
+                              setDownPaymentAmount(newAmount);
+                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() => {
+                            if (downPaymentMode === 'percentage') {
+                              setDownPaymentPercent(Math.max(0, Math.round(((Number(downPaymentPercent) || 0) - 0.25) * 100) / 100));
+                            } else {
+                              const newAmount = Math.max(0, (Number(downPaymentAmount) || 0) - 1000);
+                              setDownPaymentAmount(newAmount);
+                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -574,7 +748,7 @@ export default function MortgageCalculator() {
                     min="0"
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
-                    className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">%</span>
                 </div>
@@ -614,7 +788,7 @@ export default function MortgageCalculator() {
                 {/*  Property Taxes */}
                 <div className="pb-5">
                   <div className="flex flex-row pb-2 justify-between items-center">
-                    <label className="block text-sm font-semibold">Property taxes (yearly)</label>
+                    <label className="block text-sm font-semibold">Property taxes (annual)</label>
                     <div className="flex flex-row gap-2">
                       <button
                         type="button"
@@ -655,7 +829,7 @@ export default function MortgageCalculator() {
                   <div className="relative">
                     <input
                       type="number"
-                      value={propertyTaxMode === 'percentage' ? propertyTaxPercent : propertyTaxAmount}
+                      value={propertyTaxMode === 'percentage' ? propertyTaxPercent || '' : propertyTaxAmount || ''}
                       onChange={(e) => {
                         const value = Number(e.target.value);
                         if (propertyTaxMode === 'percentage') {
@@ -666,9 +840,44 @@ export default function MortgageCalculator() {
                           setPropertyTaxPercent((value / Number(homePrice)) * 100);
                         }
                       }}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Increase amount"
+                        onClick={() => {
+                          if (propertyTaxMode === 'percentage') {
+                            setPropertyTaxPercent(Math.round(((Number(propertyTaxPercent) || 0) + 0.25) * 100) / 100);
+                          } else {
+                            const newAmount = (Number(propertyTaxAmount) || 0) + 1000;
+                            setPropertyTaxAmount(newAmount);
+                            setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                          }
+                        }}
+                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidUpArrow size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="Decrease amount"
+                        onClick={() => {
+                          if (propertyTaxMode === 'percentage') {
+                            setPropertyTaxPercent(Math.max(0, Math.round(((Number(propertyTaxPercent) || 0) - 0.25) * 100) / 100));
+                          } else {
+                            const newAmount = Math.max(0, (Number(propertyTaxAmount) || 0) - 1000);
+                            setPropertyTaxAmount(newAmount);
+                            setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                          }
+                        }}
+                        className="hover:text-grey-med-dark focus:outline-none"
+                      >
+                        <BiSolidDownArrow size={24} />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -716,7 +925,7 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={homeInsuranceMode === 'percentage' ? homeInsurancePercent : homeInsuranceAmount}
+                        value={homeInsuranceMode === 'percentage' ? homeInsurancePercent || '' : homeInsuranceAmount || ''}
                         onChange={(e) => {
                           const value = Number(e.target.value);
                           if (homeInsuranceMode === 'percentage') {
@@ -727,9 +936,44 @@ export default function MortgageCalculator() {
                             setHomeInsurancePercent((value / Number(homePrice)) * 100);
                           }
                         }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() => {
+                            if (homeInsuranceMode === 'percentage') {
+                              setHomeInsurancePercent(Math.round(((Number(homeInsurancePercent) || 0) + 0.25) * 100) / 100);
+                            } else {
+                              const newAmount = (Number(homeInsuranceAmount) || 0) + 1000;
+                              setHomeInsuranceAmount(newAmount);
+                              setHomeInsurancePercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() => {
+                            if (homeInsuranceMode === 'percentage') {
+                              setHomeInsurancePercent(Math.max(0, Math.round(((Number(homeInsurancePercent) || 0) - 0.25) * 100) / 100));
+                            } else {
+                              const newAmount = Math.max(0, (Number(homeInsuranceAmount) || 0) - 1000);
+                              setHomeInsuranceAmount(newAmount);
+                              setHomeInsurancePercent((newAmount / Number(homePrice)) * 100);
+                            }
+                          }}
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -745,8 +989,36 @@ export default function MortgageCalculator() {
                         min="0"
                         value={hoaDues}
                         onChange={(e) => setHoaDues(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Increase amount"
+                          onClick={() =>
+                            setHoaDues(
+                              String((Number(hoaDues) || 0) + 1)
+                            )
+                          }
+                          className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidUpArrow size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-label="Decrease amount"
+                          onClick={() =>
+                            setHoaDues(
+                              String(Math.max(0, (Number(hoaDues) || 0) - 1))
+                            )
+                          }
+                          className="hover:text-grey-med-dark focus:outline-none"
+                        >
+                          <BiSolidDownArrow size={24} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -761,7 +1033,7 @@ export default function MortgageCalculator() {
                     </CardHeader>
                     <CardContent className="">
                       <div className="mb-6">
-                        <p className="text-sm font-medium">Monthly mortgage payment (P&I)</p>
+                        <p className="text-sm font-medium">Monthly mortgage payment</p>
                         <p className="text-3xl font-bold text-lagunita">{formatCurrency(results.monthlyMortgage)}</p>
                       </div>
 
@@ -794,7 +1066,7 @@ export default function MortgageCalculator() {
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                             <div
                                 className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage (P&I):
+                              Mortgage Payment:
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
