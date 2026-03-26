@@ -112,13 +112,13 @@ export default function PresentValueCalculator() {
               {/* Time Period Slider */}
               <div className="space-y-3">
                 <Label className="text-md mb-1 block font-bold">Time period: <span className="text-lagunita">{timePeriod[0]} years</span></Label>
-                <CustomSlider 
-                  value={timePeriod} 
-                  onValueChange={setTimePeriod} 
-                  max={50} 
-                  min={1} 
-                  step={1} 
-                  className="w-full" 
+                <CustomSlider
+                  value={timePeriod}
+                  onValueChange={setTimePeriod}
+                  max={50}
+                  min={1}
+                  step={1}
+                  className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"/>
                   <div className="flex justify-between text-black font-medium font-poppins">
                   <span>1 year</span>
@@ -126,14 +126,14 @@ export default function PresentValueCalculator() {
                 </div>
               </div>
 
-              {/* Watch Time Impact Button */}
+              {/* Watch the impact of time Button */}
               <Button
                 className="w-full py-[35px] px-[30px] font-bold bg-berry hover:bg-[var(--button-berry)] text-white"
                 onClick={handleWatchClick}
                 disabled={isAnimating}
                 size="watch"
               >
-                Watch Time Impact
+                Watch the Impact of Time
               </Button>
             </CardContent>
           </Card>
