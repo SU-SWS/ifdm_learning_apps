@@ -65,8 +65,8 @@ const InterestRateVisual = () => {
             <button
               className={`
                 group
-                min-w-[150px] flex-1 py-2 px-3 text-md font-bold 
-                rounded-lg border-1 border-palo-verde 
+                min-w-[150px] flex-1 py-2 px-3 text-md font-bold
+                rounded-lg border-1 border-palo-verde
                 hover:bg-[var(--button-green)]
                 ${mode === "saving" ? "bg-palo-verde" : ""}
               `}
@@ -92,8 +92,8 @@ const InterestRateVisual = () => {
             <button
               className={`
                 group
-                min-w-[150px] flex-1 py-2 px-3 text-md font-bold 
-                rounded-lg border-1 border-berry 
+                min-w-[150px] flex-1 py-2 px-3 text-md font-bold
+                rounded-lg border-1 border-berry
                 hover:bg-[var(--button-berry)]
                 ${mode === "borrowing" ? "bg-berry" : ""}
               `}
@@ -212,7 +212,7 @@ const InterestRateVisual = () => {
         <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
           <div className="flex-1 min-w-[150px]">
             <label className="block text-md font-medium text-[var(--foreground)] mb-1">
-              Time period (years):
+              Number of compounding periods:
             </label>
             <div className="relative">
               <input
