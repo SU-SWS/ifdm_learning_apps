@@ -221,7 +221,7 @@ export default function DebtPayoffCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={() => setInterestRate((prev) => Math.max(0, prev + 1))}
+                            onClick={() => setInterestRate((prev) => Math.max(0, parseFloat((prev + 0.1).toFixed(1))))}
                             className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidUpArrow size={24} />
@@ -230,7 +230,7 @@ export default function DebtPayoffCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={() => setInterestRate((prev) => Math.max(0, prev - 1))}
+                            onClick={() => setInterestRate((prev) => Math.max(0, parseFloat((prev - 0.1).toFixed(1))))}
                             className="hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidDownArrow size={24} />
@@ -465,7 +465,7 @@ export default function DebtPayoffCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Increase amount"
-                            onClick={() => setInterestRate((prev) => Math.max(0, prev + 1))}
+                            onClick={() => setInterestRate((prev) => Math.max(0, parseFloat((prev + 0.1).toFixed(1))))}
                             className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidUpArrow size={24} />
@@ -474,7 +474,7 @@ export default function DebtPayoffCalculator() {
                             type="button"
                             tabIndex={-1}
                             aria-label="Decrease amount"
-                            onClick={() => setInterestRate((prev) => Math.max(0, prev - 1))}
+                            onClick={() => setInterestRate((prev) => Math.max(0, parseFloat((prev - 0.1).toFixed(1))))}
                             className="hover:text-grey-med-dark focus:outline-none"
                           >
                             <BiSolidDownArrow size={24} />
