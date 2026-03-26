@@ -280,7 +280,7 @@ export default function MortgageCalculator() {
                       <div className="relative">
                         <input
                           type="number"
-                          value={propertyTaxMode === 'percentage' ? propertyTaxPercent : propertyTaxAmount}
+                          value={propertyTaxMode === 'percentage' ? propertyTaxPercent || '' : propertyTaxAmount || ''}
                           onChange={(e) => {
                             const value = Number(e.target.value);
                             if (propertyTaxMode === 'percentage') {
@@ -341,7 +341,7 @@ export default function MortgageCalculator() {
                       <div className="relative">
                         <input
                           type="number"
-                          value={homeInsuranceMode === 'percentage' ? homeInsurancePercent : homeInsuranceAmount}
+                          value={homeInsuranceMode === 'percentage' ? homeInsurancePercent || '' : homeInsuranceAmount || ''}
                           onChange={(e) => {
                             const value = Number(e.target.value);
                             if (homeInsuranceMode === 'percentage') {
@@ -655,7 +655,7 @@ export default function MortgageCalculator() {
                   <div className="relative">
                     <input
                       type="number"
-                      value={propertyTaxMode === 'percentage' ? propertyTaxPercent : propertyTaxAmount}
+                      value={propertyTaxMode === 'percentage' ? propertyTaxPercent || '' : propertyTaxAmount || ''}
                       onChange={(e) => {
                         const value = Number(e.target.value);
                         if (propertyTaxMode === 'percentage') {
@@ -716,7 +716,7 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        value={homeInsuranceMode === 'percentage' ? homeInsurancePercent : homeInsuranceAmount}
+                        value={homeInsuranceMode === 'percentage' ? homeInsurancePercent || '' : homeInsuranceAmount || ''}
                         onChange={(e) => {
                           const value = Number(e.target.value);
                           if (homeInsuranceMode === 'percentage') {
