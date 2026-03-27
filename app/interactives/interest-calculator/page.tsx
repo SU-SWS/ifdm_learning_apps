@@ -10,36 +10,36 @@ const InterestRateVisual = () => {
   const [mode, setMode] = useState("saving"); // 'saving' or 'borrowing'
   const [amount, setAmount] = useState<number>(100);
   const [interestRate, setInterestRate] = useState<number>(5);
-  const [years, setYears] = useState<number>(10);
+  const [periods, setPeriods] = useState<number>(10);
   const [compounding, setCompounding] = useState("annually");
 
   const [interestAmount, setInterestAmount] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
-  const MAX_YEARS = 240;
+  const MAX_PERIODS = 960; // 240 years * 4 quarters (reasonable max)
 
   // Calculate the interest and total amount
   useEffect(() => {
-    let periods = 1;
+    let periodsPerYear = 1;
     switch (compounding) {
       case "monthly":
-        periods = 12;
+        periodsPerYear = 12;
         break;
       case "quarterly":
-        periods = 4;
+        periodsPerYear = 4;
         break;
       case "semi-annually":
-        periods = 2;
+        periodsPerYear = 2;
         break;
       default:
-        periods = 1;
+        periodsPerYear = 1;
     }
 
-    // Compound interest formula: A = P(1 + r/n)^(nt)
+    // Compound interest formula: A = P(1 + r/n)^(t)
+    // where t is the number of compounding periods
     const rate = interestRate / 100;
-    const periodicRate = rate / periods;
-    const totalPeriods = periods * years;
+    const periodicRate = rate / periodsPerYear;
 
-    const calculatedTotal = amount * Math.pow(1 + periodicRate, totalPeriods);
+    const calculatedTotal = amount * Math.pow(1 + periodicRate, periods);
     const calculatedInterest = calculatedTotal - amount;
 
     setInterestAmount(
@@ -48,7 +48,7 @@ const InterestRateVisual = () => {
     setTotalAmount(
       mode === "saving" ? calculatedTotal : amount + calculatedInterest
     );
-  }, [amount, interestRate, years, compounding, mode]);
+  }, [amount, interestRate, periods, compounding, mode]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -218,12 +218,12 @@ const InterestRateVisual = () => {
               <input
                 type="number"
                 min="1"
-                max={MAX_YEARS.toString()}
-                placeholder="Enter years"
-                value={years === 0 ? "" : years}
+                max={MAX_PERIODS.toString()}
+                placeholder="Enter periods"
+                value={periods === 0 ? "" : periods}
                 onChange={(e) =>
-                  setYears(
-                    Math.min(MAX_YEARS, Math.max(0, parseInt(e.target.value) || 0))
+                  setPeriods(
+                    Math.min(MAX_PERIODS, Math.max(0, parseInt(e.target.value) || 0))
                   )
                 }
                 className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -232,11 +232,11 @@ const InterestRateVisual = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  aria-label="Increase years"
-                  onClick={() => setYears((prev) => Math.min(MAX_YEARS, prev + 1))}
-                  disabled={years >= MAX_YEARS}
+                  aria-label="Increase periods"
+                  onClick={() => setPeriods((prev) => Math.min(MAX_PERIODS, prev + 1))}
+                  disabled={periods >= MAX_PERIODS}
                   className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                    years >= MAX_YEARS ? 'opacity-30 cursor-not-allowed' : ''
+                    periods >= MAX_PERIODS ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
                 >
                   <BiSolidUpArrow size={24} />
@@ -244,11 +244,11 @@ const InterestRateVisual = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  aria-label="Decrease years"
-                  onClick={() => setYears((prev) => Math.max(1, prev - 1))}
-                  disabled={years >= MAX_YEARS}
-                  className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                    years <= 1 ? 'opacity-30 cursor-not-allowed' : ''
+                  aria-label="Decrease periods"
+                  onClick={() => setPeriods((prev) => Math.max(1, prev - 1))}
+                  disabled={periods <= 1}
+                  className={`hover:text-grey-med-dark focus:outline-none ${
+                    periods <= 1 ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
                 >
                   <BiSolidDownArrow size={24} />
@@ -326,7 +326,7 @@ const InterestRateVisual = () => {
                     maximumFractionDigits: 2,
                   })}
                 </div>
-              </div>
+                </div>
             </div>
             {/* Example section */}
             <div className="mt-6 py-4 align-self-top lg:mt-0 lg:py-0">
