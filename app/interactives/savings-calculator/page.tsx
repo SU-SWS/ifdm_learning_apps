@@ -346,7 +346,7 @@ export default function SavingsCalculator() {
 
               {mode !== "monthly-savings" && (
                 <div>
-                  <Label className="font-medium">Savings per period:</Label>
+                  <Label className="font-medium">Saving per compounding period:</Label>
                   <div className="relative mt-1">
                     <Input
                       type="number"
@@ -531,7 +531,7 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Savings per period:</CardTitle>
+                  <CardTitle className="text-center text-md font-bold">Saving per compounding period:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited)
                         ? "text-berry"
