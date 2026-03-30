@@ -543,7 +543,7 @@ export default function SavingsCalculator() {
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? "\$0"
+                      ? "$0"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -567,7 +567,7 @@ export default function SavingsCalculator() {
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? "\$0"
+                      ? "$0"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
