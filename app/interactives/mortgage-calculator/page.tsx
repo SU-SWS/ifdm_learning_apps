@@ -36,51 +36,70 @@ export default function MortgageCalculator() {
   });
 
   const calculateMortgage = useCallback(() => {
-    const r = (Number(interestRate) / 100 / 12); // Monthly interest rate
-    const n = loanTerm * 12; // Total number of payments
+  const r = (Number(interestRate) / 100 / 12); // Monthly interest rate
+  const n = loanTerm * 12; // Total number of payments
+  const hoaDuesNum = Number(hoaDues) || 0; // FIX: Parse HOA as number
 
-    if (mode === 'afford') {
-      // Calculate home price from desired monthly payment
-      const loanAmount = Number(monthlyPayment) * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
-      const computedHomePrice = loanAmount / (1 - downPaymentPercent / 100);
-      const downPayment = computedHomePrice * (downPaymentPercent / 100);
-      const monthlyTax = (computedHomePrice * (propertyTaxPercent / 100)) / 12;
-      const monthlyInsurance = (computedHomePrice * (homeInsurancePercent / 100)) / 12;
-      const totalMonthly = Number(monthlyPayment) + monthlyTax + monthlyInsurance + hoaDues;
+  if (mode === 'afford') {
+    // Calculate home price from desired monthly payment
+    const loanAmount = Number(monthlyPayment) * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
+    const computedHomePrice = loanAmount / (1 - downPaymentPercent / 100);
+    const downPayment = computedHomePrice * (downPaymentPercent / 100);
+    
+    // FIX: Handle property tax correctly based on mode
+    const monthlyTax = propertyTaxMode === 'percentage' 
+      ? (computedHomePrice * (propertyTaxPercent / 100)) / 12
+      : propertyTaxAmount / 12;
+    
+    // FIX: Handle home insurance correctly based on mode
+    const monthlyInsurance = homeInsuranceMode === 'percentage'
+      ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
+      : homeInsuranceAmount / 12;
+    
+    const totalMonthly = Number(monthlyPayment) + monthlyTax + monthlyInsurance + hoaDuesNum;
 
-      setResults({
-        homePrice: Math.round(computedHomePrice),
-        downPayment: Math.round(downPayment),
-        loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Number(Math.round(Number(monthlyPayment))),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(Number(totalMonthly)),
-        hoaDues: Math.round(Number(hoaDues) || 0),
-        totalMonthlyHousingCost: Math.round(Number(totalMonthly))
-      });
-    } else if (mode === 'payment') {
-      // Calculate monthly payment from home price
-      const downPayment = Number(homePrice) * (downPaymentPercent / 100);
-      const loanAmount = Number(homePrice) - downPayment;
-      const monthlyMortgage = loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-      const monthlyTax = (Number(homePrice) * (propertyTaxPercent / 100)) / 12;
-      const monthlyInsurance = (Number(homePrice) * (homeInsurancePercent / 100)) / 12;
-      const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDues;
+    setResults({
+      homePrice: Math.round(computedHomePrice),
+      downPayment: Math.round(downPayment),
+      loanAmount: Math.round(loanAmount),
+      monthlyMortgage: Number(Math.round(Number(monthlyPayment))),
+      monthlyTax: Math.round(monthlyTax),
+      monthlyInsurance: Math.round(monthlyInsurance),
+      totalMonthly: Math.round(Number(totalMonthly)),
+      hoaDues: Math.round(hoaDuesNum),
+      totalMonthlyHousingCost: Math.round(Number(totalMonthly))
+    });
+  } else if (mode === 'payment') {
+    // Calculate monthly payment from home price
+    const downPayment = Number(homePrice) * (downPaymentPercent / 100);
+    const loanAmount = Number(homePrice) - downPayment;
+    const monthlyMortgage = loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    
+    // FIX: Handle property tax correctly based on mode
+    const monthlyTax = propertyTaxMode === 'percentage'
+      ? (Number(homePrice) * (propertyTaxPercent / 100)) / 12
+      : propertyTaxAmount / 12;
+    
+    // FIX: Handle home insurance correctly based on mode
+    const monthlyInsurance = homeInsuranceMode === 'percentage'
+      ? (Number(homePrice) * (homeInsurancePercent / 100)) / 12
+      : homeInsuranceAmount / 12;
+    
+    const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDuesNum;
 
-      setResults({
-        homePrice: Math.round(Number(homePrice)),
-        downPayment: Math.round(downPayment),
-        loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(monthlyMortgage),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(Number(totalMonthly)),
-        hoaDues: Math.round(Number(hoaDues) || 0),
-        totalMonthlyHousingCost: Math.round(Number(totalMonthly))
-      });
-    }
-  }, [mode, monthlyPayment, homePrice, downPaymentPercent, interestRate, loanTerm, propertyTaxPercent, homeInsurancePercent, hoaDues]);
+    setResults({
+      homePrice: Math.round(Number(homePrice)),
+      downPayment: Math.round(downPayment),
+      loanAmount: Math.round(loanAmount),
+      monthlyMortgage: Math.round(monthlyMortgage),
+      monthlyTax: Math.round(monthlyTax),
+      monthlyInsurance: Math.round(monthlyInsurance),
+      totalMonthly: Math.round(Number(totalMonthly)),
+      hoaDues: Math.round(hoaDuesNum),
+      totalMonthlyHousingCost: Math.round(Number(totalMonthly))
+    });
+  }
+}, [mode, monthlyPayment, homePrice, downPaymentPercent, interestRate, loanTerm, propertyTaxPercent, propertyTaxMode, propertyTaxAmount, homeInsurancePercent, homeInsuranceMode, homeInsuranceAmount, hoaDues]);
 
   useEffect(() => {
     calculateMortgage();
@@ -337,15 +356,16 @@ export default function MortgageCalculator() {
                             type="button"
                             onClick={() => {
                               setPropertyTaxMode('dollar');
-                              // set dollar amount from results if available
-                              setPropertyTaxAmount(results.homePrice || (Number(homePrice) * (propertyTaxPercent / 100)));
+                              // FIX: Calculate annual property tax amount, not home price
+                              const annualTax = results.homePrice * (propertyTaxPercent / 100);
+                              setPropertyTaxAmount(annualTax);
                             }}
                             className={`w-[50px] text-md font-bold rounded-md border-2 transition ${
                               propertyTaxMode === 'dollar'
                                 ? 'bg-navy border-navy text-white'
                                 : 'bg-white border-lagunita text-lagunita'
                             }`}
-                          >
+                            >
                             $
                           </button>
                         </div>
@@ -360,8 +380,9 @@ export default function MortgageCalculator() {
                               setPropertyTaxPercent(value);
                             } else {
                               setPropertyTaxAmount(value);
-                              // Calculate percentage from dollar amount
-                              setPropertyTaxPercent((value / Number(homePrice)) * 100);
+                              // Use results.homePrice for afford tab
+                              const price = results.homePrice || 1; // Prevent division by zero
+                              setPropertyTaxPercent((value / price) * 100);
                             }
                           }}
                           className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -377,7 +398,8 @@ export default function MortgageCalculator() {
                               } else {
                                 const newAmount = (Number(propertyTaxAmount) || 0) + 1000;
                                 setPropertyTaxAmount(newAmount);
-                                setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                                const price = results.homePrice || 1;
+                                setPropertyTaxPercent((newAmount / price) * 100);
                               }
                             }}
                             className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
@@ -394,7 +416,8 @@ export default function MortgageCalculator() {
                               } else {
                                 const newAmount = Math.max(0, (Number(propertyTaxAmount) || 0) - 1000);
                                 setPropertyTaxAmount(newAmount);
-                                setPropertyTaxPercent((newAmount / Number(homePrice)) * 100);
+                                const price = results.homePrice || 1;
+                                setPropertyTaxPercent((newAmount / price) * 100);
                               }
                             }}
                             className="hover:text-grey-med-dark focus:outline-none"
@@ -433,8 +456,9 @@ export default function MortgageCalculator() {
                             type="button"
                             onClick={() => {
                               setHomeInsuranceMode('dollar');
-                              // set dollar amount from results if available
-                              setHomeInsuranceAmount(results.homePrice || (Number(homePrice) * (homeInsurancePercent / 100)));
+                              // FIX: Calculate annual insurance amount, not home price
+                              const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
+                              setHomeInsuranceAmount(annualInsurance);
                             }}
                             className={`w-[50px] text-md font-bold rounded-md border-2 transition ${
                               homeInsuranceMode === 'dollar'
@@ -456,13 +480,49 @@ export default function MortgageCalculator() {
                               setHomeInsurancePercent(value);
                             } else {
                               setHomeInsuranceAmount(value);
-                              // Calculate percentage from dollar amount
-                              setHomeInsurancePercent((value / Number(homePrice)) * 100);
+                              // Use results.homePrice for afford tab
+                              const price = results.homePrice || 1; // Prevent division by zero
+                              setHomeInsurancePercent((value / price) * 100);
                             }
                           }}
                           className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
-                        
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase amount"
+                            onClick={() => {
+                              if (homeInsuranceMode === 'percentage') {
+                                setHomeInsurancePercent(Math.round(((Number(homeInsurancePercent) || 0) + 0.25) * 100) / 100);
+                              } else {
+                                const newAmount = (Number(homeInsuranceAmount) || 0) + 100;
+                                setHomeInsuranceAmount(newAmount);
+                                setHomeInsurancePercent((newAmount / Number(results.homePrice)) * 100);
+                              }
+                            }}
+                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidUpArrow size={24} />
+                          </button>
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease amount"
+                            onClick={() => {
+                              if (homeInsuranceMode === 'percentage') {
+                                setHomeInsurancePercent(Math.max(0, Math.round(((Number(homeInsurancePercent) || 0) - 0.25) * 100) / 100));
+                              } else {
+                                const newAmount = Math.max(0, (Number(homeInsuranceAmount) || 0) - 100);
+                                setHomeInsuranceAmount(newAmount);
+                                setHomeInsurancePercent((newAmount / Number(results.homePrice)) * 100);
+                              }
+                            }}
+                            className="hover:text-grey-med-dark focus:outline-none"
+                          >
+                            <BiSolidDownArrow size={24} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -813,8 +873,9 @@ export default function MortgageCalculator() {
                         type="button"
                         onClick={() => {
                           setPropertyTaxMode('dollar');
-                          // set dollar amount from results if available
-                          setPropertyTaxAmount(results.homePrice || (Number(homePrice) * (propertyTaxPercent / 100)));
+                          // FIX: Calculate annual property tax amount, not home price
+                           const annualTax = results.homePrice * (propertyTaxPercent / 100);
+                            setPropertyTaxAmount(annualTax);
                         }}
                         className={`w-[50px] text-md font-bold rounded-md border-2 transition ${
                           propertyTaxMode === 'dollar'
@@ -909,8 +970,9 @@ export default function MortgageCalculator() {
                           type="button"
                           onClick={() => {
                             setHomeInsuranceMode('dollar');
-                            // set dollar amount from results if available
-                            setHomeInsuranceAmount(results.homePrice || (Number(homePrice) * (homeInsurancePercent / 100)));
+                            // FIX: Calculate annual insurance amount, not home price
+                            const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
+                            setHomeInsuranceAmount(annualInsurance);
                           }}
                           className={`w-[50px] text-md font-bold rounded-md border-2 transition ${
                             homeInsuranceMode === 'dollar'
