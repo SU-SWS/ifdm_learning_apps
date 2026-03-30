@@ -34,31 +34,38 @@ export default function RetirementCalculator() {
   const [activeTab, setActiveTab] = useState<"balance" | "savings">("balance")
   const [inputs, setInputs] = useState<CalculatorInputs>(defaultInputs)
   const [isCalculated, setIsCalculated] = useState(false)
+  const [frozenRequiredBalance, setFrozenRequiredBalance] = useState<number>(0)
 
   const results = useMemo(() => {
-    const realReturn = (inputs.expectedReturn) / 100
+    const realReturn = inputs.expectedReturn / 100
 
+    // Calculate Required Balance based on retirement spending needs
+    let calculatedRequiredBalance: number
+    
     if (realReturn <= 0) {
-      const requiredBalance = inputs.annualSpending * inputs.retirementLength
-      const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, inputs.yearsToRetirement)
-      const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
-      return {
-        requiredBalance,
-        targetBalance,
-        annualSavings: inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0,
-        monthlySavings: inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement / 12 : 0,
-      }
+      calculatedRequiredBalance = inputs.annualSpending * inputs.retirementLength
+    } else {
+      calculatedRequiredBalance =
+        inputs.annualSpending *
+        ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
     }
 
-    const requiredBalance =
-      inputs.annualSpending *
-      ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
+    // Use frozen value for Annual Savings tab, fresh calculation for Required Balance tab
+    const requiredBalance = activeTab === "savings" ? frozenRequiredBalance : calculatedRequiredBalance
 
+    // Now calculate target balance and annual savings based on the appropriate required balance
     const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, inputs.yearsToRetirement)
     const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
-    const annualSavings =
-      targetBalance *
-      (realReturn / (Math.pow(1 + realReturn, inputs.yearsToRetirement) - 1))
+    
+    let annualSavings: number
+    
+    if (realReturn <= 0 || inputs.yearsToRetirement <= 0) {
+      annualSavings = inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0
+    } else {
+      annualSavings =
+        targetBalance *
+        (realReturn / (Math.pow(1 + realReturn, inputs.yearsToRetirement) - 1))
+    }
 
     return {
       requiredBalance: Math.round(requiredBalance),
@@ -66,7 +73,7 @@ export default function RetirementCalculator() {
       annualSavings: Math.round(annualSavings),
       monthlySavings: Math.round(annualSavings / 12),
     }
-  }, [inputs])
+  }, [inputs, activeTab, frozenRequiredBalance])
 
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
@@ -83,12 +90,26 @@ export default function RetirementCalculator() {
 
   const handleCalculate = () => {
     setIsCalculated(true)
+    // FREEZE the required balance when Calculate is clicked
+    const realReturn = inputs.expectedReturn / 100
+    let calculatedRequiredBalance: number
+    
+    if (realReturn <= 0) {
+      calculatedRequiredBalance = inputs.annualSpending * inputs.retirementLength
+    } else {
+      calculatedRequiredBalance =
+        inputs.annualSpending *
+        ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
+    }
+    
+    setFrozenRequiredBalance(Math.round(calculatedRequiredBalance))
   }
 
   const handleReset = () => {
     setInputs(defaultInputs)
     setIsCalculated(false)
     setActiveTab("balance")
+    setFrozenRequiredBalance(0)
   }
 
   return (
@@ -341,7 +362,7 @@ export default function RetirementCalculator() {
                     <BiSolidDownArrow size={24} />
                   </button>
                 </div>
-              </div>
+                </div>
               <p className="text-xs">
                 How many years your retirement will last.
               </p>
