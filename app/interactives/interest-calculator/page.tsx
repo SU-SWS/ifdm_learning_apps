@@ -21,6 +21,15 @@ const InterestRateVisual = () => {
   useEffect(() => {
     let periods = 1;
     switch (compounding) {
+      case "daily":
+        periods = 365;
+        break;
+      case "weekly":
+        periods = 52;
+        break;
+      case "bi-weekly":
+        periods = 26;
+        break;
       case "monthly":
         periods = 12;
         break;
@@ -246,8 +255,8 @@ const InterestRateVisual = () => {
                   tabIndex={-1}
                   aria-label="Decrease years"
                   onClick={() => setYears((prev) => Math.max(1, prev - 1))}
-                  disabled={years >= MAX_YEARS}
-                  className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
+                  disabled={years <= 1}
+                  className={`hover:text-grey-med-dark focus:outline-none ${
                     years <= 1 ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
                 >
@@ -267,10 +276,13 @@ const InterestRateVisual = () => {
               onChange={(e) => setCompounding(e.target.value)}
               className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
               >
-              <option value="annually">Annually</option>
-              <option value="semi-annually">Semi-annually</option>
-              <option value="quarterly">Quarterly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
               <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="semi-annually">Semi-annually</option>
+              <option value="annually">Annually</option>
               </select>
               <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
               <FaAngleDown />
