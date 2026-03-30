@@ -11,7 +11,7 @@ import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-
 import ThemeToggle from "@/app/lib/theme-toggle";
 
 type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
-type CompoundingFrequency = "monthly" | "quarterly" | "annually" | "semi-annually"
+type CompoundingFrequency = "daily" | "weekly" | "bi-weekly" | "monthly" | "quarterly" | "semi-annually" | "annually"
 
 interface CalculationResults {
   contributionPerPeriod: number
@@ -32,7 +32,10 @@ interface YearlyBreakdown {
 // Helper to get periods per year and rate per period
 function getCompoundingParams(frequency: CompoundingFrequency, annualRate: number) {
   let periodsPerYear = 12;
-  if (frequency === "quarterly") periodsPerYear = 4;
+  if (frequency === "daily") periodsPerYear = 365;
+  else if (frequency === "weekly") periodsPerYear = 52;
+  else if (frequency === "bi-weekly") periodsPerYear = 26;
+  else if (frequency === "quarterly") periodsPerYear = 4;
   else if (frequency === "annually") periodsPerYear = 1;
   else if (frequency === "semi-annually") periodsPerYear = 2;
   const ratePerPeriod = annualRate / 100 / periodsPerYear;
@@ -249,7 +252,6 @@ export default function SavingsCalculator() {
             </Button>
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Panel */}
           <Card className="">
@@ -513,10 +515,13 @@ export default function SavingsCalculator() {
                   onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
                   >
-                    <option value="annually">Annually</option>
-                    <option value="semi-annually">Semi-annually</option>
-                    <option value="quarterly">Quarterly</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="bi-weekly">Bi-weekly</option>
                     <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="semi-annually">Semi-annually</option>
+                    <option value="annually">Annually</option>
                   </select>
                   <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
                     <FaAngleDown />
@@ -538,7 +543,7 @@ export default function SavingsCalculator() {
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? "$0"
+                      ? "\$0"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -562,7 +567,7 @@ export default function SavingsCalculator() {
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? "$0"
+                      ? "\$0"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -680,3 +685,4 @@ export default function SavingsCalculator() {
     </div>
   )
 }
+                
