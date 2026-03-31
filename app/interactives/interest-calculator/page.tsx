@@ -15,7 +15,6 @@ const InterestRateVisual = () => {
 
   const [interestAmount, setInterestAmount] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
-  const MAX_PERIODS = 960; // 240 years * 4 quarters (reasonable max)
 
   // Calculate the interest and total amount
   useEffect(() => {
@@ -218,12 +217,11 @@ const InterestRateVisual = () => {
               <input
                 type="number"
                 min="1"
-                max={MAX_PERIODS.toString()}
                 placeholder="Enter periods"
                 value={periods === 0 ? "" : periods}
                 onChange={(e) =>
                   setPeriods(
-                    Math.min(MAX_PERIODS, Math.max(0, parseInt(e.target.value) || 0))
+                    Math.max(0, parseInt(e.target.value) || 0)
                   )
                 }
                 className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -233,11 +231,8 @@ const InterestRateVisual = () => {
                   type="button"
                   tabIndex={-1}
                   aria-label="Increase periods"
-                  onClick={() => setPeriods((prev) => Math.min(MAX_PERIODS, prev + 1))}
-                  disabled={periods >= MAX_PERIODS}
-                  className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                    periods >= MAX_PERIODS ? 'opacity-30 cursor-not-allowed' : ''
-                  }`}
+                  onClick={() => setPeriods((prev) => Math.min(prev + 1))}
+                  className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidUpArrow size={24} />
                 </button>
