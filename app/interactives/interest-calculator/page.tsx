@@ -20,6 +20,15 @@ const InterestRateVisual = () => {
   useEffect(() => {
     let periodsPerYear = 1;
     switch (compounding) {
+      case "daily":
+        periodsPerYear = 365;
+        break;
+      case "weekly":
+        periodsPerYear = 52;
+        break;
+      case "bi-weekly":
+        periodsPerYear = 26;
+        break;
       case "monthly":
         periodsPerYear = 12;
         break;
@@ -262,10 +271,13 @@ const InterestRateVisual = () => {
               onChange={(e) => setCompounding(e.target.value)}
               className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
               >
-              <option value="annually">Annually</option>
-              <option value="semi-annually">Semi-annually</option>
-              <option value="quarterly">Quarterly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
               <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="semi-annually">Semi-annually</option>
+              <option value="annually">Annually</option>
               </select>
               <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
               <FaAngleDown />
