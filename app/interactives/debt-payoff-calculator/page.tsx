@@ -10,7 +10,7 @@ import { FaAngleDown } from "react-icons/fa";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import InfoPopover from "@/app/ui/components/popover";
 
-type CompoundingFrequency = "monthly" | "quarterly" | "semi-annually" | "annually"
+type CompoundingFrequency = "daily" | "weekly" | "bi-weekly" | "monthly" | "quarterly" | "semi-annually" | "annually"
 
 interface PayoffResult {
   timeInMonths: number
@@ -37,6 +37,12 @@ export default function DebtPayoffCalculator() {
 
   const getCompoundingPeriodsPerYear = (frequency: CompoundingFrequency): number => {
     switch (frequency) {
+      case "daily":
+        return 365
+      case "weekly":
+        return 52
+      case "bi-weekly":
+        return 26
       case "monthly":
         return 12
       case "quarterly":
@@ -252,6 +258,9 @@ export default function DebtPayoffCalculator() {
                           aria-describedby="compounding-desc"
                           className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                         >
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="bi-weekly">Bi-weekly</option>
                           <option value="monthly">Monthly</option>
                           <option value="quarterly">Quarterly</option>
                           <option value="semi-annually">Semi-Annually</option>
@@ -269,7 +278,6 @@ export default function DebtPayoffCalculator() {
                         make 12 debt payments per year.
                       </p>
                     </div>
-
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="payment" className="font-medium">Payment per compounding period</Label>
@@ -496,6 +504,9 @@ export default function DebtPayoffCalculator() {
                         className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
                         aria-describedby="compounding-desc-2"
                       >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="bi-weekly">Bi-weekly</option>
                         <option value="monthly">Monthly</option>
                         <option value="quarterly">Quarterly</option>
                         <option value="semi-annually">Semi-Annually</option>
@@ -513,7 +524,6 @@ export default function DebtPayoffCalculator() {
                         make 12 debt payments per year.
                       </p>
                     </div>
-
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Label className="font-medium">Target time to payoff</Label>
