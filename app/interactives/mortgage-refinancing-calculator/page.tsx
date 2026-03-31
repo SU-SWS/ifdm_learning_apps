@@ -759,7 +759,7 @@ export default function MortgageCalculator() {
                         <p className={`text-2xl p-4 border-1 rounded-lg font-bold ${
                           refinanceResults.monthlySavings >= 0 
                             ? "bg-lagunita-lighter text-black border-1 border-lagunita" 
-                            : "bg-berry-light border-berry text-black"
+                            : "bg-sky border-sky-dark text-black"
                         }`}>
                           ${formatCurrency(Math.abs(refinanceResults.monthlySavings))}
                         </p>

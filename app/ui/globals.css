@@ -41,6 +41,8 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --font-poppins: Poppins, sans-serif;
+  --color-sky: rgba(206, 232, 255, 1);
+  --color-sky-dark: rgba(14, 59, 79, 1);
   --color-berry: rgba(195, 31, 112, 1);
   --color-berry-light: rgba(255, 237, 246, 1);
   --color-palo-verde: rgba(39, 153, 137, 1);
