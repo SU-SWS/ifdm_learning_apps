@@ -36,70 +36,70 @@ export default function MortgageCalculator() {
   });
 
   const calculateMortgage = useCallback(() => {
-  const r = (Number(interestRate) / 100 / 12); // Monthly interest rate
-  const n = loanTerm * 12; // Total number of payments
-  const hoaDuesNum = Number(hoaDues) || 0; // FIX: Parse HOA as number
+    const r = (Number(interestRate) / 100 / 12); // Monthly interest rate
+    const n = loanTerm * 12; // Total number of payments
+    const hoaDuesNum = Number(hoaDues) || 0; // FIX: Parse HOA as number
 
-  if (mode === 'afford') {
-    // Calculate home price from desired monthly payment
-    const loanAmount = Number(monthlyPayment) * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
-    const computedHomePrice = loanAmount / (1 - downPaymentPercent / 100);
-    const downPayment = computedHomePrice * (downPaymentPercent / 100);
-    
-    // FIX: Handle property tax correctly based on mode
-    const monthlyTax = propertyTaxMode === 'percentage' 
-      ? (computedHomePrice * (propertyTaxPercent / 100)) / 12
-      : propertyTaxAmount / 12;
-    
-    // FIX: Handle home insurance correctly based on mode
-    const monthlyInsurance = homeInsuranceMode === 'percentage'
-      ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
-      : homeInsuranceAmount / 12;
-    
-    const totalMonthly = Number(monthlyPayment) + monthlyTax + monthlyInsurance + hoaDuesNum;
+    if (mode === 'afford') {
+      // Calculate home price from desired monthly payment
+      const loanAmount = Number(monthlyPayment) * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
+      const computedHomePrice = loanAmount / (1 - downPaymentPercent / 100);
+      const downPayment = computedHomePrice * (downPaymentPercent / 100);
 
-    setResults({
-      homePrice: Math.round(computedHomePrice),
-      downPayment: Math.round(downPayment),
-      loanAmount: Math.round(loanAmount),
-      monthlyMortgage: Number(Math.round(Number(monthlyPayment))),
-      monthlyTax: Math.round(monthlyTax),
-      monthlyInsurance: Math.round(monthlyInsurance),
-      totalMonthly: Math.round(Number(totalMonthly)),
-      hoaDues: Math.round(hoaDuesNum),
-      totalMonthlyHousingCost: Math.round(Number(totalMonthly))
-    });
-  } else if (mode === 'payment') {
-    // Calculate monthly payment from home price
-    const downPayment = Number(homePrice) * (downPaymentPercent / 100);
-    const loanAmount = Number(homePrice) - downPayment;
-    const monthlyMortgage = loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    
-    // FIX: Handle property tax correctly based on mode
-    const monthlyTax = propertyTaxMode === 'percentage'
-      ? (Number(homePrice) * (propertyTaxPercent / 100)) / 12
-      : propertyTaxAmount / 12;
-    
-    // FIX: Handle home insurance correctly based on mode
-    const monthlyInsurance = homeInsuranceMode === 'percentage'
-      ? (Number(homePrice) * (homeInsurancePercent / 100)) / 12
-      : homeInsuranceAmount / 12;
-    
-    const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDuesNum;
+      // FIX: Handle property tax correctly based on mode
+      const monthlyTax = propertyTaxMode === 'percentage'
+        ? (computedHomePrice * (propertyTaxPercent / 100)) / 12
+        : propertyTaxAmount / 12;
 
-    setResults({
-      homePrice: Math.round(Number(homePrice)),
-      downPayment: Math.round(downPayment),
-      loanAmount: Math.round(loanAmount),
-      monthlyMortgage: Math.round(monthlyMortgage),
-      monthlyTax: Math.round(monthlyTax),
-      monthlyInsurance: Math.round(monthlyInsurance),
-      totalMonthly: Math.round(Number(totalMonthly)),
-      hoaDues: Math.round(hoaDuesNum),
-      totalMonthlyHousingCost: Math.round(Number(totalMonthly))
-    });
-  }
-}, [mode, monthlyPayment, homePrice, downPaymentPercent, interestRate, loanTerm, propertyTaxPercent, propertyTaxMode, propertyTaxAmount, homeInsurancePercent, homeInsuranceMode, homeInsuranceAmount, hoaDues]);
+      // FIX: Handle home insurance correctly based on mode
+      const monthlyInsurance = homeInsuranceMode === 'percentage'
+        ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
+        : homeInsuranceAmount / 12;
+
+      const totalMonthly = Number(monthlyPayment) + monthlyTax + monthlyInsurance + hoaDuesNum;
+
+      setResults({
+        homePrice: Math.round(computedHomePrice),
+        downPayment: Math.round(downPayment),
+        loanAmount: Math.round(loanAmount),
+        monthlyMortgage: Number(Math.round(Number(monthlyPayment))),
+        monthlyTax: Math.round(monthlyTax),
+        monthlyInsurance: Math.round(monthlyInsurance),
+        totalMonthly: Math.round(Number(totalMonthly)),
+        hoaDues: Math.round(hoaDuesNum),
+        totalMonthlyHousingCost: Math.round(Number(totalMonthly))
+      });
+    } else if (mode === 'payment') {
+      // Calculate monthly payment from home price
+      const downPayment = Number(homePrice) * (downPaymentPercent / 100);
+      const loanAmount = Number(homePrice) - downPayment;
+      const monthlyMortgage = loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+      // FIX: Handle property tax correctly based on mode
+      const monthlyTax = propertyTaxMode === 'percentage'
+        ? (Number(homePrice) * (propertyTaxPercent / 100)) / 12
+        : propertyTaxAmount / 12;
+
+      // FIX: Handle home insurance correctly based on mode
+      const monthlyInsurance = homeInsuranceMode === 'percentage'
+        ? (Number(homePrice) * (homeInsurancePercent / 100)) / 12
+        : homeInsuranceAmount / 12;
+
+      const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDuesNum;
+
+      setResults({
+        homePrice: Math.round(Number(homePrice)),
+        downPayment: Math.round(downPayment),
+        loanAmount: Math.round(loanAmount),
+        monthlyMortgage: Math.round(monthlyMortgage),
+        monthlyTax: Math.round(monthlyTax),
+        monthlyInsurance: Math.round(monthlyInsurance),
+        totalMonthly: Math.round(Number(totalMonthly)),
+        hoaDues: Math.round(hoaDuesNum),
+        totalMonthlyHousingCost: Math.round(Number(totalMonthly))
+      });
+    }
+  }, [mode, monthlyPayment, homePrice, downPaymentPercent, interestRate, loanTerm, propertyTaxPercent, propertyTaxMode, propertyTaxAmount, homeInsurancePercent, homeInsuranceMode, homeInsuranceAmount, hoaDues]);
 
   useEffect(() => {
     calculateMortgage();
@@ -498,7 +498,8 @@ export default function MortgageCalculator() {
                               } else {
                                 const newAmount = (Number(homeInsuranceAmount) || 0) + 100;
                                 setHomeInsuranceAmount(newAmount);
-                                setHomeInsurancePercent((newAmount / Number(results.homePrice)) * 100);
+                                const price = results.homePrice || 1; // Prevent division by zero
+                                setHomeInsurancePercent((newAmount / price) * 100);
                               }
                             }}
                             className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
@@ -515,7 +516,8 @@ export default function MortgageCalculator() {
                               } else {
                                 const newAmount = Math.max(0, (Number(homeInsuranceAmount) || 0) - 100);
                                 setHomeInsuranceAmount(newAmount);
-                                setHomeInsurancePercent((newAmount / Number(results.homePrice)) * 100);
+                                const price = results.homePrice || 1; // Prevent division by zero
+                                setHomeInsurancePercent((newAmount / price) * 100);
                               }
                             }}
                             className="hover:text-grey-med-dark focus:outline-none"
