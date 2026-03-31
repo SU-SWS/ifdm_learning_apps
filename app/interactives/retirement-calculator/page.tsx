@@ -125,6 +125,10 @@ export default function RetirementCalculator() {
         <Tabs value={activeTab} onValueChange={(v) => {
           if (v === "savings" && !isCalculated) return
           setActiveTab(v as "balance" | "savings")
+          if (v === "balance") {
+            setIsCalculated(false) // This allows recalculation on the balance tab
+            setFrozenRequiredBalance(0) // Clear frozen value when returning to balance tab
+          }
         }} className="mb-10">
           <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
             <TabsTrigger
