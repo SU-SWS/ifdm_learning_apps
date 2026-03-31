@@ -769,9 +769,7 @@ export default function MortgageCalculator() {
                         <p className="text-md font-bold mt-4 mb-2">
                           {refinanceResults.totalSavings >= 0 ? "Refinancing saves you" : "Refinancing costs you"}
                         </p>
-                        <p className={`text-4xl font-bold ${
-                          refinanceResults.totalSavings >= 0 ? "text-lagunita" : "text-berry"
-                        }`}>
+                        <p className="text-4xl font-bold text-lagunita">
                           ${formatCurrency(Math.abs(refinanceResults.totalSavings))}
                         </p>
                       </div>
