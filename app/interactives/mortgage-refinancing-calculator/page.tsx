@@ -40,10 +40,6 @@ export default function MortgageCalculator() {
     breakEvenMonths: number
     breakEvenMessage: string 
   } | null>(null)
-  const [frozenMonthsRemaining, setFrozenMonthsRemaining] = useState("")
-  const [frozenAnnualRate, setFrozenAnnualRate] = useState("")
-  const [frozenBalance, setFrozenBalance] = useState("")
-  const [frozenMonthlyPayment, setFrozenMonthlyPayment] = useState("")
 
   const calculateBalance = () => {
     const months = Number.parseFloat(monthsRemaining)
@@ -64,13 +60,6 @@ export default function MortgageCalculator() {
     }
 
     setCurrentBalance(balance)
-    // Freeze the values for use in Refinance tab
-    setFrozenMonthsRemaining(monthsRemaining)
-    setFrozenAnnualRate(annualRate)
-    setFrozenBalance(balance.toFixed(2))
-    setFrozenMonthlyPayment(monthlyPayment)
-
-    // Prefill the Refinance tab with frozen values
     setRefCurrentBalance(balance.toFixed(2))
     setRefCurrentMonths(monthsRemaining)
     setRefCurrentRate(annualRate)
@@ -349,11 +338,6 @@ export default function MortgageCalculator() {
                       setMonthsRemaining("");
                       setAnnualRate("");
                       setMonthlyPayment("");
-                      // Clear frozen values
-                      setFrozenMonthsRemaining("");
-                      setFrozenAnnualRate("");
-                      setFrozenBalance("");
-                      setFrozenMonthlyPayment("");
                     } : calculateBalance}
                   >
                     {currentBalance !== null ? "Reset" : "Calculate Current Balance"}
