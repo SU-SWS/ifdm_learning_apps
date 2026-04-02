@@ -240,7 +240,7 @@ const InterestRateVisual = () => {
                   type="button"
                   tabIndex={-1}
                   aria-label="Increase periods"
-                  onClick={() => setPeriods((prev) => Math.min(prev + 1))}
+                  onClick={() => setPeriods((prev) => prev + 1)}
                   className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
                 >
                   <BiSolidUpArrow size={24} />
