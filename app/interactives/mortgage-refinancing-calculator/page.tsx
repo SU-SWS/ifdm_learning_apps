@@ -24,7 +24,7 @@ export default function MortgageCalculator() {
   const [refCurrentBalance, setRefCurrentBalance] = useState("")
   const [refCurrentMonthlyPayment, setRefCurrentMonthlyPayment] = useState("")
   const [refCurrentMonths, setRefCurrentMonths] = useState("")
-  const [refCurrentRate, setRefCurrentRate] = useState("")  // Added missing state for refinance current rate
+  const [refCurrentRate, setRefCurrentRate] = useState("")
   const [refNewLoanAmount, setRefNewLoanAmount] = useState("")
   const [refNewRate, setRefNewRate] = useState("")
   const [refNewMonths, setRefNewMonths] = useState("")
@@ -60,15 +60,19 @@ export default function MortgageCalculator() {
     }
 
     setCurrentBalance(balance)
+    setRefCurrentBalance(balance.toFixed(2))
+    setRefCurrentMonths(monthsRemaining)
+    setRefCurrentRate(annualRate)
+    setRefCurrentMonthlyPayment(monthlyPayment)
   }
 
   const calculateRefinance = () => {
     const currentBal = Number.parseFloat(refCurrentBalance)
-    const currentR = Number.parseFloat(refCurrentRate) / 100 / 12  // Fixed: Use refCurrentRate instead of refCurrentMonthlyPayment
+    const currentR = Number.parseFloat(refCurrentRate) / 100 / 12
     const currentM = Number.parseFloat(refCurrentMonths)
     const newR = Number.parseFloat(refNewRate) / 100 / 12
     const newM = Number.parseFloat(refNewMonths)
-    const closingCosts = Number.parseFloat(refClosingCosts)
+    const closingCosts = Number.parseFloat(refClosingCosts) || 0
 
     if (
       isNaN(currentBal) ||
@@ -76,7 +80,6 @@ export default function MortgageCalculator() {
       isNaN(currentM) ||
       isNaN(newR) ||
       isNaN(newM) ||
-      isNaN(closingCosts) ||
       currentBal <= 0 ||
       currentR < 0 ||
       currentM <= 0 ||
@@ -100,19 +103,18 @@ export default function MortgageCalculator() {
     // Calculate new monthly payment
     const newLoanAmount = Number.parseFloat(refNewLoanAmount)
 
-    // Validate newLoanAmount in your validation section
+    // Validate newLoanAmount
     if (
       isNaN(currentBal) ||
       isNaN(currentR) ||
       isNaN(currentM) ||
-      isNaN(newLoanAmount) ||  // ✅ Add this
+      isNaN(newLoanAmount) ||
       isNaN(newR) ||
       isNaN(newM) ||
-      isNaN(closingCosts) ||
       currentBal <= 0 ||
       currentR < 0 ||
       currentM <= 0 ||
-      newLoanAmount <= 0 ||  // ✅ Add this
+      newLoanAmount <= 0 ||
       newR < 0 ||
       newM <= 0 ||
       closingCosts < 0
@@ -121,12 +123,11 @@ export default function MortgageCalculator() {
       return
     }
 
-    // Calculate new monthly payment
     let newMonthlyPayment: number
     if (newR === 0) {
-      newMonthlyPayment = newLoanAmount / newM  // ✅ Use newLoanAmount
+      newMonthlyPayment = newLoanAmount / newM
     } else {
-      newMonthlyPayment = (newLoanAmount * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)  // ✅ Use newLoanAmount
+      newMonthlyPayment = (newLoanAmount * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
     }
 
     const monthlySavings = currentMonthlyPayment - newMonthlyPayment
@@ -139,14 +140,17 @@ export default function MortgageCalculator() {
 
     if (monthlySavings > 0) {
       // Case 1: Lower monthly payment
-      breakEvenMonths = closingCosts / monthlySavings
-      breakEvenMessage = `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
+      breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
+      breakEvenMessage = closingCosts > 0
+        ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
+        : "No closing costs to recover - immediate savings!"
     } else if (monthlySavings < 0) {
       // Case 2: Higher monthly payment
-      // Only makes sense if total savings over loan term is positive
       if (totalSavings > 0) {
-        breakEvenMonths = closingCosts / (-monthlySavings)
-        breakEvenMessage = `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
+        breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
+        breakEvenMessage = closingCosts > 0
+          ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
+          : "Despite higher monthly payments, you save overall on total interest"
       } else {
         breakEvenMonths = Infinity
         breakEvenMessage = "This refinance costs more overall - not recommended"
@@ -167,7 +171,7 @@ export default function MortgageCalculator() {
       totalNewCost,
       totalSavings,
       breakEvenMonths,
-      breakEvenMessage, // Add this to state type
+      breakEvenMessage,
     })
   }
 
@@ -329,7 +333,12 @@ export default function MortgageCalculator() {
                   )}
                   <Button
                     className={`h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto`}
-                    onClick={currentBalance !== null ? () => { setCurrentBalance(null); setMonthsRemaining(""); setAnnualRate(""); setMonthlyPayment(""); } : calculateBalance}
+                    onClick={currentBalance !== null ? () => {
+                      setCurrentBalance(null);
+                      setMonthsRemaining("");
+                      setAnnualRate("");
+                      setMonthlyPayment("");
+                    } : calculateBalance}
                   >
                     {currentBalance !== null ? "Reset" : "Calculate Current Balance"}
                   </Button>
@@ -734,7 +743,7 @@ export default function MortgageCalculator() {
                         <p className={`text-2xl p-4 border-1 rounded-lg font-bold ${
                           refinanceResults.monthlySavings >= 0 
                             ? "bg-lagunita-lighter text-black border-1 border-lagunita" 
-                            : "bg-berry-light border-berry text-black"
+                            : "bg-sky border-sky-dark text-black"
                         }`}>
                           ${formatCurrency(Math.abs(refinanceResults.monthlySavings))}
                         </p>
