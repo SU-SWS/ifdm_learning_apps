@@ -1,6 +1,7 @@
 "use client"
 
 import { Input } from "@/app/ui/components/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 
@@ -78,11 +79,11 @@ export default function CompoundInterestCalculator() {
         <div className="flex flex-col md:flex-row gap-8">
 
           {/* Input Fields */}
-          <section className="space-y-6 mb-10">
+          <section className="space-y-6 mb-10 w-1/2">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Initial Amount</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">
                   $
                 </span>
                 <Input
@@ -106,7 +107,7 @@ export default function CompoundInterestCalculator() {
                   min="0"
                   step="0.1"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">
                   %
                 </span>
               </div>
@@ -122,11 +123,11 @@ export default function CompoundInterestCalculator() {
                   className="pr-16 h-12 text-lg bg-card"
                   min="0"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">
                   years
                 </span>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm ">
                 {formatNumber(totalPeriods)} compounding periods
               </p>
             </div>
@@ -134,74 +135,71 @@ export default function CompoundInterestCalculator() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-3">Compounding Period</label>
               <div className="flex flex-wrap gap-2">
-                {compoundingOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setSelectedCompounding(option.value)}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-                      selectedCompounding === option.value
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-foreground border-border hover:bg-muted"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                <select
+                  value={selectedCompounding}
+                  onChange={(e) => setSelectedCompounding(e.target.value as CompoundingPeriod)}
+                  className="w-full h-12 px-4 bg-card border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                >
+                  {compoundingOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </section>
 
           {/* Results Section */}
-          <section className="bg-card rounded-xl border border-border p-6 mb-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Final Amount</p>
-                <p className="text-3xl font-bold text-primary">{formatCurrency(selectedResult.finalAmount)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Total Interest Earned</p>
-                <p className="text-3xl font-bold text-foreground">
-                  {formatCurrency(selectedResult.interestEarned)}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Comparison Table */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Comparison Across All Periods</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              See how compounding frequency impacts your returns
-            </p>
-
-            <div className="border border-border rounded-lg overflow-hidden bg-card">
-              <table className="min-w-full">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="font-semibold text-left px-4 py-3">Compounding</th>
-                    <th className="font-semibold text-right px-4 py-3">Periods</th>
-                    <th className="font-semibold text-right px-4 py-3">Final Amount</th>
-                    <th className="font-semibold text-right px-4 py-3">Interest Earned</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisonResults.map((result) => (
-                    <tr
-                      key={result.value}
-                      className={selectedCompounding === result.value ? "bg-primary/5" : ""}
-                    >
-                      <td className="font-medium px-4 py-3">{result.label}</td>
-                      <td className="text-right px-4 py-3">{formatNumber(result.totalPeriods)}</td>
-                      <td className="text-right px-4 py-3">{formatCurrency(result.finalAmount)}</td>
-                      <td className="text-right px-4 py-3">{formatCurrency(result.interestEarned)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-          </div>
+          <Card className="w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
+            <CardHeader>
+              <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">Results</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <p className="text-sm font-bold mb-1">Final Amount</p>
+              <p className="text-3xl font-bold text-lagunita mb-5">{formatCurrency(selectedResult.finalAmount)}</p>
+              <p className="text-sm  font-bold mb-1">Total Interest Earned</p>
+              <p className="text-3xl font-bold text-foreground">
+                {formatCurrency(selectedResult.interestEarned)}
+              </p>
+            </CardContent>
+          </Card>
         </div>
+          {/* Comparison Table */}
+        <section className="rounded-3xl bg-[var(--grey-background)] p-6 mt-10">
+          <h2 className="text-xl font-semibold mb-2">Comparison Across All Periods</h2>
+          <p className="text-sm mb-4">
+            See how compounding frequency impacts your returns
+          </p>
+
+          <div className="overflow-hidden bg-card">
+            <table className="min-w-full">
+              <thead>
+                <tr>
+                  <th className="font-semibold text-left px-4 py-3">Compounding</th>
+                  <th className="font-semibold text-right px-4 py-3">Periods</th>
+                  <th className="font-semibold text-right px-4 py-3">Final Amount</th>
+                  <th className="font-semibold text-right px-4 py-3">Interest Earned</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonResults.map((result) => (
+                  <tr
+                    key={result.value}
+                    className={selectedCompounding === result.value ? "bg-primary/5" : ""}
+                  >
+                    <td className="font-medium px-4 py-3">{result.label}</td>
+                    <td className="text-right px-4 py-3">{formatNumber(result.totalPeriods)}</td>
+                    <td className="text-right px-4 py-3">{formatCurrency(result.finalAmount)}</td>
+                    <td className="text-right px-4 py-3">{formatCurrency(result.interestEarned)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        
+      </div>
     </div>
   )
 }
