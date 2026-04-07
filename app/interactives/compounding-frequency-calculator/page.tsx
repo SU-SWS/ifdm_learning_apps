@@ -4,7 +4,6 @@ import { Input } from "@/app/ui/components/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import { FaAngleDown } from "react-icons/fa";
 
 type CompoundingPeriod = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
