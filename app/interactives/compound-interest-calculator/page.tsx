@@ -79,7 +79,7 @@ export default function CompoundInterestCalculator() {
         <div className="flex flex-col md:flex-row gap-8">
 
           {/* Input Fields */}
-          <section className="space-y-6 mb-10 w-1/2">
+          <section className="space-y-6 mb-10 w-full lg:w-1/2">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Initial Amount</label>
               <div className="relative">
@@ -151,7 +151,7 @@ export default function CompoundInterestCalculator() {
           </section>
 
           {/* Results Section */}
-          <Card className="w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
+          <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardHeader>
               <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">Results</CardTitle>
             </CardHeader>
@@ -186,12 +186,12 @@ export default function CompoundInterestCalculator() {
                 {comparisonResults.map((result) => (
                   <tr
                     key={result.value}
-                    className={selectedCompounding === result.value ? "bg-primary/5" : ""}
+                    className={selectedCompounding === result.value ? "bg-lagunita-lighter text-lagunita font-bold" : ""}
                   >
-                    <td className="font-medium px-4 py-3">{result.label}</td>
-                    <td className="text-right px-4 py-3">{formatNumber(result.totalPeriods)}</td>
-                    <td className="text-right px-4 py-3">{formatCurrency(result.finalAmount)}</td>
-                    <td className="text-right px-4 py-3">{formatCurrency(result.interestEarned)}</td>
+                    <td className="px-4 py-3 border-b">{result.label}</td>
+                    <td className="text-right px-4 py-3 border-b text-black">{formatNumber(result.totalPeriods)}</td>
+                    <td className="text-right px-4 py-3 border-b text-black">{formatCurrency(result.finalAmount)}</td>
+                    <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
                   </tr>
                 ))}
               </tbody>
