@@ -4,7 +4,8 @@ import { Input } from "@/app/ui/components/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
-
+import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+import { FaAngleDown } from "react-icons/fa";
 
 type CompoundingPeriod = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
@@ -83,16 +84,37 @@ export default function CompoundInterestCalculator() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Initial Amount</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">
-                  $
-                </span>
                 <Input
                   type="number"
                   value={initialAmount}
                   onChange={(e) => setInitialAmount(e.target.value)}
-                  className="pl-7 h-12 text-lg bg-card"
+                  className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Increase amount"
+                    onClick={() =>
+                      setInitialAmount((prev) => String(Math.max(0, Number(prev) + 1)))
+                    }
+                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                  >
+                    <BiSolidUpArrow size={24} />
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Decrease amount"
+                    onClick={() =>
+                      setInitialAmount((prev) => String(Math.max(0, Number(prev) - 1)))
+                    }
+                    className="hover:text-grey-med-dark focus:outline-none"
+                  >
+                    <BiSolidDownArrow size={24} />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -103,13 +125,34 @@ export default function CompoundInterestCalculator() {
                   type="number"
                   value={annualRate}
                   onChange={(e) => setAnnualRate(e.target.value)}
-                  className="pr-8 h-12 text-lg bg-card"
+                  className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                   step="0.1"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">
-                  %
-                </span>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Increase amount"
+                    onClick={() =>
+                      setAnnualRate((prev) => String(Math.max(0, Number(prev) + 1)))
+                    }
+                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                  >
+                    <BiSolidUpArrow size={24} />
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Decrease amount"
+                    onClick={() =>
+                      setAnnualRate((prev) => String(Math.max(0, Number(prev) - 1)))
+                    }
+                    className="hover:text-grey-med-dark focus:outline-none"
+                  >
+                    <BiSolidDownArrow size={24} />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -120,25 +163,46 @@ export default function CompoundInterestCalculator() {
                   type="number"
                   value={years}
                   onChange={(e) => setYears(e.target.value)}
-                  className="pr-16 h-12 text-lg bg-card"
+                  className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">
-                  years
-                </span>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Increase amount"
+                    onClick={() =>
+                      setYears((prev) => String(Math.max(0, Number(prev) + 1)))
+                    }
+                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                  >
+                    <BiSolidUpArrow size={24} />
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Decrease amount"
+                    onClick={() =>
+                      setYears((prev) => String(Math.max(0, Number(prev) - 1)))
+                    }
+                    className="hover:text-grey-med-dark focus:outline-none"
+                  >
+                    <BiSolidDownArrow size={24} />
+                  </button>
+                </div>
               </div>
-              <p className="mt-2 text-sm ">
+              <p className="mt-2 text-sm">
                 {formatNumber(totalPeriods)} compounding periods
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-3">Compounding Period</label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2">
                 <select
                   value={selectedCompounding}
                   onChange={(e) => setSelectedCompounding(e.target.value as CompoundingPeriod)}
-                  className="w-full h-12 px-4 bg-card border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                 >
                   {compoundingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -146,6 +210,9 @@ export default function CompoundInterestCalculator() {
                     </option>
                   ))}
                 </select>
+                <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
+                  <FaAngleDown />
+                </div>
               </div>
             </div>
           </section>
@@ -189,8 +256,8 @@ export default function CompoundInterestCalculator() {
                     className={selectedCompounding === result.value ? "bg-lagunita-lighter text-lagunita font-bold" : ""}
                   >
                     <td className="px-4 py-3 border-b">{result.label}</td>
-                    <td className="text-right px-4 py-3 border-b text-black">{formatNumber(result.totalPeriods)}</td>
-                    <td className="text-right px-4 py-3 border-b text-black">{formatCurrency(result.finalAmount)}</td>
+                    <td className="text-right px-4 py-3 border-b text-forground">{formatNumber(result.totalPeriods)}</td>
+                    <td className="text-right px-4 py-3 border-b">{formatCurrency(result.finalAmount)}</td>
                     <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
                   </tr>
                 ))}
