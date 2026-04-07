@@ -91,30 +91,6 @@ export default function CompoundInterestCalculator() {
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      setInitialAmount((prev) => String(Math.max(0, Number(prev) + 1)))
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      setInitialAmount((prev) => String(Math.max(0, Number(prev) - 1)))
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -129,30 +105,6 @@ export default function CompoundInterestCalculator() {
                   min="0"
                   step="0.1"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      setAnnualRate((prev) => String(Math.max(0, Number(prev) + 1)))
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      setAnnualRate((prev) => String(Math.max(0, Number(prev) - 1)))
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -166,30 +118,6 @@ export default function CompoundInterestCalculator() {
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      setYears((prev) => String(Math.max(0, Number(prev) + 1)))
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      setYears((prev) => String(Math.max(0, Number(prev) - 1)))
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
-                </div>
               </div>
               <p className="mt-2 text-sm">
                 {formatNumber(totalPeriods)} compounding periods
