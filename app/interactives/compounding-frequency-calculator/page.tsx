@@ -19,10 +19,13 @@ const compoundingOptions: { value: CompoundingPeriod; label: string; periodsPerY
 ]
 
 function formatCurrency(value: number): string {
-  const formatted = value.toFixed(2)
-  const [intPart, decPart] = formatted.split(".")
-  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-  return `$${withCommas}.${decPart}`
+  if (!isFinite(value)) return "$∞"
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
 }
 
 function formatNumber(value: number): string {
@@ -74,7 +77,7 @@ export default function CompoundInterestCalculator() {
     <div className=" p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <h1 className="sr-only mb-2">Present Value Calculator</h1>
+        <h1 className="sr-only mb-2">Compounding Frequency Calculator</h1>
         <ThemeToggle />
         <div className="flex flex-col md:flex-row gap-8">
 
@@ -183,8 +186,8 @@ export default function CompoundInterestCalculator() {
                     className={selectedCompounding === result.value ? "bg-lagunita-lighter text-lagunita font-bold" : ""}
                   >
                     <td className="px-4 py-3 border-b">{result.label}</td>
-                    <td className="text-right px-4 py-3 border-b text-forground">{formatNumber(result.totalPeriods)}</td>
-                    <td className="text-right px-4 py-3 border-b">{formatCurrency(result.finalAmount)}</td>
+                    <td className="text-right px-4 py-3 border-b text-foreground">{formatNumber(result.totalPeriods)}</td>
+                    <td className="text-right px-4 py-3 border-b text-foreground">{formatCurrency(result.finalAmount)}</td>
                     <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
                   </tr>
                 ))}

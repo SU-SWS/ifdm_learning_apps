@@ -71,7 +71,7 @@
   --background: oklch(1 0 0);
   --foreground: rgba(0, 0, 0, 1);
   --radius: 0.625rem;
-  --card:  oklch(0.985 0 0);;
+  --card:  oklch(0.985 0 0);
   --card-background: rgba(247, 248, 255, 1);
   --card-foreground: oklch(0.145 0 0);
   --grey-foreground: oklch(0.145 0 0);;
