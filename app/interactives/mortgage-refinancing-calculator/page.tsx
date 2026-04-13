@@ -73,6 +73,8 @@ export default function MortgageCalculator() {
     const newR = Number.parseFloat(refNewRate) / 100 / 12
     const newM = Number.parseFloat(refNewMonths)
     const closingCosts = Number.parseFloat(refClosingCosts) || 0
+    const yearsInHouse = Number.parseFloat(refYearsIn) || 0
+    const monthsInHouse = yearsInHouse * 12
 
     if (
       isNaN(currentBal) ||
@@ -131,8 +133,13 @@ export default function MortgageCalculator() {
     }
 
     const monthlySavings = currentMonthlyPayment - newMonthlyPayment
-    const totalCurrentCost = currentMonthlyPayment * currentM
-    const totalNewCost = newMonthlyPayment * newM + closingCosts
+
+    //  Use expected months in house if provided, otherwise use the shorter loan term
+    const monthsToUse = monthsInHouse > 0 ? monthsInHouse : Math.min(currentM, newM)
+
+    //  Uses monthsToUse instead of full loan terms
+    const totalCurrentCost = currentMonthlyPayment * monthsToUse
+    const totalNewCost = newMonthlyPayment * monthsToUse + closingCosts
     const totalSavings = totalCurrentCost - totalNewCost
 
     let breakEvenMonths: number
@@ -174,7 +181,6 @@ export default function MortgageCalculator() {
       breakEvenMessage,
     })
   }
-
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div>
@@ -195,7 +201,7 @@ export default function MortgageCalculator() {
                 <CardHeader>
                   <CardTitle>Current Mortgage Balance Calculator</CardTitle>
                   <CardDescription>
-                    Calculate the present value of your remaining monthly mortgage payments (your mortgage balance).
+                    Calculate your mortgage balance (the present value of your remaining monthly mortgage payments).
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -243,7 +249,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="relative">
-                    <Label className="font-semibold" htmlFor="rate">Annual interest rate (%)</Label>
+                    <Label className="font-semibold" htmlFor="rate">Current interest rate</Label>
                     <Input
                       id="rate"
                       type="number"
@@ -345,7 +351,6 @@ export default function MortgageCalculator() {
                 </CardContent>
               </Card>
             </TabsContent>
-
             <TabsContent value="refinance">
               <Card>
                 <CardHeader>
@@ -518,7 +523,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
                     </div>
-                    <div className="pl-0">
+
+<div className="pl-0">
                       <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
 
                       <div className="mb-5 relative">
@@ -603,7 +609,7 @@ export default function MortgageCalculator() {
                       </div>
 
                       <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-rate">New annual interest rate (%)</Label>
+                        <Label className="font-semibold" htmlFor="ref-new-rate">New  interest rate</Label>
                         <Input
                           id="ref-new-rate"
                           type="number"
@@ -725,7 +731,6 @@ export default function MortgageCalculator() {
                       </div>
                     </div>
                   </div>
-
                   {refinanceResults && (
                     <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left">
                       
@@ -772,7 +777,18 @@ export default function MortgageCalculator() {
                       </Button>
                       <Button
                         className={`h-18 whitespace-normal bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
-                        onClick={() => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); }}
+                        onClick={() => { 
+                          setRefinanceResults(null); 
+                          setRefCurrentBalance(""); 
+                          setRefCurrentMonthlyPayment(""); 
+                          setRefCurrentMonths(""); 
+                          setRefCurrentRate(""); 
+                          setRefNewLoanAmount(""); 
+                          setRefNewRate(""); 
+                          setRefNewMonths(""); 
+                          setRefClosingCosts(""); 
+                          setRefYearsIn(""); 
+                        }}
                       >
                         Reset
                       </Button>
