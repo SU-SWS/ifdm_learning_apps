@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/ui/components/select"
+import ThemeToggle from "@/app/lib/theme-toggle"
 
 type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "daily"
 
@@ -86,242 +87,263 @@ export default function PresentValueCalculator() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 mb-8 text-center">
-          Present Value Calculator
-        </h1>
+    <div className=" p-6 max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <h1 className="sr-only mb-2">Present Value Calculator</h1>
+            <ThemeToggle />
+            <div className="flex flex-col md:flex-row gap-8">
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8 p-0">
             <TabsTrigger value="single">Single Amount</TabsTrigger>
             <TabsTrigger value="series">Payment Series</TabsTrigger>
           </TabsList>
 
           {/* Single Amount Tab */}
           <TabsContent value="single" className="space-y-8">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
-              <h2 className="text-lg font-medium text-slate-800">Input Values</h2>
-              
-              {/* Future Value Input */}
-              <div className="space-y-2">
-                <Label htmlFor="future-value" className="text-slate-700">
-                  Future Value ($)
-                </Label>
-                <Input
-                  id="future-value"
-                  type="number"
-                  value={futureValue}
-                  onChange={(e) => setFutureValue(Number(e.target.value) || 0)}
-                  className="bg-white border-slate-300"
-                />
+            <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
+              <div className="w-full md:w-1/2 space-y-6 bg-transparent">
+                {/* Future Value Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="future-value" className="text-sm font-medium text-foreground">
+                    Future value
+                  </Label>
+                  <Input
+                    id="future-value"
+                    type="number"
+                    value={futureValue}
+                    onChange={(e) => setFutureValue(Number(e.target.value) || 0)}
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                  />
+                </div>
+
+                {/* Interest Rate Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="interest-rate" className="text-sm font-medium text-foreground">
+                    Annual interest rate (%)
+                  </Label>
+                  <Input
+                    id="interest-rate"
+                    type="number"
+                    value={interestRate}
+                    onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                  />
+                </div>
+
+                {/* Time Period Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="time-period" className="text-sm font-medium text-foreground">
+                    Number of payments (10 years)
+                  </Label>
+                  <Input
+                    id="time-period"
+                    type="number"
+                    value={timePeriod}
+                    onChange={(e) => setTimePeriod(Number(e.target.value) || 1)}
+                    min={1}
+                    max={100}
+                    step={1}
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                  />
+                </div>
+
+                {/* Compounding Frequency */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">Compounding frequency</Label>
+                  <Select
+                    value={compoundingFrequency}
+                    onValueChange={(value) => setCompoundingFrequency(value as CompoundingFrequency)}
+                  >
+                    <SelectTrigger className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(frequencyMap).map(([key, { label }]) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Interest Rate Input */}
-              <div className="space-y-2">
-                <Label htmlFor="interest-rate" className="text-slate-700">
-                  Annual Interest Rate (%)
-                </Label>
-                <Input
-                  id="interest-rate"
-                  type="number"
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
-                  min={0}
-                  max={100}
-                  step={0.1}
-                  className="bg-white border-slate-300"
-                />
-              </div>
+              {/* Results Section */}
+              <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
+                <h2 className="text-[var(--text-navy)] text-[22px] font-bold">Results</h2>
 
-              {/* Time Period Input */}
-              <div className="space-y-2">
-                <Label htmlFor="time-period" className="text-slate-700">
-                  Time Period (years)
-                </Label>
-                <Input
-                  id="time-period"
-                  type="number"
-                  value={timePeriod}
-                  onChange={(e) => setTimePeriod(Number(e.target.value) || 1)}
-                  min={1}
-                  max={100}
-                  step={1}
-                  className="bg-white border-slate-300"
-                />
-                <p className="text-sm text-slate-500">
-                  {singleCalculations.totalPeriods} compounding periods
-                </p>
-              </div>
-
-              {/* Compounding Frequency */}
-              <div className="space-y-2">
-                <Label className="text-slate-700">Compounding Frequency</Label>
-                <Select
-                  value={compoundingFrequency}
-                  onValueChange={(value) => setCompoundingFrequency(value as CompoundingFrequency)}
-                >
-                  <SelectTrigger className="bg-white border-slate-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(frequencyMap).map(([key, { label }]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Results Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-medium text-slate-800 mb-6">Results</h2>
-              
-              {/* Main Present Value Display */}
-              <div className="bg-emerald-50 rounded-lg p-6 mb-6">
-                <p className="text-sm text-emerald-600 mb-1">Present Value</p>
-                <p className="text-3xl md:text-4xl font-bold text-emerald-700">
+                {/* Main Present Value Display */}
+                <p className="text-sm  my-2">Present Value</p>
+                <p className="text-3xl font-bold text-lagunita mb-5">
                   {formatCurrency(singleCalculations.presentValue)}
                 </p>
-              </div>
 
-              {/* Breakdown */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Future Value</span>
-                  <span className="text-slate-800 font-medium">{formatCurrency(futureValue)}</span>
+                {/* Breakdown */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                    <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                      Future value:
+                    </div>
+                    <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                      {formatCurrency(futureValue)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                    <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                      Present value:
+                    </div>
+                    <div className="w-full sm:w-[50%] text-lg-title text-lagunita p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                      {formatCurrency(singleCalculations.presentValue)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                    <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                      Discount amount:
+                    </div>
+                    <div className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${singleCalculations.discountAmount < 0 ? "text-berry" : ""}`}>
+                      {formatCurrency(singleCalculations.discountAmount)}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Present Value</span>
-                  <span className="text-slate-800 font-medium">{formatCurrency(singleCalculations.presentValue)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-600">Discount Amount</span>
-                  <span className="text-red-600 font-medium">{formatCurrency(singleCalculations.discountAmount)}</span>
-                </div>
-              </div>
 
-              <p className="text-sm text-slate-500 mt-4 text-center">
-                Compounded {frequencyMap[compoundingFrequency].label.toLowerCase()} over {timePeriod} years
-              </p>
+                <p className="text-sm mt-4">
+                  Compounded {frequencyMap[compoundingFrequency].label.toLowerCase()} over {timePeriod} years
+                </p>
+              </div>
             </div>
           </TabsContent>
 
           {/* Payment Series Tab */}
           <TabsContent value="series" className="space-y-8">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
-              <h2 className="text-lg font-medium text-slate-800">Input Values</h2>
-              
-              {/* Payment Amount Input */}
-              <div className="space-y-2">
-                <Label htmlFor="payment-amount" className="text-slate-700">
-                  Payment Amount ($)
-                </Label>
-                <Input
-                  id="payment-amount"
-                  type="number"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(Number(e.target.value) || 0)}
-                  className="bg-white border-slate-300"
-                />
+            <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
+
+              <div className="bg-transparent w-full md:w-1/2 space-y-6">                
+                {/* Payment Amount Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="payment-amount" className="text-sm font-medium text-foreground">
+                    Payment amount ($)
+                  </Label>
+                  <Input
+                    id="payment-amount"
+                    type="number"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(Number(e.target.value) || 0)}
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                  />
+                </div>
+
+                {/* Interest Rate Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="payment-interest-rate" className="text-sm font-medium text-foreground">
+                    Annual interest rate 
+                  </Label>
+                  <Input
+                    id="payment-interest-rate"
+                    type="number"
+                    value={paymentInterestRate}
+                    onChange={(e) => setPaymentInterestRate(Number(e.target.value) || 0)}
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                  />
+                </div>
+
+                {/* Number of Payments Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="number-of-payments" className="text-sm font-medium text-foreground">
+                    Number of payments
+                  </Label>
+                  <Input
+                    id="number-of-payments"
+                    type="number"
+                    value={numberOfPayments}
+                    onChange={(e) => setNumberOfPayments(Number(e.target.value) || 1)}
+                    min={1}
+                    max={1000}
+                    step={1}
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                  />
+                </div>
+
+                {/* Payment Frequency */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">Payment frequency</Label>
+                  <Select
+                    value={paymentFrequency}
+                    onValueChange={(value) => setPaymentFrequency(value as CompoundingFrequency)}
+                  >
+                    <SelectTrigger className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(frequencyMap).map(([key, { label }]) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Interest Rate Input */}
-              <div className="space-y-2">
-                <Label htmlFor="payment-interest-rate" className="text-slate-700">
-                  Annual Interest Rate (%)
-                </Label>
-                <Input
-                  id="payment-interest-rate"
-                  type="number"
-                  value={paymentInterestRate}
-                  onChange={(e) => setPaymentInterestRate(Number(e.target.value) || 0)}
-                  min={0}
-                  max={100}
-                  step={0.1}
-                  className="bg-white border-slate-300"
-                />
-              </div>
-
-              {/* Number of Payments Input */}
-              <div className="space-y-2">
-                <Label htmlFor="number-of-payments" className="text-slate-700">
-                  Number of Payments
-                </Label>
-                <Input
-                  id="number-of-payments"
-                  type="number"
-                  value={numberOfPayments}
-                  onChange={(e) => setNumberOfPayments(Number(e.target.value) || 1)}
-                  min={1}
-                  max={1000}
-                  step={1}
-                  className="bg-white border-slate-300"
-                />
-              </div>
-
-              {/* Payment Frequency */}
-              <div className="space-y-2">
-                <Label className="text-slate-700">Payment Frequency</Label>
-                <Select
-                  value={paymentFrequency}
-                  onValueChange={(value) => setPaymentFrequency(value as CompoundingFrequency)}
-                >
-                  <SelectTrigger className="bg-white border-slate-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(frequencyMap).map(([key, { label }]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Results Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-medium text-slate-800 mb-6">Results</h2>
-              
-              {/* Main Present Value Display */}
-              <div className="bg-emerald-50 rounded-lg p-6 mb-6">
-                <p className="text-sm text-emerald-600 mb-1">Present Value</p>
-                <p className="text-3xl md:text-4xl font-bold text-emerald-700">
+              {/* Results Section */}
+              <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
+                <h2 className="text-[var(--text-navy)] text-[22px] font-bold">Results</h2>
+                
+                {/* Main Present Value Display */}
+                <p className="text-sm  my-2">Present Value</p>
+                <p className="text-3xl font-bold text-lagunita mb-5">
                   {formatCurrency(paymentCalculations.presentValue)}
                 </p>
-              </div>
 
-              {/* Breakdown */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Total Payments</span>
-                  <span className="text-slate-800 font-medium">{formatCurrency(paymentCalculations.totalPayments)}</span>
+                {/* Breakdown */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                    <div
+                        className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                      Total Payments:
+                    </div>
+                    <div
+                        className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                      {formatCurrency(paymentCalculations.totalPayments)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                    <div
+                        className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                      Present Value:
+                    </div>
+                    <div
+                        className="w-full sm:w-[50%] text-lg-title p-4 text-lagunita rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                      {formatCurrency(paymentCalculations.presentValue)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                    <div
+                        className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                      Discount Amount:
+                    </div>
+                    <div
+                        className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}>
+                      {formatCurrency(paymentCalculations.discountAmount)}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Present Value</span>
-                  <span className="text-slate-800 font-medium">{formatCurrency(paymentCalculations.presentValue)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-600">Discount Amount</span>
-                  <span className="text-red-600 font-medium">{formatCurrency(paymentCalculations.discountAmount)}</span>
-                </div>
+                <p className="text-sm mt-4">
+                  {numberOfPayments} payments made {frequencyMap[paymentFrequency].label.toLowerCase()}
+                </p>
               </div>
-
-              <p className="text-sm text-slate-500 mt-4 text-center">
-                {numberOfPayments} payments made {frequencyMap[paymentFrequency].label.toLowerCase()}
-              </p>
             </div>
           </TabsContent>
         </Tabs>
-
-        <footer className="text-center text-slate-500 text-sm mt-8">
-          Present Value Calculator
-        </footer>
       </div>
-    </main>
+    </div>
+    </div>
   )
 }
