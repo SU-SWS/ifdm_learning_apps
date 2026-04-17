@@ -581,13 +581,13 @@ export default function MortgageCalculator() {
                             </div>
                           </div>
                           <div className="flex flex-col my-3">
-                            <h3 className="text-lg uppercase font-bold mb-4">Monthly breakdown</h3>
+                            <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
                             <hr/>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                             <div
                                 className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage Payment:
+                              Mortgage payment:
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
@@ -1124,13 +1124,13 @@ export default function MortgageCalculator() {
                             </div>
                           </div>
                           <div className="flex flex-col my-3">
-                            <h3 className="text-lg uppercase font-bold mb-4">Monthly breakdown</h3>
+                            <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
                             <hr/>
                           </div>
                           <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                             <div
                                 className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage Payment:
+                              Mortgage payment:
                             </div>
                             <div
                                 className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
