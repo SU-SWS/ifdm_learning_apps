@@ -211,7 +211,7 @@ export default function PresentValueCalculator() {
                   </div>
                 </div>
 
-                <p className="text-sm mt-4">
+                <p className="text-sm mt-4 text-center md:text-left">
                   Compounded {frequencyMap[compoundingFrequency].label.toLowerCase()} over {timePeriod} years
                 </p>
               </div>
@@ -335,7 +335,7 @@ export default function PresentValueCalculator() {
                     </div>
                   </div>
                 </div>
-                <p className="text-sm mt-4">
+                <p className="text-sm mt-4 text-center md:text-left">
                   {numberOfPayments} payments made {frequencyMap[paymentFrequency].label.toLowerCase()}
                 </p>
               </div>
