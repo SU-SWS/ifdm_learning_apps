@@ -84,7 +84,7 @@ export default function CompoundInterestCalculator() {
           {/* Input Fields */}
           <section className="space-y-6 mb-10 w-full lg:w-1/2">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Initial Amount</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Initial amount</label>
               <div className="relative">
                 <Input
                   type="number"
@@ -97,7 +97,7 @@ export default function CompoundInterestCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Annual Interest Rate</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Annual interest rate</label>
               <div className="relative">
                 <Input
                   type="number"
@@ -111,7 +111,7 @@ export default function CompoundInterestCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Time Period</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Number of compounding periods</label>
               <div className="relative">
                 <Input
                   type="number"
@@ -121,13 +121,10 @@ export default function CompoundInterestCalculator() {
                   min="0"
                 />
               </div>
-              <p className="mt-2 text-sm">
-                {formatNumber(totalPeriods)} compounding periods
-              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-3">Compounding Period</label>
+              <label className="block text-sm font-medium text-foreground mb-3">Compounding frequency</label>
               <div className="flex items-center gap-2">
                 <select
                   value={selectedCompounding}
