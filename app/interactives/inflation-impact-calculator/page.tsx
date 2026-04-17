@@ -110,7 +110,7 @@ export default function InflationCalculator() {
               <div className="space-y-3">
                 <div className="flex items-center">
                   <Label className="text-md font-bold">Time period:&nbsp;</Label>
-                  <span className="text-md font-semibold flex items-center gap-1 text-lagunita">
+                  <span className="text-md font-semibold flex items-center gap-1">
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
                 </div>
