@@ -112,8 +112,8 @@ export default function PresentValueCalculator() {
                   <Input
                     id="future-value"
                     type="number"
-                    value={futureValue}
-                    onChange={(e) => setFutureValue(Number(e.target.value) || 0)}
+                    value={futureValue === 0 ? "" : futureValue}
+                    onChange={(e) => setFutureValue(e.target.value === "" ? 0 : Number(e.target.value))}
                     className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
                   />
                 </div>
@@ -126,8 +126,8 @@ export default function PresentValueCalculator() {
                   <Input
                     id="interest-rate"
                     type="number"
-                    value={interestRate}
-                    onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
+                    value={interestRate === 0 ? "" : interestRate}
+                    onChange={(e) => setInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={0}
                     max={100}
                     step={0.1}
@@ -143,8 +143,8 @@ export default function PresentValueCalculator() {
                   <Input
                     id="time-period"
                     type="number"
-                    value={timePeriod}
-                    onChange={(e) => setTimePeriod(Number(e.target.value) || 1)}
+                    value={timePeriod === 0 ? "" : timePeriod}
+                    onChange={(e) => setTimePeriod(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={1}
                     max={100}
                     step={1}
@@ -231,8 +231,8 @@ export default function PresentValueCalculator() {
                   <Input
                     id="payment-amount"
                     type="number"
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(Number(e.target.value) || 0)}
+                    value={paymentAmount === 0 ? "" : paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value === "" ? 0 : Number(e.target.value))}
                     className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
                   />
                 </div>
@@ -245,8 +245,8 @@ export default function PresentValueCalculator() {
                   <Input
                     id="payment-interest-rate"
                     type="number"
-                    value={paymentInterestRate}
-                    onChange={(e) => setPaymentInterestRate(Number(e.target.value) || 0)}
+                    value={paymentInterestRate === 0 ? "" : paymentInterestRate}
+                    onChange={(e) => setPaymentInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={0}
                     max={100}
                     step={0.1}
@@ -262,8 +262,8 @@ export default function PresentValueCalculator() {
                   <Input
                     id="number-of-payments"
                     type="number"
-                    value={numberOfPayments}
-                    onChange={(e) => setNumberOfPayments(Number(e.target.value) || 1)}
+                    value={numberOfPayments === 0 ? "" : numberOfPayments}
+                    onChange={(e) => setNumberOfPayments(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={1}
                     max={1000}
                     step={1}
