@@ -45,7 +45,7 @@ export default function PresentValueCalculator() {
     const totalPeriods = n * timePeriod
     const periodRate = rate / n
     const presentValue = futureValue / Math.pow(1 + periodRate, totalPeriods)
-    const discountAmount = presentValue - futureValue
+    const discountAmount =  futureValue - presentValue
 
     return {
       presentValue,
@@ -68,7 +68,7 @@ export default function PresentValueCalculator() {
     }
     
     const totalPayments = paymentAmount * numberOfPayments
-    const discountAmount = presentValue - totalPayments
+    const discountAmount = totalPayments -presentValue
 
     return {
       presentValue,
@@ -87,7 +87,7 @@ export default function PresentValueCalculator() {
   }
 
   return (
-    <div className=" p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <h1 className="sr-only mb-2">Present Value Calculator</h1>
