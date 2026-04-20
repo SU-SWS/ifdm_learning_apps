@@ -68,11 +68,6 @@ export default function CompoundInterestCalculator() {
     }))
   }, [principal, rate, timeYears])
 
-  const totalPeriods = useMemo(() => {
-    const option = compoundingOptions.find((o) => o.value === selectedCompounding)!
-    return timeYears * option.periodsPerYear
-  }, [timeYears, selectedCompounding])
-
   return (
     <div className=" p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
