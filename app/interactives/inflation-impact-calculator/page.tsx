@@ -100,7 +100,7 @@ export default function InflationCalculator() {
                   step={0.1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-md text-black font-medium font-poppins">
+                <div className="flex justify-between text-md  font-medium font-poppins">
                   <span>0%</span>
                   <span>15%</span>
                 </div>
@@ -123,7 +123,7 @@ export default function InflationCalculator() {
                   className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"
                 />
-                <div className="flex justify-between text-md text-black font-medium font-poppins">
+                <div className="flex justify-between text-md font-medium font-poppins">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>
