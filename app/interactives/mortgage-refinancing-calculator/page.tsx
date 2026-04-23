@@ -209,7 +209,7 @@ export default function MortgageCalculator() {
                       onChange={(e) => setMonthsRemaining(e.target.value)}
                       min="0"
                       step="1"
-                      className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                       <button
@@ -368,7 +368,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefCurrentBalance(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -408,7 +408,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefCurrentMonths(e.target.value)}
                           min="0"
                           step="1"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -488,7 +488,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefCurrentMonthlyPayment(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -531,7 +531,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefNewLoanAmount(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -571,7 +571,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefNewMonths(e.target.value)}
                           min="0"
                           step="1"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -654,7 +654,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefClosingCosts(e.target.value)}
                           min="0"
                           step="0.01"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -694,7 +694,7 @@ export default function MortgageCalculator() {
                           onChange={(e) => setRefYearsIn(e.target.value)}
                           min="0"
                           step="1"
-                          className="text-black font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                           <button
@@ -731,7 +731,7 @@ export default function MortgageCalculator() {
                       
                       <div className="text-left">
                         <p className="font-semibold text-lagunita mt-4 mb-2">New monthly payment</p>
-                        <p className="text-2xl p-4 bg-lagunita-lighter text-black border-1 border-lagunita rounded-lg font-bold">
+                        <p className="text-black text-2xl p-4 bg-lagunita-lighter border-1 border-lagunita rounded-lg font-bold">
                           ${formatCurrency(refinanceResults.newMonthlyPayment)}
                         </p>
                       </div>
