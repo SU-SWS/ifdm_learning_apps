@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/ca
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { FaAngleDown } from "react-icons/fa";
+import InfoPopover from "@/app/ui/components/popover";
 
 type CompoundingPeriod = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
@@ -47,13 +48,13 @@ function calculateCompoundInterest(
 }
 
 export default function CompoundInterestCalculator() {
-  const [initialAmount, setInitialAmount] = useState<string>("10000")
-  const [annualRate, setAnnualRate] = useState<string>("7")
-  const [years, setYears] = useState<string>("5")
+  const [initialAmount, setInitialAmount] = useState<string>("")
+  const [annualRate, setAnnualRate] = useState<string>("")
+  const [years, setYears] = useState<string>("")
   const [selectedCompounding, setSelectedCompounding] = useState<CompoundingPeriod>("monthly")
 
-  const principal = parseFloat(initialAmount) || 0
-  const rate = (parseFloat(annualRate) || 0) / 100
+  const principal = parseFloat(initialAmount.replace('$', '')) || 0
+  const rate = (parseFloat(annualRate.replace('%', '')) || 0) / 100
   const timeYears = parseFloat(years) || 0
 
   const selectedResult = useMemo(() => {
@@ -82,9 +83,13 @@ export default function CompoundInterestCalculator() {
               <label className="block text-sm font-medium text-foreground mb-2">Initial amount</label>
               <div className="relative">
                 <Input
-                  type="number"
+                  type="text"
                   value={initialAmount}
-                  onChange={(e) => setInitialAmount(e.target.value)}
+                  onChange={(e) => {
+                    const input = e.target.value;
+                    const numericPart = input.replace(/^\$/, '').replace(/[^0-9.]/g, '');
+                    setInitialAmount('$' + numericPart);
+                  }}
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
@@ -95,9 +100,13 @@ export default function CompoundInterestCalculator() {
               <label className="block text-sm font-medium text-foreground mb-2">Annual interest rate</label>
               <div className="relative">
                 <Input
-                  type="number"
+                  type="text"
                   value={annualRate}
-                  onChange={(e) => setAnnualRate(e.target.value)}
+                  onChange={(e) => {
+                    const input = e.target.value;
+                    const numericPart = input.replace(/^%/, '').replace(/[^0-9.]/g, '');
+                    setAnnualRate(numericPart + '%');
+                  }}
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                   step="0.1"
@@ -106,7 +115,10 @@ export default function CompoundInterestCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Number of compounding periods</label>
+              <div className="flex items-start gap-2">
+                <label className="block text-sm font-medium text-foreground mb-2">Number of compounding periods</label>
+                <InfoPopover title="Compounding frequency">Periods are counted based on the selected compounding frequency. For monthly compounding, 60 periods equals 60 months.</InfoPopover>
+              </div>
               <div className="relative">
                 <Input
                   type="number"
@@ -115,11 +127,15 @@ export default function CompoundInterestCalculator() {
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
+                <p className="text-sm font-medium text-foreground mt-2">60 monthly periods = 5 years</p>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-3">Compounding frequency</label>
+              <div className="flex items-start gap-2">
+                <label className="block text-sm font-medium text-foreground mb-3">Compounding frequency</label>
+                <InfoPopover title="Compounding frequency">Compounding frequency is how often interest is calculated and added to the balance. For example, monthly compounding applies interest once each month.</InfoPopover>
+              </div>
               <div className="flex items-center gap-2">
                 <select
                   value={selectedCompounding}
@@ -141,15 +157,15 @@ export default function CompoundInterestCalculator() {
 
           {/* Results Section */}
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
-            <CardHeader>
-              <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">Results</CardTitle>
-            </CardHeader>
             <CardContent className="p-0">
-              <p className="text-sm font-bold mb-1">Final Amount</p>
+              <p className="text-sm font-bold mb-1">Balance after {timeYears} years</p>
               <p className="text-3xl font-bold text-lagunita mb-5">{formatCurrency(selectedResult.finalAmount)}</p>
-              <p className="text-sm  font-bold mb-1">Total Interest Earned</p>
+              <p className="text-sm  font-bold mb-1">Interest Earned over {timeYears} years</p>
               <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(selectedResult.interestEarned)}
+              </p>
+              <p className="font-bold text-foreground">
+                With <span className="text-lagunita">{selectedCompounding}</span> compounding
               </p>
             </CardContent>
           </Card>
