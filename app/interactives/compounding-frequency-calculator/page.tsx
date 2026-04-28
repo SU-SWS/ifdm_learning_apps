@@ -1,7 +1,7 @@
 "use client"
 
 import { Input } from "@/app/ui/components/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
+import { Card, CardContent } from "@/app/ui/components/card"
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { FaAngleDown } from "react-icons/fa";
