@@ -142,7 +142,7 @@ export default function CompoundInterestCalculator() {
             <div>
               <div className="flex items-start gap-2">
                 <label className="block font-semibold text-foreground mb-2">Number of compounding periods</label>
-                <InfoPopover title="Compounding frequency">Periods are counted based on the selected compounding frequency. For monthly compounding, 60 periods equals 60 months.</InfoPopover>
+                <InfoPopover title="Number of compounding periods">Periods are counted based on the selected compounding frequency. For monthly compounding, 60 periods equals 60 months.</InfoPopover>
               </div>
               <div className="relative">
                 <Input
@@ -187,11 +187,11 @@ export default function CompoundInterestCalculator() {
             <CardContent className="p-0">
               <p className="text-[20px] font-bold mb-1">Balance after {formattedTimePeriod}</p>
               <p className="text-3xl font-bold text-lagunita mb-5">{formatCurrency(selectedResult.finalAmount)}</p>
-              <p className="text-sm  font-bold mb-1">Interest Earned over {formattedTimePeriod}</p>
+              <p className="text-[16px] font-semibold mb-1">Interest Earned over {formattedTimePeriod}</p>
               <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(selectedResult.interestEarned)}
               </p>
-              <p className="font-bold text-foreground">
+              <p className="text-[16px] font-semibold text-foreground">
                 With <span className="text-lagunita">{selectedCompounding}</span> compounding
               </p>
             </CardContent>
