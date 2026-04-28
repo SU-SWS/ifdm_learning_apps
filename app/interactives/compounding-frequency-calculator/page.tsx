@@ -36,10 +36,9 @@ function formatNumber(value: number): string {
 function calculateCompoundInterest(
   principal: number,
   rate: number,
-  years: number,
+  totalPeriods: number,
   periodsPerYear: number
 ): { finalAmount: number; interestEarned: number; totalPeriods: number } {
-  const totalPeriods = years * periodsPerYear
   const ratePerPeriod = rate / periodsPerYear
   const finalAmount = principal * Math.pow(1 + ratePerPeriod, totalPeriods)
   const interestEarned = finalAmount - principal
@@ -47,27 +46,53 @@ function calculateCompoundInterest(
   return { finalAmount, interestEarned, totalPeriods }
 }
 
+function formatTimePeriod(totalPeriods: number, periodsPerYear: number): string {
+  const totalYears = totalPeriods / periodsPerYear
+  const years = Math.floor(totalYears)
+  const remainingPeriods = totalPeriods - (years * periodsPerYear)
+  const months = Math.round((remainingPeriods / periodsPerYear) * 12)
+
+  if (years === 0 && months === 0) return "0 months"
+  if (years === 0) return `${months} month${months !== 1 ? 's' : ''}`
+  if (months === 0) return `${years} year${years !== 1 ? 's' : ''}`
+  
+  return `${years} year${years !== 1 ? 's' : ''} and ${months} month${months !== 1 ? 's' : ''}`
+}
+
 export default function CompoundInterestCalculator() {
   const [initialAmount, setInitialAmount] = useState<string>("")
   const [annualRate, setAnnualRate] = useState<string>("")
-  const [years, setYears] = useState<string>("")
+  const [periods, setPeriods] = useState<string>("")
   const [selectedCompounding, setSelectedCompounding] = useState<CompoundingPeriod>("monthly")
 
   const principal = parseFloat(initialAmount.replace('$', '')) || 0
   const rate = (parseFloat(annualRate.replace('%', '')) || 0) / 100
-  const timeYears = parseFloat(years) || 0
+  const totalPeriods = parseFloat(periods) || 0
+
+  const selectedOption = useMemo(() => 
+    compoundingOptions.find((o) => o.value === selectedCompounding)!,
+    [selectedCompounding]
+  )
 
   const selectedResult = useMemo(() => {
-    const option = compoundingOptions.find((o) => o.value === selectedCompounding)!
-    return calculateCompoundInterest(principal, rate, timeYears, option.periodsPerYear)
-  }, [principal, rate, timeYears, selectedCompounding])
+    return calculateCompoundInterest(principal, rate, totalPeriods, selectedOption.periodsPerYear)
+  }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
+
+  const formattedTimePeriod = useMemo(() => 
+    formatTimePeriod(totalPeriods, selectedOption.periodsPerYear),
+    [totalPeriods, selectedOption.periodsPerYear]
+  )
 
   const comparisonResults = useMemo(() => {
-    return compoundingOptions.map((option) => ({
-      ...option,
-      ...calculateCompoundInterest(principal, rate, timeYears, option.periodsPerYear),
-    }))
-  }, [principal, rate, timeYears])
+    const timeInYears = totalPeriods / selectedOption.periodsPerYear
+    return compoundingOptions.map((option) => {
+      const periodsForThisFrequency = timeInYears * option.periodsPerYear
+      return {
+        ...option,
+        ...calculateCompoundInterest(principal, rate, periodsForThisFrequency, option.periodsPerYear),
+      }
+    })
+  }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
 
   return (
     <div className=" p-6 max-w-5xl mx-auto">
@@ -80,7 +105,7 @@ export default function CompoundInterestCalculator() {
           {/* Input Fields */}
           <section className="space-y-6 mb-10 w-full lg:w-1/2">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Initial amount</label>
+              <label className="block font-semibold text-foreground mb-2">Initial amount</label>
               <div className="relative">
                 <Input
                   type="text"
@@ -97,7 +122,7 @@ export default function CompoundInterestCalculator() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Annual interest rate</label>
+              <label className="block font-semibold text-foreground mb-2">Annual interest rate</label>
               <div className="relative">
                 <Input
                   type="text"
@@ -116,24 +141,26 @@ export default function CompoundInterestCalculator() {
 
             <div>
               <div className="flex items-start gap-2">
-                <label className="block text-sm font-medium text-foreground mb-2">Number of compounding periods</label>
+                <label className="block font-semibold text-foreground mb-2">Number of compounding periods</label>
                 <InfoPopover title="Compounding frequency">Periods are counted based on the selected compounding frequency. For monthly compounding, 60 periods equals 60 months.</InfoPopover>
               </div>
               <div className="relative">
                 <Input
                   type="number"
-                  value={years}
-                  onChange={(e) => setYears(e.target.value)}
+                  value={periods}
+                  onChange={(e) => setPeriods(e.target.value)}
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
-                <p className="text-sm font-medium text-foreground mt-2">60 monthly periods = 5 years</p>
+                <p className="text-sm text-foreground mt-2">
+                  {totalPeriods > 0 && `${formatNumber(totalPeriods)} ${selectedOption.label.toLowerCase()} periods = ${formattedTimePeriod}`}
+                </p>
               </div>
             </div>
 
             <div>
               <div className="flex items-start gap-2">
-                <label className="block text-sm font-medium text-foreground mb-3">Compounding frequency</label>
+                <label className="block font-semibold text-foreground mb-3">Compounding frequency</label>
                 <InfoPopover title="Compounding frequency">Compounding frequency is how often interest is calculated and added to the balance. For example, monthly compounding applies interest once each month.</InfoPopover>
               </div>
               <div className="flex items-center gap-2">
@@ -158,9 +185,9 @@ export default function CompoundInterestCalculator() {
           {/* Results Section */}
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
-              <p className="text-sm font-bold mb-1">Balance after {timeYears} years</p>
+              <p className="text-[20px] font-bold mb-1">Balance after {formattedTimePeriod}</p>
               <p className="text-3xl font-bold text-lagunita mb-5">{formatCurrency(selectedResult.finalAmount)}</p>
-              <p className="text-sm  font-bold mb-1">Interest Earned over {timeYears} years</p>
+              <p className="text-sm  font-bold mb-1">Interest Earned over {formattedTimePeriod}</p>
               <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(selectedResult.interestEarned)}
               </p>
@@ -172,17 +199,17 @@ export default function CompoundInterestCalculator() {
         </div>
           {/* Comparison Table */}
         <section className="rounded-3xl bg-[var(--grey-background)] p-6 mt-10">
-          <h2 className="text-xl font-semibold mb-2">Comparison Across All Periods</h2>
+          <h2 className="text-xl font-semibold mb-2">Comparison Across Compounding Frequencies</h2>
           <p className="text-sm mb-4">
-            See how compounding frequency impacts your returns
+            See how compounding frequency affects returns over the same time period.
           </p>
 
           <div className="overflow-hidden bg-card">
             <table className="min-w-full">
               <thead>
                 <tr>
-                  <th className="font-semibold text-left px-4 py-3">Compounding</th>
-                  <th className="font-semibold text-right px-4 py-3">Periods</th>
+                  <th className="font-semibold text-left px-4 py-3">Compounding Frequency</th>
+                  <th className="font-semibold text-right px-4 py-3">Number of <br/>Compounding Periods</th>
                   <th className="font-semibold text-right px-4 py-3">Final Amount</th>
                   <th className="font-semibold text-right px-4 py-3">Interest Earned</th>
                 </tr>
@@ -201,6 +228,7 @@ export default function CompoundInterestCalculator() {
                 ))}
               </tbody>
             </table>
+            <p className="pt-3 font-bold text-sm">Over the same time period, more frequent compounding generally results in more interest earned, assuming the annual interest rate stays the same.</p>
           </div>
         </section>
         
