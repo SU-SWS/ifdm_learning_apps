@@ -188,7 +188,7 @@ export default function MortgageCalculator() {
                             setDownPaymentMode('percentage');
                             // if switching from dollar, compute percent
                             if (downPaymentAmount && downPaymentAmount > 0) {
-                              setDownPaymentPercent(Number(downPaymentAmount / Number(homePrice)) * 100);
+                              setDownPaymentPercent(Math.round((Number(downPaymentAmount / Number(homePrice)) * 100) * 100) / 100);
                             } else {
                               setDownPaymentPercent(downPaymentPercent);
                             }
@@ -206,7 +206,7 @@ export default function MortgageCalculator() {
                           onClick={() => {
                             setDownPaymentMode('dollar');
                             // set dollar amount from results if available
-                            setDownPaymentAmount(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100)));
+                            setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
                           }}
                           className={`w-[50px] text-md font-bold rounded-md border-2 transition ${
                             downPaymentMode === 'dollar'
@@ -226,12 +226,13 @@ export default function MortgageCalculator() {
                           const raw = e.target.value;
                           const value = raw === '' ? 0 : Number(raw);
                           if (downPaymentMode === 'percentage') {
-                            setDownPaymentPercent(value);
-                          } else {
-                            setDownPaymentAmount(value);
-                            // Calculate percentage from dollar amount
+                            setDownPaymentPercent(Math.round(value * 100) / 100);
                             const price = Number(homePrice) || results.homePrice;
-                            if (price > 0) setDownPaymentPercent((value / price) * 100);
+                            setDownPaymentAmount(Math.round((value / 100) * price));
+                          } else {
+                            setDownPaymentAmount(Math.round(value));
+                            const price = Number(homePrice) || results.homePrice;
+                            if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
                           }
                         }}
                         className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -250,7 +251,7 @@ export default function MortgageCalculator() {
                             } else {
                               const newAmount = (Number(downPaymentAmount) || 0) + 1000;
                               setDownPaymentAmount(newAmount);
-                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                              setDownPaymentPercent(Math.round((newAmount / Number(homePrice)) * 100 * 100) / 100);
                             }
                           }}
                           className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
@@ -270,7 +271,7 @@ export default function MortgageCalculator() {
                             } else {
                               const newAmount = Math.max(0, (Number(downPaymentAmount) || 0) - 1000);
                               setDownPaymentAmount(newAmount);
-                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                              setDownPaymentPercent(Math.round((newAmount / Number(homePrice)) * 100 * 100) / 100);
                             }
                           }}
                           className="hover:text-grey-med-dark focus:outline-none"
@@ -712,7 +713,7 @@ export default function MortgageCalculator() {
                             setDownPaymentMode('percentage');
                             // if switching from dollar, compute percent
                             if (downPaymentAmount && downPaymentAmount > 0) {
-                              setDownPaymentPercent((downPaymentAmount / Number(homePrice) * 100));
+                              setDownPaymentPercent(Math.round((downPaymentAmount / Number(homePrice) * 100) * 100) / 100);
                             } else {
                               setDownPaymentPercent(downPaymentPercent);
                             }
@@ -730,7 +731,7 @@ export default function MortgageCalculator() {
                           onClick={() => {
                             setDownPaymentMode('dollar');
                             // set dollar amount from results if available
-                            setDownPaymentAmount(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100)));
+                            setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
                           }}
                           className={`w-[50px] text-md font-bold rounded-md border-2 transition ${
                             downPaymentMode === 'dollar'
@@ -750,12 +751,13 @@ export default function MortgageCalculator() {
                           const raw = e.target.value;
                           const value = raw === '' ? 0 : Number(raw);
                           if (downPaymentMode === 'percentage') {
-                            setDownPaymentPercent(value);
-                          } else {
-                            setDownPaymentAmount(value);
-                            // Calculate percentage from dollar amount
+                            setDownPaymentPercent(Math.round(value * 100) / 100);
                             const price = Number(homePrice) || results.homePrice;
-                            if (price > 0) setDownPaymentPercent((value / price) * 100);
+                            setDownPaymentAmount(Math.round((value / 100) * price));
+                          } else {
+                            setDownPaymentAmount(Math.round(value));
+                            const price = Number(homePrice) || results.homePrice;
+                            if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
                           }
                         }}
                         className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -771,7 +773,7 @@ export default function MortgageCalculator() {
                             } else {
                               const newAmount = (Number(downPaymentAmount) || 0) + 1000;
                               setDownPaymentAmount(newAmount);
-                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                              setDownPaymentPercent(Math.round((newAmount / Number(homePrice)) * 100 * 100) / 100);
                             }
                           }}
                           className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
@@ -788,7 +790,7 @@ export default function MortgageCalculator() {
                             } else {
                               const newAmount = Math.max(0, (Number(downPaymentAmount) || 0) - 1000);
                               setDownPaymentAmount(newAmount);
-                              setDownPaymentPercent((newAmount / Number(homePrice)) * 100);
+                              setDownPaymentPercent(Math.round((newAmount / Number(homePrice)) * 100 * 100) / 100);
                             }
                           }}
                           className="hover:text-grey-med-dark focus:outline-none"
