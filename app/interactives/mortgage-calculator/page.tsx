@@ -139,14 +139,14 @@ export default function MortgageCalculator() {
                         <label className="block text-sm font-semibold">
                           Monthly mortgage budget (principal + interest)
                         </label>
-                        <InfoPopover title="Debt amount">This is your total balance owed or what you would like to pay off.</InfoPopover>
+                        <InfoPopover title="Monthly mortgage budget">Enter the portion of the monthly budget used for the loan payment. Additional housing costs like taxes and insurance are not included here.</InfoPopover>
                       </div>
                     </div>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                       <input
                         type="number"
-                        placeholder="-"
+                        placeholder=""
                         step="1"
                         value={monthlyPayment}
                         onChange={(e) => setMonthlyPayment(e.target.value)}
@@ -159,62 +159,83 @@ export default function MortgageCalculator() {
                   <div className="pb-5">
                     <div className="flex flex-row pb-2 justify-between items-center">
                       <label className="block text-sm font-semibold">Down payment</label>
-                      <div className="flex flex-row gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDownPaymentMode('percentage');
-                            // if switching from dollar, compute percent
-                            if (downPaymentAmount && downPaymentAmount > 0) {
-                              setDownPaymentPercent(Math.round((Number(downPaymentAmount / Number(homePrice)) * 100) * 100) / 100);
-                            } else {
-                              setDownPaymentPercent(downPaymentPercent);
-                            }
-                          }}
-                          className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                      <div className="flex flex-row gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="downPaymentMode"
+                            value="percentage"
+                            checked={downPaymentMode === 'percentage'}
+                            onChange={() => {
+                              setDownPaymentMode('percentage');
+                              // if switching from dollar, compute percent
+                              if (downPaymentAmount >= 0) {
+                                setDownPaymentPercent(Math.round((Number(downPaymentAmount / Number(homePrice)) * 100) * 100) / 100);
+                              } else {
+                                setDownPaymentPercent(downPaymentPercent);
+                              }
+                            }}
+                            className="w-4 h-4  accent-lagunita cursor-pointer"
+                          />
+                          <span className={`text-xs transition ${
                             downPaymentMode === 'percentage'
-                              ? 'bg-navy border-navy text-white'
-                              : 'bg-white border-lagunita text-lagunita'
-                          }`}
-                        >
-                          Use percent instead
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDownPaymentMode('dollar');
-                            // set dollar amount from results if available
-                            setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
-                          }}
-                          className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                              ? 'text-black font-semibold'
+                              : 'text-black'
+                          }`}>
+                            Percent
+                          </span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="downPaymentMode"
+                            value="dollar"
+                            checked={downPaymentMode === 'dollar'}
+                            onChange={() => {
+                              setDownPaymentMode('dollar');
+                              // set dollar amount from results if available
+                              setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
+                            }}
+                            className="w-4 accent-lagunita cursor-pointer"
+                          />
+                          <span className={`text-xs transition ${
                             downPaymentMode === 'dollar'
-                              ? 'bg-navy border-navy text-white'
-                              : 'bg-white border-lagunita text-lagunita'
-                          }`}
-                        >
-                          Use dollars instead
-                        </button>
+                              ? 'text-black font-semibold'
+                              : 'text-black'
+                          }`}>
+                            Dollars
+                          </span>
+                        </label>
                       </div>
                     </div>
                     <div className="relative">
-                      <input
-                        type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          const value = raw === '' ? 0 : Number(raw);
-                          if (downPaymentMode === 'percentage') {
+                      {downPaymentMode === 'percentage' ? (
+                        <input
+                          type="number"
+                          value={downPaymentPercent || ''}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const value = raw === '' ? 0 : Number(raw);
                             setDownPaymentPercent(Math.round(value * 100) / 100);
                             const price = Number(homePrice) || results.homePrice;
                             setDownPaymentAmount(Math.round((value / 100) * price));
-                          } else {
+                          }}
+                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      ) : (
+                        <input
+                          type="number"
+                          value={downPaymentAmount || ''}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const value = raw === '' ? 0 : Number(raw);
                             setDownPaymentAmount(Math.round(value));
                             const price = Number(homePrice) || results.homePrice;
                             if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
-                          }
-                        }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
+                          }}
+                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      )}
                       <p className="text-xs mt-1">Enter 0 if no down payment is planned.</p>
                     </div>
                   </div>
@@ -225,7 +246,7 @@ export default function MortgageCalculator() {
                     <div className="relative">
                       <input
                         type="number"
-                        placeholder="-"
+                        placeholder=""
                         step="0.1"
                         min="0"
                         value={interestRate}
@@ -239,27 +260,37 @@ export default function MortgageCalculator() {
                   {/* Loan Term */}
                   <div className="pb-5">
                     <label className="block text-sm font-semibold">Loan term</label>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setLoanTerm(15)}
-                        className={`flex-1 py-3 rounded-lg font-medium transition ${
-                          loanTerm === 15
-                            ? 'bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white'
-                            : 'bg-white border-2 border-lagunita text-lagunita'
-                        }`}
-                      >
-                        15 years
-                      </button>
-                      <button
-                        onClick={() => setLoanTerm(30)}
-                        className={`flex-1 py-3 rounded-lg font-medium transition ${
-                          loanTerm === 30
-                            ? 'bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white'
-                            : 'bg-white border-2 border-lagunita text-lagunita'
-                        }`}
-                      >
-                        30 years
-                      </button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <label className={`flex-1 cursor-pointer flex flex-row ${
+                        loanTerm === 15
+                          ? ' border-navy'
+                          : ' border-lagunita'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="loanTerm"
+                          value="15"
+                          checked={loanTerm === 15}
+                          onChange={() => setLoanTerm(15)}
+                          className="mr-3 w-4 accent-lagunita"
+                        />
+                        <span className={`self-center ${loanTerm === 15 ? 'font-semibold' : 'font-normal'}`}>15 years</span>
+                      </label>
+                      <label className={`flex-1 cursor-pointer flex flex-row ${
+                        loanTerm === 30
+                          ? 'border-navy'
+                          : 'border-lagunita'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="loanTerm"
+                          value="30"
+                          checked={loanTerm === 30}
+                          onChange={() => setLoanTerm(30)}
+                          className="mr-3 w-4 accent-lagunita"
+                        />
+                        <span className={`self-center ${loanTerm === 30 ? 'font-semibold' : 'font-normal'}`}>30 years</span>
+                      </label>
                     </div>
                   </div>
                   {/* Optional Section */}
@@ -397,11 +428,15 @@ export default function MortgageCalculator() {
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                         <input
                           type="number"
-                          placeholder="-"
+                          placeholder=""
                           step="1"
                           min="0"
+                          max="100000"
                           value={hoaDues}
-                          onChange={(e) => setHoaDues(e.target.value)}
+                          onChange={(e) => {
+                            const value = Math.min(Number(e.target.value) || 0, 100000);
+                            setHoaDues(value.toString());
+                          }}
                           className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
@@ -525,7 +560,7 @@ export default function MortgageCalculator() {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                       <input
                         type="number"
-                        placeholder="-"
+                        placeholder=""
                         step="1"
                         value={homePrice}
                         onChange={(e) => setHomePrice(e.target.value)}
@@ -545,7 +580,7 @@ export default function MortgageCalculator() {
                           onClick={() => {
                             setDownPaymentMode('percentage');
                             // if switching from dollar, compute percent
-                            if (downPaymentAmount && downPaymentAmount > 0) {
+                            if (downPaymentAmount >= 0) {
                               setDownPaymentPercent(Math.round((downPaymentAmount / Number(homePrice) * 100) * 100) / 100);
                             } else {
                               setDownPaymentPercent(downPaymentPercent);
@@ -606,7 +641,7 @@ export default function MortgageCalculator() {
                   <input
                     type="number"
                     step="0.1"
-                    placeholder="-"
+                    placeholder=""
                     min="0"
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
@@ -619,27 +654,37 @@ export default function MortgageCalculator() {
               {/* Loan Term */}
               <div className="pb-5">
                 <label className="block text-sm font-semibold">Loan term</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setLoanTerm(15)}
-                    className={`flex-1 py-3 rounded-lg font-medium transition ${
-                      loanTerm === 15
-                        ? 'bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white'
-                        : 'bg-white border-2 border-lagunita text-lagunita'
-                    }`}
-                  >
-                    15 years
-                  </button>
-                  <button
-                    onClick={() => setLoanTerm(30)}
-                    className={`flex-1 py-3 rounded-lg font-medium transition ${
-                      loanTerm === 30
-                        ? 'bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white'
-                        : 'bg-white border-2 border-lagunita text-lagunita'
-                    }`}
-                  >
-                    30 years
-                  </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <label className={`flex-1 cursor-pointer flex flex-row ${
+                    loanTerm === 15
+                      ? ' border-navy'
+                      : ' border-lagunita'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="loanTerm"
+                      value="15"
+                      checked={loanTerm === 15}
+                      onChange={() => setLoanTerm(15)}
+                      className="mr-3 w-4 accent-lagunita"
+                    />
+                    <span className="self-center">15 years</span>
+                  </label>
+                  <label className={`flex-1 cursor-pointer flex flex-row ${
+                    loanTerm === 30
+                      ? 'border-navy'
+                      : 'border-lagunita'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="loanTerm"
+                      value="30"
+                      checked={loanTerm === 30}
+                      onChange={() => setLoanTerm(30)}
+                      className="mr-3 w-4 accent-lagunita"
+                    />
+                    <span className="self-center">30 years</span>
+                  </label>
                 </div>
               </div>
 
@@ -776,7 +821,7 @@ export default function MortgageCalculator() {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                       <input
                         type="number"
-                        placeholder="-"
+                        placeholder=""
                         step="1"
                         min="0"
                         value={hoaDues}
