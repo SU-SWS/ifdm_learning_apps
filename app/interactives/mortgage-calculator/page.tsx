@@ -115,6 +115,8 @@ export default function MortgageCalculator() {
     }).format(value);
   };
 
+  const emptyResultsString = "Enter values to see your estimate"
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div>
@@ -143,7 +145,7 @@ export default function MortgageCalculator() {
                       </div>
                     </div>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
+                      <span className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                       <input
                         type="number"
                         placeholder=""
@@ -163,19 +165,16 @@ export default function MortgageCalculator() {
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="radio"
-                            name="downPaymentMode"
-                            value="percentage"
+                            name="downPaymentModeAfford"
                             checked={downPaymentMode === 'percentage'}
                             onChange={() => {
                               setDownPaymentMode('percentage');
                               // if switching from dollar, compute percent
-                              if (downPaymentAmount >= 0) {
-                                setDownPaymentPercent(Math.round((Number(downPaymentAmount / Number(homePrice)) * 100) * 100) / 100);
-                              } else {
-                                setDownPaymentPercent(downPaymentPercent);
+                              if (downPaymentAmount >= 0 && results.homePrice > 0) {
+                                setDownPaymentPercent(Math.round((downPaymentAmount / results.homePrice * 100) * 100) / 100);
                               }
                             }}
-                            className="w-4 h-4  accent-lagunita cursor-pointer"
+                            className="w-4 h-4 accent-lagunita cursor-pointer"
                           />
                           <span className={`text-xs transition ${
                             downPaymentMode === 'percentage'
@@ -188,15 +187,14 @@ export default function MortgageCalculator() {
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="radio"
-                            name="downPaymentMode"
-                            value="dollar"
+                            name="downPaymentModeAfford"
                             checked={downPaymentMode === 'dollar'}
                             onChange={() => {
                               setDownPaymentMode('dollar');
                               // set dollar amount from results if available
-                              setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
+                              setDownPaymentAmount(Math.round(results.downPayment || (results.homePrice * (downPaymentPercent / 100))));
                             }}
-                            className="w-4 accent-lagunita cursor-pointer"
+                            className="w-4 h-4 accent-lagunita cursor-pointer"
                           />
                           <span className={`text-xs transition ${
                             downPaymentMode === 'dollar'
@@ -210,31 +208,53 @@ export default function MortgageCalculator() {
                     </div>
                     <div className="relative">
                       {downPaymentMode === 'percentage' ? (
-                        <input
-                          type="number"
-                          value={downPaymentPercent || ''}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            const value = raw === '' ? 0 : Number(raw);
-                            setDownPaymentPercent(Math.round(value * 100) / 100);
-                            const price = Number(homePrice) || results.homePrice;
-                            setDownPaymentAmount(Math.round((value / 100) * price));
-                          }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={downPaymentPercent === 0 ? '0' : downPaymentPercent || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (raw === '' || raw === '0') {
+                                setDownPaymentPercent(0);
+                                setDownPaymentAmount(0);
+                                return;
+                              }
+                              const value = Number(raw);
+                              setDownPaymentPercent(Math.round(value * 100) / 100);
+                              const price = results.homePrice || 1;
+                              setDownPaymentAmount(Math.round((value / 100) * price));
+                            }}
+                            className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            %
+                          </span>
+                        </div>
                       ) : (
-                        <input
-                          type="number"
-                          value={downPaymentAmount || ''}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            const value = raw === '' ? 0 : Number(raw);
-                            setDownPaymentAmount(Math.round(value));
-                            const price = Number(homePrice) || results.homePrice;
-                            if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
-                          }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={downPaymentAmount === 0 ? '0' : downPaymentAmount || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (raw === '' || raw === '0') {
+                                setDownPaymentAmount(0);
+                                setDownPaymentPercent(0);
+                                return;
+                              }
+                              const value = Number(raw);
+                              setDownPaymentAmount(Math.round(value));
+                              const price = results.homePrice || 1;
+                              if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
+                            }}
+                            className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                        </div>
                       )}
                       <p className="text-xs mt-1">Enter 0 if no down payment is planned.</p>
                     </div>
@@ -253,7 +273,7 @@ export default function MortgageCalculator() {
                         onChange={(e) => setInterestRate(e.target.value)}
                         className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">%</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-gray-500 ">%</span>
                     </div>
                   </div>
 
@@ -301,131 +321,191 @@ export default function MortgageCalculator() {
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
                         <label className="block text-sm font-semibold">Property taxes (annual)</label>
-                        <div className="flex flex-row gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setPropertyTaxMode('percentage');
-                              // if switching from dollar, compute percent
-                              if (propertyTaxAmount && propertyTaxAmount > 0) {
-                                setPropertyTaxPercent((propertyTaxAmount / Number(results.homePrice)) * 100);
-                              } else {
-                                setPropertyTaxPercent(0);
-                              }
-                            }}
-                            className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                        <div className="flex flex-row gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="propertyTaxMode"
+                              value="percentage"
+                              checked={propertyTaxMode === 'percentage'}
+                              onChange={() => {
+                                setPropertyTaxMode('percentage');
+                                // if switching from dollar, compute percent
+                                if (propertyTaxAmount && propertyTaxAmount > 0) {
+                                  setPropertyTaxPercent((propertyTaxAmount / Number(results.homePrice)) * 100);
+                                } else {
+                                  setPropertyTaxPercent(0);
+                                }
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className={`text-xs transition ${
                               propertyTaxMode === 'percentage'
-                                ? 'bg-navy border-navy text-white'
-                                : 'bg-white border-lagunita text-lagunita'
-                            }`}
-                          >
-                            Use percent instead
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setPropertyTaxMode('dollar');
-                              // FIX: Calculate annual property tax amount, not home price
-                              const annualTax = results.homePrice * (propertyTaxPercent / 100);
-                              setPropertyTaxAmount(annualTax);
-                            }}
-                            className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                                ? 'text-black font-semibold'
+                                : 'text-black'
+                            }`}>
+                              Percent
+                            </span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="propertyTaxMode"
+                              value="dollar"
+                              checked={propertyTaxMode === 'dollar'}
+                              onChange={() => {
+                                setPropertyTaxMode('dollar');
+                                // Calculate annual property tax amount, not home price
+                                const annualTax = results.homePrice * (propertyTaxPercent / 100);
+                                setPropertyTaxAmount(annualTax);
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className={`text-xs transition ${
                               propertyTaxMode === 'dollar'
-                                ? 'bg-navy border-navy text-white'
-                                : 'bg-white border-lagunita text-lagunita'
-                            }`}
-                            >
-                            Use dollars instead
-                          </button>
+                                ? 'text-black font-semibold'
+                                : 'text-black'
+                            }`}>
+                              Dollars
+                            </span>
+                          </label>
                         </div>
                       </div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={propertyTaxMode === 'percentage' ? propertyTaxPercent || '' : propertyTaxAmount || ''}
-                          onChange={(e) => {
-                            const value = Number(e.target.value);
-                            if (propertyTaxMode === 'percentage') {
-                              setPropertyTaxPercent(value);
-                            } else {
-                              setPropertyTaxAmount(value);
-                              // Use results.homePrice for afford tab
-                              const price = results.homePrice || 1; // Prevent division by zero
-                              setPropertyTaxPercent((value / price) * 100);
-                            }
-                          }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
+                      {/* Property Tax Input */}
+                      {propertyTaxMode === 'percentage' ? (
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={propertyTaxPercent || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              const value = raw === '' ? 0 : Number(raw);
+                              setPropertyTaxPercent(Math.round(value * 100) / 100);
+                              const price = results.homePrice || 1;
+                              setPropertyTaxAmount(Math.round((value / 100) * price));
+                            }}
+                            className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            %
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={propertyTaxAmount || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              const value = raw === '' ? 0 : Number(raw);
+                              setPropertyTaxAmount(Math.round(value));
+                              const price = results.homePrice || 1;
+                              if (price > 0) setPropertyTaxPercent(Math.round((value / price) * 100 * 100) / 100);
+                            }}
+                            className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                        </div>
+                      )}
                     </div>
 
                     {/*  Homeowners Insurance */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
                         <label className="block text-sm font-semibold">Homeowners insurance (annual)</label>
-                        <div className="flex flex-row gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setHomeInsuranceMode('percentage');
-                              // if switching from dollar, compute percent
-                              if (homeInsuranceAmount && homeInsuranceAmount > 0) {
-                                setHomeInsurancePercent((homeInsuranceAmount / Number(results.homePrice)) * 100);
-                              } else {
-                                setHomeInsurancePercent(0);
-                              }
-                            }}
-                            className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                        <div className="flex flex-row gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="homeInsuranceMode"
+                              value="percentage"
+                              checked={homeInsuranceMode === 'percentage'}
+                              onChange={() => {
+                                setHomeInsuranceMode('percentage');
+                                // if switching from dollar, compute percent
+                                if (homeInsuranceAmount && homeInsuranceAmount > 0) {
+                                  setHomeInsurancePercent((homeInsuranceAmount / Number(results.homePrice)) * 100);
+                                } else {
+                                  setHomeInsurancePercent(0);
+                                }
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className={`text-xs transition ${
                               homeInsuranceMode === 'percentage'
-                                ? 'bg-navy border-navy text-white'
-                                : 'bg-white border-lagunita text-lagunita'
-                            }`}
-                          >
-                            Use percent instead
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setHomeInsuranceMode('dollar');
-                              // FIX: Calculate annual insurance amount, not home price
-                              const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
-                              setHomeInsuranceAmount(annualInsurance);
-                            }}
-                            className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                                ? 'text-black font-semibold'
+                                : 'text-black'
+                            }`}>
+                              Percent
+                            </span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="homeInsuranceMode"
+                              value="dollar"
+                              checked={homeInsuranceMode === 'dollar'}
+                              onChange={() => {
+                                setHomeInsuranceMode('dollar');
+                                // Calculate annual insurance amount, not home price
+                                const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
+                                setHomeInsuranceAmount(annualInsurance);
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className={`text-xs transition ${
                               homeInsuranceMode === 'dollar'
-                                ? 'bg-navy border-navy text-white'
-                                : 'bg-white border-lagunita text-lagunita'
-                            }`}
-                          >
-                            Use dollars instead
-                          </button>
+                                ? 'text-black font-semibold'
+                                : 'text-black'
+                            }`}>
+                              Dollars
+                            </span>
+                          </label>
                         </div>
                       </div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={homeInsuranceMode === 'percentage' ? homeInsurancePercent || '' : homeInsuranceAmount || ''}
-                          onChange={(e) => {
-                            const value = Number(e.target.value);
-                            if (homeInsuranceMode === 'percentage') {
-                              setHomeInsurancePercent(value);
-                            } else {
-                              setHomeInsuranceAmount(value);
-                              // Use results.homePrice for afford tab
-                              const price = results.homePrice || 1; // Prevent division by zero
-                              setHomeInsurancePercent((value / price) * 100);
-                            }
-                          }}
-                          className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
+                      {/* Home Insurance Amount Input */}
+                      {homeInsuranceMode === 'percentage' ? (
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={homeInsurancePercent || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              const value = raw === '' ? 0 : Number(raw);
+                              setHomeInsurancePercent(Math.round(value * 100) / 100);
+                              const price = results.homePrice || 1;
+                              setHomeInsuranceAmount(Math.round((value / 100) * price));
+                            }}
+                            className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            %
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={homeInsuranceAmount || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              const value = raw === '' ? 0 : Number(raw);
+                              setHomeInsuranceAmount(Math.round(value));
+                              const price = results.homePrice || 1;
+                              if (price > 0) setHomeInsurancePercent(Math.round((value / price) * 100 * 100) / 100);
+                            }}
+                            className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* HOA Dues */}
                     <div className="pb-5">
                       <label className="block text-sm font-semibold">HOA dues (monthly)</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
                         <input
                           type="number"
                           placeholder=""
@@ -557,7 +637,7 @@ export default function MortgageCalculator() {
                       Home price
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
+                      <span className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                       <input
                         type="number"
                         placeholder=""
@@ -570,268 +650,346 @@ export default function MortgageCalculator() {
                     <p className="text-xs mt-1">Enter the purchase price of the home.</p>
                   </div>
 
-                  {/* Down Payment */}
+                  {/* Down Payment Monthly Payment */}
                   <div className="pb-5">
                     <div className="flex flex-row pb-2 justify-between items-center">
                       <label className="block text-sm font-semibold">Down payment</label>
-                      <div className="flex flex-row gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDownPaymentMode('percentage');
-                            // if switching from dollar, compute percent
-                            if (downPaymentAmount >= 0) {
-                              setDownPaymentPercent(Math.round((downPaymentAmount / Number(homePrice) * 100) * 100) / 100);
-                            } else {
-                              setDownPaymentPercent(downPaymentPercent);
-                            }
-                          }}
-                          className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                      {/* Radio Buttons for Payment Mode */}
+                      <div className="flex flex-row gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="downPaymentModePayment"
+                            checked={downPaymentMode === 'percentage'}
+                            onChange={() => {
+                              setDownPaymentMode('percentage');
+                              // if switching from dollar, compute percent
+                              if (downPaymentAmount >= 0 && Number(homePrice) > 0) {
+                                setDownPaymentPercent(Math.round((downPaymentAmount / Number(homePrice) * 100) * 100) / 100);
+                              }
+                            }}
+                            className="w-4 h-4 accent-lagunita cursor-pointer"
+                          />
+                          <span className={`text-xs transition ${
                             downPaymentMode === 'percentage'
-                              ? 'bg-navy border-navy text-white'
-                              : 'bg-white border-lagunita text-lagunita'
-                          }`}
-                        >
-                          Use percent instead
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDownPaymentMode('dollar');
-                            // set dollar amount from results if available
-                            setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
-                          }}
-                          className={`text-xs p-1 m-1 rounded-md border-2 transition ${
+                              ? 'text-black font-semibold'
+                              : 'text-black'
+                          }`}>
+                            Percent
+                          </span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="downPaymentModePayment"
+                            checked={downPaymentMode === 'dollar'}
+                            onChange={() => {
+                              setDownPaymentMode('dollar');
+                              // set dollar amount from results if available
+                              setDownPaymentAmount(Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100))));
+                            }}
+                            className="w-4 h-4 accent-lagunita cursor-pointer"
+                          />
+                          <span className={`text-xs transition ${
                             downPaymentMode === 'dollar'
-                              ? 'bg-navy border-navy text-white'
-                              : 'bg-white border-lagunita text-lagunita'
-                          }`}
-                        >
-                          Use dollars instead
-                        </button>
+                              ? 'text-black font-semibold'
+                              : 'text-black'
+                          }`}>
+                            Dollars
+                          </span>
+                        </label>
                       </div>
                     </div>
                     <div className="relative">
-                      <input
-                        type="number"
-                        value={downPaymentMode === 'percentage' ? downPaymentPercent || '' : downPaymentAmount || ''}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          const value = raw === '' ? 0 : Number(raw);
-                          if (downPaymentMode === 'percentage') {
-                            setDownPaymentPercent(Math.round(value * 100) / 100);
-                            const price = Number(homePrice) || results.homePrice;
-                            setDownPaymentAmount(Math.round((value / 100) * price));
-                          } else {
-                            setDownPaymentAmount(Math.round(value));
-                            const price = Number(homePrice) || results.homePrice;
-                            if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
-                          }
-                        }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
+                      {downPaymentMode === 'percentage' ? (
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={downPaymentPercent === 0 ? '0' : downPaymentPercent || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (raw === '' || raw === '0') {
+                                setDownPaymentPercent(0);
+                                setDownPaymentAmount(0);
+                                return;
+                              }
+                              const value = Number(raw);
+                              setDownPaymentPercent(Math.round(value * 100) / 100);
+                              const price = Number(homePrice) || results.homePrice;
+                              setDownPaymentAmount(Math.round((value / 100) * price));
+                            }}
+                            className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            %
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={downPaymentAmount === 0 ? '0' : downPaymentAmount || ''}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (raw === '' || raw === '0') {
+                                setDownPaymentAmount(0);
+                                setDownPaymentPercent(0);
+                                return;
+                              }
+                              const value = Number(raw);
+                              setDownPaymentAmount(Math.round(value));
+                              const price = Number(homePrice) || results.homePrice;
+                              if (price > 0) setDownPaymentPercent(Math.round((value / price) * 100 * 100) / 100);
+                            }}
+                            className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                        </div>
+                      )}
                       <p className="text-xs mt-1">Enter 0 if no down payment is planned.</p>
                     </div>
                   </div>
 
-              {/* Interest Rate */}
-              <div className="pb-5">
-                <label className="block text-sm font-semibold">Interest rate</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder=""
-                    min="0"
-                    value={interestRate}
-                    onChange={(e) => setInterestRate(e.target.value)}
-                    className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium">%</span>
-                </div>
-              </div>
-
-              {/* Loan Term */}
-              <div className="pb-5">
-                <label className="block text-sm font-semibold">Loan term</label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <label className={`flex-1 cursor-pointer flex flex-row ${
-                    loanTerm === 15
-                      ? ' border-navy'
-                      : ' border-lagunita'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="loanTerm"
-                      value="15"
-                      checked={loanTerm === 15}
-                      onChange={() => setLoanTerm(15)}
-                      className="mr-3 w-4 accent-lagunita"
-                    />
-                    <span className="self-center">15 years</span>
-                  </label>
-                  <label className={`flex-1 cursor-pointer flex flex-row ${
-                    loanTerm === 30
-                      ? 'border-navy'
-                      : 'border-lagunita'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="loanTerm"
-                      value="30"
-                      checked={loanTerm === 30}
-                      onChange={() => setLoanTerm(30)}
-                      className="mr-3 w-4 accent-lagunita"
-                    />
-                    <span className="self-center">30 years</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Optional Section */}
-              <div className="pt-4 border-t border-gray-200">
-                <h3 className="text-lg font-semibold mb-4">Optional</h3>
-
-                {/*  Property Taxes */}
-                <div className="pb-5">
-                  <div className="flex flex-row pb-2 justify-between items-center">
-                    <label className="block text-sm font-semibold">Property taxes (annual)</label>
-                    <div className="flex flex-row gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPropertyTaxMode('percentage');
-                          // if switching from dollar, compute percent
-                          if (propertyTaxAmount && propertyTaxAmount > 0) {
-                            setPropertyTaxPercent((propertyTaxAmount / Number(homePrice)) * 100);
-                          } else {
-                            setPropertyTaxPercent(0);
-                          }
-                        }}
-                        className={`text-xs p-1 m-1 rounded-md border-2 transition ${
-                          propertyTaxMode === 'percentage'
-                            ? 'bg-navy border-navy text-white'
-                            : 'bg-white border-lagunita text-lagunita'
-                        }`}
-                      >
-                        Use percent instead
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPropertyTaxMode('dollar');
-                          // FIX: Calculate annual property tax amount, not home price
-                           const annualTax = results.homePrice * (propertyTaxPercent / 100);
-                            setPropertyTaxAmount(annualTax);
-                        }}
-                        className={`text-xs p-1 m-1 rounded-md border-2 transition ${
-                          propertyTaxMode === 'dollar'
-                            ? 'bg-navy border-navy text-white'
-                            : 'bg-white border-lagunita text-lagunita'
-                        }`}
-                      >
-                        Use dollars instead
-                      </button>
+                  {/* Interest Rate */}
+                  <div className="pb-5">
+                    <label className="block text-sm font-semibold">Interest rate</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.1"
+                        placeholder=""
+                        min="0"
+                        value={interestRate}
+                        onChange={(e) => setInterestRate(e.target.value)}
+                        className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <span className="absolute right-3 text-gray-500 top-1/2 -translate-y-1/2 font-medium">%</span>
                     </div>
                   </div>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={propertyTaxMode === 'percentage' ? propertyTaxPercent || '' : propertyTaxAmount || ''}
-                      onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (propertyTaxMode === 'percentage') {
-                          setPropertyTaxPercent(value);
-                        } else {
-                          setPropertyTaxAmount(value);
-                          // Calculate percentage from dollar amount
-                          setPropertyTaxPercent((value / Number(homePrice)) * 100);
-                        }
-                      }}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                </div>
 
-                {/*  Homeowners Insurance */}
+                  {/* Loan Term */}
                   <div className="pb-5">
-                    <div className="flex flex-row pb-2 justify-between items-center">
-                      <label className="block text-sm font-semibold">Homeowners insurance (annual)</label>
-                      <div className="flex flex-row gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setHomeInsuranceMode('percentage');
-                            // if switching from dollar, compute percent
-                            if (homeInsuranceAmount && homeInsuranceAmount > 0) {
-                              setHomeInsurancePercent((homeInsuranceAmount / Number(homePrice)) * 100);
-                            } else {
-                              setHomeInsurancePercent(0);
-                            }
-                          }}
-                          className={`text-xs p-1 m-1 rounded-md border-2 transition ${
-                            homeInsuranceMode === 'percentage'
-                              ? 'bg-navy border-navy text-white'
-                              : 'bg-white border-lagunita text-lagunita'
-                          }`}
-                        >
-                          Use percent instead
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setHomeInsuranceMode('dollar');
-                            // FIX: Calculate annual insurance amount, not home price
-                            const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
-                            setHomeInsuranceAmount(annualInsurance);
-                          }}
-                          className={`text-xs p-1 m-1 rounded-md border-2 transition ${
-                            homeInsuranceMode === 'dollar'
-                              ? 'bg-navy border-navy text-white'
-                              : 'bg-white border-lagunita text-lagunita'
-                          }`}
-                        >
-                          Use dollars instead
-                        </button>
+                    <label className="block text-sm font-semibold">Loan term</label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <label className={`flex-1 cursor-pointer flex flex-row ${
+                        loanTerm === 15
+                          ? ' border-navy'
+                          : ' border-lagunita'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="loanTerm"
+                          value="15"
+                          checked={loanTerm === 15}
+                          onChange={() => setLoanTerm(15)}
+                          className="mr-3 w-4 accent-lagunita"
+                        />
+                        <span className={`self-center ${loanTerm === 15 ? 'font-semibold' : 'font-normal'}`}>15 years</span>
+                      </label>
+                      <label className={`flex-1 cursor-pointer flex flex-row ${
+                        loanTerm === 30
+                          ? 'border-navy'
+                          : 'border-lagunita'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="loanTerm"
+                          value="30"
+                          checked={loanTerm === 30}
+                          onChange={() => setLoanTerm(30)}
+                          className="mr-3 w-4 accent-lagunita"
+                        />
+                        <span className={`self-center ${loanTerm === 30 ? 'font-semibold' : 'font-normal'}`}>30 years</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Optional Section */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4">Optional</h3>
+
+                    {/*  Property Taxes */}
+                    <div className="pb-5">
+                      <div className="flex flex-row pb-2 justify-between items-center">
+                        <label className="block text-sm font-semibold">Property taxes (annual)</label>
+                        {/* Radio Buttons for Property Tax Mode */}
+                        <div className="flex flex-row gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="propertyTaxMode"
+                              checked={propertyTaxMode === 'percentage'}
+                              onChange={() => {
+                                setPropertyTaxMode('percentage');
+                                // if switching from dollar, compute percent
+                                if (propertyTaxAmount && propertyTaxAmount > 0) {
+                                  setPropertyTaxPercent((propertyTaxAmount / Number(homePrice)) * 100);
+                                } else {
+                                  setPropertyTaxPercent(0);
+                                }
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className="text-xs">Percent</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="propertyTaxMode"
+                              checked={propertyTaxMode === 'dollar'}
+                              onChange={() => {
+                                setPropertyTaxMode('dollar');
+                                // Calculate annual property tax amount
+                                const annualTax = results.homePrice * (propertyTaxPercent / 100);
+                                setPropertyTaxAmount(annualTax);
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className="text-xs">Dollars</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        {propertyTaxMode === 'percentage' ? (
+                          <>
+                            <input
+                              type="number"
+                              value={propertyTaxPercent || ''}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                const value = raw === '' ? 0 : Number(raw);
+                                setPropertyTaxPercent(Math.round(value * 100) / 100);
+                                const price = Number(homePrice) || results.homePrice;
+                                setPropertyTaxAmount(Math.round((value / 100) * price));
+                              }}
+                              className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                              %
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <input
+                              type="number"
+                              value={propertyTaxAmount || ''}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                const value = raw === '' ? 0 : Number(raw);
+                                setPropertyTaxAmount(Math.round(value));
+                                const price = Number(homePrice) || results.homePrice;
+                                if (price > 0) setPropertyTaxPercent(Math.round((value / price) * 100 * 100) / 100);
+                              }}
+                              className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={homeInsuranceMode === 'percentage' ? homeInsurancePercent || '' : homeInsuranceAmount || ''}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (homeInsuranceMode === 'percentage') {
-                            setHomeInsurancePercent(value);
-                          } else {
-                            setHomeInsuranceAmount(value);
-                            // Calculate percentage from dollar amount
-                            setHomeInsurancePercent((value / Number(homePrice)) * 100);
-                          }
-                        }}
-                        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                    </div>
-                  </div>
 
-                  {/* HOA Dues */}
-                  <div className="pb-5">
-                    <label className="block text-sm font-semibold">HOA dues (monthly)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
-                      <input
-                        type="number"
-                        placeholder=""
-                        step="1"
-                        min="0"
-                        value={hoaDues}
-                        onChange={(e) => setHoaDues(e.target.value)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
+                    {/*  Homeowners Insurance */}
+                    <div className="pb-5">
+                      <div className="flex flex-row pb-2 justify-between items-center">
+                        <label className="block text-sm font-semibold">Homeowners insurance (annual)</label>
+                        {/* Radio Buttons for Home Insurance Mode */}
+                        <div className="flex flex-row gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="homeInsuranceMode"
+                              checked={homeInsuranceMode === 'percentage'}
+                              onChange={() => {
+                                setHomeInsuranceMode('percentage');
+                                // if switching from dollar, compute percent
+                                if (homeInsuranceAmount && homeInsuranceAmount > 0) {
+                                  setHomeInsurancePercent((homeInsuranceAmount / Number(homePrice)) * 100);
+                                } else {
+                                  setHomeInsurancePercent(0);
+                                }
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className="text-xs">Percent</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="homeInsuranceMode"
+                              checked={homeInsuranceMode === 'dollar'}
+                              onChange={() => {
+                                setHomeInsuranceMode('dollar');
+                                // Calculate annual insurance amount
+                                const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
+                                setHomeInsuranceAmount(annualInsurance);
+                              }}
+                              className="w-4 h-4 accent-lagunita cursor-pointer"
+                            />
+                            <span className="text-xs">Dollars</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        {homeInsuranceMode === 'percentage' ? (
+                          <>
+                            <input
+                              type="number"
+                              value={homeInsurancePercent || ''}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                const value = raw === '' ? 0 : Number(raw);
+                                setHomeInsurancePercent(Math.round(value * 100) / 100);
+                                const price = Number(homePrice) || results.homePrice;
+                                setHomeInsuranceAmount(Math.round((value / 100) * price));
+                              }}
+                              className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                              %
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <input
+                              type="number"
+                              value={homeInsuranceAmount || ''}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                const value = raw === '' ? 0 : Number(raw);
+                                setHomeInsuranceAmount(Math.round(value));
+                                const price = Number(homePrice) || results.homePrice;
+                                if (price > 0) setHomeInsurancePercent(Math.round((value / price) * 100 * 100) / 100);
+                              }}
+                              className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                      {/* HOA Dues */}
+                      <div className="pb-5">
+                        <label className="block text-sm font-semibold">HOA dues (monthly)</label>
+                        <div className="relative">
+                          <span className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
+                          <input
+                            type="number"
+                            placeholder=""
+                            step="1"
+                            min="0"
+                            value={hoaDues}
+                            onChange={(e) => setHoaDues(e.target.value)}
+                            className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
               {/* Right Column - Results */}
               <div className="pl-0">
