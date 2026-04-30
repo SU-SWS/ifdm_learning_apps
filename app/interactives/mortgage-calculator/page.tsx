@@ -1006,7 +1006,6 @@ export default function MortgageCalculator() {
                     </CardHeader>
                     <CardContent className="">
                       <div className="mb-6">
-                        <p className="text-sm font-medium">Total including taxes, insurance, and HOA</p>
                         <p className={
                           results.homePrice > 0 
                             ? 'text-3xl font-bold text-lagunita' 
