@@ -532,7 +532,13 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-sm font-medium">Based on your monthly housing budget.</p>
-                        <p className="text-3xl font-bold text-lagunita">{formatCurrency(Number(results.homePrice || 0))}</p>
+                        <p className={
+                          results.homePrice > 0 
+                            ? 'text-3xl font-bold text-lagunita' 
+                            : 'text-lg font-bold text-gray-500 italic'
+                        }>
+                          {results.homePrice > 0 ? formatCurrency(Number(results.homePrice)) : emptyResultsString}
+                        </p>
                       </div>
 
                       <div className="rounded-lg">
@@ -1001,7 +1007,13 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-sm font-medium">Total including taxes, insurance, and HOA</p>
-                        <p className="text-3xl font-bold text-lagunita">{formatCurrency(results.monthlyMortgage)}</p>
+                        <p className={
+                          results.homePrice > 0 
+                            ? 'text-3xl font-bold text-lagunita' 
+                            : 'text-lg font-bold text-gray-500 italic'
+                        }>
+                          {results.homePrice > 0 ? formatCurrency(Number(results.monthlyMortgage)) : emptyResultsString}
+                        </p>
                       </div>
 
                       <div className="rounded-lg">
