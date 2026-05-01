@@ -67,12 +67,12 @@ export default function MortgageCalculator() {
       const computedHomePrice = loanAmount / (1 - safeDownPaymentPercent / 100);
       const downPayment = computedHomePrice * (safeDownPaymentPercent / 100);
 
-      // FIX: Handle property tax correctly based on mode
+      // Handle property tax correctly based on mode
       const monthlyTax = propertyTaxMode === 'percentage'
         ? (computedHomePrice * (propertyTaxPercent / 100)) / 12
         : propertyTaxAmount / 12;
 
-      // FIX: Handle home insurance correctly based on mode
+      // Handle home insurance correctly based on mode
       const monthlyInsurance = homeInsuranceMode === 'percentage'
         ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
@@ -127,12 +127,12 @@ export default function MortgageCalculator() {
         return;
       }
 
-      // FIX: Handle property tax correctly based on mode
+      // Handle property tax correctly based on mode
       const monthlyTax = propertyTaxMode === 'percentage'
         ? (Number(homePrice) * (propertyTaxPercent / 100)) / 12
         : propertyTaxAmount / 12;
 
-      // FIX: Handle home insurance correctly based on mode
+      // Handle home insurance correctly based on mode
       const monthlyInsurance = homeInsuranceMode === 'percentage'
         ? (Number(homePrice) * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
@@ -189,6 +189,37 @@ export default function MortgageCalculator() {
   );
   const showAffordResults = mode === 'afford' && Number(monthlyPayment) > 0 && Number(interestRate) > 0 && downPaymentPercent < 100;
   const showPaymentResults = mode === 'payment' && Number(homePrice) > 0 && Number(interestRate) > 0 && downPaymentPercent < 100;
+
+  const handleReset = () => {
+    setMode('afford');
+    setMonthlyPayment('');
+    setHomePrice('');
+    setDownPaymentPercent(20);
+    setDownPaymentPercentInput('20');
+    setDownPaymentAmount(0);
+    setDownPaymentAmountInput('0');
+    setInterestRate('');
+    setLoanTerm(30);
+    setPropertyTaxPercent(1.25);
+    setPropertyTaxMode('percentage');
+    setPropertyTaxAmount(0);
+    setHomeInsurancePercent(0.35);
+    setHomeInsuranceMode('percentage');
+    setHomeInsuranceAmount(0);
+    setHoaDues('');
+    setDownPaymentMode('percentage');
+    setResults({
+      homePrice: 0,
+      downPayment: 0,
+      loanAmount: 0,
+      monthlyMortgage: 0,
+      monthlyTax: 0,
+      monthlyInsurance: 0,
+      totalMonthly: 0,
+      hoaDues: 0,
+      totalMonthlyHousingCost: 0
+    });
+  }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -1270,7 +1301,15 @@ export default function MortgageCalculator() {
                 </div>
               </div>
         </TabsContent>
-
+        {/* Calculate and Reset Buttons */}
+            <div className="flex">
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+              >
+                Reset
+              </button>
+            </div>
           </Tabs>
         </div>
       </div>
