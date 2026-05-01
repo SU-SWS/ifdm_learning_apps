@@ -332,7 +332,7 @@ export default function MortgageCalculator() {
                                 setPropertyTaxMode('percentage');
                                 // if switching from dollar, compute percent
                                 if (propertyTaxAmount && propertyTaxAmount > 0) {
-                                  setPropertyTaxPercent((propertyTaxAmount / Number(results.homePrice)) * 100);
+                                  setPropertyTaxPercent(Math.round((propertyTaxAmount / Number(results.homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setPropertyTaxPercent(0);
                                 }
@@ -357,7 +357,7 @@ export default function MortgageCalculator() {
                                 setPropertyTaxMode('dollar');
                                 // Calculate annual property tax amount, not home price
                                 const annualTax = results.homePrice * (propertyTaxPercent / 100);
-                                setPropertyTaxAmount(annualTax);
+                                setPropertyTaxAmount(Math.round(annualTax));
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -424,7 +424,7 @@ export default function MortgageCalculator() {
                                 setHomeInsuranceMode('percentage');
                                 // if switching from dollar, compute percent
                                 if (homeInsuranceAmount && homeInsuranceAmount > 0) {
-                                  setHomeInsurancePercent((homeInsuranceAmount / Number(results.homePrice)) * 100);
+                                  setHomeInsurancePercent(Math.round((homeInsuranceAmount / Number(results.homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setHomeInsurancePercent(0);
                                 }
@@ -449,7 +449,7 @@ export default function MortgageCalculator() {
                                 setHomeInsuranceMode('dollar');
                                 // Calculate annual insurance amount, not home price
                                 const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
-                                setHomeInsuranceAmount(annualInsurance);
+                                setHomeInsuranceAmount(Math.round(annualInsurance));
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -833,7 +833,7 @@ export default function MortgageCalculator() {
                                 setPropertyTaxMode('percentage');
                                 // if switching from dollar, compute percent
                                 if (propertyTaxAmount && propertyTaxAmount > 0) {
-                                  setPropertyTaxPercent((propertyTaxAmount / Number(homePrice)) * 100);
+                                  setPropertyTaxPercent(Math.round((propertyTaxAmount / Number(homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setPropertyTaxPercent(0);
                                 }
@@ -851,7 +851,7 @@ export default function MortgageCalculator() {
                                 setPropertyTaxMode('dollar');
                                 // Calculate annual property tax amount
                                 const annualTax = results.homePrice * (propertyTaxPercent / 100);
-                                setPropertyTaxAmount(annualTax);
+                                setPropertyTaxAmount(Math.round(annualTax));
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -913,7 +913,7 @@ export default function MortgageCalculator() {
                                 setHomeInsuranceMode('percentage');
                                 // if switching from dollar, compute percent
                                 if (homeInsuranceAmount && homeInsuranceAmount > 0) {
-                                  setHomeInsurancePercent((homeInsuranceAmount / Number(homePrice)) * 100);
+                                  setHomeInsurancePercent(Math.round((homeInsuranceAmount / Number(homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setHomeInsurancePercent(0);
                                 }
@@ -931,7 +931,7 @@ export default function MortgageCalculator() {
                                 setHomeInsuranceMode('dollar');
                                 // Calculate annual insurance amount
                                 const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
-                                setHomeInsuranceAmount(annualInsurance);
+                                setHomeInsuranceAmount(Math.round(annualInsurance));
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
