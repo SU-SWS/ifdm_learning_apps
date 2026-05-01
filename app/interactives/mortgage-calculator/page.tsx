@@ -41,6 +41,21 @@ export default function MortgageCalculator() {
     const hoaDuesNum = Number(hoaDues) || 0; // FIX: Parse HOA as number
 
     if (mode === 'afford') {
+      if (Number(monthlyPayment) <= 0 || Number(interestRate) <= 0) {
+        setResults({
+          homePrice: 0,
+          downPayment: 0,
+          loanAmount: 0,
+          monthlyMortgage: 0,
+          monthlyTax: 0,
+          monthlyInsurance: 0,
+          totalMonthly: 0,
+          hoaDues: 0,
+          totalMonthlyHousingCost: 0
+        });
+        return;
+      }
+
       // Calculate home price from desired monthly payment
       const loanAmount = Number(monthlyPayment) * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
       const computedHomePrice = loanAmount / (1 - downPaymentPercent / 100);
@@ -116,6 +131,8 @@ export default function MortgageCalculator() {
   };
 
   const emptyResultsString = "Enter values to see your estimate"
+  const showAffordResults = mode === 'afford' && Number(monthlyPayment) > 0 && Number(interestRate) > 0;
+  const showPaymentResults = mode === 'payment' && Number(homePrice) > 0 && Number(interestRate) > 0;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -524,112 +541,117 @@ export default function MortgageCalculator() {
                   </div>
                 </div>
                 <div className="pl-0">
-                {/* Right Column - Results */}
+                  {/* Right Column - Results */}
                   <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-md font-bold">Estimated home price</CardTitle>
-                    </CardHeader>
-                    <CardContent className="">
-                      <div className="mb-6">
-                        <p className="text-sm font-medium">Based on your monthly housing budget.</p>
-                        <p className={
-                          results.homePrice > 0 
-                            ? 'text-3xl font-bold text-lagunita' 
-                            : 'text-lg font-bold text-gray-500 italic'
-                        }>
-                          {results.homePrice > 0 ? formatCurrency(Number(results.homePrice)) : emptyResultsString}
-                        </p>
-                      </div>
+                    {showAffordResults ? (
+                      <>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-md font-bold">Estimated home price</CardTitle>
+                        </CardHeader>
+                        <CardContent className="">
+                          <div className="mb-6">
+                            <p className="text-sm font-medium">Based on your monthly housing budget.</p>
+                            <p className={
+                              results.homePrice > 0 
+                                ? 'text-3xl font-bold text-lagunita' 
+                                : 'text-lg font-bold text-gray-500 italic'
+                            }>
+                              {results.homePrice > 0 ? formatCurrency(Number(results.homePrice)) : emptyResultsString}
+                            </p>
+                          </div>
 
-                      <div className="rounded-lg">
-                        <div className="innerwrapper">
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md  p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
-                              Down payment:
-                            </div>
-                            <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                              {formatCurrency(results.downPayment || 0)}
+                          <div className="rounded-lg">
+                            <div className="innerwrapper">
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md  p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
+                                  Down payment:
+                                </div>
+                                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.downPayment || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
+                                  Loan amount:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
+                                >
+                                  {formatCurrency(results.loanAmount || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col my-3">
+                                <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
+                                <hr/>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Mortgage payment:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.monthlyMortgage || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Property taxes:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.monthlyTax || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Insurance:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.monthlyInsurance || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  HOA:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.hoaDues || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Total monthly housing cost:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center">
+                                  {formatCurrency(results.totalMonthlyHousingCost || 0)}
+                                </div>
+                              </div>
+                              <div className="space-y-6">
+                              {/* Disclaimer */}
+                                <div className="py-5">
+                                  <p className="text-sm">
+                                    Mortgage estimates calculate principal and interest. Taxes, insurance, and HOA are added separately to show total housing cost.
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
-                              Loan amount:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
-                            >
-                              {formatCurrency(results.loanAmount || 0)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col my-3">
-                            <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
-                            <hr/>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage payment:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyMortgage || 0)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Property taxes:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyTax || 0)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Insurance:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyInsurance || 0)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              HOA:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.hoaDues || 0)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Total monthly housing cost:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.totalMonthlyHousingCost || 0)}
-                            </div>
-                          </div>
-                          <div className="space-y-6">
-                          {/* Disclaimer */}
-                            <div className="py-5">
-                              <p className="text-sm">
-                                Mortgage estimates calculate principal and interest. Taxes, insurance, and HOA are added separately to show total housing cost.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
+                        </CardContent>
+                      </>
+                    ) : (
+                      <div className="min-h-[28rem]" />
+                    )}
                   </Card>
-                  
                 </div>
               </div>
             </TabsContent>
@@ -1001,107 +1023,113 @@ export default function MortgageCalculator() {
               <div className="pl-0">
                 {/* Right Column - Results */}
                   <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-md font-bold">Estimated monthly mortgage payment</CardTitle>
-                    </CardHeader>
-                    <CardContent className="">
-                      <div className="mb-6">
-                        <p className={
-                          results.homePrice > 0 
-                            ? 'text-3xl font-bold text-lagunita' 
-                            : 'text-lg font-bold text-gray-500 italic'
-                        }>
-                          {results.homePrice > 0 ? formatCurrency(Number(results.monthlyMortgage)) : emptyResultsString}
-                        </p>
-                      </div>
+                    {showPaymentResults ? (
+                      <>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-md font-bold">Estimated monthly mortgage payment</CardTitle>
+                        </CardHeader>
+                        <CardContent className="">
+                          <div className="mb-6">
+                            <p className={
+                              results.homePrice > 0 
+                                ? 'text-3xl font-bold text-lagunita' 
+                                : 'text-lg font-bold text-gray-500 italic'
+                            }>
+                              {results.homePrice > 0 ? formatCurrency(Number(results.monthlyMortgage)) : emptyResultsString}
+                            </p>
+                          </div>
 
-                      <div className="rounded-lg">
-                        <div className="innerwrapper">
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md  p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
-                              Down payment:
-                            </div>
-                            <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                              {formatCurrency(results.downPayment || 0)}
+                          <div className="rounded-lg">
+                            <div className="innerwrapper">
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md  p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
+                                  Down payment:
+                                </div>
+                                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.downPayment || 0)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
+                                  Loan amount:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
+                                >
+                                  {formatCurrency(results.loanAmount)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col my-3">
+                                <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
+                                <hr/>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Mortgage payment:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.monthlyMortgage)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Property taxes:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.monthlyTax)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Insurance:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.monthlyInsurance)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  HOA:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
+                                  {formatCurrency(results.hoaDues)}
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div
+                                    className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  Total monthly housing cost:
+                                </div>
+                                <div
+                                    className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center">
+                                  {formatCurrency(results.totalMonthlyHousingCost)}
+                                </div>
+                              </div>
+                              <div className="space-y-6">
+                              {/* Disclaimer */}
+                                <div className="py-5">
+                                  <p className="text-sm">
+                                    Mortgage estimates calculate principal and interest. Taxes, insurance, and HOA are added separately to show total housing cost.
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
-                              Loan amount:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
-                            >
-                              {formatCurrency(results.loanAmount)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col my-3">
-                            <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
-                            <hr/>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Mortgage payment:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyMortgage)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Property taxes:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyTax)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Insurance:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.monthlyInsurance)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              HOA:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.hoaDues)}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                            <div
-                                className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                              Total monthly housing cost:
-                            </div>
-                            <div
-                                className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                              {formatCurrency(results.totalMonthlyHousingCost)}
-                            </div>
-                          </div>
-                          <div className="space-y-6">
-                          {/* Disclaimer */}
-                            <div className="py-5">
-                              <p className="text-sm">
-                                Mortgage estimates calculate principal and interest. Taxes, insurance, and HOA are added separately to show total housing cost.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
+                        </CardContent>
+                      </>
+                    ) : (
+                      <div className="min-h-[28rem]" />
+                    )}
                   </Card>
                   
                 </div>
