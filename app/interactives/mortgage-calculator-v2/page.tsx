@@ -496,7 +496,7 @@ export default function MortgageCalculator() {
                               onChange={() => {
                                 setPropertyTaxMode('percentage');
                                 // if switching from dollar, compute percent
-                                if (propertyTaxAmount && propertyTaxAmount > 0) {
+                                if (propertyTaxAmount && propertyTaxAmount > 0 && Number(results.homePrice) > 0) {
                                   setPropertyTaxPercent(Math.round((propertyTaxAmount / Number(results.homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setPropertyTaxPercent(0);
@@ -588,7 +588,7 @@ export default function MortgageCalculator() {
                               onChange={() => {
                                 setHomeInsuranceMode('percentage');
                                 // if switching from dollar, compute percent
-                                if (homeInsuranceAmount && homeInsuranceAmount > 0) {
+                                if (homeInsuranceAmount && homeInsuranceAmount > 0 && Number(results.homePrice) > 0) {
                                   setHomeInsurancePercent(Math.round((homeInsuranceAmount / Number(results.homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setHomeInsurancePercent(0);
@@ -1042,7 +1042,7 @@ export default function MortgageCalculator() {
                               onChange={() => {
                                 setPropertyTaxMode('percentage');
                                 // if switching from dollar, compute percent
-                                if (propertyTaxAmount && propertyTaxAmount > 0) {
+                                if (propertyTaxAmount && propertyTaxAmount > 0 && Number(homePrice) > 0) {
                                   setPropertyTaxPercent(Math.round((propertyTaxAmount / Number(homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setPropertyTaxPercent(0);
@@ -1122,7 +1122,7 @@ export default function MortgageCalculator() {
                               onChange={() => {
                                 setHomeInsuranceMode('percentage');
                                 // if switching from dollar, compute percent
-                                if (homeInsuranceAmount && homeInsuranceAmount > 0) {
+                                if (homeInsuranceAmount && homeInsuranceAmount > 0 && Number(homePrice) > 0) {
                                   setHomeInsurancePercent(Math.round((homeInsuranceAmount / Number(homePrice)) * 100 * 100) / 100);
                                 } else {
                                   setHomeInsurancePercent(0);
