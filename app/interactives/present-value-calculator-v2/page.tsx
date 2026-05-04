@@ -96,8 +96,8 @@ export default function PresentValueCalculator() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8 p-0">
-            <TabsTrigger value="single">Single Amount</TabsTrigger>
-            <TabsTrigger value="series">Payment Series</TabsTrigger>
+            <TabsTrigger value="single">Single amount</TabsTrigger>
+            <TabsTrigger value="series">Payment series</TabsTrigger>
           </TabsList>
 
           {/* Single Amount Tab */}
@@ -105,8 +105,9 @@ export default function PresentValueCalculator() {
             <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
               <div className="w-full md:w-1/2 space-y-6 bg-transparent">
                 {/* Future Value Input */}
+                <p>Enter a future value to calculate what it is worth today.</p>
                 <div className="space-y-2">
-                  <Label htmlFor="future-value" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="future-value" className="block font-semibold text-foreground mb-2">
                     Future value
                   </Label>
                   <Input
@@ -137,8 +138,8 @@ export default function PresentValueCalculator() {
 
                 {/* Time Period Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="time-period" className="text-sm font-medium text-foreground">
-                    Number of payments (10 years)
+                  <Label htmlFor="time-period" className="block font-semibold text-foreground mb-2">
+                    Number of compounding periods
                   </Label>
                   <Input
                     id="time-period"
@@ -150,11 +151,12 @@ export default function PresentValueCalculator() {
                     step={1}
                     className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
                   />
+                  <p>10 quarterly periods = 2 years and 6 months.</p>
                 </div>
 
                 {/* Compounding Frequency */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Compounding frequency</Label>
+                  <Label className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
                   <Select
                     value={compoundingFrequency}
                     onValueChange={(value) => setCompoundingFrequency(value as CompoundingFrequency)}
@@ -224,8 +226,9 @@ export default function PresentValueCalculator() {
 
               <div className="bg-transparent w-full md:w-1/2 space-y-6">                
                 {/* Payment Amount Input */}
+                <p>Enter a payment amount and number of payments to calculate their value today.</p>
                 <div className="space-y-2">
-                  <Label htmlFor="payment-amount" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="payment-amount" className="block font-semibold text-foreground mb-2">
                     Payment amount ($)
                   </Label>
                   <Input
@@ -239,7 +242,7 @@ export default function PresentValueCalculator() {
 
                 {/* Interest Rate Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="payment-interest-rate" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="payment-interest-rate" className="block font-semibold text-foreground mb-2">
                     Annual interest rate 
                   </Label>
                   <Input
@@ -256,7 +259,7 @@ export default function PresentValueCalculator() {
 
                 {/* Number of Payments Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="number-of-payments" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="number-of-payments" className="block font-semibold text-foreground mb-2">
                     Number of payments
                   </Label>
                   <Input
@@ -273,7 +276,7 @@ export default function PresentValueCalculator() {
 
                 {/* Payment Frequency */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Payment frequency</Label>
+                  <Label className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
                   <Select
                     value={paymentFrequency}
                     onValueChange={(value) => setPaymentFrequency(value as CompoundingFrequency)}
