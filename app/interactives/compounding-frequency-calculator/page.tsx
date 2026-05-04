@@ -192,7 +192,7 @@ export default function CompoundInterestCalculator() {
                 {formatCurrency(selectedResult.interestEarned)}
               </p>
               <p className="text-[16px] font-semibold text-foreground">
-                With <span className="text-lagunita">{selectedCompounding}</span> compounding
+                With <span className="text-lagunita">{selectedCompounding === 'semi-annually' ? 'semi-annual' : selectedCompounding === 'annually' ? 'annual' : selectedCompounding}</span> compounding
               </p>
             </CardContent>
           </Card>
