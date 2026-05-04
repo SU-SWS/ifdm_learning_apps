@@ -151,7 +151,9 @@ export default function PresentValueCalculator() {
                     step={1}
                     className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
                   />
-                  <p>10 quarterly periods = 2 years and 6 months.</p>
+                  <p className="text-sm text-foreground mt-2">
+                  {totalPeriods > 0 && `${totalPeriods} ${frequencyMap[compoundingFrequency].label.toLowerCase()} periods = ${timePeriod} year${timePeriod === 1 ? '' : 's'}`}
+                </p>
                 </div>
 
                 {/* Compounding Frequency */}
