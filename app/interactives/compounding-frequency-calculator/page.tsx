@@ -221,7 +221,7 @@ export default function CompoundInterestCalculator() {
                     className={selectedCompounding === result.value ? "bg-lagunita-lighter text-lagunita font-bold" : ""}
                   >
                     <td className="px-4 py-3 border-b">{result.label}</td>
-                    <td className="text-right px-4 py-3 border-b text-foreground">{formatNumber(result.totalPeriods)}</td>
+                    <td className="text-right px-4 py-3 border-b text-foreground">{result.totalPeriods.toFixed(2)}</td>
                     <td className="text-right px-4 py-3 border-b text-foreground">{formatCurrency(result.finalAmount)}</td>
                     <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
                   </tr>
