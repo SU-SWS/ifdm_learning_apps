@@ -264,7 +264,7 @@ export default function MortgageCalculator() {
             </div>
           )}
 
-          <Tabs defaultValue={mode} className="w-full">
+          <Tabs value={mode} onValueChange={(v) => setMode(v)} className="w-full">
             <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
               <TabsTrigger value="afford" className="cursor-pointer">Home you can afford</TabsTrigger>
               <TabsTrigger value="payment" className="cursor-pointer">Monthly payment</TabsTrigger>
@@ -480,7 +480,7 @@ export default function MortgageCalculator() {
                   </div>
                   {/* Optional Section */}
                   <div className="pt-4 border-t border-gray-200">
-                    <h3 className="text-lg font-semiboldmb-4">Additional housing costs</h3>
+                    <h3 className="text-lg font-semibold mb-4">Additional housing costs</h3>
 
                     {/*  Property Taxes */}
                     <div className="pb-5">
