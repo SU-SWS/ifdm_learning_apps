@@ -45,9 +45,8 @@ export default function MortgageCalculator() {
     if (mode === 'afford') {
       const paymentAmount = Math.max(0, Number(monthlyPayment));
       const interestRateValue = Number(interestRate);
-      const safeDownPaymentPercent = clampPercent(downPaymentPercent);
 
-      if (paymentAmount <= 0 || interestRateValue <= 0 || safeDownPaymentPercent >= 100) {
+      if (paymentAmount <= 0 || interestRateValue <= 0) {
         setResults({
           homePrice: 0,
           downPayment: 0,
@@ -62,10 +61,41 @@ export default function MortgageCalculator() {
         return;
       }
 
-      // Calculate home price from desired monthly payment
+      // Calculate loan amount from desired monthly payment
       const loanAmount = paymentAmount * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
-      const computedHomePrice = loanAmount / (1 - safeDownPaymentPercent / 100);
-      const downPayment = computedHomePrice * (safeDownPaymentPercent / 100);
+      let computedHomePrice: number;
+      let downPayment: number;
+
+      if (downPaymentMode === 'dollar') {
+        // In dollar mode: homePrice = loanAmount + fixedDownPaymentAmount
+        downPayment = downPaymentAmount;
+        computedHomePrice = loanAmount + downPayment;
+        // Update the percent to reflect the actual down payment percentage
+        if (computedHomePrice > 0) {
+          const calculatedPercent = Math.round((downPayment / computedHomePrice) * 100 * 100) / 100;
+          setDownPaymentPercent(calculatedPercent);
+          setDownPaymentPercentInput(String(calculatedPercent));
+        }
+      } else {
+        // In percentage mode: homePrice = loanAmount / (1 - downPaymentPercent/100)
+        const safeDownPaymentPercent = clampPercent(downPaymentPercent);
+        if (safeDownPaymentPercent >= 100) {
+          setResults({
+            homePrice: 0,
+            downPayment: 0,
+            loanAmount: 0,
+            monthlyMortgage: 0,
+            monthlyTax: 0,
+            monthlyInsurance: 0,
+            totalMonthly: 0,
+            hoaDues: 0,
+            totalMonthlyHousingCost: 0
+          });
+          return;
+        }
+        computedHomePrice = loanAmount / (1 - safeDownPaymentPercent / 100);
+        downPayment = computedHomePrice * (safeDownPaymentPercent / 100);
+      }
 
       // Handle property tax correctly based on mode
       const monthlyTax = propertyTaxMode === 'percentage'
@@ -151,7 +181,7 @@ export default function MortgageCalculator() {
         totalMonthlyHousingCost: Math.round(Number(totalMonthly))
       });
     }
-  }, [mode, monthlyPayment, homePrice, downPaymentPercent, interestRate, loanTerm, propertyTaxPercent, propertyTaxMode, propertyTaxAmount, homeInsurancePercent, homeInsuranceMode, homeInsuranceAmount, hoaDues]);
+  }, [mode, monthlyPayment, homePrice, downPaymentPercent, downPaymentAmount, downPaymentMode, interestRate, loanTerm, propertyTaxPercent, propertyTaxMode, propertyTaxAmount, homeInsurancePercent, homeInsuranceMode, homeInsuranceAmount, hoaDues]);
 
   useEffect(() => {
     calculateMortgage();
@@ -234,7 +264,7 @@ export default function MortgageCalculator() {
             </div>
           )}
 
-          <Tabs defaultValue={mode} onValueChange={(v) => setMode(v)} className="w-full">
+          <Tabs defaultValue={mode} className="w-full">
             <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
               <TabsTrigger value="afford" className="cursor-pointer">Home you can afford</TabsTrigger>
               <TabsTrigger value="payment" className="cursor-pointer">Monthly payment</TabsTrigger>
@@ -373,12 +403,11 @@ export default function MortgageCalculator() {
                                 setDownPaymentPercentInput('');
                                 return;
                               }
-                              const maxPrice = results.homePrice || 1;
-                              const clampedAmount = clampDownPaymentAmount(Math.round(Number(raw)), maxPrice);
-                              const percentValue = maxPrice > 0 ? Math.round((clampedAmount / maxPrice) * 100 * 100) / 100 : 0;
-                              setDownPaymentAmount(clampedAmount);
-                              setDownPaymentPercent(percentValue);
-                              setDownPaymentPercentInput(String(percentValue));
+                              // In afford mode, home price is calculated output, not input.
+                              // Don't clamp against results.homePrice; let calculateMortgage handle it.
+                              const amountValue = Math.round(Number(raw));
+                              setDownPaymentAmount(amountValue);
+                              // Percentage will be recalculated when home price is available
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
