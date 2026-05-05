@@ -211,7 +211,7 @@ export default function CompoundInterestCalculator() {
                   <th className="font-semibold text-left px-4 py-3">Compounding Frequency</th>
                   <th className="font-semibold text-right px-4 py-3">Number of <br/>Compounding Periods</th>
                   <th className="font-semibold text-right px-4 py-3">Final Amount</th>
-                  <th className="font-semibold text-right px-4 py-3">Interest Earned</th>
+                  <th className="font-semibold text-right px-4 py-3">Interest Accrued</th>
                 </tr>
               </thead>
               <tbody>
@@ -223,12 +223,11 @@ export default function CompoundInterestCalculator() {
                     <td className="px-4 py-3 border-b">{result.label}</td>
                     <td className="text-right px-4 py-3 border-b text-foreground">{Number(result.totalPeriods.toFixed(2))}</td>
                     <td className="text-right px-4 py-3 border-b text-foreground">{formatCurrency(result.finalAmount)}</td>
-                    <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
+                    <td className="text-right px-4 py-3 border-b last:border-b-0 text-foreground">{formatCurrency(result.interestEarned)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="pt-3 font-bold text-sm">Over the same time period, more frequent compounding generally results in more interest earned, assuming the annual interest rate stays the same.</p>
           </div>
         </section>
         
