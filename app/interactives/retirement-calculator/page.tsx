@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
-import { BiSolidError, BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
+import { BiSolidError } from "react-icons/bi";
 
 interface CalculatorInputs {
   annualSpending: number
