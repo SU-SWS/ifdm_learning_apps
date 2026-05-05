@@ -34,37 +34,44 @@ export default function RetirementCalculator() {
   const [activeTab, setActiveTab] = useState<"balance" | "savings">("balance")
   const [inputs, setInputs] = useState<CalculatorInputs>(defaultInputs)
   const [isCalculated, setIsCalculated] = useState(false)
-  const [frozenRequiredBalance, setFrozenRequiredBalance] = useState<number>(0)
+  const [calculatedInputs, setCalculatedInputs] = useState<CalculatorInputs | null>(null)
 
   const results = useMemo(() => {
-    const realReturn = inputs.expectedReturn / 100
-
-    // Calculate Required Balance based on retirement spending needs
-    let calculatedRequiredBalance: number
-    
-    if (realReturn <= 0) {
-      calculatedRequiredBalance = inputs.annualSpending * inputs.retirementLength
-    } else {
-      calculatedRequiredBalance =
-        inputs.annualSpending *
-        ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
+    // Return empty results if not calculated yet
+    if (!calculatedInputs) {
+      return {
+        requiredBalance: 0,
+        targetBalance: 0,
+        annualSavings: 0,
+        monthlySavings: 0,
+      }
     }
 
-    // Use frozen value for Annual Savings tab, fresh calculation for Required Balance tab
-    const requiredBalance = activeTab === "savings" ? frozenRequiredBalance : calculatedRequiredBalance
+    const realReturn = calculatedInputs.expectedReturn / 100
 
-    // Now calculate target balance and annual savings based on the appropriate required balance
-    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, inputs.yearsToRetirement)
+    // Calculate Required Balance based on retirement spending needs
+    let requiredBalance: number
+    
+    if (realReturn <= 0) {
+      requiredBalance = calculatedInputs.annualSpending * calculatedInputs.retirementLength
+    } else {
+      requiredBalance =
+        calculatedInputs.annualSpending *
+        ((1 - Math.pow(1 + realReturn, -calculatedInputs.retirementLength)) / realReturn)
+    }
+
+    // Calculate target balance and annual savings
+    const FV_currentSavings = calculatedInputs.currentSavings * Math.pow(1 + realReturn, calculatedInputs.yearsToRetirement)
     const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
     
     let annualSavings: number
     
-    if (realReturn <= 0 || inputs.yearsToRetirement <= 0) {
-      annualSavings = inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0
+    if (realReturn <= 0 || calculatedInputs.yearsToRetirement <= 0) {
+      annualSavings = calculatedInputs.yearsToRetirement > 0 ? targetBalance / calculatedInputs.yearsToRetirement : 0
     } else {
       annualSavings =
         targetBalance *
-        (realReturn / (Math.pow(1 + realReturn, inputs.yearsToRetirement) - 1))
+        (realReturn / (Math.pow(1 + realReturn, calculatedInputs.yearsToRetirement) - 1))
     }
 
     return {
@@ -73,43 +80,23 @@ export default function RetirementCalculator() {
       annualSavings: Math.round(annualSavings),
       monthlySavings: Math.round(annualSavings / 12),
     }
-  }, [inputs, activeTab, frozenRequiredBalance])
+  }, [calculatedInputs])
 
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
     setInputs((prev) => ({ ...prev, [key]: numValue }))
-    // Only invalidate the calculation when balance-tab-only inputs change
-    // while on the balance tab. Shared inputs (expectedReturn, retirementLength)
-    // and savings-tab inputs should not reset when on the savings tab.
-    const savingsTabKeys: Array<keyof CalculatorInputs> = ["currentSavings", "yearsToRetirement"]
-    const sharedKeys: Array<keyof CalculatorInputs> = ["expectedReturn", "retirementLength"]
-    if (savingsTabKeys.includes(key)) return
-    if (sharedKeys.includes(key) && activeTab === "savings") return
-    setIsCalculated(false)
   }
 
   const handleCalculate = () => {
     setIsCalculated(true)
-    // FREEZE the required balance when Calculate is clicked
-    const realReturn = inputs.expectedReturn / 100
-    let calculatedRequiredBalance: number
-    
-    if (realReturn <= 0) {
-      calculatedRequiredBalance = inputs.annualSpending * inputs.retirementLength
-    } else {
-      calculatedRequiredBalance =
-        inputs.annualSpending *
-        ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
-    }
-    
-    setFrozenRequiredBalance(Math.round(calculatedRequiredBalance))
+    setCalculatedInputs({ ...inputs }) // Store snapshot of current inputs
   }
 
   const handleReset = () => {
     setInputs(defaultInputs)
     setIsCalculated(false)
     setActiveTab("balance")
-    setFrozenRequiredBalance(0)
+    setCalculatedInputs(null)
   }
 
   return (
@@ -125,10 +112,6 @@ export default function RetirementCalculator() {
         <Tabs value={activeTab} onValueChange={(v) => {
           if (v === "savings" && !isCalculated) return
           setActiveTab(v as "balance" | "savings")
-          if (v === "balance") {
-            setIsCalculated(false) // This allows recalculation on the balance tab
-            setFrozenRequiredBalance(0) // Clear frozen value when returning to balance tab
-          }
         }} className="mb-10">
           <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
             <TabsTrigger
@@ -160,16 +143,8 @@ export default function RetirementCalculator() {
               </div>
             )}
 
-            {isCalculated && (
-              <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                <p className="font-bold mb-1">Target Retirement Savings</p>
-                <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.targetBalance) : "—"}</p>
-              </div>
-            )}
-
             {activeTab === "balance" ? (
               <>
-                {/* Required Balance Result */}
                 {/* Annual Spending Input */}
                 <div className="space-y-2">
                   <label className="block text-sm text-foreground">
@@ -183,36 +158,7 @@ export default function RetirementCalculator() {
                       onChange={(e) => updateInput("annualSpending", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase amount"
-                        onClick={() =>
-                          updateInput(
-                            "annualSpending",
-                            String((inputs.annualSpending ?? 0) + 1)
-                          )
-                        }
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease amount"
-                        onClick={() =>
-                          updateInput(
-                            "annualSpending",
-                            String(Math.max(0, (inputs.annualSpending ?? 0) - 1))
-                          )
-                        }
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
+
                   </div>
                   <p className="text-xs">
                     How much you plan to withdraw each year.
@@ -221,7 +167,7 @@ export default function RetirementCalculator() {
               </>
             ) : (
               <>
-                {/* Annual Savings Input */}
+                {/* Current Savings Input */}
                 <div className="space-y-2">
                   <label className="block text-sm text-foreground">
                     Current retirement savings
@@ -235,36 +181,6 @@ export default function RetirementCalculator() {
                       onChange={(e) => updateInput("currentSavings", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase amount"
-                        onClick={() =>
-                          updateInput(
-                            "currentSavings",
-                            String((inputs.currentSavings ?? 0) + 1)
-                          )
-                        }
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease amount"
-                        onClick={() =>
-                          updateInput(
-                            "currentSavings",
-                            String(Math.max(0, (inputs.currentSavings ?? 0) - 1))
-                          )
-                        }
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
                   </div>
                   <p className="text-xs">
                     How much you have already saved for retirement.
@@ -285,36 +201,6 @@ export default function RetirementCalculator() {
                       onChange={(e) => updateInput("yearsToRetirement", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase years"
-                        onClick={() =>
-                          updateInput(
-                            "yearsToRetirement",
-                            String(Math.min(99, (inputs.yearsToRetirement ?? 0) + 1))
-                          )
-                        }
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease years"
-                        onClick={() =>
-                          updateInput(
-                            "yearsToRetirement",
-                            String(Math.max(0, (inputs.yearsToRetirement ?? 0) - 1))
-                          )
-                        }
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
                   </div>
                   <p className="text-xs">
                     How many years until you plan to retire.
@@ -336,36 +222,6 @@ export default function RetirementCalculator() {
                   onChange={(e) => updateInput("retirementLength", e.target.value)}
                   className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      updateInput(
-                        "retirementLength",
-                        String((inputs.retirementLength ?? 0) + 1)
-                      )
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      updateInput(
-                        "retirementLength",
-                        String(Math.max(0, (inputs.retirementLength ?? 0) - 1))
-                      )
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
-                </div>
                 </div>
               <p className="text-xs">
                 How many years your retirement will last.
@@ -386,36 +242,6 @@ export default function RetirementCalculator() {
                   onChange={(e) => updateInput("expectedReturn", e.target.value)}
                   className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      updateInput(
-                        "expectedReturn",
-                        String(Math.round(((inputs.expectedReturn ?? 0) + 0.1) * 10) / 10)
-                      )
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      updateInput(
-                        "expectedReturn",
-                        String(Math.max(0, Math.round(((inputs.expectedReturn ?? 0) - 0.1) * 10) / 10))
-                      )
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
-                </div>
               </div>
               <p className="text-xs">
                 {activeTab === "balance"
@@ -425,26 +251,21 @@ export default function RetirementCalculator() {
               </p>
             </div>
 
-            {/* Calculate and Reset Buttons */}
-
-            {activeTab === "balance" && (
-              <>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={handleCalculate}
-                    className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
-                  >
-                    Calculate
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </>
-            )}
+            {/* Calculate and Reset Buttons - Show on both tabs */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleCalculate}
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+              >
+                Calculate
+              </button>
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+              >
+                Reset
+              </button>
+            </div>
 
           </div>
 
@@ -463,7 +284,11 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold text-lagunita">
                     {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturn}% annual return during retirement.</p>
+                  <p className="mt-3 mb-6 text-sm">
+                    {isCalculated && calculatedInputs
+                      ? `This estimates the lump sum needed at retirement to fund your annual spending for ${calculatedInputs.retirementLength} years, assuming a ${calculatedInputs.expectedReturn}% annual return during retirement.`
+                      : "Click Calculate to see your required retirement balance."}
+                  </p>
                 </div>
               </>
             ) : (
@@ -471,15 +296,21 @@ export default function RetirementCalculator() {
                 {/* Annual Savings Result */}
                 <div className="mb-8">
                   <p className="font-bold text-xl mb-1">Required Retirement Balance</p>
-                  <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.requiredBalance) : "—"}</p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturn}% annual return during retirement.</p>
+                  <p className="text-4xl font-bold text-lagunita">{formatCurrency(results.requiredBalance)}</p>
+                  <p className="mt-3 mb-6 text-sm">
+                    {calculatedInputs &&
+                      `This estimates the lump sum needed at retirement to fund your annual spending for ${calculatedInputs.retirementLength} years, assuming a ${calculatedInputs.expectedReturn}% annual return during retirement.`}
+                  </p>
                   <p className="mb-1 font-bold">
                     Required Annual Savings
                   </p>
                   <p className="text-4xl font-bold text-lagunita">
                     {formatCurrency(results.annualSavings)}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">Amount to save each year over {inputs.yearsToRetirement} years to reach your target balance, assuming a {inputs.expectedReturn}% annual return before retirement.</p>
+                  <p className="mt-3 mb-6 text-sm">
+                    {calculatedInputs &&
+                      `Amount to save each year over ${calculatedInputs.yearsToRetirement} years to reach your target balance, assuming a ${calculatedInputs.expectedReturn}% annual return before retirement.`}
+                  </p>
                 </div>
               </>
             )}
