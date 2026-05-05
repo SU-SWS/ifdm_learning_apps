@@ -29,10 +29,6 @@ function formatCurrency(value: number): string {
   }).format(value)
 }
 
-function formatNumber(value: number): string {
-  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-}
-
 function calculateCompoundInterest(
   principal: number,
   rate: number,
@@ -44,19 +40,6 @@ function calculateCompoundInterest(
   const interestEarned = finalAmount - principal
 
   return { finalAmount, interestEarned, totalPeriods }
-}
-
-function formatTimePeriod(totalPeriods: number, periodsPerYear: number): string {
-  const totalYears = totalPeriods / periodsPerYear
-  const years = Math.floor(totalYears)
-  const remainingPeriods = totalPeriods - (years * periodsPerYear)
-  const months = Math.round((remainingPeriods / periodsPerYear) * 12)
-
-  if (years === 0 && months === 0) return "0 months"
-  if (years === 0) return `${months} month${months !== 1 ? 's' : ''}`
-  if (months === 0) return `${years} year${years !== 1 ? 's' : ''}`
-  
-  return `${years} year${years !== 1 ? 's' : ''} and ${months} month${months !== 1 ? 's' : ''}`
 }
 
 export default function CompoundInterestCalculator() {
@@ -77,11 +60,6 @@ export default function CompoundInterestCalculator() {
   const selectedResult = useMemo(() => {
     return calculateCompoundInterest(principal, rate, totalPeriods, selectedOption.periodsPerYear)
   }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
-
-  const formattedTimePeriod = useMemo(() => 
-    formatTimePeriod(totalPeriods, selectedOption.periodsPerYear),
-    [totalPeriods, selectedOption.periodsPerYear]
-  )
 
   const comparisonResults = useMemo(() => {
     const timeInYears = totalPeriods / selectedOption.periodsPerYear
@@ -152,9 +130,6 @@ export default function CompoundInterestCalculator() {
                   className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
-                <p className="text-sm text-foreground mt-2">
-                  {totalPeriods > 0 && `${formatNumber(totalPeriods)} ${selectedOption.label.toLowerCase()} periods = ${formattedTimePeriod}`}
-                </p>
               </div>
             </div>
 
@@ -185,9 +160,29 @@ export default function CompoundInterestCalculator() {
           {/* Results Section */}
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
-              <p className="text-[20px] font-bold mb-1">Balance after {formattedTimePeriod}</p>
+              <p className="text-[20px] font-bold mb-1">Balance after {periods} 
+                {
+                selectedCompounding === 'daily' ? ' days' : 
+                selectedCompounding === 'weekly' ? ' weeks' : 
+                selectedCompounding === 'biweekly' ? ' bi-weekly periods' : 
+                selectedCompounding === 'monthly' ? ' months' : 
+                selectedCompounding === 'quarterly' ? ' quarters' : 
+                selectedCompounding === 'semi-annually' ? ' semi-annual periods' : 
+                selectedCompounding === 'annually' ? ' years' : 
+                selectedCompounding}
+              </p>
               <p className="text-3xl font-bold text-lagunita mb-5">{formatCurrency(selectedResult.finalAmount)}</p>
-              <p className="text-[16px] font-semibold mb-1">Interest Earned over {formattedTimePeriod}</p>
+              <p className="text-[16px] font-semibold mb-1">Interest accrued over {periods} 
+                {
+                selectedCompounding === 'daily' ? ' days' : 
+                selectedCompounding === 'weekly' ? ' weeks' : 
+                selectedCompounding === 'biweekly' ? ' bi-weekly periods' : 
+                selectedCompounding === 'monthly' ? ' months' : 
+                selectedCompounding === 'quarterly' ? ' quarters' : 
+                selectedCompounding === 'semi-annually' ? ' semi-annual periods' : 
+                selectedCompounding === 'annually' ? ' years' : 
+                selectedCompounding}
+              </p>
               <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(selectedResult.interestEarned)}
               </p>
@@ -211,7 +206,7 @@ export default function CompoundInterestCalculator() {
                   <th className="font-semibold text-left px-4 py-3">Compounding Frequency</th>
                   <th className="font-semibold text-right px-4 py-3">Number of <br/>Compounding Periods</th>
                   <th className="font-semibold text-right px-4 py-3">Final Amount</th>
-                  <th className="font-semibold text-right px-4 py-3">Interest Accrued</th>
+                  <th className="font-semibold text-right px-4 py-3">Interest Earned</th>
                 </tr>
               </thead>
               <tbody>
@@ -223,11 +218,12 @@ export default function CompoundInterestCalculator() {
                     <td className="px-4 py-3 border-b">{result.label}</td>
                     <td className="text-right px-4 py-3 border-b text-foreground">{Number(result.totalPeriods.toFixed(2))}</td>
                     <td className="text-right px-4 py-3 border-b text-foreground">{formatCurrency(result.finalAmount)}</td>
-                    <td className="text-right px-4 py-3 border-b last:border-b-0 text-foreground">{formatCurrency(result.interestEarned)}</td>
+                    <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <p className="pt-3 font-bold text-sm">Over the same time period, more frequent compounding generally results in more interest accrued, assuming the annual interest rate stays the same.</p>
           </div>
         </section>
         
