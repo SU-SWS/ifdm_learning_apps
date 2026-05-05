@@ -14,13 +14,15 @@ import {
 } from "@/app/ui/components/select"
 import ThemeToggle from "@/app/lib/theme-toggle"
 
-type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "daily"
+type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
 const frequencyMap: Record<CompoundingFrequency, { periods: number; label: string }> = {
   annually: { periods: 1, label: "Annually" },
   "semi-annually": { periods: 2, label: "Semi-annually" },
   quarterly: { periods: 4, label: "Quarterly" },
   monthly: { periods: 12, label: "Monthly" },
+  biweekly: { periods: 26, label: "Biweekly" },
+  weekly: { periods: 52, label: "Weekly" },
   daily: { periods: 365, label: "Daily" },
 }
 
@@ -220,7 +222,7 @@ export default function PresentValueCalculator() {
               {/* Results Section */}
               <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
                 {/* Main Present Value Display */}
-                <h2 className="text-[var(--text-navy)] text-center text-[22px] font-bold">Present value today</h2>
+                <h2 className="text-[var(--text-navy)] text-center text-[22px] font-bold">Present value</h2>
                 <p className="text-3xl font-bold text-lagunita mb-5 text-center">
                   {formatCurrency(singleCalculations.presentValue)}
                 </p>
@@ -252,10 +254,6 @@ export default function PresentValueCalculator() {
                     </div>
                   </div>
                 </div>
-
-                <p className="text-sm mt-4 text-center md:text-left">
-                  {timePeriod} {frequencyMap[compoundingFrequency].label.toLowerCase()} periods = {formatTimePeriod(timePeriod, frequencyMap[compoundingFrequency].periods)}
-                </p>
               </div>
             </div>
           </TabsContent>
@@ -389,9 +387,6 @@ export default function PresentValueCalculator() {
                     </div>
                   </div>
                 </div>
-                <p className="text-sm mt-4 text-center md:text-left">
-                  {numberOfPayments} payments made {frequencyMap[paymentFrequency].label.toLowerCase()}
-                </p>
               </div>
             </div>
           </TabsContent>
