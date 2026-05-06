@@ -210,7 +210,7 @@ export default function MortgageCalculator() {
   const clampDownPaymentAmount = (amount: number, price: number) => Math.max(0, Math.min(amount, price));
 
   const emptyResultsString = "Enter values to see your estimate"
-  const validationErrorMessage = "Your inputs are not valid for this scenario. Trying lowering the down payment or increasing the home price."
+  const validationErrorMessage = "Your inputs are not valid for this scenario. Try lowering the down payment or increasing the home price."
   const hasValidationError = (
     Number(monthlyPayment) < 0 ||
     Number(homePrice) < 0 ||
