@@ -206,7 +206,7 @@ export default function CompoundInterestCalculator() {
                   <th className="font-semibold text-left px-4 py-3">Compounding Frequency</th>
                   <th className="font-semibold text-right px-4 py-3">Number of <br/>Compounding Periods</th>
                   <th className="font-semibold text-right px-4 py-3">Final Amount</th>
-                  <th className="font-semibold text-right px-4 py-3">Interest Earned</th>
+                  <th className="font-semibold text-right px-4 py-3">Interest Accrued</th>
                 </tr>
               </thead>
               <tbody>
