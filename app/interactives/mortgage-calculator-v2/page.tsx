@@ -202,7 +202,7 @@ export default function MortgageCalculator() {
   const clampDownPaymentAmount = (amount: number, price: number) => Math.max(0, Math.min(amount, price));
 
   const emptyResultsString = "Enter values to see your estimate"
-  const validationErrorMessage = "Your inputs are not valid for this scenario. Try lowering the down payment or increasing your monthly budget."
+  const validationErrorMessage = "Your inputs are not valid for this scenario. Trying lowering the down payment or increasing the home price."
   const hasValidationError = (
     Number(monthlyPayment) < 0 ||
     Number(homePrice) < 0 ||
@@ -221,7 +221,6 @@ export default function MortgageCalculator() {
   const showPaymentResults = mode === 'payment' && Number(homePrice) > 0 && Number(interestRate) > 0 && downPaymentPercent < 100;
 
   const handleReset = () => {
-    setMode('afford');
     setMonthlyPayment('');
     setHomePrice('');
     setDownPaymentPercent(20);
@@ -278,9 +277,9 @@ export default function MortgageCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <label className="block text-sm font-semibold">
-                          Monthly mortgage budget (principal + interest)
+                          Monthly mortgage payment (principal + interest)
                         </label>
-                        <InfoPopover title="Monthly mortgage budget">Enter the portion of the monthly budget used for the loan payment. Additional housing costs like taxes and insurance are not included here.</InfoPopover>
+                        <InfoPopover title="Monthly mortgage payment">Enter the amount you can afford for your loan payment (principal + interest only). Taxes, insurance, and HOA fees are added separately below.</InfoPopover>
                       </div>
                     </div>
                     <div className="relative">
@@ -698,7 +697,6 @@ export default function MortgageCalculator() {
                         </CardHeader>
                         <CardContent className="">
                           <div className="mb-6">
-                            <p className="text-sm font-medium">Based on your monthly housing budget.</p>
                             <p className={
                               results.homePrice > 0 
                                 ? 'text-3xl font-bold text-lagunita' 
