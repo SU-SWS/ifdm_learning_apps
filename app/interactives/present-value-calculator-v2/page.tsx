@@ -131,7 +131,6 @@ export default function PresentValueCalculator() {
               <div className="w-full md:w-1/2 space-y-6 bg-transparent">
                 {/* Future Value Input */}
                 <p>Enter a future value to calculate what it is worth today.</p>
-                {/* Future Value Input */}
                 <div className="space-y-2">
                   <Label htmlFor="future-value" className="block font-semibold text-foreground mb-2">
                     Future value
@@ -157,7 +156,7 @@ export default function PresentValueCalculator() {
                 {/* Interest Rate Input */}
                 <div className="space-y-2">
                   <div className="relative">
-                    <Label htmlFor="interest-rate" className="text-sm font-medium text-foreground">
+                    <Label htmlFor="interest-rate" className="block font-semibold text-foreground mb-2">
                       Annual interest rate (%)
                     </Label>
                     <Input
@@ -192,9 +191,7 @@ export default function PresentValueCalculator() {
                     className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <p className="text-sm text-foreground mt-2">
-
                     {timePeriod > 0 && `${formatNumber(timePeriod)} ${frequencyMap[compoundingFrequency].label.toLowerCase()} period${timePeriod !== 1 ? 's' : ''} = ${formatTimePeriod(timePeriod, frequencyMap[compoundingFrequency].periods)}`}
-
                 </p>
                 </div>
 
@@ -324,6 +321,9 @@ export default function PresentValueCalculator() {
                     step={1}
                     className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
+                  <p className="text-sm text-foreground mt-2">
+                    {numberOfPayments > 0 && `${formatNumber(numberOfPayments)} ${frequencyMap[paymentFrequency].label.toLowerCase()} period${numberOfPayments !== 1 ? 's' : ''} = ${formatTimePeriod(numberOfPayments, frequencyMap[paymentFrequency].periods)}`}
+                  </p>
                 </div>
 
                 {/* Payment Frequency */}
