@@ -3,12 +3,13 @@
 import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
-import { BiSolidError, BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
+import { BiSolidError } from "react-icons/bi";
 
 interface CalculatorInputs {
   annualSpending: number
   retirementLength: number
-  expectedReturn: number
+  expectedReturnDuringRetirement: number  // Used for Required Balance calculation
+  expectedReturnBeforeRetirement: number  // Used ONLY for Annual Savings calculation
   currentSavings: number
   yearsToRetirement: number
 }
@@ -25,9 +26,10 @@ function formatCurrency(value: number): string {
 const defaultInputs: CalculatorInputs = {
   annualSpending: 60000,
   retirementLength: 25,
-  expectedReturn: 5,
+  expectedReturnDuringRetirement: 5,
+  expectedReturnBeforeRetirement: 0,
   currentSavings: 0,
-  yearsToRetirement: 30,
+  yearsToRetirement: 0,
 }
 
 export default function RetirementCalculator() {
@@ -37,34 +39,35 @@ export default function RetirementCalculator() {
   const [frozenRequiredBalance, setFrozenRequiredBalance] = useState<number>(0)
 
   const results = useMemo(() => {
-    const realReturn = inputs.expectedReturn / 100
+    const realReturnDuringRetirement = inputs.expectedReturnDuringRetirement / 100  // ← CHANGED
+    const realReturnBeforeRetirement = inputs.expectedReturnBeforeRetirement / 100  // ← ADDED
 
     // Calculate Required Balance based on retirement spending needs
     let calculatedRequiredBalance: number
     
-    if (realReturn <= 0) {
+    if (realReturnDuringRetirement <= 0) {  // ← CHANGED
       calculatedRequiredBalance = inputs.annualSpending * inputs.retirementLength
     } else {
       calculatedRequiredBalance =
         inputs.annualSpending *
-        ((1 - Math.pow(1 + realReturn, -inputs.retirementLength)) / realReturn)
+        ((1 - Math.pow(1 + realReturnDuringRetirement, -inputs.retirementLength)) / realReturnDuringRetirement)  // ← CHANGED
     }
 
     // Use frozen value for Annual Savings tab, fresh calculation for Required Balance tab
     const requiredBalance = activeTab === "savings" ? frozenRequiredBalance : calculatedRequiredBalance
 
     // Now calculate target balance and annual savings based on the appropriate required balance
-    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturn, inputs.yearsToRetirement)
+    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturnBeforeRetirement, inputs.yearsToRetirement)  // ← CHANGED
     const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
     
     let annualSavings: number
     
-    if (realReturn <= 0 || inputs.yearsToRetirement <= 0) {
+    if (realReturnBeforeRetirement <= 0 || inputs.yearsToRetirement <= 0) {  // ← CHANGED
       annualSavings = inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0
     } else {
       annualSavings =
         targetBalance *
-        (realReturn / (Math.pow(1 + realReturn, inputs.yearsToRetirement) - 1))
+        (realReturnBeforeRetirement / (Math.pow(1 + realReturnBeforeRetirement, inputs.yearsToRetirement) - 1))  // ← CHANGED
     }
 
     return {
@@ -78,20 +81,34 @@ export default function RetirementCalculator() {
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
     setInputs((prev) => ({ ...prev, [key]: numValue }))
-    // Only invalidate the calculation when balance-tab-only inputs change
-    // while on the balance tab. Shared inputs (expectedReturn, retirementLength)
-    // and savings-tab inputs should not reset when on the savings tab.
-    const savingsTabKeys: Array<keyof CalculatorInputs> = ["currentSavings", "yearsToRetirement"]
-    const sharedKeys: Array<keyof CalculatorInputs> = ["expectedReturn", "retirementLength"]
-    if (savingsTabKeys.includes(key)) return
-    if (sharedKeys.includes(key) && activeTab === "savings") return
+    
+    // Inputs that ONLY affect the savings calculation (don't reset isCalculated)
+    const savingsOnlyInputs: Array<keyof CalculatorInputs> = [
+      "currentSavings", 
+      "yearsToRetirement", 
+      "expectedReturnBeforeRetirement"  // ← ADDED
+    ]
+    
+    // Inputs that affect the Required Balance calculation
+    const balanceInputs: Array<keyof CalculatorInputs> = [
+      "annualSpending", 
+      "retirementLength", 
+      "expectedReturnDuringRetirement"  // ← ADDED
+    ]
+    
+    // Don't reset if changing savings-only inputs
+    if (savingsOnlyInputs.includes(key)) return
+    
+    // Don't reset if on savings tab and changing balance inputs
+    if (activeTab === "savings" && balanceInputs.includes(key)) return
+    
     setIsCalculated(false)
   }
 
   const handleCalculate = () => {
     setIsCalculated(true)
     // FREEZE the required balance when Calculate is clicked
-    const realReturn = inputs.expectedReturn / 100
+    const realReturn = inputs.expectedReturnDuringRetirement / 100  // ← CHANGED
     let calculatedRequiredBalance: number
     
     if (realReturn <= 0) {
@@ -160,13 +177,6 @@ export default function RetirementCalculator() {
               </div>
             )}
 
-            {isCalculated && (
-              <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                <p className="font-bold mb-1">Target Retirement Savings</p>
-                <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.targetBalance) : "—"}</p>
-              </div>
-            )}
-
             {activeTab === "balance" ? (
               <>
                 {/* Required Balance Result */}
@@ -183,36 +193,6 @@ export default function RetirementCalculator() {
                       onChange={(e) => updateInput("annualSpending", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase amount"
-                        onClick={() =>
-                          updateInput(
-                            "annualSpending",
-                            String((inputs.annualSpending ?? 0) + 1)
-                          )
-                        }
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease amount"
-                        onClick={() =>
-                          updateInput(
-                            "annualSpending",
-                            String(Math.max(0, (inputs.annualSpending ?? 0) - 1))
-                          )
-                        }
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
                   </div>
                   <p className="text-xs">
                     How much you plan to withdraw each year.
@@ -235,36 +215,6 @@ export default function RetirementCalculator() {
                       onChange={(e) => updateInput("currentSavings", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase amount"
-                        onClick={() =>
-                          updateInput(
-                            "currentSavings",
-                            String((inputs.currentSavings ?? 0) + 1)
-                          )
-                        }
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease amount"
-                        onClick={() =>
-                          updateInput(
-                            "currentSavings",
-                            String(Math.max(0, (inputs.currentSavings ?? 0) - 1))
-                          )
-                        }
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
                   </div>
                   <p className="text-xs">
                     How much you have already saved for retirement.
@@ -285,36 +235,6 @@ export default function RetirementCalculator() {
                       onChange={(e) => updateInput("yearsToRetirement", e.target.value)}
                       className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase years"
-                        onClick={() =>
-                          updateInput(
-                            "yearsToRetirement",
-                            String(Math.min(99, (inputs.yearsToRetirement ?? 0) + 1))
-                          )
-                        }
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease years"
-                        onClick={() =>
-                          updateInput(
-                            "yearsToRetirement",
-                            String(Math.max(0, (inputs.yearsToRetirement ?? 0) - 1))
-                          )
-                        }
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
                   </div>
                   <p className="text-xs">
                     How many years until you plan to retire.
@@ -336,94 +256,55 @@ export default function RetirementCalculator() {
                   onChange={(e) => updateInput("retirementLength", e.target.value)}
                   className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      updateInput(
-                        "retirementLength",
-                        String((inputs.retirementLength ?? 0) + 1)
-                      )
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      updateInput(
-                        "retirementLength",
-                        String(Math.max(0, (inputs.retirementLength ?? 0) - 1))
-                      )
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
-                </div>
                 </div>
               <p className="text-xs">
                 How many years your retirement will last.
               </p>
             </div>}
 
-            {/* Expected Return Input */}
-            <div className="space-y-2">
-              <label className="block text-sm text-foreground">
-                Expected annual return on investment (%)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={inputs.expectedReturn || ""}
-                  onChange={(e) => updateInput("expectedReturn", e.target.value)}
-                  className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Increase amount"
-                    onClick={() =>
-                      updateInput(
-                        "expectedReturn",
-                        String(Math.round(((inputs.expectedReturn ?? 0) + 0.1) * 10) / 10)
-                      )
-                    }
-                    className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidUpArrow size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Decrease amount"
-                    onClick={() =>
-                      updateInput(
-                        "expectedReturn",
-                        String(Math.max(0, Math.round(((inputs.expectedReturn ?? 0) - 0.1) * 10) / 10))
-                      )
-                    }
-                    className="hover:text-grey-med-dark focus:outline-none"
-                  >
-                    <BiSolidDownArrow size={24} />
-                  </button>
+            {/* Expected Return Input - BALANCE TAB */}
+            {activeTab === "balance" && (
+              <div className="space-y-2">
+                <label className="block text-sm text-foreground">
+                  Expected annual return during retirement (%)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={inputs.expectedReturnDuringRetirement || ""}
+                    onChange={(e) => updateInput("expectedReturnDuringRetirement", e.target.value)}
+                    className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
                 </div>
+                <p className="text-xs">
+                  Annual investment return rate during retirement.
+                </p>
               </div>
-              <p className="text-xs">
-                {activeTab === "balance"
-                  ? "Annual investment return rate during retirement."
-                  : "Annual investment return rate before retirement."
-                }
-              </p>
-            </div>
+            )}
+
+{/* Expected Return Input - SAVINGS TAB */}
+{activeTab === "savings" && (
+  <div className="space-y-2">
+    <label className="block text-sm text-foreground">
+      Expected annual return before retirement (%)
+    </label>
+    <div className="relative">
+      <input
+        type="number"
+        min="0"
+        step="0.1"
+        value={inputs.expectedReturnBeforeRetirement || ""}
+        onChange={(e) => updateInput("expectedReturnBeforeRetirement", e.target.value)}
+        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+    </div>
+    <p className="text-xs">
+      Annual investment return rate before retirement.
+    </p>
+  </div>
+)}
 
             {/* Calculate and Reset Buttons */}
 
@@ -450,9 +331,6 @@ export default function RetirementCalculator() {
 
           {/* Right Column - Results */}
           <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-            <h3 className="mb-1 text-2xl font-bold">Results</h3>
-
-            <p className="mb-5 text-sm font-medium">Your calculated retirement figures</p>
             {activeTab === "balance" ? (
               <>
                 {/* Required Balance Result */}
@@ -463,7 +341,9 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold text-lagunita">
                     {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturn}% annual return during retirement.</p>
+                  <p className="mt-3 mb-6 text-sm">
+                    This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturnDuringRetirement}% annual return during retirement.
+                  </p>
                 </div>
               </>
             ) : (
@@ -471,15 +351,25 @@ export default function RetirementCalculator() {
                 {/* Annual Savings Result */}
                 <div className="mb-8">
                   <p className="font-bold text-xl mb-1">Required Retirement Balance</p>
-                  <p className="text-4xl font-bold text-lagunita">{isCalculated ? formatCurrency(results.requiredBalance) : "—"}</p>
-                  <p className="mt-3 mb-6 text-sm">This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturn}% annual return during retirement.</p>
+                  <p className="text-4xl font-bold text-lagunita">
+                    {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
+                  </p>
+                  <p className="mt-3 mb-6 text-sm">
+                    This estimates the lump sum needed at retirement to fund your annual spending 
+                    for {inputs.retirementLength} years, assuming a {inputs.expectedReturnDuringRetirement}% 
+                    annual return during retirement.
+                  </p>
                   <p className="mb-1 font-bold">
                     Required Annual Savings
                   </p>
                   <p className="text-4xl font-bold text-lagunita">
                     {formatCurrency(results.annualSavings)}
                   </p>
-                  <p className="mt-3 mb-6 text-sm">Amount to save each year over {inputs.yearsToRetirement} years to reach your target balance, assuming a {inputs.expectedReturn}% annual return before retirement.</p>
+                  <p className="mt-3 mb-6 text-sm">
+                    Amount to save each year over {inputs.yearsToRetirement} years to reach your 
+                    target balance, assuming a {inputs.expectedReturnBeforeRetirement}% annual 
+                    return before retirement.
+                  </p>
                 </div>
               </>
             )}
