@@ -25,6 +25,9 @@ export default function MortgageCalculator() {
   const [homeInsuranceMode, setHomeInsuranceMode] = useState('percentage');
   const [homeInsuranceAmount, setHomeInsuranceAmount] = useState(0);
 
+  // NEW: Store unrounded calculated values for accurate conversions
+  const [calculatedHomePrice, setCalculatedHomePrice] = useState(0);
+
   const [results, setResults] = useState({
     homePrice: 0,
     downPayment: 0,
@@ -40,7 +43,7 @@ export default function MortgageCalculator() {
   const calculateMortgage = useCallback(() => {
     const r = (Number(interestRate) / 100 / 12); // Monthly interest rate
     const n = loanTerm * 12; // Total number of payments
-    const hoaDuesNum = Number(hoaDues) || 0; // FIX: Parse HOA as number
+    const hoaDuesNum = Number(hoaDues) || 0;
 
     if (mode === 'afford') {
       const paymentAmount = Math.max(0, Number(monthlyPayment));
@@ -58,6 +61,7 @@ export default function MortgageCalculator() {
           hoaDues: 0,
           totalMonthlyHousingCost: 0
         });
+        setCalculatedHomePrice(0);
         return;
       }
 
@@ -72,9 +76,9 @@ export default function MortgageCalculator() {
         computedHomePrice = loanAmount + downPayment;
         // Update the percent to reflect the actual down payment percentage
         if (computedHomePrice > 0) {
-          const calculatedPercent = Math.round((downPayment / computedHomePrice) * 100 * 100) / 100;
+          const calculatedPercent = (downPayment / computedHomePrice) * 100;
           setDownPaymentPercent(calculatedPercent);
-          setDownPaymentPercentInput(String(calculatedPercent));
+          setDownPaymentPercentInput(calculatedPercent.toFixed(2));
         }
       } else {
         // In percentage mode: homePrice = loanAmount / (1 - downPaymentPercent/100)
@@ -91,11 +95,15 @@ export default function MortgageCalculator() {
             hoaDues: 0,
             totalMonthlyHousingCost: 0
           });
+          setCalculatedHomePrice(0);
           return;
         }
         computedHomePrice = loanAmount / (1 - safeDownPaymentPercent / 100);
         downPayment = computedHomePrice * (safeDownPaymentPercent / 100);
       }
+
+      // Store unrounded value for accurate conversions
+      setCalculatedHomePrice(computedHomePrice);
 
       // Handle property tax correctly based on mode
       const monthlyTax = propertyTaxMode === 'percentage'
@@ -202,7 +210,7 @@ export default function MortgageCalculator() {
   const clampDownPaymentAmount = (amount: number, price: number) => Math.max(0, Math.min(amount, price));
 
   const emptyResultsString = "Enter values to see your estimate"
-  const validationErrorMessage = "Your inputs are not valid for this scenario. Try lowering the down payment or increasing your monthly budget."
+  const validationErrorMessage = "Your inputs are not valid for this scenario. Try lowering the down payment or increasing the home price."
   const hasValidationError = (
     Number(monthlyPayment) < 0 ||
     Number(homePrice) < 0 ||
@@ -221,7 +229,6 @@ export default function MortgageCalculator() {
   const showPaymentResults = mode === 'payment' && Number(homePrice) > 0 && Number(interestRate) > 0 && downPaymentPercent < 100;
 
   const handleReset = () => {
-    setMode('afford');
     setMonthlyPayment('');
     setHomePrice('');
     setDownPaymentPercent(20);
@@ -238,6 +245,7 @@ export default function MortgageCalculator() {
     setHomeInsuranceAmount(0);
     setHoaDues('');
     setDownPaymentMode('percentage');
+    setCalculatedHomePrice(0);
     setResults({
       homePrice: 0,
       downPayment: 0,
@@ -278,9 +286,9 @@ export default function MortgageCalculator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <label className="block text-sm font-semibold">
-                          Monthly mortgage budget (principal + interest)
+                          Monthly mortgage payment (principal + interest)
                         </label>
-                        <InfoPopover title="Monthly mortgage budget">Enter the portion of the monthly budget used for the loan payment. Additional housing costs like taxes and insurance are not included here.</InfoPopover>
+                        <InfoPopover title="Monthly mortgage payment">Enter the amount you can afford for your loan payment (principal + interest only). Taxes, insurance, and HOA fees are added separately below.</InfoPopover>
                       </div>
                     </div>
                     <div className="relative">
@@ -316,11 +324,11 @@ export default function MortgageCalculator() {
                             checked={downPaymentMode === 'percentage'}
                             onChange={() => {
                               setDownPaymentMode('percentage');
-                              // if switching from dollar, compute percent
-                              if (downPaymentAmount >= 0 && results.homePrice > 0) {
-                                const percentValue = Math.round((downPaymentAmount / results.homePrice * 100) * 100) / 100;
+                              // FIX: Use unrounded calculatedHomePrice instead of results.homePrice
+                              if (downPaymentAmount >= 0 && calculatedHomePrice > 0) {
+                                const percentValue = (downPaymentAmount / calculatedHomePrice) * 100;
                                 setDownPaymentPercent(percentValue);
-                                setDownPaymentPercentInput(String(percentValue));
+                                setDownPaymentPercentInput(percentValue.toFixed(2));
                               }
                             }}
                             className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -340,9 +348,10 @@ export default function MortgageCalculator() {
                             checked={downPaymentMode === 'dollar'}
                             onChange={() => {
                               setDownPaymentMode('dollar');
-                              const amountValue = Math.round(results.downPayment || (results.homePrice * (downPaymentPercent / 100)));
+                              // FIX: Use unrounded calculatedHomePrice for accurate conversion
+                              const amountValue = calculatedHomePrice * (downPaymentPercent / 100);
                               setDownPaymentAmount(amountValue);
-                              setDownPaymentAmountInput(String(amountValue));
+                              setDownPaymentAmountInput(Math.round(amountValue).toString());
                             }}
                             className="w-4 h-4 accent-lagunita cursor-pointer"
                           />
@@ -370,16 +379,16 @@ export default function MortgageCalculator() {
                               if (raw === '') {
                                 setDownPaymentPercent(0);
                                 setDownPaymentAmount(0);
-                                setDownPaymentAmountInput('');
+                                setDownPaymentAmountInput('0');
                                 return;
                               }
                               const value = clampPercent(Number(raw));
-                              const percentValue = Math.round(value * 100) / 100;
-                              setDownPaymentPercent(percentValue);
-                              const price = results.homePrice || 1;
-                              const computedAmount = Math.round((value / 100) * price);
+                              setDownPaymentPercent(value);
+                              // FIX: Use unrounded calculatedHomePrice for conversion
+                              const price = calculatedHomePrice || 0;
+                              const computedAmount = (value / 100) * price;
                               setDownPaymentAmount(computedAmount);
-                              setDownPaymentAmountInput(String(computedAmount));
+                              setDownPaymentAmountInput(Math.round(computedAmount).toString());
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -400,14 +409,12 @@ export default function MortgageCalculator() {
                               if (raw === '') {
                                 setDownPaymentAmount(0);
                                 setDownPaymentPercent(0);
-                                setDownPaymentPercentInput('');
+                                setDownPaymentPercentInput('0');
                                 return;
                               }
-                              // In afford mode, home price is calculated output, not input.
-                              // Don't clamp against results.homePrice; let calculateMortgage handle it.
-                              const amountValue = Math.round(Number(raw));
+                              const amountValue = Number(raw);
                               setDownPaymentAmount(amountValue);
-                              // Percentage will be recalculated when home price is available
+                              // Percentage will be recalculated in calculateMortgage
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -495,9 +502,9 @@ export default function MortgageCalculator() {
                               checked={propertyTaxMode === 'percentage'}
                               onChange={() => {
                                 setPropertyTaxMode('percentage');
-                                // if switching from dollar, compute percent
-                                if (propertyTaxAmount && propertyTaxAmount > 0 && Number(results.homePrice) > 0) {
-                                  setPropertyTaxPercent(Math.round((propertyTaxAmount / Number(results.homePrice)) * 100 * 100) / 100);
+                                // FIX: Use unrounded calculatedHomePrice
+                                if (propertyTaxAmount && propertyTaxAmount > 0 && calculatedHomePrice > 0) {
+                                  setPropertyTaxPercent((propertyTaxAmount / calculatedHomePrice) * 100);
                                 } else {
                                   setPropertyTaxPercent(0);
                                 }
@@ -520,9 +527,9 @@ export default function MortgageCalculator() {
                               checked={propertyTaxMode === 'dollar'}
                               onChange={() => {
                                 setPropertyTaxMode('dollar');
-                                // Calculate annual property tax amount, not home price
-                                const annualTax = results.homePrice * (propertyTaxPercent / 100);
-                                setPropertyTaxAmount(Math.round(annualTax));
+                                // FIX: Use unrounded calculatedHomePrice
+                                const annualTax = calculatedHomePrice * (propertyTaxPercent / 100);
+                                setPropertyTaxAmount(annualTax);
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -545,9 +552,10 @@ export default function MortgageCalculator() {
                             onChange={(e) => {
                               const raw = e.target.value;
                               const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                              setPropertyTaxPercent(Math.round(value * 100) / 100);
-                              const price = results.homePrice || 1;
-                              setPropertyTaxAmount(Math.round((value / 100) * price));
+                              setPropertyTaxPercent(value);
+                              // FIX: Use unrounded calculatedHomePrice
+                              const price = calculatedHomePrice || 0;
+                              setPropertyTaxAmount((value / 100) * price);
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -559,13 +567,14 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <input
                             type="number"
-                            value={propertyTaxAmount || ''}
+                            value={Math.round(propertyTaxAmount) || ''}
                             onChange={(e) => {
                               const raw = e.target.value;
                               const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                              setPropertyTaxAmount(Math.round(value));
-                              const price = results.homePrice || 1;
-                              if (price > 0) setPropertyTaxPercent(Math.round((value / price) * 100 * 100) / 100);
+                              setPropertyTaxAmount(value);
+                              // FIX: Use unrounded calculatedHomePrice
+                              const price = calculatedHomePrice || 0;
+                              if (price > 0) setPropertyTaxPercent((value / price) * 100);
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -587,9 +596,9 @@ export default function MortgageCalculator() {
                               checked={homeInsuranceMode === 'percentage'}
                               onChange={() => {
                                 setHomeInsuranceMode('percentage');
-                                // if switching from dollar, compute percent
-                                if (homeInsuranceAmount && homeInsuranceAmount > 0 && Number(results.homePrice) > 0) {
-                                  setHomeInsurancePercent(Math.round((homeInsuranceAmount / Number(results.homePrice)) * 100 * 100) / 100);
+                                // FIX: Use unrounded calculatedHomePrice
+                                if (homeInsuranceAmount && homeInsuranceAmount > 0 && calculatedHomePrice > 0) {
+                                  setHomeInsurancePercent((homeInsuranceAmount / calculatedHomePrice) * 100);
                                 } else {
                                   setHomeInsurancePercent(0);
                                 }
@@ -612,9 +621,9 @@ export default function MortgageCalculator() {
                               checked={homeInsuranceMode === 'dollar'}
                               onChange={() => {
                                 setHomeInsuranceMode('dollar');
-                                // Calculate annual insurance amount, not home price
-                                const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
-                                setHomeInsuranceAmount(Math.round(annualInsurance));
+                                // FIX: Use unrounded calculatedHomePrice
+                                const annualInsurance = calculatedHomePrice * (homeInsurancePercent / 100);
+                                setHomeInsuranceAmount(annualInsurance);
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -637,9 +646,10 @@ export default function MortgageCalculator() {
                             onChange={(e) => {
                               const raw = e.target.value;
                               const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                              setHomeInsurancePercent(Math.round(value * 100) / 100);
-                              const price = results.homePrice || 1;
-                              setHomeInsuranceAmount(Math.round((value / 100) * price));
+                              setHomeInsurancePercent(value);
+                              // FIX: Use unrounded calculatedHomePrice
+                              const price = calculatedHomePrice || 0;
+                              setHomeInsuranceAmount((value / 100) * price);
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -651,13 +661,14 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <input
                             type="number"
-                            value={homeInsuranceAmount || ''}
+                            value={Math.round(homeInsuranceAmount) || ''}
                             onChange={(e) => {
                               const raw = e.target.value;
                               const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                              setHomeInsuranceAmount(Math.round(value));
-                              const price = results.homePrice || 1;
-                              if (price > 0) setHomeInsurancePercent(Math.round((value / price) * 100 * 100) / 100);
+                              setHomeInsuranceAmount(value);
+                              // FIX: Use unrounded calculatedHomePrice
+                              const price = calculatedHomePrice || 0;
+                              if (price > 0) setHomeInsurancePercent((value / price) * 100);
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -698,7 +709,6 @@ export default function MortgageCalculator() {
                         </CardHeader>
                         <CardContent className="">
                           <div className="mb-6">
-                            <p className="text-sm font-medium">Based on your monthly housing budget.</p>
                             <p className={
                               results.homePrice > 0 
                                 ? 'text-3xl font-bold text-lagunita' 
@@ -831,14 +841,14 @@ export default function MortgageCalculator() {
                           if (downPaymentMode === 'dollar') {
                             const clampedDownPayment = clampDownPaymentAmount(downPaymentAmount, priceValue);
                             setDownPaymentAmount(clampedDownPayment);
-                            setDownPaymentAmountInput(String(clampedDownPayment));
-                            const percentValue = priceValue > 0 ? Math.round((clampedDownPayment / priceValue) * 100 * 100) / 100 : 0;
+                            setDownPaymentAmountInput(Math.round(clampedDownPayment).toString());
+                            const percentValue = priceValue > 0 ? (clampedDownPayment / priceValue) * 100 : 0;
                             setDownPaymentPercent(percentValue);
-                            setDownPaymentPercentInput(String(percentValue));
+                            setDownPaymentPercentInput(percentValue.toFixed(2));
                           } else {
-                            const computedAmount = Math.round((downPaymentPercent / 100) * priceValue);
+                            const computedAmount = (downPaymentPercent / 100) * priceValue;
                             setDownPaymentAmount(computedAmount);
-                            setDownPaymentAmountInput(String(computedAmount));
+                            setDownPaymentAmountInput(Math.round(computedAmount).toString());
                           }
                         }}
                         className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -860,11 +870,11 @@ export default function MortgageCalculator() {
                             checked={downPaymentMode === 'percentage'}
                             onChange={() => {
                               setDownPaymentMode('percentage');
-                              // if switching from dollar, compute percent
+                              // FIX: Use current downPaymentAmount (unrounded) and homePrice
                               if (downPaymentAmount >= 0 && Number(homePrice) > 0) {
-                                const percentValue = Math.round((downPaymentAmount / Number(homePrice) * 100) * 100) / 100;
+                                const percentValue = (downPaymentAmount / Number(homePrice)) * 100;
                                 setDownPaymentPercent(percentValue);
-                                setDownPaymentPercentInput(String(percentValue));
+                                setDownPaymentPercentInput(percentValue.toFixed(2));
                               }
                             }}
                             className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -884,9 +894,10 @@ export default function MortgageCalculator() {
                             checked={downPaymentMode === 'dollar'}
                             onChange={() => {
                               setDownPaymentMode('dollar');
-                              const amountValue = Math.round(results.downPayment || (Number(homePrice) * (downPaymentPercent / 100)));
+                              // FIX: Use homePrice (unrounded) for accurate conversion
+                              const amountValue = Number(homePrice) * (downPaymentPercent / 100);
                               setDownPaymentAmount(amountValue);
-                              setDownPaymentAmountInput(String(amountValue));
+                              setDownPaymentAmountInput(Math.round(amountValue).toString());
                             }}
                             className="w-4 h-4 accent-lagunita cursor-pointer"
                           />
@@ -914,16 +925,15 @@ export default function MortgageCalculator() {
                               if (raw === '') {
                                 setDownPaymentPercent(0);
                                 setDownPaymentAmount(0);
-                                setDownPaymentAmountInput('');
+                                setDownPaymentAmountInput('0');
                                 return;
                               }
                               const value = clampPercent(Number(raw));
-                              const percentValue = Math.round(value * 100) / 100;
-                              setDownPaymentPercent(percentValue);
-                              const price = Number(homePrice) || results.homePrice;
-                              const computedAmount = Math.round((value / 100) * price);
+                              setDownPaymentPercent(value);
+                              const price = Number(homePrice) || 0;
+                              const computedAmount = (value / 100) * price;
                               setDownPaymentAmount(computedAmount);
-                              setDownPaymentAmountInput(String(computedAmount));
+                              setDownPaymentAmountInput(Math.round(computedAmount).toString());
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -944,15 +954,22 @@ export default function MortgageCalculator() {
                               if (raw === '') {
                                 setDownPaymentAmount(0);
                                 setDownPaymentPercent(0);
-                                setDownPaymentPercentInput('');
+                                setDownPaymentPercentInput('0');
                                 return;
                               }
-                              const maxPrice = Number(homePrice) || results.homePrice;
-                              const clampedAmount = clampDownPaymentAmount(Math.round(Number(raw)), maxPrice);
-                              const percentValue = maxPrice > 0 ? Math.round((clampedAmount / maxPrice) * 100 * 100) / 100 : 0;
+                              // FIX: Don't clamp immediately; let user type freely
+                              // Only clamp the internal state value
+                              const maxPrice = Number(homePrice) || 0;
+                              const rawAmount = Number(raw);
+                              const clampedAmount = clampDownPaymentAmount(rawAmount, maxPrice);
+
+                              // Store the clamped amount internally
                               setDownPaymentAmount(clampedAmount);
+
+                              // Calculate percentage based on clamped amount
+                              const percentValue = maxPrice > 0 ? (clampedAmount / maxPrice) * 100 : 0;
                               setDownPaymentPercent(percentValue);
-                              setDownPaymentPercentInput(String(percentValue));
+                              setDownPaymentPercentInput(percentValue.toFixed(2));
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -1041,9 +1058,9 @@ export default function MortgageCalculator() {
                               checked={propertyTaxMode === 'percentage'}
                               onChange={() => {
                                 setPropertyTaxMode('percentage');
-                                // if switching from dollar, compute percent
+                                // FIX: Use homePrice (unrounded)
                                 if (propertyTaxAmount && propertyTaxAmount > 0 && Number(homePrice) > 0) {
-                                  setPropertyTaxPercent(Math.round((propertyTaxAmount / Number(homePrice)) * 100 * 100) / 100);
+                                  setPropertyTaxPercent((propertyTaxAmount / Number(homePrice)) * 100);
                                 } else {
                                   setPropertyTaxPercent(0);
                                 }
@@ -1059,9 +1076,9 @@ export default function MortgageCalculator() {
                               checked={propertyTaxMode === 'dollar'}
                               onChange={() => {
                                 setPropertyTaxMode('dollar');
-                                // Calculate annual property tax amount
-                                const annualTax = results.homePrice * (propertyTaxPercent / 100);
-                                setPropertyTaxAmount(Math.round(annualTax));
+                                // FIX: Use homePrice (unrounded)
+                                const annualTax = Number(homePrice) * (propertyTaxPercent / 100);
+                                setPropertyTaxAmount(annualTax);
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -1078,9 +1095,9 @@ export default function MortgageCalculator() {
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                                setPropertyTaxPercent(Math.round(value * 100) / 100);
-                                const price = Number(homePrice) || results.homePrice;
-                                setPropertyTaxAmount(Math.round((value / 100) * price));
+                                setPropertyTaxPercent(value);
+                                const price = Number(homePrice) || 0;
+                                setPropertyTaxAmount((value / 100) * price);
                               }}
                               className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
@@ -1092,13 +1109,13 @@ export default function MortgageCalculator() {
                           <>
                             <input
                               type="number"
-                              value={propertyTaxAmount || ''}
+                              value={Math.round(propertyTaxAmount) || ''}
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                                setPropertyTaxAmount(Math.round(value));
-                                const price = Number(homePrice) || results.homePrice;
-                                if (price > 0) setPropertyTaxPercent(Math.round((value / price) * 100 * 100) / 100);
+                                setPropertyTaxAmount(value);
+                                const price = Number(homePrice) || 0;
+                                if (price > 0) setPropertyTaxPercent((value / price) * 100);
                               }}
                               className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
@@ -1121,9 +1138,9 @@ export default function MortgageCalculator() {
                               checked={homeInsuranceMode === 'percentage'}
                               onChange={() => {
                                 setHomeInsuranceMode('percentage');
-                                // if switching from dollar, compute percent
+                                // FIX: Use homePrice (unrounded)
                                 if (homeInsuranceAmount && homeInsuranceAmount > 0 && Number(homePrice) > 0) {
-                                  setHomeInsurancePercent(Math.round((homeInsuranceAmount / Number(homePrice)) * 100 * 100) / 100);
+                                  setHomeInsurancePercent((homeInsuranceAmount / Number(homePrice)) * 100);
                                 } else {
                                   setHomeInsurancePercent(0);
                                 }
@@ -1139,9 +1156,9 @@ export default function MortgageCalculator() {
                               checked={homeInsuranceMode === 'dollar'}
                               onChange={() => {
                                 setHomeInsuranceMode('dollar');
-                                // Calculate annual insurance amount
-                                const annualInsurance = results.homePrice * (homeInsurancePercent / 100);
-                                setHomeInsuranceAmount(Math.round(annualInsurance));
+                                // FIX: Use homePrice (unrounded)
+                                const annualInsurance = Number(homePrice) * (homeInsurancePercent / 100);
+                                setHomeInsuranceAmount(annualInsurance);
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
@@ -1158,9 +1175,9 @@ export default function MortgageCalculator() {
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                                setHomeInsurancePercent(Math.round(value * 100) / 100);
-                                const price = Number(homePrice) || results.homePrice;
-                                setHomeInsuranceAmount(Math.round((value / 100) * price));
+                                setHomeInsurancePercent(value);
+                                const price = Number(homePrice) || 0;
+                                setHomeInsuranceAmount((value / 100) * price);
                               }}
                               className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
@@ -1172,13 +1189,13 @@ export default function MortgageCalculator() {
                           <>
                             <input
                               type="number"
-                              value={homeInsuranceAmount || ''}
+                              value={Math.round(homeInsuranceAmount) || ''}
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 const value = clampNonNegativeNumber(raw === '' ? 0 : Number(raw));
-                                setHomeInsuranceAmount(Math.round(value));
-                                const price = Number(homePrice) || results.homePrice;
-                                if (price > 0) setHomeInsurancePercent(Math.round((value / price) * 100 * 100) / 100);
+                                setHomeInsuranceAmount(value);
+                                const price = Number(homePrice) || 0;
+                                if (price > 0) setHomeInsurancePercent((value / price) * 100);
                               }}
                               className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
