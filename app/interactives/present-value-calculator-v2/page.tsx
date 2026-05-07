@@ -14,27 +14,52 @@ import {
 } from "@/app/ui/components/select"
 import ThemeToggle from "@/app/lib/theme-toggle"
 
-type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "daily"
+type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
 const frequencyMap: Record<CompoundingFrequency, { periods: number; label: string }> = {
   annually: { periods: 1, label: "Annually" },
   "semi-annually": { periods: 2, label: "Semi-annually" },
   quarterly: { periods: 4, label: "Quarterly" },
   monthly: { periods: 12, label: "Monthly" },
+  biweekly: { periods: 26, label: "Biweekly" },
+  weekly: { periods: 52, label: "Weekly" },
   daily: { periods: 365, label: "Daily" },
+}
+
+function formatTimePeriod(totalPeriods: number, periodsPerYear: number): string {
+  const totalYears = totalPeriods / periodsPerYear
+  const years = Math.floor(totalYears)
+  const remainingPeriods = totalPeriods - (years * periodsPerYear)
+  const months = Math.round((remainingPeriods / periodsPerYear) * 12)
+
+  if (years === 0 && months === 0) return "0 months"
+  if (years === 0) {
+    return months === 1 ? "1 month" : `${months} months`
+  }
+  if (months === 0) {
+    return years === 1 ? "1 year" : `${years} years`
+  }
+  
+  const yearText = years === 1 ? "1 year" : `${years} years`
+  const monthText = months === 1 ? "1 month" : `${months} months`
+  return `${yearText} and ${monthText}`
+}
+
+function formatNumber(value: number): string {
+  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
 
 export default function PresentValueCalculator() {
   const [activeTab, setActiveTab] = useState("single")
   
   // Single Amount State
-  const [futureValue, setFutureValue] = useState(10000)
+  const [futureValue, setFutureValue] = useState(0)
   const [interestRate, setInterestRate] = useState(5)
   const [timePeriod, setTimePeriod] = useState(10)
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("annually")
 
   // Payment Series State
-  const [paymentAmount, setPaymentAmount] = useState(1000)
+  const [paymentAmount, setPaymentAmount] = useState(0)
   const [paymentInterestRate, setPaymentInterestRate] = useState(5)
   const [numberOfPayments, setNumberOfPayments] = useState(10)
   const [paymentFrequency, setPaymentFrequency] = useState<CompoundingFrequency>("annually")
@@ -42,10 +67,10 @@ export default function PresentValueCalculator() {
   const singleCalculations = useMemo(() => {
     const rate = interestRate / 100
     const n = frequencyMap[compoundingFrequency].periods
-    const totalPeriods = n * timePeriod
+    const totalPeriods = timePeriod // CHANGED: use input directly as total periods
     const periodRate = rate / n
     const presentValue = futureValue / Math.pow(1 + periodRate, totalPeriods)
-    const discountAmount =  futureValue - presentValue
+    const discountAmount = futureValue - presentValue
 
     return {
       presentValue,
@@ -68,7 +93,7 @@ export default function PresentValueCalculator() {
     }
     
     const totalPayments = paymentAmount * numberOfPayments
-    const discountAmount = totalPayments -presentValue
+    const discountAmount = totalPayments - presentValue
 
     return {
       presentValue,
@@ -96,8 +121,8 @@ export default function PresentValueCalculator() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8 p-0">
-            <TabsTrigger value="single">Single Amount</TabsTrigger>
-            <TabsTrigger value="series">Payment Series</TabsTrigger>
+            <TabsTrigger value="single">Single amount</TabsTrigger>
+            <TabsTrigger value="series">Payment series</TabsTrigger>
           </TabsList>
 
           {/* Single Amount Tab */}
@@ -105,40 +130,55 @@ export default function PresentValueCalculator() {
             <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
               <div className="w-full md:w-1/2 space-y-6 bg-transparent">
                 {/* Future Value Input */}
+                <p>Enter a future value to calculate what it is worth today.</p>
                 <div className="space-y-2">
-                  <Label htmlFor="future-value" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="future-value" className="block font-semibold text-foreground mb-2">
                     Future value
                   </Label>
-                  <Input
-                    id="future-value"
-                    type="number"
-                    value={futureValue === 0 ? "" : futureValue}
-                    onChange={(e) => setFutureValue(e.target.value === "" ? 0 : Number(e.target.value))}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
-                  />
+                  <div className="relative">
+                    {futureValue > 0 && (
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        $
+                      </span>
+                    )}
+                    <Input
+                      id="future-value"
+                      type="number"
+                      value={futureValue === 0 ? "" : futureValue}
+                      onChange={(e) => setFutureValue(e.target.value === "" ? 0 : Number(e.target.value))}
+                      className={`bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        futureValue > 0 ? "pl-7" : ""
+                      }`}
+                    />
+                  </div>
                 </div>
 
                 {/* Interest Rate Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="interest-rate" className="text-sm font-medium text-foreground">
-                    Annual interest rate (%)
-                  </Label>
-                  <Input
-                    id="interest-rate"
-                    type="number"
-                    value={interestRate === 0 ? "" : interestRate}
-                    onChange={(e) => setInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
-                    min={0}
-                    max={100}
-                    step={0.1}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
-                  />
+                  <div className="relative">
+                    <Label htmlFor="interest-rate" className="block font-semibold text-foreground mb-2">
+                      Annual interest rate (%)
+                    </Label>
+                    <Input
+                      id="interest-rate"
+                      type="number"
+                      value={interestRate === 0 ? "" : interestRate}
+                      onChange={(e) => setInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="absolute right-4 top-[2.8em] -translate-y-1/2 text-gray-500 pointer-events-none">
+                      %
+                    </span>
+                  </div>
                 </div>
 
                 {/* Time Period Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="time-period" className="text-sm font-medium text-foreground">
-                    Number of payments (10 years)
+                  <Label htmlFor="time-period" className="block font-semibold text-foreground mb-2">
+                    Number of compounding periods
                   </Label>
                   <Input
                     id="time-period"
@@ -146,15 +186,18 @@ export default function PresentValueCalculator() {
                     value={timePeriod === 0 ? "" : timePeriod}
                     onChange={(e) => setTimePeriod(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={1}
-                    max={100}
+                    max={1000}
                     step={1}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
+                  <p className="text-sm text-foreground mt-2">
+                    {timePeriod > 0 && `${formatNumber(timePeriod)} ${frequencyMap[compoundingFrequency].label.toLowerCase()} period${timePeriod !== 1 ? 's' : ''} = ${formatTimePeriod(timePeriod, frequencyMap[compoundingFrequency].periods)}`}
+                </p>
                 </div>
 
                 {/* Compounding Frequency */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Compounding frequency</Label>
+                  <Label className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
                   <Select
                     value={compoundingFrequency}
                     onValueChange={(value) => setCompoundingFrequency(value as CompoundingFrequency)}
@@ -175,11 +218,9 @@ export default function PresentValueCalculator() {
 
               {/* Results Section */}
               <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
-                <h2 className="text-[var(--text-navy)] text-[22px] font-bold">Results</h2>
-
                 {/* Main Present Value Display */}
-                <p className="text-sm  my-2">Present Value</p>
-                <p className="text-3xl font-bold text-lagunita mb-5">
+                <h2 className="text-[var(--text-navy)] text-center text-[22px] font-bold">Present value</h2>
+                <p className="text-3xl font-bold text-lagunita mb-5 text-center">
                   {formatCurrency(singleCalculations.presentValue)}
                 </p>
 
@@ -210,10 +251,6 @@ export default function PresentValueCalculator() {
                     </div>
                   </div>
                 </div>
-
-                <p className="text-sm mt-4 text-center md:text-left">
-                  Compounded {frequencyMap[compoundingFrequency].label.toLowerCase()} over {timePeriod} years
-                </p>
               </div>
             </div>
           </TabsContent>
@@ -224,39 +261,54 @@ export default function PresentValueCalculator() {
 
               <div className="bg-transparent w-full md:w-1/2 space-y-6">                
                 {/* Payment Amount Input */}
+                <p>Find what a series of payments is worth today. Enter a payment amount and number of payments to calculate the present value.</p>
                 <div className="space-y-2">
-                  <Label htmlFor="payment-amount" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="payment-amount" className="block font-semibold text-foreground mb-2">
                     Payment amount ($)
                   </Label>
-                  <Input
-                    id="payment-amount"
-                    type="number"
-                    value={paymentAmount === 0 ? "" : paymentAmount}
-                    onChange={(e) => setPaymentAmount(e.target.value === "" ? 0 : Number(e.target.value))}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
-                  />
+                  <div className="relative">
+                    {paymentAmount > 0 && (
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        $
+                      </span>
+                    )}
+                    <Input
+                      id="payment-amount"
+                      type="number"
+                      value={paymentAmount === 0 ? "" : paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value === "" ? 0 : Number(e.target.value))}
+                      className={`bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        paymentAmount > 0 ? "pl-7" : ""
+                      }`}
+                    />
+                  </div>
                 </div>
 
                 {/* Interest Rate Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="payment-interest-rate" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="payment-interest-rate" className="block font-semibold text-foreground mb-2">
                     Annual interest rate 
                   </Label>
-                  <Input
-                    id="payment-interest-rate"
-                    type="number"
-                    value={paymentInterestRate === 0 ? "" : paymentInterestRate}
-                    onChange={(e) => setPaymentInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
-                    min={0}
-                    max={100}
-                    step={0.1}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="payment-interest-rate"
+                      type="number"
+                      value={paymentInterestRate === 0 ? "" : paymentInterestRate}
+                      onChange={(e) => setPaymentInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                      %
+                    </span>
+                  </div>
                 </div>
 
                 {/* Number of Payments Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="number-of-payments" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="number-of-payments" className="block font-semibold text-foreground mb-2">
                     Number of payments
                   </Label>
                   <Input
@@ -267,13 +319,16 @@ export default function PresentValueCalculator() {
                     min={1}
                     max={1000}
                     step={1}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3"
+                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
+                  <p className="text-sm text-foreground mt-2">
+                    {numberOfPayments > 0 && `${formatNumber(numberOfPayments)} ${frequencyMap[paymentFrequency].label.toLowerCase()} period${numberOfPayments !== 1 ? 's' : ''} = ${formatTimePeriod(numberOfPayments, frequencyMap[paymentFrequency].periods)}`}
+                  </p>
                 </div>
 
                 {/* Payment Frequency */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Payment frequency</Label>
+                  <Label className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
                   <Select
                     value={paymentFrequency}
                     onValueChange={(value) => setPaymentFrequency(value as CompoundingFrequency)}
@@ -294,11 +349,8 @@ export default function PresentValueCalculator() {
 
               {/* Results Section */}
               <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
-                <h2 className="text-[var(--text-navy)] text-[22px] font-bold">Results</h2>
-                
-                {/* Main Present Value Display */}
-                <p className="text-sm  my-2">Present Value</p>
-                <p className="text-3xl font-bold text-lagunita mb-5">
+              <h2 className="text-[var(--text-navy)] text-center text-[22px] font-bold">Present value</h2>
+                 <p className="text-3xl font-bold text-lagunita mb-5 text-center">
                   {formatCurrency(paymentCalculations.presentValue)}
                 </p>
 
@@ -335,9 +387,6 @@ export default function PresentValueCalculator() {
                     </div>
                   </div>
                 </div>
-                <p className="text-sm mt-4 text-center md:text-left">
-                  {numberOfPayments} payments made {frequencyMap[paymentFrequency].label.toLowerCase()}
-                </p>
               </div>
             </div>
           </TabsContent>
