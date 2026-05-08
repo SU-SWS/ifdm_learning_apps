@@ -71,6 +71,23 @@ export default function CompoundInterestCalculator() {
       }
     })
   }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
+  
+  type CompoundingPeriod = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
+
+const getPeriodText = (compounding: CompoundingPeriod, periods: number): string => {
+  const periodMap: Record<CompoundingPeriod, [string, string]> = {
+    daily: ['day', 'days'],
+    weekly: ['week', 'weeks'],
+    biweekly: ['bi-weekly period', 'bi-weekly periods'],
+    monthly: ['month', 'months'],
+    quarterly: ['quarter', 'quarters'],
+    'semi-annually': ['semi-annual period', 'semi-annual periods'],
+    annually: ['year', 'years']
+  };
+
+  const [singular, plural] = periodMap[compounding];
+  return periods === 1 ? singular : plural;
+};
 
   return (
     <div className=" p-6 max-w-5xl mx-auto">
@@ -160,28 +177,13 @@ export default function CompoundInterestCalculator() {
           {/* Results Section */}
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
-              <p className="text-[20px] font-bold mb-1">Balance after {periods} 
-                {
-                selectedCompounding === 'daily' ? ' days' : 
-                selectedCompounding === 'weekly' ? ' weeks' : 
-                selectedCompounding === 'biweekly' ? ' bi-weekly periods' : 
-                selectedCompounding === 'monthly' ? ' months' : 
-                selectedCompounding === 'quarterly' ? ' quarters' : 
-                selectedCompounding === 'semi-annually' ? ' semi-annual periods' : 
-                selectedCompounding === 'annually' ? ' years' : 
-                selectedCompounding}
+              <p className="text-[20px] font-bold mb-1">
+                Balance after {periods} {getPeriodText(selectedCompounding, Number(periods))}
               </p>
-              <p className="text-3xl font-bold text-lagunita mb-5">{formatCurrency(selectedResult.finalAmount)}</p>
-              <p className="text-[16px] font-semibold mb-1">Interest accrued over {periods} 
-                {
-                selectedCompounding === 'daily' ? ' days' : 
-                selectedCompounding === 'weekly' ? ' weeks' : 
-                selectedCompounding === 'biweekly' ? ' bi-weekly periods' : 
-                selectedCompounding === 'monthly' ? ' months' : 
-                selectedCompounding === 'quarterly' ? ' quarters' : 
-                selectedCompounding === 'semi-annually' ? ' semi-annual periods' : 
-                selectedCompounding === 'annually' ? ' years' : 
-                selectedCompounding}
+              <p className="text-3xl font-bold text-lagunita mb-5">
+                {formatCurrency(selectedResult.finalAmount)}</p>
+              <p className="text-[16px] font-semibold mb-1">
+                Interest accrued over {periods} {getPeriodText(selectedCompounding, Number(periods))}
               </p>
               <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(selectedResult.interestEarned)}
