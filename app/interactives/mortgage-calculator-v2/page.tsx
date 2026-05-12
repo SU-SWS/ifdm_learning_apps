@@ -815,6 +815,7 @@ export default function MortgageCalculator() {
             </TabsContent>
 
             <TabsContent value="payment">
+              <p className="text-sm text-muted-foreground">Estimate a monthly mortgage payment based on your target home price.</p>
               <div className="grid md:grid-cols-2 py-8 gap-8">
                 {/* Left Column - Inputs */}
                 <div className="pb-5">
