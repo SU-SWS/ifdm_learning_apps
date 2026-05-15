@@ -271,7 +271,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => setAnnualRate(e.target.value)}
                             min="0"
                             step="0.1"
-                            className="text-lagunita font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {annualRate && (
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
@@ -368,18 +368,19 @@ export default function MortgageCalculator() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {!currentBalance ? (
-                    <div className="rounded-xl border-2 border-lagunita bg-lagunita-lighter p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <p className="text-sm text-navy">
+                    <div className="rounded-xl border-1 border-grey-border bg-[var(--info-popup-background)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <p className="text-sm inline">
                         Start by calculating your current mortgage balance
                         first. Enter your details in the Current Balance tab,
                         then come back here to explore refinance options.
+
+                        <button
+                          onClick={() => setActiveTab("current-balance")}
+                          className="pl-2 inline-flex items-center gap-2 whitespace-nowrap text-lagunita font-semibold hover:underline cursor-pointer"
+                        >
+                          Calculate current balance <FaArrowRight size={12} />
+                        </button>
                       </p>
-                      <button
-                        onClick={() => setActiveTab("current-balance")}
-                        className="flex items-center gap-2 whitespace-nowrap text-lagunita font-semibold hover:underline cursor-pointer"
-                      >
-                        Calculate current balance <FaArrowRight size={12} />
-                      </button>
                     </div>
                   ) : null}
 
@@ -416,7 +417,7 @@ export default function MortgageCalculator() {
                                 <dt className="pr-1 inline-block text-[var(--results-card-empty)]">
                                   Interest rate:
                                 </dt>
-                                <dd className="font-bold inline-block text-lagunita">
+                                <dd className="font-bold inline-block">
                                   {refCurrentRate}%
                                 </dd>
                               </div>
@@ -442,7 +443,7 @@ export default function MortgageCalculator() {
                             </dl>
                           </div>
                         ) : (
-                          <div className="rounded-lg border border-[var(--border)] bg-[var(--card-background)] p-4">
+                          <div className="rounded-lg border border-[var(--border)] bg-[var(--results-card-grey-background)] p-4">
                             <p className="text-sm text-[var(--results-card-empty)]">
                               No balance calculated yet.
                             </p>
@@ -479,11 +480,11 @@ export default function MortgageCalculator() {
                               }
                               min="0"
                               step="0.01"
-                              className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error" : ""}`}
+                              className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error border-2" : ""}`}
                             />
                           </div>
                           {refErrors.newLoanAmount && (
-                            <p role="alert" className="mt-1 text-sm text-error">
+                            <p role="alert" className="mt-1 text-sm text-error font-semibold">
                               {refErrors.newLoanAmount}
                             </p>
                           )}
@@ -505,7 +506,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewMonths(e.target.value)}
                               min="0"
                               step="1"
-                              className={`font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error" : ""}`}
+                              className={`font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error border-2" : ""}`}
                             />
                             {refNewMonths && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
@@ -523,7 +524,7 @@ export default function MortgageCalculator() {
                             </p>
                           )}
                           {refErrors.newMonths && (
-                            <p role="alert" className="mt-1 text-sm text-error">
+                            <p role="alert" className="mt-1 text-sm font-semibold text-error">
                               {refErrors.newMonths}
                             </p>
                           )}
@@ -545,7 +546,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewRate(e.target.value)}
                               min="0"
                               step="0.1"
-                              className={`text-lagunita font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-error" : ""}`}
+                              className={`font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-error border-2" : ""}`}
                             />
                             {refNewRate && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
@@ -554,7 +555,7 @@ export default function MortgageCalculator() {
                             )}
                           </div>
                           {refErrors.newRate && (
-                            <p role="alert" className="mt-1 text-sm text-error">
+                            <p role="alert" className="mt-1 text-sm font-semibold text-error">
                               {refErrors.newRate}
                             </p>
                           )}
@@ -660,7 +661,6 @@ export default function MortgageCalculator() {
                             {refinanceResults.totalSavings >= 0 ? (
                               <>
                                 <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
-                                  <FaCircleCheck size={18} aria-hidden="true" />{" "}
                                   Refinancing may be worth it
                                 </h3>
                                 <p className="text-sm mt-1 text-[var(--results-card-empty)]">
@@ -670,8 +670,7 @@ export default function MortgageCalculator() {
                               </>
                             ) : (
                               <>
-                                <h3 className="text-lg font-bold text-berry flex items-center gap-2">
-                                  <FaCircleXmark size={18} aria-hidden="true" />{" "}
+                                <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
                                   Refinancing may not be worth it
                                 </h3>
                                 <p className="text-sm mt-1 text-[var(--results-card-empty)]">
