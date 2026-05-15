@@ -252,7 +252,7 @@ export default function MortgageCalculator() {
                             <div
                               id="rate-tooltip"
                               role="tooltip"
-                              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-navy text-white text-xs p-2 
+                              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-[var(--info-popup-background)] text-navy border-1 border-grey-border text-xs p-4 
                  invisible group-hover:visible group-focus-within:visible
                  opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 
                  transition-opacity pointer-events-none z-10"
@@ -308,7 +308,7 @@ export default function MortgageCalculator() {
                       {currentBalance !== null && (
                         <button
                           onClick={handleReset}
-                          className="mt-4 flex items-center gap-2 px-4 py-2 rounded-md border-2 border-navy text-navy bg-transparent hover:border-lagunita hover:text-lagunita cursor-pointer transition-colors w-full md:w-auto justify-center md:justify-start"
+                          className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-lagunita text-navy bg-transparent hover:border-navy hover:text-navy hover:underline cursor-pointer transition-colors w-full md:w-auto justify-center md:justify-start"
                         >
                           <FaRotateLeft size={14} />
                           Reset
@@ -334,7 +334,7 @@ export default function MortgageCalculator() {
                             Based on the remaining monthly payments
                           </p>
                           <Button
-                            className="mt-6 h-18 whitespace-normal bg-lagunita border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+                            className="mt-4 px-6 py-6 whitespace-normal bg-navy border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
                             onClick={() => setActiveTab("refinance")}
                           >
                             Continue to refinance
@@ -382,357 +382,383 @@ export default function MortgageCalculator() {
                       </button>
                     </div>
                   ) : null}
+
                   <div className="md:grid md:grid-cols-2 gap-8">
-                    {/* Left — read-only summary from Tab 1 */}
-                    <div className="pr-4">
-                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
-                        Current Loan Terms
-                      </h2>
-
-                      {currentBalance ? (
-                        <dl className="space-y-4">
-                          <div>
-                            <dt className="text-sm text-[var(--results-card-empty)]">
-                              Current balance
-                            </dt>
-                            <dd className="font-bold text-lg">
-                              ${formatCurrency(currentBalance)}
-                            </dd>
+                    {/* ── Left column ─────────────────────────────────────────── */}
+                    <div className="flex flex-col gap-8">
+                      {/* Current Loan Terms — read-only */}
+                      <div>
+                        <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
+                          Current Loan Terms
+                        </h2>
+                        {currentBalance ? (
+                          <div className="rounded-lg border border-[var(--border)] bg-[var(--results-card-grey-background)] p-4">
+                            <dl className="space-y-4">
+                              <div>
+                                <dt className="pr-1 inline-block text-[var(--results-card-empty)]">
+                                  Current balance:
+                                </dt>
+                                <dd className="inline-block font-bold">
+                                  ${formatCurrency(currentBalance)}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="pr-1 inline-block text-[var(--results-card-empty)]">
+                                  Time remaining:
+                                </dt>
+                                <dd className="font-bold inline-block">
+                                  {refCurrentMonths} months
+                                  {refCurrentMonths &&
+                                    ` (${(Number.parseFloat(refCurrentMonths) / 12).toFixed(1)} years)`}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="pr-1 inline-block text-[var(--results-card-empty)]">
+                                  Interest rate:
+                                </dt>
+                                <dd className="font-bold inline-block text-lagunita">
+                                  {refCurrentRate}%
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="pr-1 inline-block text-[var(--results-card-empty)]">
+                                  Monthly payment:
+                                </dt>
+                                <dd className="font-bold inline-block">
+                                  ${refCurrentMonthlyPayment}
+                                </dd>
+                              </div>
+                              <div>
+                                <button
+                                  onClick={() =>
+                                    setActiveTab("current-balance")
+                                  }
+                                  className="mt-2 flex items-center gap-2 text-sm text-lagunita font-semibold hover:underline cursor-pointer"
+                                >
+                                  <FaArrowLeft size={12} aria-hidden="true" />{" "}
+                                  Edit current balance
+                                </button>
+                              </div>
+                            </dl>
                           </div>
-                          <div>
-                            <dt className="text-sm text-[var(--results-card-empty)]">
-                              Time remaining
-                            </dt>
-                            <dd className="font-bold text-lg">
-                              {refCurrentMonths} months
-                              {refCurrentMonths &&
-                                ` (${(Number.parseFloat(refCurrentMonths) / 12).toFixed(1)} years)`}
-                            </dd>
+                        ) : (
+                          <div className="rounded-lg border border-[var(--border)] bg-[var(--card-background)] p-4">
+                            <p className="text-sm text-[var(--results-card-empty)]">
+                              No balance calculated yet.
+                            </p>
                           </div>
-                          <div>
-                            <dt className="text-sm text-[var(--results-card-empty)]">
-                              Interest rate
-                            </dt>
-                            <dd className="font-bold text-lg text-lagunita">
-                              {refCurrentRate}%
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-[var(--results-card-empty)]">
-                              Monthly payment
-                            </dt>
-                            <dd className="font-bold text-lg">
-                              ${refCurrentMonthlyPayment}
-                            </dd>
-                          </div>
-                          <div>
-                            <button
-                              onClick={() => setActiveTab("current-balance")}
-                              className="mt-2 flex items-center gap-2 text-sm text-lagunita font-semibold hover:underline cursor-pointer"
-                            >
-                              <FaArrowLeft size={12} aria-hidden="true" /> Edit
-                              current balance
-                            </button>
-                          </div>
-                        </dl>
-                      ) : (
-                        <p className="text-sm text-[var(--results-card-empty)]">
-                          No balance calculated yet.
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Right — new loan term inputs */}
-                    <div className="pl-0">
-                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
-                        New Loan Terms
-                      </h2>
-
-                      <div className="mb-5 relative">
-                        <Label
-                          className="font-semibold"
-                          htmlFor="ref-new-loan-amount"
-                        >
-                          New loan amount
-                        </Label>
-                        <div className="relative">
-                          {refNewLoanAmount && (
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
-                              $
-                            </span>
-                          )}
-                          <Input
-                            id="ref-new-loan-amount"
-                            type="number"
-                            placeholder=""
-                            value={refNewLoanAmount}
-                            onChange={(e) =>
-                              setRefNewLoanAmount(e.target.value)
-                            }
-                            min="0"
-                            step="0.01"
-                            className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error" : ""}`}
-                          />
-                        </div>
-                        {refErrors.newLoanAmount && (
-                          <p role="alert" className="mt-1 text-sm text-error">
-                            {refErrors.newLoanAmount}
-                          </p>
                         )}
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label
-                          className="font-semibold"
-                          htmlFor="ref-new-months"
-                        >
-                          New loan term (months)
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="ref-new-months"
-                            type="number"
-                            placeholder=""
-                            value={refNewMonths}
-                            onChange={(e) => setRefNewMonths(e.target.value)}
-                            min="0"
-                            step="1"
-                            className="font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
+                      {/* New Loan Terms — inputs */}
+                      <div>
+                        <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
+                          New Loan Terms
+                        </h2>
+
+                        <div className="mb-5 relative">
+                          <Label
+                            className="font-semibold"
+                            htmlFor="ref-new-loan-amount"
+                          >
+                            New loan amount
+                          </Label>
+                          <div className="relative">
+                            {refNewLoanAmount && (
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
+                                $
+                              </span>
+                            )}
+                            <Input
+                              id="ref-new-loan-amount"
+                              type="number"
+                              placeholder=""
+                              value={refNewLoanAmount}
+                              onChange={(e) =>
+                                setRefNewLoanAmount(e.target.value)
+                              }
+                              min="0"
+                              step="0.01"
+                              className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error" : ""}`}
+                            />
+                          </div>
+                          {refErrors.newLoanAmount && (
+                            <p role="alert" className="mt-1 text-sm text-error">
+                              {refErrors.newLoanAmount}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="mb-5 relative">
+                          <Label
+                            className="font-semibold"
+                            htmlFor="ref-new-months"
+                          >
+                            New loan term (months)
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="ref-new-months"
+                              type="number"
+                              placeholder=""
+                              value={refNewMonths}
+                              onChange={(e) => setRefNewMonths(e.target.value)}
+                              min="0"
+                              step="1"
+                              className={`font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error" : ""}`}
+                            />
+                            {refNewMonths && (
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
+                                months
+                              </span>
+                            )}
+                          </div>
                           {refNewMonths && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
-                              months
-                            </span>
+                            <p className="mt-3 text-[14px]">
+                              {refNewMonths} months ={" "}
+                              {(Number.parseFloat(refNewMonths) / 12).toFixed(
+                                1,
+                              )}{" "}
+                              years
+                            </p>
+                          )}
+                          {refErrors.newMonths && (
+                            <p role="alert" className="mt-1 text-sm text-error">
+                              {refErrors.newMonths}
+                            </p>
                           )}
                         </div>
-                        {refNewMonths && (
-                          <p className="mt-3 text-[14px]">
-                            {refNewMonths} months ={" "}
-                            {(Number.parseFloat(refNewMonths) / 12).toFixed(1)}{" "}
-                            years
-                          </p>
-                        )}
-                        {refErrors.newMonths && (
-                          <p role="alert" className="mt-1 text-sm text-error">
-                            {refErrors.newMonths}
-                          </p>
-                        )}
-                      </div>
 
-                      <div className="mb-5 relative">
-                        <div className="flex items-center gap-1 mb-1">
+                        <div className="mb-5 relative">
                           <Label
                             className="font-semibold"
                             htmlFor="ref-new-rate"
                           >
                             New interest rate
                           </Label>
-                        </div>
-                        <div className="relative">
-                          <Input
-                            id="ref-new-rate"
-                            type="number"
-                            placeholder=""
-                            value={refNewRate}
-                            onChange={(e) => setRefNewRate(e.target.value)}
-                            min="0"
-                            step="0.1"
-                            className="text-lagunita font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          {refNewRate && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
-                              %
-                            </span>
+                          <div className="relative">
+                            <Input
+                              id="ref-new-rate"
+                              type="number"
+                              placeholder=""
+                              value={refNewRate}
+                              onChange={(e) => setRefNewRate(e.target.value)}
+                              min="0"
+                              step="0.1"
+                              className={`text-lagunita font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-error" : ""}`}
+                            />
+                            {refNewRate && (
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
+                                %
+                              </span>
+                            )}
+                          </div>
+                          {refErrors.newRate && (
+                            <p role="alert" className="mt-1 text-sm text-error">
+                              {refErrors.newRate}
+                            </p>
                           )}
                         </div>
-                        {refErrors.newRate && (
-                          <p role="alert" className="mt-1 text-sm text-error">
-                            {refErrors.newRate}
-                          </p>
+
+                        <div className="my-6 border-b border-lagunita" />
+
+                        <div className="mb-5 relative">
+                          <Label
+                            className="font-semibold"
+                            htmlFor="ref-closing"
+                          >
+                            Closing costs & fees
+                          </Label>
+                          <div className="relative">
+                            {refClosingCosts && (
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
+                                $
+                              </span>
+                            )}
+                            <Input
+                              id="ref-closing"
+                              type="number"
+                              placeholder=""
+                              value={refClosingCosts}
+                              onChange={(e) =>
+                                setRefClosingCosts(e.target.value)
+                              }
+                              min="0"
+                              step="0.01"
+                              className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-6" : ""}`}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mb-5 relative">
+                          <Label
+                            className="font-semibold"
+                            htmlFor="ref-years-in-house"
+                          >
+                            Expected years living in house
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="ref-years-in-house"
+                              type="number"
+                              placeholder=""
+                              value={refYearsIn}
+                              onChange={(e) => setRefYearsIn(e.target.value)}
+                              min="0"
+                              step="1"
+                              className="font-bold pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            {refYearsIn && (
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
+                                years
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        {refinanceResults ? (
+                          <div className="flex gap-4">
+                            <Button
+                              className="h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1"
+                              onClick={calculateRefinance}
+                            >
+                              Recalculate
+                            </Button>
+                            <button
+                              onClick={() => {
+                                setRefinanceResults(null);
+                                setRefNewLoanAmount("");
+                                setRefNewRate("");
+                                setRefNewMonths("");
+                                setRefClosingCosts("");
+                                setRefYearsIn("");
+                                setRefErrors({});
+                              }}
+                              className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-lagunita text-navy bg-transparent hover:border-navy hover:text-navy hover:underline cursor-pointer transition-colors flex-1 justify-center"
+                            >
+                              <FaRotateLeft size={14} aria-hidden="true" />
+                              Reset new loan terms
+                            </button>
+                          </div>
+                        ) : (
+                          <Button
+                            className="h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full"
+                            onClick={calculateRefinance}
+                          >
+                            Compare Refinance Options
+                          </Button>
                         )}
                       </div>
+                    </div>
 
-                      <div className="my-6 border-b border-lagunita" />
+                    {/* ── Right column — results or empty state ───────────────── */}
+                    <div>
+                      {refinanceResults ? (
+                        <div className="bg-[var(--card-background)] rounded-xl p-8">
+                          <div className="mb-6">
+                            {refinanceResults.totalSavings >= 0 ? (
+                              <>
+                                <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
+                                  <FaCircleCheck size={18} aria-hidden="true" />{" "}
+                                  Refinancing may be worth it
+                                </h3>
+                                <p className="text-sm mt-1 text-[var(--results-card-empty)]">
+                                  You could save money over the time you plan to
+                                  stay in the home.
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <h3 className="text-lg font-bold text-berry flex items-center gap-2">
+                                  <FaCircleXmark size={18} aria-hidden="true" />{" "}
+                                  Refinancing may not be worth it
+                                </h3>
+                                <p className="text-sm mt-1 text-[var(--results-card-empty)]">
+                                  Based on the planned time in the home, this
+                                  refinance may cost more than staying with the
+                                  current loan.
+                                </p>
+                              </>
+                            )}
+                          </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-closing">
-                          Closing costs & fees
-                        </Label>
-                        <div className="relative">
-                          {refClosingCosts && (
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
-                              $
-                            </span>
-                          )}
-                          <Input
-                            id="ref-closing"
-                            type="number"
-                            placeholder=""
-                            value={refClosingCosts}
-                            onChange={(e) => setRefClosingCosts(e.target.value)}
-                            min="0"
-                            step="0.01"
-                            className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-6" : ""}`}
-                          />
+                          <div className="rounded-lg mt-4">
+                            <div className="innerwrapper">
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
+                                  New monthly payment:
+                                </div>
+                                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                                  $
+                                  {formatCurrency(
+                                    refinanceResults.newMonthlyPayment,
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
+                                  {refinanceResults.monthlySavings >= 0
+                                    ? "Monthly savings:"
+                                    : "Monthly increase:"}
+                                </div>
+                                <div
+                                  className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
+                                >
+                                  {refinanceResults.monthlySavings >= 0
+                                    ? "−"
+                                    : "+"}
+                                  $
+                                  {formatCurrency(
+                                    Math.abs(refinanceResults.monthlySavings),
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
+                                  Closing costs & fees:
+                                </div>
+                                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                                  $
+                                  {formatCurrency(
+                                    Number.parseFloat(refClosingCosts) || 0,
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                                <div className="w-full sm:w-[50%] text-md p-4 font-bold bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                  {refinanceResults.totalSavings >= 0
+                                    ? "Estimated savings over planned stay:"
+                                    : "Estimated total cost difference:"}
+                                </div>
+                                <div
+                                  className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center"
+                                >
+                                  {refinanceResults.totalSavings >= 0
+                                    ? "−"
+                                    : "+"}
+                                  $
+                                  {formatCurrency(
+                                    Math.abs(refinanceResults.totalSavings),
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="mb-5 relative">
-                        <Label
-                          className="font-semibold"
-                          htmlFor="ref-years-in-house"
-                        >
-                          Expected years living in house
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="ref-years-in-house"
-                            type="number"
-                            placeholder=""
-                            value={refYearsIn}
-                            onChange={(e) => setRefYearsIn(e.target.value)}
-                            min="0"
-                            step="1"
-                            className="font-bold pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          {refYearsIn && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
-                              years
-                            </span>
-                          )}
+                      ) : (
+                        <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+                          <h2 className="mb-1 text-md font-bold text-[var(--results-card-empty)]">
+                            Your refinance analysis will appear here.
+                          </h2>
+                          <p>Enter your new loan details to compare options.</p>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
-
-                  {/* Results */}
-                  {/* Action buttons */}
-                  {refinanceResults ? (
-                    <div className="bg-[var(--card-background)] rounded-xl p-8">
-                      {/* Header */}
-                      <div className="mb-6">
-                        {refinanceResults.totalSavings >= 0 ? (
-                          <>
-                            <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
-                              <FaCircleCheck size={18} /> Refinancing may be
-                              worth it
-                            </h3>
-                            <p className="text-sm mt-1 text-[var(--results-card-empty)]">
-                              You could save money over the time you plan to
-                              stay in the home.
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <h3 className="text-lg font-bold text-berry flex items-center gap-2">
-                              <FaCircleXmark size={18} /> Refinancing may not be
-                              worth it
-                            </h3>
-                            <p className="text-sm mt-1 text-[var(--results-card-empty)]">
-                              Based on the planned time in the home, this
-                              refinance may cost more than staying with the
-                              current loan.
-                            </p>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Table */}
-                      <div className="border border-[var(--border)] rounded-lg overflow-hidden mt-4">
-                        <div className="flex justify-between px-4 py-3 border-b border-[var(--border)]">
-                          <span className="text-sm text-[var(--results-card-empty)]">
-                            New monthly payment
-                          </span>
-                          <span className="font-bold">
-                            $
-                            {formatCurrency(refinanceResults.newMonthlyPayment)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between px-4 py-3 border-b border-[var(--border)]">
-                          <span className="text-sm text-[var(--results-card-empty)]">
-                            {refinanceResults.monthlySavings >= 0
-                              ? "Monthly savings"
-                              : "Monthly increase"}
-                          </span>
-                          <span
-                            className={`font-bold ${refinanceResults.monthlySavings >= 0 ? "text-lagunita" : "text-berry"}`}
-                          >
-                            {refinanceResults.monthlySavings >= 0 ? "−" : "+"}$
-                            {formatCurrency(
-                              Math.abs(refinanceResults.monthlySavings),
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex justify-between px-4 py-3 border-b border-[var(--border)]">
-                          <span className="text-sm text-[var(--results-card-empty)]">
-                            Closing costs & fees
-                          </span>
-                          <span className="font-bold">
-                            $
-                            {formatCurrency(
-                              Number.parseFloat(refClosingCosts) || 0,
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex justify-between px-4 py-3">
-                          <span className="text-sm text-[var(--results-card-empty)]">
-                            {refinanceResults.totalSavings >= 0
-                              ? "Estimated savings over planned stay"
-                              : "Estimated total cost difference"}
-                          </span>
-                          <span
-                            className={`font-bold text-lg ${refinanceResults.totalSavings >= 0 ? "text-lagunita" : "text-berry"}`}
-                          >
-                            {refinanceResults.totalSavings >= 0 ? "−" : "+"}$
-                            {formatCurrency(
-                              Math.abs(refinanceResults.totalSavings),
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                      <h2 className="mb-1 text-md font-bold text-[var(--results-card-empty)]">
-                        Your refinance analysis will appear here.
-                      </h2>
-                      <p>Enter your new loan details to compare options.</p>
-                    </div>
-                  )}
-
-                  {/* Action buttons */}
-                  {refinanceResults ? (
-                    <div className="flex gap-4 w-full md:w-auto">
-                      <Button
-                        className="h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none"
-                        onClick={calculateRefinance}
-                      >
-                        Recalculate
-                      </Button>
-                      <button
-                        onClick={() => {
-                          setRefinanceResults(null);
-                          setRefNewLoanAmount("");
-                          setRefNewRate("");
-                          setRefNewMonths("");
-                          setRefClosingCosts("");
-                          setRefYearsIn("");
-                          setRefErrors({});
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 rounded-md border-2 border-navy text-navy bg-transparent hover:border-lagunita hover:text-lagunita cursor-pointer transition-colors flex-1 md:flex-none justify-center"
-                      >
-                        <FaRotateLeft size={14} />
-                        Reset new loan terms
-                      </button>
-                    </div>
-                  ) : (
-                    <Button
-                      className="h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
-                      onClick={calculateRefinance}
-                    >
-                      Compare Refinance Options
-                    </Button>
-                  )}
                 </CardContent>
               </Card>
             </TabsContent>
