@@ -113,62 +113,135 @@ export default function MortgageCalculator() {
 
     if (Object.keys(errors).length > 0) return;
 
-    const currentMonthlyPayment =
-      currentR === 0
-        ? currentBal / currentM
-        : (currentBal * (currentR * Math.pow(1 + currentR, currentM))) /
-          (Math.pow(1 + currentR, currentM) - 1);
+    const currentMonthlyPayment = currentR === 0
+    ? currentBal / currentM
+    : (currentBal * (currentR * Math.pow(1 + currentR, currentM))) / (Math.pow(1 + currentR, currentM) - 1)
 
-    const newMonthlyPayment =
-      newR === 0
-        ? newLoanAmount / newM
-        : (newLoanAmount * (newR * Math.pow(1 + newR, newM))) /
-          (Math.pow(1 + newR, newM) - 1);
+    const newMonthlyPayment = newR === 0
+      ? newLoanAmount / newM
+      : (newLoanAmount * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
 
-    const monthlySavings = currentMonthlyPayment - newMonthlyPayment;
-    const totalCurrentCost = currentMonthlyPayment * currentM;
-    const totalNewCost = newMonthlyPayment * newM + closingCosts;
-    const totalSavings = totalCurrentCost - totalNewCost;
+    const monthlySavings = currentMonthlyPayment - newMonthlyPayment
 
-    let breakEvenMonths: number;
-    let breakEvenMessage: string;
+    const monthsInHouse = refYearsIn ? Number.parseFloat(refYearsIn) * 12 : 0
 
-    if (monthlySavings > 0) {
-      breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0;
-      breakEvenMessage =
-        closingCosts > 0
+    if (monthsInHouse > 0) {
+      // ── Planned-stay comparison ─────────────────────────────────
+      // Months actually used for each loan (can't exceed the loan term)
+      const currentMonthsToUse = Math.min(monthsInHouse, currentM)
+      const newMonthsToUse = Math.min(monthsInHouse, newM)
+
+      // Helper: remaining principal after n payments
+      const remainingBalance = (
+        principal: number,
+        monthlyRate: number,
+        termMonths: number,
+        paymentsMade: number,
+      ) => {
+        if (monthlyRate === 0)
+          return Math.max(
+            0,
+            principal - (principal / termMonths) * paymentsMade,
+          );
+        const payment =
+          (principal * (monthlyRate * Math.pow(1 + monthlyRate, termMonths))) /
+          (Math.pow(1 + monthlyRate, termMonths) - 1);
+        return Math.max(
+          0,
+          principal * Math.pow(1 + monthlyRate, paymentsMade) -
+            payment *
+              ((Math.pow(1 + monthlyRate, paymentsMade) - 1) / monthlyRate),
+        );
+      };
+
+      // Total paid out of pocket over the planned stay
+      const totalCurrentPaid = currentMonthlyPayment * currentMonthsToUse
+      const totalNewPaid = newMonthlyPayment * newMonthsToUse + closingCosts
+
+      // Remaining principal at point of sale — higher balance = more owed at sale
+      const currentRemainingBal = remainingBalance(currentBal, currentR, currentM, currentMonthsToUse)
+      const newRemainingBal = remainingBalance(newLoanAmount, newR, newM, newMonthsToUse)
+
+      // Net cost = what you paid + what you still owe at sale
+      // Lower net cost = better deal
+      const currentNetCost = totalCurrentPaid + currentRemainingBal
+      const newNetCost = totalNewPaid + newRemainingBal
+
+      const totalSavings = currentNetCost - newNetCost
+
+      let breakEvenMonths: number
+      let breakEvenMessage: string
+
+      if (monthlySavings > 0) {
+        breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
+        breakEvenMessage = closingCosts > 0
           ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
-          : "No closing costs to recover - immediate savings!";
-    } else if (monthlySavings < 0) {
-      if (totalSavings > 0) {
-        breakEvenMonths = closingCosts > 0 ? closingCosts / -monthlySavings : 0;
-        breakEvenMessage =
-          closingCosts > 0
-            ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
-            : "Despite higher monthly payments, you save overall on total interest";
+          : "No closing costs to recover - immediate savings!"
+      } else if (monthlySavings < 0) {
+        breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
+        breakEvenMessage = closingCosts > 0
+          ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
+          : "Despite higher monthly payments, you save overall on total interest"
       } else {
-        breakEvenMonths = Infinity;
-        breakEvenMessage =
-          "This refinance costs more overall - not recommended";
-      }
-    } else {
-      breakEvenMonths = totalSavings > 0 ? 0 : Infinity;
-      breakEvenMessage =
-        totalSavings > 0
+        breakEvenMonths = totalSavings > 0 ? 0 : Infinity
+        breakEvenMessage = totalSavings > 0
           ? "Same monthly payment, but you save on total interest"
-          : "No financial benefit";
-    }
+          : "No financial benefit"
+      }
 
-    setRefinanceResults({
-      currentMonthlyPayment,
-      newMonthlyPayment,
-      monthlySavings,
-      totalCurrentCost,
-      totalNewCost,
-      totalSavings,
-      breakEvenMonths,
-      breakEvenMessage,
-    });
+      setRefinanceResults({
+        currentMonthlyPayment,
+        newMonthlyPayment,
+        monthlySavings,
+        totalCurrentCost: currentNetCost,
+        totalNewCost: newNetCost,
+        totalSavings,
+        breakEvenMonths,
+        breakEvenMessage,
+      })
+
+    } else {
+      // ── Full-term comparison (no planned stay entered) ──────────
+      const totalCurrentCost = currentMonthlyPayment * currentM
+      const totalNewCost = newMonthlyPayment * newM + closingCosts
+      const totalSavings = totalCurrentCost - totalNewCost
+
+      let breakEvenMonths: number
+      let breakEvenMessage: string
+
+      if (monthlySavings > 0) {
+        breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
+        breakEvenMessage = closingCosts > 0
+          ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
+          : "No closing costs to recover - immediate savings!"
+      } else if (monthlySavings < 0) {
+        if (totalSavings > 0) {
+          breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
+          breakEvenMessage = closingCosts > 0
+            ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
+            : "Despite higher monthly payments, you save overall on total interest"
+        } else {
+          breakEvenMonths = Infinity
+          breakEvenMessage = "This refinance costs more overall - not recommended"
+        }
+      } else {
+        breakEvenMonths = totalSavings > 0 ? 0 : Infinity
+        breakEvenMessage = totalSavings > 0
+          ? "Same monthly payment, but you save on total interest"
+          : "No financial benefit"
+      }
+
+      setRefinanceResults({
+        currentMonthlyPayment,
+        newMonthlyPayment,
+        monthlySavings,
+        totalCurrentCost,
+        totalNewCost,
+        totalSavings,
+        breakEvenMonths,
+        breakEvenMessage,
+      })
+    }
   }
 
   return (
