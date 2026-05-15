@@ -1,21 +1,23 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/ui/components/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader } from "@/app/ui/components/card"
 import { Label } from "@/app/ui/components/label"
 import { Input } from "@/app/ui/components/input"
 import { Button } from "@/app/ui/components/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
-import ThemeToggle from "@/app/lib/theme-toggle";
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+import ThemeToggle from "@/app/lib/theme-toggle"
+import { FaRotateLeft, FaArrowRight, FaArrowLeft, FaCircleCheck, FaCircleXmark, FaCircleInfo } from "react-icons/fa6"
 
-const formatCurrency = (amount: number) => 
-  amount.toLocaleString("en-US", { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+const formatCurrency = (amount: number) =>
+  amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   })
 
 export default function MortgageCalculator() {
+  const [activeTab, setActiveTab] = useState("current-balance")
+
   const [monthsRemaining, setMonthsRemaining] = useState("")
   const [annualRate, setAnnualRate] = useState("")
   const [monthlyPayment, setMonthlyPayment] = useState("")
@@ -38,129 +40,123 @@ export default function MortgageCalculator() {
     totalNewCost: number
     totalSavings: number
     breakEvenMonths: number
-    breakEvenMessage: string 
+    breakEvenMessage: string
   } | null>(null)
 
-  const calculateBalance = () => {
+  const [refErrors, setRefErrors] = useState<{
+    newLoanAmount?: string
+    newRate?: string
+    newMonths?: string
+  }>({})
+
+  // ── Live balance calculation ──────────────────────────────────────────────
+  useEffect(() => {
     const months = Number.parseFloat(monthsRemaining)
     const rate = Number.parseFloat(annualRate) / 100 / 12
     const payment = Number.parseFloat(monthlyPayment)
 
-    if (isNaN(months) || isNaN(rate) || isNaN(payment) || months <= 0 || rate < 0 || payment <= 0) {
-      alert("Please enter valid positive numbers")
+    if (
+      !monthsRemaining || !annualRate || !monthlyPayment ||
+      isNaN(months) || isNaN(rate) || isNaN(payment) ||
+      months <= 0 || rate < 0 || payment <= 0
+    ) {
+      setCurrentBalance(null)
       return
     }
 
-    let balance: number
-
-    if (rate === 0) {
-      balance = payment * months
-    } else {
-      balance = payment * ((1 - Math.pow(1 + rate, -months)) / rate)
-    }
+    const balance = rate === 0
+      ? payment * months
+      : payment * ((1 - Math.pow(1 + rate, -months)) / rate)
 
     setCurrentBalance(balance)
+    // Keep refinance tab pre-filled in sync
     setRefCurrentBalance(balance.toFixed(2))
     setRefCurrentMonths(monthsRemaining)
     setRefCurrentRate(annualRate)
     setRefCurrentMonthlyPayment(monthlyPayment)
+  }, [monthsRemaining, annualRate, monthlyPayment])
+
+  const handleReset = () => {
+    setCurrentBalance(null)
+    setMonthsRemaining("")
+    setAnnualRate("")
+    setMonthlyPayment("")
+    setRefCurrentBalance("")
+    setRefCurrentMonths("")
+    setRefCurrentRate("")
+    setRefCurrentMonthlyPayment("")
   }
 
   const calculateRefinance = () => {
-    const currentBal = Number.parseFloat(refCurrentBalance)
-    const currentR = Number.parseFloat(refCurrentRate) / 100 / 12
-    const currentM = Number.parseFloat(refCurrentMonths)
-    const newR = Number.parseFloat(refNewRate) / 100 / 12
-    const newM = Number.parseFloat(refNewMonths)
-    const closingCosts = Number.parseFloat(refClosingCosts) || 0
+    const errors: {
+      newLoanAmount?: string;
+      newRate?: string;
+      newMonths?: string;
+    } = {};
 
-    if (
-      isNaN(currentBal) ||
-      isNaN(currentR) ||
-      isNaN(currentM) ||
-      isNaN(newR) ||
-      isNaN(newM) ||
-      currentBal <= 0 ||
-      currentR < 0 ||
-      currentM <= 0 ||
-      newR < 0 ||
-      newM <= 0 ||
-      closingCosts < 0
-    ) {
-      alert("Please enter valid numbers")
-      return
-    }
+    const currentBal = Number.parseFloat(refCurrentBalance);
+    const currentR = Number.parseFloat(refCurrentRate) / 100 / 12;
+    const currentM = Number.parseFloat(refCurrentMonths);
+    const newR = Number.parseFloat(refNewRate) / 100 / 12;
+    const newM = Number.parseFloat(refNewMonths);
+    const closingCosts = Number.parseFloat(refClosingCosts) || 0;
+    const newLoanAmount = Number.parseFloat(refNewLoanAmount);
 
-    // Calculate current monthly payment: PMT = P × [r(1 + r)^n] / [(1 + r)^n - 1]
-    let currentMonthlyPayment: number
-    if (currentR === 0) {
-      currentMonthlyPayment = currentBal / currentM
-    } else {
-      currentMonthlyPayment =
-        (currentBal * (currentR * Math.pow(1 + currentR, currentM))) / (Math.pow(1 + currentR, currentM) - 1)
-    }
+    if (!refNewLoanAmount || isNaN(newLoanAmount) || newLoanAmount <= 0)
+      errors.newLoanAmount = "Please enter a valid loan amount greater than 0.";
+    if (!refNewRate || isNaN(newR) || newR < 0)
+      errors.newRate = "Please enter a valid interest rate.";
+    if (!refNewMonths || isNaN(newM) || newM <= 0)
+      errors.newMonths = "Please enter a valid loan term greater than 0.";
 
-    // Calculate new monthly payment
-    const newLoanAmount = Number.parseFloat(refNewLoanAmount)
+    setRefErrors(errors);
 
-    // Validate newLoanAmount
-    if (
-      isNaN(currentBal) ||
-      isNaN(currentR) ||
-      isNaN(currentM) ||
-      isNaN(newLoanAmount) ||
-      isNaN(newR) ||
-      isNaN(newM) ||
-      currentBal <= 0 ||
-      currentR < 0 ||
-      currentM <= 0 ||
-      newLoanAmount <= 0 ||
-      newR < 0 ||
-      newM <= 0 ||
-      closingCosts < 0
-    ) {
-      alert("Please enter valid numbers")
-      return
-    }
+    if (Object.keys(errors).length > 0) return;
 
-    let newMonthlyPayment: number
-    if (newR === 0) {
-      newMonthlyPayment = newLoanAmount / newM
-    } else {
-      newMonthlyPayment = (newLoanAmount * (newR * Math.pow(1 + newR, newM))) / (Math.pow(1 + newR, newM) - 1)
-    }
+    const currentMonthlyPayment =
+      currentR === 0
+        ? currentBal / currentM
+        : (currentBal * (currentR * Math.pow(1 + currentR, currentM))) /
+          (Math.pow(1 + currentR, currentM) - 1);
 
-    const monthlySavings = currentMonthlyPayment - newMonthlyPayment
-    const totalCurrentCost = currentMonthlyPayment * currentM
-    const totalNewCost = newMonthlyPayment * newM + closingCosts
-    const totalSavings = totalCurrentCost - totalNewCost
+    const newMonthlyPayment =
+      newR === 0
+        ? newLoanAmount / newM
+        : (newLoanAmount * (newR * Math.pow(1 + newR, newM))) /
+          (Math.pow(1 + newR, newM) - 1);
 
-    let breakEvenMonths: number
-    let breakEvenMessage: string
+    const monthlySavings = currentMonthlyPayment - newMonthlyPayment;
+    const totalCurrentCost = currentMonthlyPayment * currentM;
+    const totalNewCost = newMonthlyPayment * newM + closingCosts;
+    const totalSavings = totalCurrentCost - totalNewCost;
+
+    let breakEvenMonths: number;
+    let breakEvenMessage: string;
 
     if (monthlySavings > 0) {
-      // Case 1: Lower monthly payment
-      breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
-      breakEvenMessage = closingCosts > 0
-        ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
-        : "No closing costs to recover - immediate savings!"
+      breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0;
+      breakEvenMessage =
+        closingCosts > 0
+          ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
+          : "No closing costs to recover - immediate savings!";
     } else if (monthlySavings < 0) {
-      // Case 2: Higher monthly payment
       if (totalSavings > 0) {
-        breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
-        breakEvenMessage = closingCosts > 0
-          ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
-          : "Despite higher monthly payments, you save overall on total interest"
+        breakEvenMonths = closingCosts > 0 ? closingCosts / -monthlySavings : 0;
+        breakEvenMessage =
+          closingCosts > 0
+            ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
+            : "Despite higher monthly payments, you save overall on total interest";
       } else {
-        breakEvenMonths = Infinity
-        breakEvenMessage = "This refinance costs more overall - not recommended"
+        breakEvenMonths = Infinity;
+        breakEvenMessage =
+          "This refinance costs more overall - not recommended";
       }
     } else {
-      // Case 3: Same monthly payment
-      breakEvenMonths = totalSavings > 0 ? 0 : Infinity
-      breakEvenMessage = totalSavings > 0 
-        ? "Same monthly payment, but you save on total interest" 
-        : "No financial benefit"
+      breakEvenMonths = totalSavings > 0 ? 0 : Infinity;
+      breakEvenMessage =
+        totalSavings > 0
+          ? "Same monthly payment, but you save on total interest"
+          : "No financial benefit";
     }
 
     setRefinanceResults({
@@ -172,314 +168,577 @@ export default function MortgageCalculator() {
       totalSavings,
       breakEvenMonths,
       breakEvenMessage,
-    })
+    });
   }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div>
         <ThemeToggle />
-        {/* Header */}
         <h1 className="sr-only">Mortgage Calculator Suite</h1>
-        {/* Mode Selection */}
         <div className="mb-8">
-
-          <Tabs defaultValue="current-balance" className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
-              <TabsTrigger value="current-balance" className="cursor-pointer">Current Balance</TabsTrigger>
-              <TabsTrigger value="refinance" className="cursor-pointer">Refinance Analysis</TabsTrigger>
+              <TabsTrigger value="current-balance" className="cursor-pointer">
+                Current Balance
+              </TabsTrigger>
+              <TabsTrigger value="refinance" className="cursor-pointer">
+                Refinance Analysis
+              </TabsTrigger>
             </TabsList>
 
+            {/* ── Tab 1: Current Balance ─────────────────────────────────── */}
             <TabsContent value="current-balance">
               <Card>
                 <CardHeader>
-                  <CardTitle>Current Mortgage Balance Calculator</CardTitle>
                   <CardDescription>
-                    Calculate the present value of your remaining monthly mortgage payments (your mortgage balance).
+                    Calculate your remaining mortgage balance (the present value
+                    of your remaining monthly mortgage payments).
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-12 lg:grid-cols-2">
+                    {/* Left — inputs */}
                     <div>
-                      <Label className="font-semibold" htmlFor="months">Months remaining on loan</Label>
-                      <Input
-                        id="months"
-                        type="number"
-                        placeholder="-"
-                        value={monthsRemaining}
-                        onChange={(e) => setMonthsRemaining(e.target.value)}
-                        min="0"
-                        step="1"
-                        className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <p className="mt-3 text-[14px]">{monthsRemaining || "0"} months = {(Number.parseFloat(monthsRemaining || "0") / 12).toFixed(1)} years</p>
-
-                      <Label className="font-semibold" htmlFor="rate">Annual interest rate (%)</Label>
-                      <Input
-                        id="rate"
-                        type="number"
-                        placeholder="-"
-                        value={annualRate}
-                        onChange={(e) => setAnnualRate(e.target.value)}
-                        min="0"
-                        step="0.1"
-                        className="text-lagunita font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-
-                      <Label className="font-semibold" htmlFor="payment">Monthly payment amount ($)</Label>
-                      <Input
-                        id="payment"
-                        type="number"
-                        placeholder="-"
-                        value={monthlyPayment}
-                        onChange={(e) => setMonthlyPayment(e.target.value)}
-                        min="0"
-                        step="0.01"
-                        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      {currentBalance !== null && (
-                        <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left"> 
-                          <p className="text-md font-bold mb-1">Current Mortgage Balance</p>
-                          <p className="text-4xl font-bold text-lagunita">
-                            ${currentBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </p>
+                      <div className="mb-5 relative">
+                        <Label className="font-semibold" htmlFor="months">
+                          Months remaining on loan
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="months"
+                            type="number"
+                            placeholder=""
+                            value={monthsRemaining}
+                            onChange={(e) => setMonthsRemaining(e.target.value)}
+                            min="0"
+                            step="1"
+                            className="font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          {monthsRemaining && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
+                              months
+                            </span>
+                          )}
                         </div>
+                        {monthsRemaining && (
+                          <p className="mt-3 text-[14px]">
+                            {monthsRemaining} months ={" "}
+                            {(Number.parseFloat(monthsRemaining) / 12).toFixed(
+                              1,
+                            )}{" "}
+                            years
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mb-5 relative">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Label className="font-semibold" htmlFor="rate">
+                            Current interest rate
+                          </Label>
+                          <div className="relative group">
+                            <button
+                              type="button"
+                              aria-describedby="rate-tooltip"
+                              className="cursor-help text-[#A7C1CC] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
+                            >
+                              <FaCircleInfo size={16} aria-hidden="true" />
+                            </button>
+                            <div
+                              id="rate-tooltip"
+                              role="tooltip"
+                              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-navy text-white text-xs p-2 
+                 invisible group-hover:visible group-focus-within:visible
+                 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 
+                 transition-opacity pointer-events-none z-10"
+                            >
+                              Enter the current interest rate on your mortgage.
+                              Check your latest statement.
+                            </div>
+                          </div>
+                        </div>
+                        <div className="relative">
+                          <Input
+                            id="rate"
+                            type="number"
+                            placeholder=""
+                            value={annualRate}
+                            onChange={(e) => setAnnualRate(e.target.value)}
+                            min="0"
+                            step="0.1"
+                            className="text-lagunita font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          {annualRate && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
+                              %
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mb-5 relative">
+                        <Label className="font-semibold" htmlFor="payment">
+                          Monthly payment amount ($)
+                        </Label>
+                        <div className="relative">
+                          {monthlyPayment && (
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
+                              $
+                            </span>
+                          )}
+                          <Input
+                            id="payment"
+                            type="number"
+                            placeholder=""
+                            value={monthlyPayment}
+                            onChange={(e) => setMonthlyPayment(e.target.value)}
+                            min="0"
+                            step="0.01"
+                            className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${monthlyPayment ? "pl-6" : ""}`}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Reset — only visible once there's a result */}
+                      {currentBalance !== null && (
+                        <button
+                          onClick={handleReset}
+                          className="mt-4 flex items-center gap-2 px-4 py-2 rounded-md border-2 border-navy text-navy bg-transparent hover:border-lagunita hover:text-lagunita cursor-pointer transition-colors w-full md:w-auto justify-center md:justify-start"
+                        >
+                          <FaRotateLeft size={14} />
+                          Reset
+                        </button>
                       )}
-                      <Button
-                        className={`h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto`}
-                        onClick={currentBalance !== null ? () => {
-                          setCurrentBalance(null);
-                          setMonthsRemaining("");
-                          setAnnualRate("");
-                          setMonthlyPayment("");
-                        } : calculateBalance}
-                      >
-                        {currentBalance !== null ? "Reset" : "Calculate Current Balance"}
-                      </Button>
                     </div>
-                    <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                      <h2 className="mb-1 text-md font-bold text-[var(--results-card-empty)]">Your current mortgage balance will appear here.</h2>
-                      <p>
-                        Enter your loan details to see your estimated remaining balance.
-                      </p>
-                  </div>
+
+                    {/* Right — live result or empty state */}
+                    <div
+                      className="bg-[var(--card-background)] rounded-3xl p-[32px]"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {currentBalance !== null ? (
+                        <>
+                          <p className="text-md font-bold mb-1">
+                            Estimated current balance
+                          </p>
+                          <p className="text-4xl font-bold text-lagunita">
+                            ${formatCurrency(currentBalance)}
+                          </p>
+                          <p className="mt-2 text-sm text-[var(--results-card-empty)]">
+                            Based on the remaining monthly payments
+                          </p>
+                          <Button
+                            className="mt-6 h-18 whitespace-normal bg-lagunita border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+                            onClick={() => setActiveTab("refinance")}
+                          >
+                            Continue to refinance
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <h2 className="mb-1 text-md text-center font-bold text-[var(--results-card-empty)]">
+                            Your current mortgage balance will appear here.
+                          </h2>
+                          <p className="text-center">
+                            Enter your loan details to see your estimated
+                            remaining balance.
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
+            {/* ── Tab 2: Refinance Analysis ──────────────────────────────── */}
             <TabsContent value="refinance">
               <Card>
                 <CardHeader>
-                  <CardTitle>Refinance Analysis</CardTitle>
-                  <CardDescription>Analyze if refinancing makes financial sense for your situation.
+                  <CardDescription>
+                    Analyze if refinancing makes financial sense for your
+                    situation.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="md:grid md:grid-cols-2 gap-4">
-                    <div className="pr-4">
-                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
-                  
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-balance">Remaining balance ($)</Label>
-                        <Input
-                          id="ref-balance"
-                          type="number"
-                          placeholder="-"
-                          value={refCurrentBalance}
-                          onChange={(e) => setRefCurrentBalance(e.target.value)}
-                          min="0"
-                          step="0.01"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-current-months">Months remaining on loan</Label>
-                        <Input
-                          id="ref-current-months"
-                          type="number"
-                          placeholder="-"
-                          value={refCurrentMonths}
-                          onChange={(e) => setRefCurrentMonths(e.target.value)}
-                          min="0"
-                          step="1"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-current-rate">Current interest rate (%)</Label>
-                        <Input
-                          id="ref-current-rate"
-                          type="number"
-                          placeholder="-"
-                          value={refCurrentRate}
-                          onChange={(e) => setRefCurrentRate(e.target.value)}
-                          min="0"
-                          step="0.01"
-                          className="text-lagunita font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-current-monthly-payment">Current monthly payment amount</Label>
-                        <Input
-                          id="ref-current-monthly-payment"
-                          type="number"
-                          placeholder="-"
-                          value={refCurrentMonthlyPayment}
-                          onChange={(e) => setRefCurrentMonthlyPayment(e.target.value)}
-                          min="0"
-                          step="0.01"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
+                  {!currentBalance ? (
+                    <div className="rounded-xl border-2 border-lagunita bg-lagunita-lighter p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <p className="text-sm text-navy">
+                        Start by calculating your current mortgage balance
+                        first. Enter your details in the Current Balance tab,
+                        then come back here to explore refinance options.
+                      </p>
+                      <button
+                        onClick={() => setActiveTab("current-balance")}
+                        className="flex items-center gap-2 whitespace-nowrap text-lagunita font-semibold hover:underline cursor-pointer"
+                      >
+                        Calculate current balance <FaArrowRight size={12} />
+                      </button>
                     </div>
+                  ) : null}
+                  <div className="md:grid md:grid-cols-2 gap-8">
+                    {/* Left — read-only summary from Tab 1 */}
+                    <div className="pr-4">
+                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
+                        Current Loan Terms
+                      </h2>
+
+                      {currentBalance ? (
+                        <dl className="space-y-4">
+                          <div>
+                            <dt className="text-sm text-[var(--results-card-empty)]">
+                              Current balance
+                            </dt>
+                            <dd className="font-bold text-lg">
+                              ${formatCurrency(currentBalance)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-[var(--results-card-empty)]">
+                              Time remaining
+                            </dt>
+                            <dd className="font-bold text-lg">
+                              {refCurrentMonths} months
+                              {refCurrentMonths &&
+                                ` (${(Number.parseFloat(refCurrentMonths) / 12).toFixed(1)} years)`}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-[var(--results-card-empty)]">
+                              Interest rate
+                            </dt>
+                            <dd className="font-bold text-lg text-lagunita">
+                              {refCurrentRate}%
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-[var(--results-card-empty)]">
+                              Monthly payment
+                            </dt>
+                            <dd className="font-bold text-lg">
+                              ${refCurrentMonthlyPayment}
+                            </dd>
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => setActiveTab("current-balance")}
+                              className="mt-2 flex items-center gap-2 text-sm text-lagunita font-semibold hover:underline cursor-pointer"
+                            >
+                              <FaArrowLeft size={12} aria-hidden="true" /> Edit
+                              current balance
+                            </button>
+                          </div>
+                        </dl>
+                      ) : (
+                        <p className="text-sm text-[var(--results-card-empty)]">
+                          No balance calculated yet.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Right — new loan term inputs */}
                     <div className="pl-0">
-                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
+                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
+                        New Loan Terms
+                      </h2>
 
                       <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-loan-amount">New loan amount</Label>
-                        <Input
-                          id="ref-new-loan-amount"
-                          type="number"
-                          placeholder="-"
-                          value={refNewLoanAmount}
-                          onChange={(e) => setRefNewLoanAmount(e.target.value)}
-                          min="0"
-                          step="0.01"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
+                        <Label
+                          className="font-semibold"
+                          htmlFor="ref-new-loan-amount"
+                        >
+                          New loan amount
+                        </Label>
+                        <div className="relative">
+                          {refNewLoanAmount && (
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
+                              $
+                            </span>
+                          )}
+                          <Input
+                            id="ref-new-loan-amount"
+                            type="number"
+                            placeholder=""
+                            value={refNewLoanAmount}
+                            onChange={(e) =>
+                              setRefNewLoanAmount(e.target.value)
+                            }
+                            min="0"
+                            step="0.01"
+                            className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error" : ""}`}
+                          />
+                        </div>
+                        {refErrors.newLoanAmount && (
+                          <p role="alert" className="mt-1 text-sm text-error">
+                            {refErrors.newLoanAmount}
+                          </p>
+                        )}
                       </div>
 
                       <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-months">New loan term (months)</Label>
-                        <Input
-                          id="ref-new-months"
-                          type="number"
-                          placeholder="-"
-                          value={refNewMonths}
-                          onChange={(e) => setRefNewMonths(e.target.value)}
-                          min="0"
-                          step="1"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <p className="mt-3 text-[14px]">{refNewMonths || "0"} months = {(Number.parseFloat(refNewMonths || "0") / 12).toFixed(1)} years</p>
+                        <Label
+                          className="font-semibold"
+                          htmlFor="ref-new-months"
+                        >
+                          New loan term (months)
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="ref-new-months"
+                            type="number"
+                            placeholder=""
+                            value={refNewMonths}
+                            onChange={(e) => setRefNewMonths(e.target.value)}
+                            min="0"
+                            step="1"
+                            className="font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          {refNewMonths && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
+                              months
+                            </span>
+                          )}
+                        </div>
+                        {refNewMonths && (
+                          <p className="mt-3 text-[14px]">
+                            {refNewMonths} months ={" "}
+                            {(Number.parseFloat(refNewMonths) / 12).toFixed(1)}{" "}
+                            years
+                          </p>
+                        )}
+                        {refErrors.newMonths && (
+                          <p role="alert" className="mt-1 text-sm text-error">
+                            {refErrors.newMonths}
+                          </p>
+                        )}
                       </div>
 
                       <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-rate">New annual interest rate (%)</Label>
-                        <Input
-                          id="ref-new-rate"
-                          type="number"
-                          placeholder="-"
-                          value={refNewRate}
-                          onChange={(e) => setRefNewRate(e.target.value)}
-                          min="0"
-                          step="0.1"
-                          className="text-lagunita font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
+                        <div className="flex items-center gap-1 mb-1">
+                          <Label
+                            className="font-semibold"
+                            htmlFor="ref-new-rate"
+                          >
+                            New interest rate
+                          </Label>
+                        </div>
+                        <div className="relative">
+                          <Input
+                            id="ref-new-rate"
+                            type="number"
+                            placeholder=""
+                            value={refNewRate}
+                            onChange={(e) => setRefNewRate(e.target.value)}
+                            min="0"
+                            step="0.1"
+                            className="text-lagunita font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          {refNewRate && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
+                              %
+                            </span>
+                          )}
+                        </div>
+                        {refErrors.newRate && (
+                          <p role="alert" className="mt-1 text-sm text-error">
+                            {refErrors.newRate}
+                          </p>
+                        )}
                       </div>
 
-                      <div className="my-6 border-b-1 border-lagunita"/>
+                      <div className="my-6 border-b border-lagunita" />
 
                       <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-closing">Closing cost & fees</Label>
-                        <Input
-                          id="ref-closing"
-                          type="number"
-                          placeholder="-"
-                          value={refClosingCosts}
-                          onChange={(e) => setRefClosingCosts(e.target.value)}
-                          min="0"
-                          step="0.01"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
+                        <Label className="font-semibold" htmlFor="ref-closing">
+                          Closing costs & fees
+                        </Label>
+                        <div className="relative">
+                          {refClosingCosts && (
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
+                              $
+                            </span>
+                          )}
+                          <Input
+                            id="ref-closing"
+                            type="number"
+                            placeholder=""
+                            value={refClosingCosts}
+                            onChange={(e) => setRefClosingCosts(e.target.value)}
+                            min="0"
+                            step="0.01"
+                            className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-6" : ""}`}
+                          />
+                        </div>
                       </div>
 
                       <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-years-in-house">Expected years living in house</Label>
-                        <Input
-                          id="ref-years-in-house"
-                          type="number"
-                          placeholder="-"
-                          value={refYearsIn}
-                          onChange={(e) => setRefYearsIn(e.target.value)}
-                          min="0"
-                          step="1"
-                          className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
+                        <Label
+                          className="font-semibold"
+                          htmlFor="ref-years-in-house"
+                        >
+                          Expected years living in house
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="ref-years-in-house"
+                            type="number"
+                            placeholder=""
+                            value={refYearsIn}
+                            onChange={(e) => setRefYearsIn(e.target.value)}
+                            min="0"
+                            step="1"
+                            className="font-bold pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          {refYearsIn && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
+                              years
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {refinanceResults && (
-                    <div className="bg-[var(--card-background)] rounded-md p-[32px] text-center md:text-left">
-                      
-                      <div className="text-left">
-                        <p className="font-semibold text-lagunita mt-4 mb-2">New monthly payment</p>
-                        <p className="text-black text-2xl p-4 bg-lagunita-lighter border-1 border-lagunita rounded-lg font-bold">
-                          ${formatCurrency(refinanceResults.newMonthlyPayment)}
-                        </p>
+                  {/* Results */}
+                  {/* Action buttons */}
+                  {refinanceResults ? (
+                    <div className="bg-[var(--card-background)] rounded-xl p-8">
+                      {/* Header */}
+                      <div className="mb-6">
+                        {refinanceResults.totalSavings >= 0 ? (
+                          <>
+                            <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
+                              <FaCircleCheck size={18} /> Refinancing may be
+                              worth it
+                            </h3>
+                            <p className="text-sm mt-1 text-[var(--results-card-empty)]">
+                              You could save money over the time you plan to
+                              stay in the home.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <h3 className="text-lg font-bold text-berry flex items-center gap-2">
+                              <FaCircleXmark size={18} /> Refinancing may not be
+                              worth it
+                            </h3>
+                            <p className="text-sm mt-1 text-[var(--results-card-empty)]">
+                              Based on the planned time in the home, this
+                              refinance may cost more than staying with the
+                              current loan.
+                            </p>
+                          </>
+                        )}
                       </div>
 
-                      <div className="text-left">
-                        <p className="font-semibold text-lagunita mt-4 mb-2">
-                          {refinanceResults.monthlySavings >= 0 ? "Monthly savings" : "Monthly increase"}
-                        </p>
-                        <p className={`text-2xl p-4 border-1 rounded-lg font-bold ${
-                          refinanceResults.monthlySavings >= 0 
-                            ? "bg-lagunita-lighter text-black border-1 border-lagunita" 
-                            : "bg-sky border-sky-dark text-black"
-                        }`}>
-                          ${formatCurrency(Math.abs(refinanceResults.monthlySavings))}
-                        </p>
+                      {/* Table */}
+                      <div className="border border-[var(--border)] rounded-lg overflow-hidden mt-4">
+                        <div className="flex justify-between px-4 py-3 border-b border-[var(--border)]">
+                          <span className="text-sm text-[var(--results-card-empty)]">
+                            New monthly payment
+                          </span>
+                          <span className="font-bold">
+                            $
+                            {formatCurrency(refinanceResults.newMonthlyPayment)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between px-4 py-3 border-b border-[var(--border)]">
+                          <span className="text-sm text-[var(--results-card-empty)]">
+                            {refinanceResults.monthlySavings >= 0
+                              ? "Monthly savings"
+                              : "Monthly increase"}
+                          </span>
+                          <span
+                            className={`font-bold ${refinanceResults.monthlySavings >= 0 ? "text-lagunita" : "text-berry"}`}
+                          >
+                            {refinanceResults.monthlySavings >= 0 ? "−" : "+"}$
+                            {formatCurrency(
+                              Math.abs(refinanceResults.monthlySavings),
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex justify-between px-4 py-3 border-b border-[var(--border)]">
+                          <span className="text-sm text-[var(--results-card-empty)]">
+                            Closing costs & fees
+                          </span>
+                          <span className="font-bold">
+                            $
+                            {formatCurrency(
+                              Number.parseFloat(refClosingCosts) || 0,
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex justify-between px-4 py-3">
+                          <span className="text-sm text-[var(--results-card-empty)]">
+                            {refinanceResults.totalSavings >= 0
+                              ? "Estimated savings over planned stay"
+                              : "Estimated total cost difference"}
+                          </span>
+                          <span
+                            className={`font-bold text-lg ${refinanceResults.totalSavings >= 0 ? "text-lagunita" : "text-berry"}`}
+                          >
+                            {refinanceResults.totalSavings >= 0 ? "−" : "+"}$
+                            {formatCurrency(
+                              Math.abs(refinanceResults.totalSavings),
+                            )}
+                          </span>
+                        </div>
                       </div>
-
-                      <div className="">
-                        <p className="text-md font-bold mt-4 mb-2">
-                          {refinanceResults.totalSavings >= 0 ? "Refinancing saves you" : "Refinancing costs you"}
-                        </p>
-                        <p className={`text-4xl font-bold ${
-                          refinanceResults.totalSavings >= 0 ? "text-lagunita" : "text-berry"
-                        }`}>
-                          ${formatCurrency(Math.abs(refinanceResults.totalSavings))}
-                        </p>
-                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+                      <h2 className="mb-1 text-md font-bold text-[var(--results-card-empty)]">
+                        Your refinance analysis will appear here.
+                      </h2>
+                      <p>Enter your new loan details to compare options.</p>
                     </div>
                   )}
 
+                  {/* Action buttons */}
                   {refinanceResults ? (
                     <div className="flex gap-4 w-full md:w-auto">
                       <Button
-                        className={`h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
+                        className="h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none"
                         onClick={calculateRefinance}
                       >
                         Recalculate
                       </Button>
-                      <Button
-                        className={`h-18 whitespace-normal bg-navy cursor-pointer border-2 border-navy hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1 md:flex-none`}
-                        onClick={() => { setRefinanceResults(null); setRefCurrentBalance(""); setRefCurrentMonthlyPayment(""); setRefCurrentMonths(""); setRefCurrentRate(""); setRefNewLoanAmount(""); setRefNewRate(""); setRefNewMonths(""); setRefClosingCosts(""); setRefYearsIn(""); }}
+                      <button
+                        onClick={() => {
+                          setRefinanceResults(null);
+                          setRefNewLoanAmount("");
+                          setRefNewRate("");
+                          setRefNewMonths("");
+                          setRefClosingCosts("");
+                          setRefYearsIn("");
+                          setRefErrors({});
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-md border-2 border-navy text-navy bg-transparent hover:border-lagunita hover:text-lagunita cursor-pointer transition-colors flex-1 md:flex-none justify-center"
                       >
-                        Reset
-                      </Button>
+                        <FaRotateLeft size={14} />
+                        Reset new loan terms
+                      </button>
                     </div>
                   ) : (
                     <Button
-                      className={`h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto`}
+                      className="h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
                       onClick={calculateRefinance}
                     >
                       Compare Refinance Options
                     </Button>
                   )}
-
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
+        </div>
       </div>
     </div>
-  </div>
-  )
+  );
 }
