@@ -7,7 +7,7 @@ import { Input } from "@/app/ui/components/input"
 import { Button } from "@/app/ui/components/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 import ThemeToggle from "@/app/lib/theme-toggle"
-import { FaRotateLeft, FaArrowRight, FaArrowLeft, FaCircleCheck, FaCircleXmark, FaCircleInfo } from "react-icons/fa6"
+import { FaRotateLeft, FaArrowRight, FaArrowLeft, FaCircleInfo } from "react-icons/fa6"
 
 const formatCurrency = (amount: number) =>
   amount.toLocaleString("en-US", {
