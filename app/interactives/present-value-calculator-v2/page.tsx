@@ -54,15 +54,16 @@ export default function PresentValueCalculator() {
   
   // Single Amount State
   const [futureValue, setFutureValue] = useState(0)
-  const [interestRate, setInterestRate] = useState(5)
-  const [timePeriod, setTimePeriod] = useState(10)
+  const [interestRate, setInterestRate] = useState(0)
+  const [timePeriod, setTimePeriod] = useState(0)
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("annually")
 
   // Payment Series State
   const [paymentAmount, setPaymentAmount] = useState(0)
-  const [paymentInterestRate, setPaymentInterestRate] = useState(5)
-  const [numberOfPayments, setNumberOfPayments] = useState(10)
+  const [paymentInterestRate, setPaymentInterestRate] = useState(0)
+  const [numberOfPayments, setNumberOfPayments] = useState(0)
   const [paymentFrequency, setPaymentFrequency] = useState<CompoundingFrequency>("annually")
+  const [finalAmount, setFinalAmount] = useState(0)
 
   const singleCalculations = useMemo(() => {
     const rate = interestRate / 100
@@ -80,27 +81,39 @@ export default function PresentValueCalculator() {
   }, [futureValue, interestRate, timePeriod, compoundingFrequency])
 
   const paymentCalculations = useMemo(() => {
-    const rate = paymentInterestRate / 100
-    const n = frequencyMap[paymentFrequency].periods
-    const periodRate = rate / n
-    
-    // Present value of an annuity formula: PV = PMT * [(1 - (1 + r)^-n) / r]
-    let presentValue: number
+    const rate = paymentInterestRate / 100;
+    const n = frequencyMap[paymentFrequency].periods;
+    const periodRate = rate / n;
+
+    let pvPayments: number;
     if (periodRate === 0) {
-      presentValue = paymentAmount * numberOfPayments
+      pvPayments = paymentAmount * numberOfPayments;
     } else {
-      presentValue = paymentAmount * ((1 - Math.pow(1 + periodRate, -numberOfPayments)) / periodRate)
+      pvPayments =
+        paymentAmount *
+        ((1 - Math.pow(1 + periodRate, -numberOfPayments)) / periodRate);
     }
-    
-    const totalPayments = paymentAmount * numberOfPayments
-    const discountAmount = totalPayments - presentValue
+
+    // PV of the lump sum final amount discounted over all periods
+    const pvFinalAmount =
+      finalAmount / Math.pow(1 + periodRate, numberOfPayments);
+
+    const presentValue = pvPayments + pvFinalAmount;
+    const totalPayments = paymentAmount * numberOfPayments + finalAmount;
+    const discountAmount = totalPayments - presentValue;
 
     return {
       presentValue,
       totalPayments,
       discountAmount,
-    }
-  }, [paymentAmount, paymentInterestRate, numberOfPayments, paymentFrequency])
+    };
+  }, [
+    paymentAmount,
+    finalAmount,
+    paymentInterestRate,
+    numberOfPayments,
+    paymentFrequency,
+  ]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -136,17 +149,16 @@ export default function PresentValueCalculator() {
                     Future value
                   </Label>
                   <div className="relative">
-                    {futureValue > 0 && (
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                        $
-                      </span>
-                    )}
+                    <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
                     <Input
                       id="future-value"
                       type="number"
+                      inputMode="numeric"
                       value={futureValue === 0 ? "" : futureValue}
                       onChange={(e) => setFutureValue(e.target.value === "" ? 0 : Number(e.target.value))}
-                      className={`bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         futureValue > 0 ? "pl-7" : ""
                       }`}
                     />
@@ -157,19 +169,21 @@ export default function PresentValueCalculator() {
                 <div className="space-y-2">
                   <div className="relative">
                     <Label htmlFor="interest-rate" className="block font-semibold text-foreground mb-2">
-                      Annual interest rate (%)
+                      Annual interest rate
                     </Label>
                     <Input
                       id="interest-rate"
+                      aria-label="Annual interest rate, percent"
                       type="number"
+                      inputMode="numeric"
                       value={interestRate === 0 ? "" : interestRate}
                       onChange={(e) => setInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
                       min={0}
                       max={100}
                       step={0.1}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <span className="absolute right-4 top-[2.8em] -translate-y-1/2 text-gray-500 pointer-events-none">
+                    <span aria-hidden="true" className="absolute right-4 top-[3.3em] -translate-y-1/2 text-gray-500 pointer-events-none">
                       %
                     </span>
                   </div>
@@ -183,16 +197,14 @@ export default function PresentValueCalculator() {
                   <Input
                     id="time-period"
                     type="number"
+                    inputMode="numeric"
                     value={timePeriod === 0 ? "" : timePeriod}
                     onChange={(e) => setTimePeriod(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={1}
                     max={1000}
                     step={1}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <p className="text-sm text-foreground mt-2">
-                    {timePeriod > 0 && `${formatNumber(timePeriod)} ${frequencyMap[compoundingFrequency].label.toLowerCase()} period${timePeriod !== 1 ? 's' : ''} = ${formatTimePeriod(timePeriod, frequencyMap[compoundingFrequency].periods)}`}
-                </p>
                 </div>
 
                 {/* Compounding Frequency */}
@@ -225,21 +237,13 @@ export default function PresentValueCalculator() {
                 </p>
 
                 {/* Breakdown */}
-                <div className="space-y-3">
+                <div aria-live="polite" aria-atomic="true" className="space-y-3">
                   <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                     <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                       Future value:
                     </div>
                     <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                       {formatCurrency(futureValue)}
-                    </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                    <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                      Present value:
-                    </div>
-                    <div className="w-full sm:w-[50%] text-lg-title text-lagunita p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                      {formatCurrency(singleCalculations.presentValue)}
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -264,21 +268,42 @@ export default function PresentValueCalculator() {
                 <p>Find what a series of payments is worth today. Enter a payment amount and number of payments to calculate the present value.</p>
                 <div className="space-y-2">
                   <Label htmlFor="payment-amount" className="block font-semibold text-foreground mb-2">
-                    Payment amount ($)
+                    Payment amount
                   </Label>
                   <div className="relative">
-                    {paymentAmount > 0 && (
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                        $
-                      </span>
-                    )}
+                    <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
                     <Input
                       id="payment-amount"
                       type="number"
+                      inputMode="numeric"
                       value={paymentAmount === 0 ? "" : paymentAmount}
                       onChange={(e) => setPaymentAmount(e.target.value === "" ? 0 : Number(e.target.value))}
-                      className={`bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         paymentAmount > 0 ? "pl-7" : ""
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Final Amount Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="final-amount" className="block font-semibold text-foreground mb-2">
+                    Final amount (optional)
+                  </Label>
+                  <div className="relative">
+                    <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
+                    <Input
+                      id="final-amount"
+                      type="number"
+                      inputMode="numeric"
+                      value={finalAmount === 0 ? "" : finalAmount}
+                      onChange={(e) => setFinalAmount(e.target.value === "" ? 0 : Number(e.target.value))}
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        finalAmount > 0 ? "pl-7" : ""
                       }`}
                     />
                   </div>
@@ -292,15 +317,17 @@ export default function PresentValueCalculator() {
                   <div className="relative">
                     <Input
                       id="payment-interest-rate"
+                      aria-label="Annual interest rate, percent"
                       type="number"
+                      inputMode="numeric"
                       value={paymentInterestRate === 0 ? "" : paymentInterestRate}
                       onChange={(e) => setPaymentInterestRate(e.target.value === "" ? 0 : Number(e.target.value))}
                       min={0}
                       max={100}
                       step={0.1}
-                      className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                    <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
                       %
                     </span>
                   </div>
@@ -314,16 +341,14 @@ export default function PresentValueCalculator() {
                   <Input
                     id="number-of-payments"
                     type="number"
+                    inputMode="numeric"
                     value={numberOfPayments === 0 ? "" : numberOfPayments}
                     onChange={(e) => setNumberOfPayments(e.target.value === "" ? 0 : Number(e.target.value))}
                     min={1}
                     max={1000}
                     step={1}
-                    className="bg-white border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <p className="text-sm text-foreground mt-2">
-                    {numberOfPayments > 0 && `${formatNumber(numberOfPayments)} ${frequencyMap[paymentFrequency].label.toLowerCase()} period${numberOfPayments !== 1 ? 's' : ''} = ${formatTimePeriod(numberOfPayments, frequencyMap[paymentFrequency].periods)}`}
-                  </p>
                 </div>
 
                 {/* Payment Frequency */}
@@ -359,7 +384,7 @@ export default function PresentValueCalculator() {
                   <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                     <div
                         className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                      Total Payments:
+                      Total payments:
                     </div>
                     <div
                         className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
@@ -369,17 +394,7 @@ export default function PresentValueCalculator() {
                   <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                     <div
                         className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                      Present Value:
-                    </div>
-                    <div
-                        className="w-full sm:w-[50%] text-lg-title p-4 text-lagunita rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                      {formatCurrency(paymentCalculations.presentValue)}
-                    </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                    <div
-                        className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
-                      Discount Amount:
+                      Discount amount:
                     </div>
                     <div
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}>
