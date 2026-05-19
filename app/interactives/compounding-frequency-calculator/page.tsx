@@ -99,11 +99,16 @@ export default function CompoundInterestCalculator() {
         <h1 className="sr-only">Compounding Frequency Calculator</h1>
         <ThemeToggle />
         <div className="flex flex-col md:flex-row gap-8">
-
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-6 mb-10 w-full lg:w-1/2">
+          <section
+            aria-label="Calculator inputs"
+            className="space-y-6 mb-10 w-full lg:w-1/2"
+          >
             <div>
-              <label htmlFor="initial-amount" className="block font-semibold text-foreground mb-2">
+              <label
+                htmlFor="initial-amount"
+                className="block font-semibold text-foreground mb-2"
+              >
                 Initial amount
               </label>
               <div className="relative">
@@ -113,10 +118,16 @@ export default function CompoundInterestCalculator() {
                   value={initialAmount}
                   onChange={(e) => {
                     const input = e.target.value;
-                    const numericPart = input.replace(/^\$/, '').replace(/[^0-9.]/g, '');
+                    const numericPart = input
+                      .replace(/^\$/, "")
+                      .replace(/[^0-9.]/g, "");
                     const numericValue = parseFloat(numericPart);
-                    if (!isNaN(numericValue) && numericValue > MAX_INITIAL_AMOUNT) return;
-                    setInitialAmount('$' + numericPart);
+                    if (
+                      !isNaN(numericValue) &&
+                      numericValue > MAX_INITIAL_AMOUNT
+                    )
+                      return;
+                    setInitialAmount("$" + numericPart);
                   }}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
@@ -125,7 +136,10 @@ export default function CompoundInterestCalculator() {
             </div>
 
             <div>
-              <label htmlFor="annual-rate" className="block font-semibold text-foreground mb-2">
+              <label
+                htmlFor="annual-rate"
+                className="block font-semibold text-foreground mb-2"
+              >
                 Annual interest rate
               </label>
               <div className="relative">
@@ -135,26 +149,37 @@ export default function CompoundInterestCalculator() {
                   value={annualRate}
                   onChange={(e) => {
                     const input = e.target.value;
-                    const numericPart = input.replace(/[^0-9.]/g, '');
+                    const numericPart = input.replace(/[^0-9.]/g, "");
                     const numericValue = parseFloat(numericPart);
-                    if (!isNaN(numericValue) && numericValue > MAX_ANNUAL_RATE) return;
+                    if (!isNaN(numericValue) && numericValue > MAX_ANNUAL_RATE)
+                      return;
                     setAnnualRate(numericPart);
                   }}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                   step="0.1"
                 />
-                <span aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-gray-500">%</span>
+                <span
+                  aria-hidden="true"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-gray-500"
+                >
+                  %
+                </span>
               </div>
             </div>
 
             <div>
               <div className="flex items-start gap-2">
-                <label htmlFor="periods" className="block font-semibold text-foreground mb-2">
+                <label
+                  htmlFor="periods"
+                  className="block font-semibold text-foreground mb-2"
+                >
                   Number of compounding periods
                 </label>
                 <InfoPopover title="Number of compounding periods">
-                  Periods are counted based on the selected compounding frequency. For monthly compounding, 60 periods equals 60 months.
+                  Periods are counted based on the selected compounding
+                  frequency. For monthly compounding, 60 periods equals 60
+                  months.
                 </InfoPopover>
               </div>
               <div className="relative">
@@ -162,7 +187,18 @@ export default function CompoundInterestCalculator() {
                   id="periods"
                   type="number"
                   value={periods}
-                  onChange={(e) => setPeriods(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || Number(val) >= 0) setPeriods(val);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") e.preventDefault();
+                  }}
+                  onBlur={(e) => {
+                    if (periods.startsWith(".")) {
+                      setPeriods("0" + periods);
+                    }
+                  }}
                   aria-describedby="periods-info"
                   className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
@@ -172,18 +208,25 @@ export default function CompoundInterestCalculator() {
 
             <div>
               <div className="flex items-start gap-2">
-                <label htmlFor="compounding-frequency" className="block font-semibold text-foreground mb-3">
+                <label
+                  htmlFor="compounding-frequency"
+                  className="block font-semibold text-foreground mb-3"
+                >
                   Compounding frequency
                 </label>
                 <InfoPopover title="Compounding frequency">
-                  Compounding frequency is how often interest is calculated and added to the balance. For example, monthly compounding applies interest once each month.
+                  Compounding frequency is how often interest is calculated and
+                  added to the balance. For example, monthly compounding applies
+                  interest once each month.
                 </InfoPopover>
               </div>
               <div className="flex items-center gap-2">
                 <select
                   id="compounding-frequency"
                   value={selectedCompounding}
-                  onChange={(e) => setSelectedCompounding(e.target.value as CompoundingPeriod)}
+                  onChange={(e) =>
+                    setSelectedCompounding(e.target.value as CompoundingPeriod)
+                  }
                   aria-describedby="compounding-frequency-info"
                   className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                 >
@@ -193,7 +236,10 @@ export default function CompoundInterestCalculator() {
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none ml-[-40px] text-gray-400 text-lg" aria-hidden="true">
+                <div
+                  className="pointer-events-none ml-[-40px] text-gray-400 text-lg"
+                  aria-hidden="true"
+                >
                   <FaAngleDown />
                 </div>
               </div>
@@ -204,61 +250,112 @@ export default function CompoundInterestCalculator() {
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
               <h2 className="text-[20px] font-bold mb-1">
-                Balance after {periods} {getPeriodText(selectedCompounding, Number(periods))}
+                Balance after {periods}{" "}
+                {getPeriodText(selectedCompounding, Number(periods))}
               </h2>
               <p className="text-3xl font-bold text-lagunita mb-5">
                 {formatCurrency(selectedResult.finalAmount)}
               </p>
               <p className="text-[16px] font-semibold mb-1">
-                Interest accrued over {periods} {getPeriodText(selectedCompounding, Number(periods))}
+                Interest accrued over {periods}{" "}
+                {getPeriodText(selectedCompounding, Number(periods))}
               </p>
               <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(selectedResult.interestEarned)}
               </p>
               <p className="text-[16px] font-semibold text-foreground">
-                With <span className="text-lagunita">{selectedCompounding === 'semi-annually' ? 'semi-annual' : selectedCompounding === 'annually' ? 'annual' : selectedCompounding}</span> compounding
+                With{" "}
+                <span className="text-lagunita">
+                  {selectedCompounding === "semi-annually"
+                    ? "semi-annual"
+                    : selectedCompounding === "annually"
+                      ? "annual"
+                      : selectedCompounding}
+                </span>{" "}
+                compounding
               </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Comparison Table */}
-        <section aria-label="Comparison across compounding frequencies" className="rounded-3xl bg-[var(--grey-background)] p-6 mt-10">
-          <h2 className="text-xl font-semibold mb-2">Comparison Across Compounding Frequencies</h2>
+        <section
+          aria-label="Comparison across compounding frequencies"
+          className="rounded-3xl bg-[var(--grey-background)] p-6 mt-10"
+        >
+          <h2 className="text-xl font-semibold mb-2">
+            Comparison Across Compounding Frequencies
+          </h2>
           <p className="text-sm mb-4">
-            See how compounding frequency affects returns over the same time period.
+            See how compounding frequency affects returns over the same time
+            period.
           </p>
 
           <div className="overflow-hidden bg-card">
             <table className="min-w-full">
               <thead>
                 <tr>
-                  <th scope="col" className="font-semibold text-left px-4 py-3">Compounding Frequency</th>
-                  <th scope="col" className="font-semibold text-right px-4 py-3">Number of <br />Compounding Periods</th>
-                  <th scope="col" className="font-semibold text-right px-4 py-3">Final Amount</th>
-                  <th scope="col" className="font-semibold text-right px-4 py-3">Interest Accrued</th>
+                  <th scope="col" className="font-semibold text-left px-4 py-3">
+                    Compounding Frequency
+                  </th>
+                  <th
+                    scope="col"
+                    className="font-semibold text-right px-4 py-3"
+                  >
+                    Number of <br />
+                    Compounding Periods
+                  </th>
+                  <th
+                    scope="col"
+                    className="font-semibold text-right px-4 py-3"
+                  >
+                    Final Amount
+                  </th>
+                  <th
+                    scope="col"
+                    className="font-semibold text-right px-4 py-3"
+                  >
+                    Interest Accrued
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonResults.map((result) => (
                   <tr
                     key={result.value}
-                    aria-current={selectedCompounding === result.value ? "true" : undefined}
-                    className={selectedCompounding === result.value ? "bg-lagunita-lighter text-lagunita font-bold" : ""}
+                    aria-current={
+                      selectedCompounding === result.value ? "true" : undefined
+                    }
+                    className={
+                      selectedCompounding === result.value
+                        ? "bg-[var(--grey-background)] text-[var(--color-teal)] font-bold"
+                        : ""
+                    }
                   >
                     <td className="px-4 py-3 border-b">{result.label}</td>
-                    <td className="text-right px-4 py-3 border-b text-foreground">{Number(result.totalPeriods.toFixed(2))}</td>
-                    <td className="text-right px-4 py-3 border-b text-foreground">{formatCurrency(result.finalAmount)}</td>
-                    <td className="text-right px-4 py-3 border-b">{formatCurrency(result.interestEarned)}</td>
+                    <td className="text-right px-4 py-3 border-b">
+                      {result.totalPeriods % 1 === 0
+                        ? result.totalPeriods.toFixed(0)
+                        : result.totalPeriods.toFixed(2)}
+                    </td>
+                    <td className="text-right px-4 py-3 border-b">
+                      {formatCurrency(result.finalAmount)}
+                    </td>
+                    <td className="text-right px-4 py-3 border-b">
+                      {formatCurrency(result.interestEarned)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="pt-3 font-bold text-sm">Over the same time period, more frequent compounding generally results in more interest accrued, assuming the annual interest rate stays the same.</p>
+            <p className="pt-3 font-bold text-sm">
+              Over the same time period, more frequent compounding results in
+              more interest accrued, assuming the annual interest rate stays the
+              same.
+            </p>
           </div>
         </section>
-
       </div>
     </div>
-  )
+  );
 }

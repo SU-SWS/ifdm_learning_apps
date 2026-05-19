@@ -119,6 +119,7 @@
   --foreground: oklch(0.145 0 0);
   --button-green:  rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
+  --color-teal: rgba(74, 203, 225, 1);
 }
 
 .dark {
