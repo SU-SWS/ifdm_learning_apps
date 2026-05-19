@@ -51,7 +51,7 @@ export default function CompoundInterestCalculator() {
   const [periods, setPeriods] = useState<string>("")
   const [selectedCompounding, setSelectedCompounding] = useState<CompoundingPeriod>("monthly")
 
-  const principal = parseFloat(initialAmount.replace('$', '')) || 0
+  const principal = parseFloat(initialAmount) || 0
   const rate = (parseFloat(annualRate) || 0) / 100
   const totalPeriods = parseFloat(periods) || 0
 
@@ -118,20 +118,21 @@ export default function CompoundInterestCalculator() {
                   value={initialAmount}
                   onChange={(e) => {
                     const input = e.target.value;
-                    const numericPart = input
-                      .replace(/^\$/, "")
-                      .replace(/[^0-9.]/g, "");
+                    const numericPart = input.replace(/[^0-9.]/g, "");
                     const numericValue = parseFloat(numericPart);
                     if (
                       !isNaN(numericValue) &&
                       numericValue > MAX_INITIAL_AMOUNT
                     )
                       return;
-                    setInitialAmount("$" + numericPart);
+                    setInitialAmount(numericPart);
                   }}
-                  className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
+                  className="w-full pl-4 pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                  $
+                </span>
               </div>
             </div>
 
