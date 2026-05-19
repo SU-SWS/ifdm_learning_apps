@@ -159,7 +159,7 @@ export default function PresentValueCalculator() {
                       value={futureValue === 0 ? "" : futureValue}
                       onChange={(e) => setFutureValue(e.target.value === "" ? 0 : Number(e.target.value))}
                       className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                        futureValue > 0 ? "pl-7" : ""
+                        futureValue > 0 ? "pl-7" : "pl-8"
                       }`}
                     />
                   </div>
@@ -231,8 +231,8 @@ export default function PresentValueCalculator() {
               {/* Results Section */}
               <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
                 {/* Main Present Value Display */}
-                <h2 className="text-[var(--text-navy)] text-center text-[22px] font-bold">Present value</h2>
-                <p className="text-3xl font-bold text-lagunita mb-5 text-center">
+                <h2 className="text-[var(--text-navy)] text-[22px] font-bold">Present value</h2>
+                <p className="text-3xl font-bold text-lagunita mb-5">
                   {formatCurrency(singleCalculations.presentValue)}
                 </p>
 
@@ -281,7 +281,7 @@ export default function PresentValueCalculator() {
                       value={paymentAmount === 0 ? "" : paymentAmount}
                       onChange={(e) => setPaymentAmount(e.target.value === "" ? 0 : Number(e.target.value))}
                       className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                        paymentAmount > 0 ? "pl-7" : ""
+                        paymentAmount > 0 ? "pl-7" : "pl-8"
                       }`}
                     />
                   </div>
@@ -303,7 +303,7 @@ export default function PresentValueCalculator() {
                       value={finalAmount === 0 ? "" : finalAmount}
                       onChange={(e) => setFinalAmount(e.target.value === "" ? 0 : Number(e.target.value))}
                       className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                        finalAmount > 0 ? "pl-7" : ""
+                        finalAmount > 0 ? "pl-7" : "pl-8"
                       }`}
                     />
                   </div>
@@ -374,8 +374,8 @@ export default function PresentValueCalculator() {
 
               {/* Results Section */}
               <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
-              <h2 className="text-[var(--text-navy)] text-center text-[22px] font-bold">Present value</h2>
-                 <p className="text-3xl font-bold text-lagunita mb-5 text-center">
+              <h2 className="text-[var(--text-navy)] text-[22px] font-bold">Present value</h2>
+                 <p className="text-3xl font-bold text-lagunita mb-5">
                   {formatCurrency(paymentCalculations.presentValue)}
                 </p>
 
