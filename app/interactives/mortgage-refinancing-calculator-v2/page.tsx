@@ -267,16 +267,12 @@ export default function MortgageCalculator() {
             {/* ── Tab 1: Current Balance ─────────────────────────────────── */}
             <TabsContent value="current-balance">
               <Card>
-                <CardHeader>
-                  <CardDescription>
-                    Calculate your remaining mortgage balance (the present value
-                    of your remaining monthly mortgage payments).
-                  </CardDescription>
-                </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-12 lg:grid-cols-2">
                     {/* Left — inputs */}
                     <div>
+                      <p className="mb-8">Calculate your remaining mortgage balance (the present value of your remaining monthly mortgage payments).</p>
+
                       <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="months">
                           Months remaining on loan
@@ -293,7 +289,7 @@ export default function MortgageCalculator() {
                             className="pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {monthsRemaining && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
                               months
                             </span>
                           )}
@@ -347,7 +343,7 @@ export default function MortgageCalculator() {
                             className="pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {annualRate && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
                               %
                             </span>
                           )}
@@ -372,8 +368,11 @@ export default function MortgageCalculator() {
                             onChange={(e) => setMonthlyPayment(e.target.value)}
                             min="0"
                             step="0.01"
-                            className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${monthlyPayment ? "pl-6" : ""}`}
+                            className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            $
+                          </span>
                         </div>
                       </div>
 
@@ -433,13 +432,8 @@ export default function MortgageCalculator() {
             {/* ── Tab 2: Refinance Analysis ──────────────────────────────── */}
             <TabsContent value="refinance">
               <Card>
-                <CardHeader>
-                  <CardDescription>
-                    Analyze if refinancing makes financial sense for your
-                    situation.
-                  </CardDescription>
-                </CardHeader>
                 <CardContent className="space-y-6">
+                  <p className="mb-8">Analyze if refinancing makes financial sense for your situation.</p>
                   {!currentBalance ? (
                     <div className="rounded-xl border-1 border-grey-border bg-[var(--info-popup-background)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <p className="text-sm inline">
@@ -581,11 +575,9 @@ export default function MortgageCalculator() {
                               step="1"
                               className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error border-2" : ""}`}
                             />
-                            {refNewMonths && (
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
-                                months
-                              </span>
-                            )}
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none">
+                              months
+                            </span>
                           </div>
                           {refNewMonths && (
                             <p className="mt-3 text-[14px]">
@@ -778,9 +770,6 @@ export default function MortgageCalculator() {
                                 <div
                                   className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
                                 >
-                                  {refinanceResults.monthlySavings >= 0
-                                    ? "−"
-                                    : "+"}
                                   $
                                   {formatCurrency(
                                     Math.abs(refinanceResults.monthlySavings),
@@ -809,9 +798,6 @@ export default function MortgageCalculator() {
                                 <div
                                   className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center"
                                 >
-                                  {refinanceResults.totalSavings >= 0
-                                    ? "−"
-                                    : "+"}
                                   $
                                   {formatCurrency(
                                     Math.abs(refinanceResults.totalSavings),

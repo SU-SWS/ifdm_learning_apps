@@ -176,6 +176,7 @@
   --button-green:  rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
   --results-card-empty: oklch(0.985 0 0);
+  --info-popup-background: rgba(239, 255, 252, 1);
 }
 
 @layer base {
