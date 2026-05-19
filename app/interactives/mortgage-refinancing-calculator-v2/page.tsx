@@ -290,7 +290,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => setMonthsRemaining(e.target.value)}
                             min="0"
                             step="1"
-                            className="font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {monthsRemaining && (
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
@@ -344,7 +344,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => setAnnualRate(e.target.value)}
                             min="0"
                             step="0.1"
-                            className="font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {annualRate && (
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
@@ -372,7 +372,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => setMonthlyPayment(e.target.value)}
                             min="0"
                             step="0.01"
-                            className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${monthlyPayment ? "pl-6" : ""}`}
+                            className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${monthlyPayment ? "pl-6" : ""}`}
                           />
                         </div>
                       </div>
@@ -553,7 +553,7 @@ export default function MortgageCalculator() {
                               }
                               min="0"
                               step="0.01"
-                              className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error border-2" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error border-2" : ""}`}
                             />
                           </div>
                           {refErrors.newLoanAmount && (
@@ -579,7 +579,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewMonths(e.target.value)}
                               min="0"
                               step="1"
-                              className={`font-bold pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error border-2" : ""}`}
+                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error border-2" : ""}`}
                             />
                             {refNewMonths && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
@@ -619,7 +619,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewRate(e.target.value)}
                               min="0"
                               step="0.1"
-                              className={`font-bold pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-error border-2" : ""}`}
+                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-error border-2" : ""}`}
                             />
                             {refNewRate && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
@@ -659,7 +659,7 @@ export default function MortgageCalculator() {
                               }
                               min="0"
                               step="0.01"
-                              className={`font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-6" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-6" : ""}`}
                             />
                           </div>
                         </div>
@@ -680,7 +680,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefYearsIn(e.target.value)}
                               min="0"
                               step="1"
-                              className="font-bold pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              className="pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                             {refYearsIn && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
