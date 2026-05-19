@@ -355,14 +355,9 @@ export default function MortgageCalculator() {
 
                       <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="payment">
-                          Monthly payment amount ($)
+                          Monthly payment amount
                         </Label>
                         <div className="relative">
-                          {monthlyPayment && (
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
-                              $
-                            </span>
-                          )}
                           <Input
                             id="payment"
                             type="number"
@@ -378,9 +373,7 @@ export default function MortgageCalculator() {
                             data-form-type="other" // Dashlane specifically
                             className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                            $
-                          </span>
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
                         </div>
                       </div>
 
@@ -542,11 +535,6 @@ export default function MortgageCalculator() {
                             New loan amount
                           </Label>
                           <div className="relative">
-                            {refNewLoanAmount && (
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
-                                $
-                              </span>
-                            )}
                             <Input
                               id="ref-new-loan-amount"
                               type="number"
@@ -557,8 +545,9 @@ export default function MortgageCalculator() {
                               }
                               min="0"
                               step="0.01"
-                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-6" : ""} ${refErrors.newLoanAmount ? "border-error border-2" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-error border-2" : ""}`}
                             />
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
                           </div>
                           {refErrors.newLoanAmount && (
                             <p
@@ -588,7 +577,7 @@ export default function MortgageCalculator() {
                               step="1"
                               className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error border-2" : ""}`}
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
                               months
                             </span>
                           </div>
