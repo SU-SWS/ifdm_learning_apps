@@ -271,7 +271,10 @@ export default function MortgageCalculator() {
                   <div className="grid gap-12 lg:grid-cols-2">
                     {/* Left — inputs */}
                     <div>
-                      <p className="mb-8">Calculate your remaining mortgage balance (the present value of your remaining monthly mortgage payments).</p>
+                      <p className="mb-8">
+                        Calculate your remaining mortgage balance (the present
+                        value of your remaining monthly mortgage payments).
+                      </p>
 
                       <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="months">
@@ -368,6 +371,11 @@ export default function MortgageCalculator() {
                             onChange={(e) => setMonthlyPayment(e.target.value)}
                             min="0"
                             step="0.01"
+                            autoComplete="off"
+                            data-lpignore="true" // LastPass
+                            data-1p-ignore // 1Password
+                            data-bwignore // Bitwarden
+                            data-form-type="other" // Dashlane specifically
                             className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
@@ -433,14 +441,16 @@ export default function MortgageCalculator() {
             <TabsContent value="refinance">
               <Card>
                 <CardContent className="space-y-6">
-                  <p className="mb-8">Analyze if refinancing makes financial sense for your situation.</p>
+                  <p className="mb-8">
+                    Analyze if refinancing makes financial sense for your
+                    situation.
+                  </p>
                   {!currentBalance ? (
                     <div className="rounded-xl border-1 border-grey-border bg-[var(--info-popup-background)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <p className="text-sm inline">
                         Start by calculating your current mortgage balance
                         first. Enter your details in the Current Balance tab,
                         then come back here to explore refinance options.
-
                         <button
                           onClick={() => setActiveTab("current-balance")}
                           className="pl-2 inline-flex items-center gap-2 whitespace-nowrap text-lagunita font-semibold hover:underline cursor-pointer"
@@ -551,7 +561,10 @@ export default function MortgageCalculator() {
                             />
                           </div>
                           {refErrors.newLoanAmount && (
-                            <p role="alert" className="mt-1 text-sm text-error font-semibold">
+                            <p
+                              role="alert"
+                              className="mt-1 text-sm text-error font-semibold"
+                            >
                               {refErrors.newLoanAmount}
                             </p>
                           )}
@@ -589,7 +602,10 @@ export default function MortgageCalculator() {
                             </p>
                           )}
                           {refErrors.newMonths && (
-                            <p role="alert" className="mt-1 text-sm font-semibold text-error">
+                            <p
+                              role="alert"
+                              className="mt-1 text-sm font-semibold text-error"
+                            >
                               {refErrors.newMonths}
                             </p>
                           )}
@@ -620,7 +636,10 @@ export default function MortgageCalculator() {
                             )}
                           </div>
                           {refErrors.newRate && (
-                            <p role="alert" className="mt-1 text-sm font-semibold text-error">
+                            <p
+                              role="alert"
+                              className="mt-1 text-sm font-semibold text-error"
+                            >
                               {refErrors.newRate}
                             </p>
                           )}
@@ -767,9 +786,7 @@ export default function MortgageCalculator() {
                                     ? "Monthly savings:"
                                     : "Monthly increase:"}
                                 </div>
-                                <div
-                                  className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]"
-                                >
+                                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                                   $
                                   {formatCurrency(
                                     Math.abs(refinanceResults.monthlySavings),
@@ -795,9 +812,7 @@ export default function MortgageCalculator() {
                                     ? "Estimated savings over planned stay:"
                                     : "Estimated total cost difference:"}
                                 </div>
-                                <div
-                                  className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center"
-                                >
+                                <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
                                   $
                                   {formatCurrency(
                                     Math.abs(refinanceResults.totalSavings),
