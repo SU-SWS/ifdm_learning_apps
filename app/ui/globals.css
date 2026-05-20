@@ -45,7 +45,6 @@
   --color-sky-dark: rgba(14, 59, 79, 1);
   --color-berry: rgba(195, 31, 112, 1);
   --color-berry-light: rgba(255, 237, 246, 1);
-  --color-error: #8C1515;
   --color-palo-verde: rgba(39, 153, 137, 1);
   --color-palo-verde-light: rgba(239, 247, 239, 1);
   --color-lagunita: rgba(0, 124, 146, 1);
@@ -122,6 +121,7 @@
   --button-berry: rgba(151, 24, 87, 1);
   --color-teal: rgba(74, 203, 225, 1);
   --color-symbols: #616877;
+  --color-inline-error: #8C1515;
 }
 
 .dark {
@@ -175,6 +175,7 @@
   --button-green:  rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
   --color-symbols: oklch(0.985 0 0);
+  --color-inline-error: #F4795B;
 }
 
 @layer base {

@@ -136,7 +136,7 @@ export default function CompoundInterestCalculator() {
                     setInitialAmount(numericPart);
                   }}
                   min="0"
-                  className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-error border-2" : ""}`}
+                  className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
                   $
@@ -145,7 +145,7 @@ export default function CompoundInterestCalculator() {
               {initialAmountError && (
                 <p
                   role="alert"
-                  className="mt-1 text-sm text-error font-semibold"
+                  className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                 >
                   {initialAmountError}
                 </p>
@@ -180,7 +180,7 @@ export default function CompoundInterestCalculator() {
                     setAnnualRateError("");
                     setAnnualRate(numericPart);
                   }}
-                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-error border-2" : ""}`}
+                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
                   step="0.1"
                 />
@@ -194,7 +194,7 @@ export default function CompoundInterestCalculator() {
               {annualRateError && (
                 <p
                   role="alert"
-                  className="mt-1 text-sm text-error font-semibold"
+                  className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                 >
                   {annualRateError}
                 </p>
