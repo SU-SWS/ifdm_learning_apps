@@ -292,7 +292,7 @@ export default function MortgageCalculator() {
                             className="pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {monthsRemaining && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none">
                               months
                             </span>
                           )}
@@ -346,7 +346,7 @@ export default function MortgageCalculator() {
                             className="pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {annualRate && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                               %
                             </span>
                           )}
@@ -373,7 +373,7 @@ export default function MortgageCalculator() {
                             data-form-type="other" // Dashlane specifically
                             className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
                       </div>
 
@@ -545,14 +545,14 @@ export default function MortgageCalculator() {
                               }
                               min="0"
                               step="0.01"
-                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-error border-2" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                           </div>
                           {refErrors.newLoanAmount && (
                             <p
                               role="alert"
-                              className="mt-1 text-sm text-error font-semibold"
+                              className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                             >
                               {refErrors.newLoanAmount}
                             </p>
@@ -575,9 +575,9 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewMonths(e.target.value)}
                               min="0"
                               step="1"
-                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-error border-2" : ""}`}
+                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none">
                               months
                             </span>
                           </div>
@@ -593,7 +593,7 @@ export default function MortgageCalculator() {
                           {refErrors.newMonths && (
                             <p
                               role="alert"
-                              className="mt-1 text-sm font-semibold text-error"
+                              className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]"
                             >
                               {refErrors.newMonths}
                             </p>
@@ -616,7 +616,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewRate(e.target.value)}
                               min="0"
                               step="0.1"
-                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-error border-2" : ""}`}
+                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
                             {refNewRate && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
@@ -627,7 +627,7 @@ export default function MortgageCalculator() {
                           {refErrors.newRate && (
                             <p
                               role="alert"
-                              className="mt-1 text-sm font-semibold text-error"
+                              className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]"
                             >
                               {refErrors.newRate}
                             </p>
