@@ -128,9 +128,9 @@ export default function CompoundInterestCalculator() {
                     setInitialAmount(numericPart);
                   }}
                   min="0"
-                  className="w-full pl-4 pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
                   $
                 </span>
               </div>
@@ -162,7 +162,7 @@ export default function CompoundInterestCalculator() {
                 />
                 <span
                   aria-hidden="true"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-gray-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-[var(--color-symbols)]"
                 >
                   %
                 </span>
