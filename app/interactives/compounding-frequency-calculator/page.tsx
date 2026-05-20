@@ -75,6 +75,9 @@ export default function CompoundInterestCalculator() {
     })
   }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
 
+  const [initialAmountError, setInitialAmountError] = useState<string>("")
+  const [annualRateError, setAnnualRateError] = useState<string>("")
+
   type CompoundingPeriod = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
 
   const getPeriodText = (compounding: CompoundingPeriod, periods: number): string => {
@@ -123,17 +126,30 @@ export default function CompoundInterestCalculator() {
                     if (
                       !isNaN(numericValue) &&
                       numericValue > MAX_INITIAL_AMOUNT
-                    )
+                    ) {
+                      setInitialAmountError(
+                        "Initial amount cannot exceed $50,000,000,000,000.",
+                      );
                       return;
+                    }
+                    setInitialAmountError("");
                     setInitialAmount(numericPart);
                   }}
                   min="0"
-                  className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-error border-2" : ""}`}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
                   $
                 </span>
               </div>
+              {initialAmountError && (
+                <p
+                  role="alert"
+                  className="mt-1 text-sm text-error font-semibold"
+                >
+                  {initialAmountError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -152,11 +168,19 @@ export default function CompoundInterestCalculator() {
                     const input = e.target.value;
                     const numericPart = input.replace(/[^0-9.]/g, "");
                     const numericValue = parseFloat(numericPart);
-                    if (!isNaN(numericValue) && numericValue > MAX_ANNUAL_RATE)
+                    if (
+                      !isNaN(numericValue) &&
+                      numericValue > MAX_ANNUAL_RATE
+                    ) {
+                      setAnnualRateError(
+                        "Annual interest rate cannot exceed 1,000%.",
+                      );
                       return;
+                    }
+                    setAnnualRateError("");
                     setAnnualRate(numericPart);
                   }}
-                  className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-error border-2" : ""}`}
                   min="0"
                   step="0.1"
                 />
@@ -167,6 +191,14 @@ export default function CompoundInterestCalculator() {
                   %
                 </span>
               </div>
+              {annualRateError && (
+                <p
+                  role="alert"
+                  className="mt-1 text-sm text-error font-semibold"
+                >
+                  {annualRateError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -195,7 +227,7 @@ export default function CompoundInterestCalculator() {
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
-                  onBlur={(e) => {
+                  onBlur={() => {
                     if (periods.startsWith(".")) {
                       setPeriods("0" + periods);
                     }
