@@ -37,6 +37,14 @@ export default function RetirementCalculator() {
   const [inputs, setInputs] = useState<CalculatorInputs>(defaultInputs)
   const [isCalculated, setIsCalculated] = useState(false)
   const [frozenRequiredBalance, setFrozenRequiredBalance] = useState<number>(0)
+  const [annualSpendingError, setAnnualSpendingError] = useState<string>("");
+  const [retirementLengthError, setRetirementLengthError] =
+    useState<string>("");
+  const [returnDuringError, setReturnDuringError] = useState<string>("");
+  const [currentSavingsError, setCurrentSavingsError] = useState<string>("");
+  const [yearsToRetirementError, setYearsToRetirementError] =
+    useState<string>("");
+  const [returnBeforeError, setReturnBeforeError] = useState<string>("");
 
   const results = useMemo(() => {
     const realReturnDuringRetirement = inputs.expectedReturnDuringRetirement / 100  // ← CHANGED
@@ -75,6 +83,7 @@ export default function RetirementCalculator() {
       targetBalance: Math.round(targetBalance),
       annualSavings: Math.round(annualSavings),
       monthlySavings: Math.round(annualSavings / 12),
+        FV_currentSavings: Math.round(FV_currentSavings),
     }
   }, [inputs, activeTab, frozenRequiredBalance])
 
@@ -134,24 +143,23 @@ export default function RetirementCalculator() {
       <div className="mb-8">
         <ThemeToggle />
         {/* Header */}
-        <h1 className="sr-only">
-          Understanding retirement planning
-        </h1>
+        <h1 className="sr-only">Understanding retirement planning</h1>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => {
-          if (v === "savings" && !isCalculated) return
-          setActiveTab(v as "balance" | "savings")
-          if (v === "balance") {
-            setIsCalculated(false) // This allows recalculation on the balance tab
-            setFrozenRequiredBalance(0) // Clear frozen value when returning to balance tab
-          }
-        }} className="mb-10">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => {
+            if (v === "savings" && !isCalculated) return;
+            setActiveTab(v as "balance" | "savings");
+            if (v === "balance") {
+              setIsCalculated(false); // This allows recalculation on the balance tab
+              setFrozenRequiredBalance(0); // Clear frozen value when returning to balance tab
+            }
+          }}
+          className="mb-10"
+        >
           <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
-            <TabsTrigger
-              value="balance"
-              className="cursor-pointer"
-            >
+            <TabsTrigger value="balance" className="cursor-pointer">
               Required balance
             </TabsTrigger>
             <TabsTrigger
@@ -172,7 +180,8 @@ export default function RetirementCalculator() {
               <div className="mb-6 p-5 bg-[#FFF3CC] rounded-lg flex flex-row gap-3">
                 <BiSolidError className="mb-2 text-[#8C5A15]" size={80} />
                 <p className="text-[#8C5A15] font-bold">
-                  First calculate your required retirement balance before viewing the Annual savings tab.
+                  First calculate your required retirement balance before
+                  viewing the Annual savings tab.
                 </p>
               </div>
             )}
@@ -190,10 +199,31 @@ export default function RetirementCalculator() {
                       type="number"
                       min="1"
                       value={inputs.annualSpending || ""}
-                      onChange={(e) => updateInput("annualSpending", e.target.value)}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        if (val <= 0) {
+                          setAnnualSpendingError(
+                            "Annual spending must be greater than 0.",
+                          );
+                        } else {
+                          setAnnualSpendingError("");
+                        }
+                        updateInput("annualSpending", e.target.value);
+                      }}
+                      className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualSpendingError ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
                     />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
+                      $
+                    </span>
                   </div>
+                  {annualSpendingError && (
+                    <p
+                      role="alert"
+                      className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                    >
+                      {annualSpendingError}
+                    </p>
+                  )}
                   <p className="text-xs">
                     How much you plan to withdraw each year.
                   </p>
@@ -210,12 +240,41 @@ export default function RetirementCalculator() {
                     <input
                       type="number"
                       min="0"
-                      placeholder="-"
+                      placeholder=""
                       value={inputs.currentSavings || ""}
-                      onChange={(e) => updateInput("currentSavings", e.target.value)}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        if (val < 0) {
+                          setCurrentSavingsError(
+                            "Current savings cannot be negative.",
+                          );
+                        } else {
+                          setCurrentSavingsError("");
+                        }
+                        updateInput("currentSavings", e.target.value);
+                      }}
+                      className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${currentSavingsError || (!currentSavingsError && inputs.currentSavings > 0 && inputs.yearsToRetirement > 0 && results.FV_currentSavings >= frozenRequiredBalance) ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
                     />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
+                      $
+                    </span>
                   </div>
+                  {currentSavingsError && (
+                    <p
+                      role="alert"
+                      className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                    >
+                      {currentSavingsError}
+                    </p>
+                  )}
+                  {!currentSavingsError &&
+                    inputs.currentSavings > 0 &&
+                    inputs.yearsToRetirement > 0 &&
+                    results.FV_currentSavings >= frozenRequiredBalance && (
+                      <p className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]">
+                        Your current savings already meet your retirement goal.
+                      </p>
+                    )}
                   <p className="text-xs">
                     How much you have already saved for retirement.
                   </p>
@@ -232,10 +291,32 @@ export default function RetirementCalculator() {
                       min="0"
                       max="99"
                       value={inputs.yearsToRetirement || ""}
-                      onChange={(e) => updateInput("yearsToRetirement", e.target.value)}
-                      className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        if (val <= 0) {
+                          setYearsToRetirementError(
+                            "Years to retirement must be greater than 0.",
+                          );
+                        } else if (val > 99) {
+                          setYearsToRetirementError(
+                            "Years to retirement cannot exceed 99.",
+                          );
+                        } else {
+                          setYearsToRetirementError("");
+                        }
+                        updateInput("yearsToRetirement", e.target.value);
+                      }}
+                      className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${yearsToRetirementError ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
                     />
                   </div>
+                  {yearsToRetirementError && (
+                    <p
+                      role="alert"
+                      className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                    >
+                      {yearsToRetirementError}
+                    </p>
+                  )}
                   <p className="text-xs">
                     How many years until you plan to retire.
                   </p>
@@ -244,29 +325,53 @@ export default function RetirementCalculator() {
             )}
 
             {/* Retirement Length Input */}
-            {activeTab === "balance" && <div className="space-y-2">
-              <label className="block text-sm text-foreground">
-                Expected length of retirement (years)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="1"
-                  value={inputs.retirementLength || ""}
-                  onChange={(e) => updateInput("retirementLength", e.target.value)}
-                  className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
+            {activeTab === "balance" && (
+              <div className="space-y-2">
+                <label className="block text-sm text-foreground">
+                  Expected length of retirement (years)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    value={inputs.retirementLength || ""}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      if (val <= 0) {
+                        setRetirementLengthError(
+                          "Retirement length must be greater than 0.",
+                        );
+                      } else if (val > 100) {
+                        setRetirementLengthError(
+                          "Retirement length cannot exceed 100 years.",
+                        );
+                      } else {
+                        setRetirementLengthError("");
+                      }
+                      updateInput("retirementLength", e.target.value);
+                    }}
+                    className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${retirementLengthError ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                  />
                 </div>
-              <p className="text-xs">
-                How many years your retirement will last.
-              </p>
-            </div>}
+                {retirementLengthError && (
+                  <p
+                    role="alert"
+                    className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                  >
+                    {retirementLengthError}
+                  </p>
+                )}
+                <p className="text-xs">
+                  How many years your retirement will last.
+                </p>
+              </div>
+            )}
 
             {/* Expected Return Input - BALANCE TAB */}
             {activeTab === "balance" && (
               <div className="space-y-2">
                 <label className="block text-sm text-foreground">
-                  Expected annual return during retirement (%)
+                  Expected annual return during retirement
                 </label>
                 <div className="relative">
                   <input
@@ -274,37 +379,91 @@ export default function RetirementCalculator() {
                     min="0"
                     step="0.1"
                     value={inputs.expectedReturnDuringRetirement || ""}
-                    onChange={(e) => updateInput("expectedReturnDuringRetirement", e.target.value)}
-                    className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      if (val < 0) {
+                        setReturnDuringError("Return rate cannot be negative.");
+                      } else if (val > 100) {
+                        setReturnDuringError("Return rate cannot exceed 100%.");
+                      } else {
+                        setReturnDuringError("");
+                      }
+                      updateInput(
+                        "expectedReturnDuringRetirement",
+                        e.target.value,
+                      );
+                    }}
+                    className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${returnDuringError ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
                   />
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-[var(--color-symbols)]"
+                  >
+                    %
+                  </span>
                 </div>
+                {returnDuringError && (
+                  <p
+                    role="alert"
+                    className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                  >
+                    {returnDuringError}
+                  </p>
+                )}
                 <p className="text-xs">
                   Annual investment return rate during retirement.
                 </p>
               </div>
             )}
 
-{/* Expected Return Input - SAVINGS TAB */}
-{activeTab === "savings" && (
-  <div className="space-y-2">
-    <label className="block text-sm text-foreground">
-      Expected annual return before retirement (%)
-    </label>
-    <div className="relative">
-      <input
-        type="number"
-        min="0"
-        step="0.1"
-        value={inputs.expectedReturnBeforeRetirement || ""}
-        onChange={(e) => updateInput("expectedReturnBeforeRetirement", e.target.value)}
-        className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-      />
-    </div>
-    <p className="text-xs">
-      Annual investment return rate before retirement.
-    </p>
-  </div>
-)}
+            {/* Expected Return Input - SAVINGS TAB */}
+            {activeTab === "savings" && (
+              <div className="space-y-2">
+                <label className="block text-sm text-foreground">
+                  Expected annual return before retirement
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={inputs.expectedReturnBeforeRetirement || ""}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      if (val < 0) {
+                        setReturnBeforeError("Return rate cannot be negative.");
+                      } else if (val > 100) {
+                        setReturnBeforeError("Return rate cannot exceed 100%.");
+                      } else {
+                        setReturnBeforeError("");
+                      }
+                      updateInput(
+                        "expectedReturnBeforeRetirement",
+                        e.target.value,
+                      );
+                    }}
+                    className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${returnBeforeError ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-[var(--color-symbols)]"
+                  >
+                    %
+                  </span>
+                </div>
+                {returnBeforeError && (
+                  <p
+                    role="alert"
+                    className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                  >
+                    {returnBeforeError}
+                  </p>
+                )}
+                <p className="text-xs">
+                  Annual investment return rate before retirement.
+                </p>
+              </div>
+            )}
 
             {/* Calculate and Reset Buttons */}
 
@@ -326,7 +485,6 @@ export default function RetirementCalculator() {
                 </div>
               </>
             )}
-
           </div>
 
           {/* Right Column - Results */}
@@ -339,10 +497,15 @@ export default function RetirementCalculator() {
                     Required Retirement Balance
                   </p>
                   <p className="text-4xl font-bold text-lagunita">
-                    {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
+                    {isCalculated
+                      ? formatCurrency(results.requiredBalance)
+                      : "—"}
                   </p>
                   <p className="mt-3 mb-6 text-sm">
-                    This estimates the lump sum needed at retirement to fund your annual spending for {inputs.retirementLength} years, assuming a {inputs.expectedReturnDuringRetirement}% annual return during retirement.
+                    This estimates the lump sum needed at retirement to fund
+                    your annual spending for {inputs.retirementLength} years,
+                    assuming a {inputs.expectedReturnDuringRetirement}% annual
+                    return during retirement.
                   </p>
                 </div>
               </>
@@ -350,25 +513,29 @@ export default function RetirementCalculator() {
               <>
                 {/* Annual Savings Result */}
                 <div className="mb-8">
-                  <p className="font-bold text-xl mb-1">Required Retirement Balance</p>
+                  <p className="font-bold text-xl mb-1">
+                    Required Retirement Balance
+                  </p>
                   <p className="text-4xl font-bold text-lagunita">
-                    {isCalculated ? formatCurrency(results.requiredBalance) : "—"}
+                    {isCalculated
+                      ? formatCurrency(results.requiredBalance)
+                      : "—"}
                   </p>
                   <p className="mt-3 mb-6 text-sm">
-                    This estimates the lump sum needed at retirement to fund your annual spending 
-                    for {inputs.retirementLength} years, assuming a {inputs.expectedReturnDuringRetirement}% 
-                    annual return during retirement.
+                    This estimates the lump sum needed at retirement to fund
+                    your annual spending for {inputs.retirementLength} years,
+                    assuming a {inputs.expectedReturnDuringRetirement}% annual
+                    return during retirement.
                   </p>
-                  <p className="mb-1 font-bold">
-                    Required Annual Savings
-                  </p>
+                  <p className="mb-1 font-bold">Required Annual Savings</p>
                   <p className="text-4xl font-bold text-lagunita">
                     {formatCurrency(results.annualSavings)}
                   </p>
                   <p className="mt-3 mb-6 text-sm">
-                    Amount to save each year over {inputs.yearsToRetirement} years to reach your 
-                    target balance, assuming a {inputs.expectedReturnBeforeRetirement}% annual 
-                    return before retirement.
+                    Amount to save each year over {inputs.yearsToRetirement}{" "}
+                    years to reach your target balance, assuming a{" "}
+                    {inputs.expectedReturnBeforeRetirement}% annual return
+                    before retirement.
                   </p>
                 </div>
               </>
@@ -377,5 +544,5 @@ export default function RetirementCalculator() {
         </div>
       </div>
     </div>
-  )
+  );
 }
