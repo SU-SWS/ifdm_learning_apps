@@ -120,7 +120,7 @@
   --foreground: oklch(0.145 0 0);
   --button-green:  rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
-  --color-teal: rgba(74, 203, 225, 1);
+  --color-teal: rgba(0, 124, 146, 1);
   --color-symbols: #616877;
   --color-inline-error: #8C1515;
   --results-card-empty: rgba(102, 112, 133, 1);
@@ -178,6 +178,7 @@
   --additional-background: rgb(52, 51, 51);
   --button-green:  rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
+  --color-teal: rgba(74, 203, 225, 1);
   --color-symbols: oklch(0.985 0 0);
   --color-inline-error: #F4795B;
   --results-card-empty: oklch(0.985 0 0);
