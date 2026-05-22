@@ -26,29 +26,6 @@ const frequencyMap: Record<CompoundingFrequency, { periods: number; label: strin
   daily: { periods: 365, label: "Daily" },
 }
 
-function formatTimePeriod(totalPeriods: number, periodsPerYear: number): string {
-  const totalYears = totalPeriods / periodsPerYear
-  const years = Math.floor(totalYears)
-  const remainingPeriods = totalPeriods - (years * periodsPerYear)
-  const months = Math.round((remainingPeriods / periodsPerYear) * 12)
-
-  if (years === 0 && months === 0) return "0 months"
-  if (years === 0) {
-    return months === 1 ? "1 month" : `${months} months`
-  }
-  if (months === 0) {
-    return years === 1 ? "1 year" : `${years} years`
-  }
-  
-  const yearText = years === 1 ? "1 year" : `${years} years`
-  const monthText = months === 1 ? "1 month" : `${months} months`
-  return `${yearText} and ${monthText}`
-}
-
-function formatNumber(value: number): string {
-  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-}
-
 export default function PresentValueCalculator() {
   const [activeTab, setActiveTab] = useState("single")
   
