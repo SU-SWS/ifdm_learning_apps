@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { FiSun, FiMoon } from "react-icons/fi";
 
 const themes = [
-  { label: "Light", value: "light", icon: <FiSun size={20} /> },
-  { label: "Dark", value: "dark", icon: <FiMoon size={20} /> },
+  { label: "Light", value: "light", icon: <FiSun size={20} aria-hidden="true" /> },
+  { label: "Dark", value: "dark", icon: <FiMoon size={20} aria-hidden="true" /> },
 ];
 
 export default function ThemeToggle() {
@@ -29,9 +29,9 @@ export default function ThemeToggle() {
   // Don't render until component is mounted on client
   if (!mounted) {
     return (
-      <div className="flex gap-2 items-center justify-end mb-4">
-        <div className="px-3 py-1 rounded border bg-grey-light w-11 h-8"></div>
-        <div className="px-3 py-1 rounded border bg-grey-light w-11 h-8"></div>
+      <div role="group" aria-label="Theme" className="flex gap-2 items-center justify-end mb-4">
+        <div className="px-3 py-1 rounded border bg-grey-light w-11 h-8" aria-hidden="true"></div>
+        <div className="px-3 py-1 rounded border bg-grey-light w-11 h-8" aria-hidden="true"></div>
       </div>
     );
   }
@@ -46,6 +46,7 @@ export default function ThemeToggle() {
           }`}
           onClick={() => setTheme(t.value)}
           aria-label={t.label}
+          aria-pressed={theme === t.value}
         >
           {t.icon}
         </button>
