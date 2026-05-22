@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader } from "@/app/ui/components/card"
+import { Card, CardContent } from "@/app/ui/components/card"
 import { Label } from "@/app/ui/components/label"
 import { Input } from "@/app/ui/components/input"
 import { Button } from "@/app/ui/components/button"
@@ -170,24 +170,18 @@ export default function MortgageCalculator() {
       const totalSavings = currentNetCost - newNetCost
 
       let breakEvenMonths: number
-      let breakEvenMessage: string
 
       if (monthlySavings > 0) {
         breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
-        breakEvenMessage = closingCosts > 0
-          ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
-          : "No closing costs to recover - immediate savings!"
       } else if (monthlySavings < 0) {
         breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
-        breakEvenMessage = closingCosts > 0
-          ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
-          : "Despite higher monthly payments, you save overall on total interest"
       } else {
         breakEvenMonths = totalSavings > 0 ? 0 : Infinity
-        breakEvenMessage = totalSavings > 0
-          ? "Same monthly payment, but you save on total interest"
-          : "No financial benefit"
       }
+
+      const breakEvenMessage = breakEvenMonths === Infinity 
+        ? "You will not break even with this refinance"
+        : `Break even in ${Math.ceil(breakEvenMonths)} months`
 
       setRefinanceResults({
         currentMonthlyPayment,
@@ -207,29 +201,23 @@ export default function MortgageCalculator() {
       const totalSavings = totalCurrentCost - totalNewCost
 
       let breakEvenMonths: number
-      let breakEvenMessage: string
 
       if (monthlySavings > 0) {
         breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
-        breakEvenMessage = closingCosts > 0
-          ? `You'll recover closing costs in ${breakEvenMonths.toFixed(1)} months`
-          : "No closing costs to recover - immediate savings!"
+
       } else if (monthlySavings < 0) {
         if (totalSavings > 0) {
           breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
-          breakEvenMessage = closingCosts > 0
-            ? `Despite higher monthly payments, you'll save overall if you stay ${breakEvenMonths.toFixed(1)}+ months`
-            : "Despite higher monthly payments, you save overall on total interest"
         } else {
           breakEvenMonths = Infinity
-          breakEvenMessage = "This refinance costs more overall - not recommended"
         }
       } else {
         breakEvenMonths = totalSavings > 0 ? 0 : Infinity
-        breakEvenMessage = totalSavings > 0
-          ? "Same monthly payment, but you save on total interest"
-          : "No financial benefit"
       }
+
+      const breakEvenMessage = breakEvenMonths === Infinity 
+        ? "You will not break even with this refinance"
+        : `Break even in ${Math.ceil(breakEvenMonths)} months`
 
       setRefinanceResults({
         currentMonthlyPayment,
@@ -438,7 +426,7 @@ export default function MortgageCalculator() {
                     Analyze if refinancing makes financial sense for your
                     situation.
                   </p>
-                  {!currentBalance ? (
+                  {currentBalance === null ? (
                     <div className="rounded-xl border-1 border-grey-border bg-[var(--info-popup-background)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <p className="text-sm inline">
                         Start by calculating your current mortgage balance
@@ -462,7 +450,7 @@ export default function MortgageCalculator() {
                         <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
                           Current Loan Terms
                         </h2>
-                        {currentBalance ? (
+                        {currentBalance !== null ? (
                           <div className="rounded-lg border border-[var(--border)] bg-[var(--results-card-grey-background)] p-4">
                             <dl className="space-y-4">
                               <div>
