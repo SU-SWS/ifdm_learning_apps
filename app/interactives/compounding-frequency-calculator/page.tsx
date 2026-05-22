@@ -232,7 +232,6 @@ export default function CompoundInterestCalculator() {
                       setPeriods("0" + periods);
                     }
                   }}
-                  aria-describedby="periods-info"
                   className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
                 />
@@ -260,7 +259,6 @@ export default function CompoundInterestCalculator() {
                   onChange={(e) =>
                     setSelectedCompounding(e.target.value as CompoundingPeriod)
                   }
-                  aria-describedby="compounding-frequency-info"
                   className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                 >
                   {compoundingOptions.map((option) => (
