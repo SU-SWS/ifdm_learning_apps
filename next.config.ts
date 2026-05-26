@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     output: 'export',
     trailingSlash: true,
-    basePath: '',
+    basePath: process.env.NEXT_BASE_PATH || '',
     eslint: {
         // Directories to run ESLint on during builds
         dirs: ['app'],
