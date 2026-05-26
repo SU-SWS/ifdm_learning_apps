@@ -287,7 +287,7 @@ export default function CompoundInterestCalculator() {
               <p className="text-3xl font-bold text-lagunita mb-5">
                 {formatCurrency(selectedResult.finalAmount)}
               </p>
-              <p className="text-[16px] font-semibold mb-1">
+              <p className="text-[20px] font-bold mb-1">
                 Interest accrued over {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </p>
