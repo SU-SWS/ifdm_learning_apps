@@ -312,7 +312,7 @@ export default function MortgageCalculator() {
                             <div
                               id="rate-tooltip"
                               role="tooltip"
-                              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-[var(--info-popup-background)] text-navy border-1 border-grey-border text-xs p-4 
+                              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-[var(--info-popup-background)] border-1 border-grey-border text-xs p-4 
                  invisible group-hover:visible group-focus-within:visible
                  opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 
                  transition-opacity pointer-events-none z-10"
@@ -361,7 +361,9 @@ export default function MortgageCalculator() {
                             data-form-type="other" // Dashlane specifically
                             className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                         </div>
                       </div>
 
@@ -535,7 +537,9 @@ export default function MortgageCalculator() {
                               step="0.01"
                               className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                              $
+                            </span>
                           </div>
                           {refErrors.newLoanAmount && (
                             <p
@@ -670,11 +674,9 @@ export default function MortgageCalculator() {
                               step="1"
                               className="pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
-                            {refYearsIn && (
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold pointer-events-none">
-                                years
-                              </span>
-                            )}
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none">
+                              years
+                            </span>
                           </div>
                         </div>
 
