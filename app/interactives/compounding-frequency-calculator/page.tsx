@@ -20,10 +20,9 @@ const compoundingOptions: { value: CompoundingPeriod; label: string; periodsPerY
 ]
 
 function formatCurrency(value: number): string {
-  if (!isFinite(value)) return "$∞"
+  if (!isFinite(value)) return "-"
   if (value >= 1_000_000_000_000) return `$${(value / 1_000_000_000_000).toFixed(2)}T`
   if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -82,6 +81,10 @@ export default function CompoundInterestCalculator() {
 
   const [initialAmountError, setInitialAmountError] = useState<string>("")
   const [annualRateError, setAnnualRateError] = useState<string>("")
+  const hasError =
+  !!initialAmountError ||
+  !!annualRateError ||
+  Number(periods) > maxPeriods
 
   type CompoundingPeriod = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
 
@@ -299,15 +302,15 @@ export default function CompoundInterestCalculator() {
                 Balance after {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </h2>
-              <p className="text-3xl font-bold text-lagunita mb-5 overflow-x-auto">
-                {formatCurrency(selectedResult.finalAmount)}
+              <p className="text-3xl/normal font-bold text-lagunita mb-5 overflow-auto">
+                {hasError ? "-" : formatCurrency(selectedResult.finalAmount)}
               </p>
               <p className="text-[16px] font-semibold mb-1">
                 Interest accrued over {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </p>
-              <p className="text-3xl font-bold text-foreground overflow-x-auto">
-                {formatCurrency(selectedResult.interestEarned)}
+              <p className="text-3xl/normal font-bold text-foreground overflow-auto">
+                {hasError ? "-" : formatCurrency(selectedResult.interestEarned)}
               </p>
               <p className="text-[16px] font-semibold text-foreground">
                 With{" "}
@@ -385,10 +388,10 @@ export default function CompoundInterestCalculator() {
                         : result.totalPeriods.toFixed(2)}
                     </td>
                     <td className="text-right px-4 py-3 border-b overflow-x-auto">
-                      {formatCurrency(result.finalAmount)}
+                      {hasError ? "-" : formatCurrency(result.finalAmount)}
                     </td>
                     <td className="text-right px-4 py-3 border-b overflow-x-auto">
-                      {formatCurrency(result.interestEarned)}
+                      {hasError ? "-" : formatCurrency(result.interestEarned)}
                     </td>
                   </tr>
                 ))}
@@ -417,11 +420,11 @@ export default function CompoundInterestCalculator() {
                 </div>
                 <div className="mt-1">
                   <span className="block font-semibold">Final Amount</span>
-                  <span className="block overflow-auto">{formatCurrency(result.finalAmount)}</span>
+                  <span className="block overflow-auto">{hasError ? "-" : formatCurrency(result.finalAmount)}</span>
                 </div>
                 <div className="mt-1">
                   <span className="block font-semibold">Interest Accrued</span>
-                  <span className="block overflow-x-auto">{formatCurrency(result.interestEarned)}</span>
+                  <span className="block overflow-x-auto">{hasError ? "-" : formatCurrency(result.interestEarned)}</span>
                 </div>
               </div>
             ))}
