@@ -47,7 +47,7 @@ export default function InfoPopover({
         <Popover.Content
           side="top"
           align="center"
-          className="z-50 w-63 center rounded-md border-2 border-lagunita m-auto p-4 pt-1 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] bg-[var(--card-background)] rounded-3xl"
+          className="z-50 w-63 center rounded-md border-2 border-[var(--color-teal)] m-auto p-4 pt-1 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] bg-[var(--card-background)]"
           onBlur={handleContentBlur}
         >
           <div
@@ -64,7 +64,7 @@ export default function InfoPopover({
               className="flex flex-row justify-end text-sm font-semibold p-0 mr-[-1em] underline text-[var(--popover-link)] hover:text-[var(--popover-link-hover)] hover:no-underline  
               cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-lagunita"
             >
-              <X className="w-6 h-6 text-lagunita font-bold" />
+              <X className="w-6 h-6 text-[var(--color-teal)] font-bold" />
             </a>
             <h3 id="info-popover-title" className="font-semibold text-sm mb-1 text-[var(--foreground)]">
               {title}

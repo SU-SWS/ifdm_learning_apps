@@ -302,7 +302,7 @@ export default function CompoundInterestCalculator() {
                 Balance after {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </h2>
-              <p className="text-3xl/normal font-bold text-lagunita mb-5 overflow-auto">
+              <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
                 {hasError ? "-" : formatCurrency(selectedResult.finalAmount)}
               </p>
               <p className="text-[16px] font-semibold mb-1">
@@ -314,7 +314,7 @@ export default function CompoundInterestCalculator() {
               </p>
               <p className="text-[16px] font-semibold text-foreground">
                 With{" "}
-                <span className="text-lagunita">
+                <span className="text-[var(--color-teal)]">
                   {selectedCompounding === "semi-annually"
                     ? "semi-annual"
                     : selectedCompounding === "annually"
