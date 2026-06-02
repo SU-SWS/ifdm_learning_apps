@@ -21,6 +21,9 @@ const compoundingOptions: { value: CompoundingPeriod; label: string; periodsPerY
 
 function formatCurrency(value: number): string {
   if (!isFinite(value)) return "$∞"
+  if (value >= 1_000_000_000_000) return `$${(value / 1_000_000_000_000).toFixed(2)}T`
+  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -247,7 +250,7 @@ export default function CompoundInterestCalculator() {
               </div>
               {Number(periods) > maxPeriods && (
                 <p role="alert" className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold">
-                  Number of periods cannot exceed {maxPeriods} ({selectedOption.label.toLowerCase()} compounding caps at 100 years).
+                  Number of periods cannot exceed {maxPeriods.toLocaleString("en-US")} ({selectedOption.label.toLowerCase()} compounding caps at 100 years).
                 </p>
               )}
             </div>
@@ -403,22 +406,22 @@ export default function CompoundInterestCalculator() {
                     : "bg-card"
                 }`}
               >
-                <p className="font-semibold mb-2">{result.label}</p>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Periods</span>
-                  <span>
+                <p className="font-bold mb-2">{result.label}</p>
+                <div>
+                  <span className="block font-semibold">Periods</span>
+                  <span className="block">
                     {result.totalPeriods % 1 === 0
                       ? result.totalPeriods.toFixed(0)
                       : result.totalPeriods.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="text-muted-foreground">Final Amount</span>
-                  <span>{formatCurrency(result.finalAmount)}</span>
+                <div className="mt-1">
+                  <span className="block font-semibold">Final Amount</span>
+                  <span className="block overflow-auto">{formatCurrency(result.finalAmount)}</span>
                 </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="text-muted-foreground">Interest Accrued</span>
-                  <span>{formatCurrency(result.interestEarned)}</span>
+                <div className="mt-1">
+                  <span className="block font-semibold">Interest Accrued</span>
+                  <span className="block overflow-x-auto">{formatCurrency(result.interestEarned)}</span>
                 </div>
               </div>
             ))}
