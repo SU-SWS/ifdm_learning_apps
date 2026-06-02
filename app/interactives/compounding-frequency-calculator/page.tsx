@@ -42,7 +42,7 @@ function calculateCompoundInterest(
   return { finalAmount, interestEarned, totalPeriods }
 }
 
-const MAX_INITIAL_AMOUNT = 50_000_000_000_000 // 50 trillion
+const MAX_INITIAL_AMOUNT = 100_000_000 // 100 million
 const MAX_ANNUAL_RATE = 1000 // 1,000%
 
 export default function CompoundInterestCalculator() {
@@ -59,6 +59,8 @@ export default function CompoundInterestCalculator() {
     compoundingOptions.find((o) => o.value === selectedCompounding)!,
     [selectedCompounding]
   )
+
+  const maxPeriods = selectedOption.periodsPerYear * 100 // Limit to 100 years worth of periods for the selected frequency
 
   const selectedResult = useMemo(() => {
     return calculateCompoundInterest(principal, rate, totalPeriods, selectedOption.periodsPerYear)
@@ -128,12 +130,15 @@ export default function CompoundInterestCalculator() {
                       numericValue > MAX_INITIAL_AMOUNT
                     ) {
                       setInitialAmountError(
-                        "Initial amount cannot exceed $50,000,000,000,000.",
+                        "Initial amount cannot exceed $100,000,000.",
                       );
                       return;
                     }
                     setInitialAmountError("");
                     setInitialAmount(numericPart);
+                  }}
+                  onBlur={() => {
+                    if (initialAmount.startsWith(".")) setInitialAmount("0" + initialAmount);
                   }}
                   min="0"
                   className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -179,6 +184,9 @@ export default function CompoundInterestCalculator() {
                     }
                     setAnnualRateError("");
                     setAnnualRate(numericPart);
+                  }}
+                  onBlur={() => {
+                    if (annualRate.startsWith(".")) setAnnualRate("0" + annualRate);
                   }}
                   className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
@@ -234,8 +242,14 @@ export default function CompoundInterestCalculator() {
                   }}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
+                  max={maxPeriods}
                 />
               </div>
+              {Number(periods) > maxPeriods && (
+                <p role="alert" className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold">
+                  Number of periods cannot exceed {maxPeriods} ({selectedOption.label.toLowerCase()} compounding caps at 100 years).
+                </p>
+              )}
             </div>
 
             <div>
@@ -256,9 +270,7 @@ export default function CompoundInterestCalculator() {
                 <select
                   id="compounding-frequency"
                   value={selectedCompounding}
-                  onChange={(e) =>
-                    setSelectedCompounding(e.target.value as CompoundingPeriod)
-                  }
+                  onChange={(e) => setSelectedCompounding(e.target.value as CompoundingPeriod)}
                   className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                 >
                   {compoundingOptions.map((option) => (
@@ -284,14 +296,14 @@ export default function CompoundInterestCalculator() {
                 Balance after {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </h2>
-              <p className="text-3xl font-bold text-lagunita mb-5">
+              <p className="text-3xl font-bold text-lagunita mb-5 overflow-x-auto">
                 {formatCurrency(selectedResult.finalAmount)}
               </p>
               <p className="text-[16px] font-semibold mb-1">
                 Interest accrued over {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </p>
-              <p className="text-3xl font-bold text-foreground">
+              <p className="text-3xl font-bold text-foreground overflow-x-auto">
                 {formatCurrency(selectedResult.interestEarned)}
               </p>
               <p className="text-[16px] font-semibold text-foreground">
@@ -322,29 +334,29 @@ export default function CompoundInterestCalculator() {
             period.
           </p>
 
-          <div className="overflow-hidden bg-card">
-            <table className="min-w-full">
+          <div className="hidden md:block overflow-x-auto bg-card">
+            <table className="w-full">
               <thead>
                 <tr>
-                  <th scope="col" className="font-semibold text-left px-4 py-3">
+                  <th scope="col" className="w-1/4 font-semibold text-left px-4 py-3">
                     Compounding Frequency
                   </th>
                   <th
                     scope="col"
-                    className="font-semibold text-right px-4 py-3"
+                    className="w-1/4 font-semibold text-right px-4 py-3"
                   >
                     Number of <br />
                     Compounding Periods
                   </th>
                   <th
                     scope="col"
-                    className="font-semibold text-right px-4 py-3"
+                    className="w-1/4 font-semibold text-right px-4 py-3"
                   >
                     Final Amount
                   </th>
                   <th
                     scope="col"
-                    className="font-semibold text-right px-4 py-3"
+                    className="w-1/4 font-semibold text-right px-4 py-3"
                   >
                     Interest Accrued
                   </th>
@@ -364,27 +376,58 @@ export default function CompoundInterestCalculator() {
                     }
                   >
                     <td className="px-4 py-3 border-b">{result.label}</td>
-                    <td className="text-right px-4 py-3 border-b">
+                    <td className="text-right px-4 py-3 border-b overflow-x-auto">
                       {result.totalPeriods % 1 === 0
                         ? result.totalPeriods.toFixed(0)
                         : result.totalPeriods.toFixed(2)}
                     </td>
-                    <td className="text-right px-4 py-3 border-b">
+                    <td className="text-right px-4 py-3 border-b overflow-x-auto">
                       {formatCurrency(result.finalAmount)}
                     </td>
-                    <td className="text-right px-4 py-3 border-b">
+                    <td className="text-right px-4 py-3 border-b overflow-x-auto">
                       {formatCurrency(result.interestEarned)}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="pt-3 font-bold text-sm">
-              Over the same time period, more frequent compounding results in
-              more interest accrued, assuming the annual interest rate stays the
-              same.
-            </p>
           </div>
+          {/* Card layout - visible on small screens only */}
+          <div className="md:hidden space-y-3">
+            {comparisonResults.map((result) => (
+              <div
+                key={result.value}
+                className={`rounded-xl p-4 border ${
+                  selectedCompounding === result.value
+                    ? "bg-[var(--grey-background)] text-[var(--color-teal)] font-bold"
+                    : "bg-card"
+                }`}
+              >
+                <p className="font-semibold mb-2">{result.label}</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Periods</span>
+                  <span>
+                    {result.totalPeriods % 1 === 0
+                      ? result.totalPeriods.toFixed(0)
+                      : result.totalPeriods.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-muted-foreground">Final Amount</span>
+                  <span>{formatCurrency(result.finalAmount)}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-muted-foreground">Interest Accrued</span>
+                  <span>{formatCurrency(result.interestEarned)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="pt-3 font-bold text-sm">
+            Over the same time period, more frequent compounding results in
+            more interest accrued, assuming the annual interest rate stays the
+            same.
+          </p>
         </section>
       </div>
     </div>
