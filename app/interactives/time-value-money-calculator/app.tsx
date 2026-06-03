@@ -458,7 +458,7 @@ export function TVMCalculator() {
             {/* Present Value */}
             {solveFor !== "PV" && (
               <div className="space-y-2">
-                <Label htmlFor="pv" className="block font-semibold text-foreground mb-2">Present Value</Label>
+                <Label htmlFor="pv" className="block font-semibold text-foreground mb-2">Present value</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
                   <Input id="pv" type="text" inputMode="decimal" value={presentValue}
@@ -473,7 +473,7 @@ export function TVMCalculator() {
             {/* Payment (early position for RATE/NPER) */}
             {(solveFor === "RATE" || solveFor === "NPER") && (
               <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per Period</Label>
+                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per period</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
                   <Input id="pmt" type="text" inputMode="decimal" value={payment}
@@ -488,7 +488,7 @@ export function TVMCalculator() {
             {/* Future Value */}
             {solveFor !== "FV" && (
               <div className="space-y-2">
-                <Label htmlFor="fv" className="block font-semibold text-foreground mb-2">Future Value</Label>
+                <Label htmlFor="fv" className="block font-semibold text-foreground mb-2">Future value</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
                   <Input id="fv" type="text" inputMode="decimal" value={futureValue}
@@ -503,7 +503,7 @@ export function TVMCalculator() {
             {/* Payment (normal position) */}
             {solveFor !== "PMT" && solveFor !== "RATE" && solveFor !== "NPER" && (
               <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per Period</Label>
+                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per period</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
                   <Input id="pmt" type="text" inputMode="decimal" value={payment}
@@ -518,7 +518,7 @@ export function TVMCalculator() {
             {/* Annual Rate */}
             {solveFor !== "RATE" && (
               <div className="space-y-2">
-                <Label htmlFor="rate" className="block font-semibold text-foreground mb-2">Annual Interest Rate</Label>
+                <Label htmlFor="rate" className="block font-semibold text-foreground mb-2">Annual interest rate</Label>
                 <div className="relative">
                   <Input id="rate" type="text" inputMode="decimal" value={annualRate}
                     onChange={(e) => handleInputChange(e.target.value, setAnnualRate)}
@@ -533,7 +533,7 @@ export function TVMCalculator() {
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
               <div className="space-y-2">
-                <Label htmlFor="periods" className="block font-semibold text-foreground mb-2">Number of Periods</Label>
+                <Label htmlFor="periods" className="block font-semibold text-foreground mb-2">Number of periods</Label>
                 <Input id="periods" type="text" inputMode="numeric" value={periods}
                   onChange={(e) => { const val = e.target.value; if (val === "" || /^\d*$/.test(val)) setPeriods(val) }}
                   className={`border-border bg-card ${getFieldError("periods") ? "border-destructive" : ""}`} />
@@ -543,7 +543,7 @@ export function TVMCalculator() {
 
             {/* Compounding Frequency */}
             <div className="space-y-2">
-              <Label htmlFor="compounding" className="block font-semibold text-foreground mb-2">Compounding Frequency</Label>
+              <Label htmlFor="compounding" className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
               <Select value={compoundingFrequency} onValueChange={setCompoundingFrequency}>
                 <SelectTrigger id="compounding" className="border-border bg-card">
                   <SelectValue placeholder="Select frequency" />
