@@ -151,6 +151,22 @@ export function TVMCalculator() {
 
   const calculate = useCallback(() => {
     setCalcError("")
+    
+    // ── Don't calculate (or show errors) until all required fields are filled ──
+  const requiredFields: Record<SolveFor, string[]> = {
+    FV: [presentValue, annualRate, periods],
+    PV: [futureValue, annualRate, periods],
+    PMT: [presentValue, futureValue, annualRate, periods],
+    RATE: [presentValue, futureValue, periods],
+    NPER: [presentValue, futureValue, annualRate],
+  };
+  const allFilled = requiredFields[solveFor].every((f) => f.trim() !== "");
+  if (!allFilled) {
+    setResult(null);
+    setFieldErrors([]);
+    return;
+  }
+
     const errors = validateInputs()
     setFieldErrors(errors)
     if (errors.length > 0) { setResult(null); return }
@@ -325,23 +341,199 @@ export function TVMCalculator() {
   const currentOption = SOLVE_OPTIONS.find(o => o.value === solveFor)
 
   const getExample = () => {
-    const examples = {
-      saving: [
-        {
-          title: "Simple Savings Account",
-          bullets: ["Starting balance: $5,000", "Annual rate: 2%", "Time period: 10 years"],
-          example: { solveFor: "FV" as SolveFor, pv: "5000", rate: "2", periods: "10", compoundFreq: "1" }
-        }
-      ],
-      borrowing: [
-        {
-          title: "Loan Payment Calculation",
-          bullets: ["Loan amount: $200,000", "Annual rate: 4.5%", "Time period: 30 years", "Monthly payments"],
-          example: { solveFor: "PMT" as SolveFor, pv: "200000", rate: "4.5", periods: "360", compoundFreq: "12", paymentFreq: "12", paymentFreqMode: "different" as PaymentFrequencyMode }
-        }
-      ]
+    if (exampleMode === "saving") {
+      switch (solveFor) {
+        case "FV":
+          return {
+            title: "Future Value Example: Solve for a future savings balance",
+            bullets: [
+              "Present value (initial deposit): negative",
+              "Payment per period (ongoing deposits): negative",
+              "Future value (account balance at the end): positive",
+            ],
+            example: {
+              solveFor: "FV" as SolveFor,
+              pv: "-10000",
+              pmt: "-5000",
+              rate: "8",
+              periods: "40",
+              compoundFreq: "1",
+              paymentFreq: "1",
+            },
+          };
+        case "PV":
+          return {
+            title:
+              "Present Value Example: Solve for the initial deposit needed to reach a savings goal",
+            bullets: [
+              "Payment per period (ongoing deposits): negative",
+              "Future value (target savings goal): positive",
+              "Present value (initial deposit needed): negative",
+            ],
+            example: {
+              solveFor: "PV" as SolveFor,
+              pmt: "-250",
+              fv: "20000",
+              rate: "4",
+              periods: "36",
+              compoundFreq: "12",
+              paymentFreq: "12",
+            },
+          };
+        case "PMT":
+          return {
+            title:
+              "Payment Example: Solve for the required savings contribution to reach a savings goal",
+            bullets: [
+              "Present value (initial deposit): negative",
+              "Future value (target savings goal): positive",
+              "Payment per period (required contribution): negative",
+            ],
+            example: {
+              solveFor: "PMT" as SolveFor,
+              pv: "-50000",
+              fv: "1000000",
+              rate: "7",
+              periods: "30",
+              compoundFreq: "1",
+              paymentFreq: "1",
+            },
+          };
+        case "RATE":
+          return {
+            title: "Interest Rate Example: Solve for the interest rate earned",
+            bullets: [
+              "Present value (initial deposit): negative",
+              "Payment per period (ongoing deposits): negative",
+              "Future value (ending balance): positive",
+            ],
+            example: {
+              solveFor: "RATE" as SolveFor,
+              pv: "-10000",
+              pmt: "-2000",
+              fv: "150000",
+              periods: "30",
+              compoundFreq: "1",
+              paymentFreq: "1",
+            },
+          };
+        case "NPER":
+          return {
+            title:
+              "Number of Periods Example: Solve for time to reach savings goal",
+            bullets: [
+              "Present value (initial deposit): negative",
+              "Payment per period (ongoing deposits): negative",
+              "Future value (target savings goal): positive",
+            ],
+            example: {
+              solveFor: "NPER" as SolveFor,
+              pv: "-5000",
+              pmt: "-300",
+              fv: "30000",
+              rate: "3.5",
+              compoundFreq: "12",
+              paymentFreq: "12",
+            },
+          };
+      }
+    } else {
+      switch (solveFor) {
+        case "FV":
+          return {
+            title: "Future Value Example: Solve for remaining loan balance",
+            bullets: [
+              "Present value (loan amount received): positive",
+              "Payment per period (loan payments): negative",
+              "Future value (remaining balance): negative or zero",
+            ],
+            example: {
+              solveFor: "FV" as SolveFor,
+              pv: "250000",
+              pmt: "-1500",
+              rate: "6.5",
+              periods: "120",
+              compoundFreq: "12",
+              paymentFreq: "12",
+            },
+          };
+        case "PV":
+          return {
+            title:
+              "Present Value Example: Solve for the loan amount you can afford",
+            bullets: [
+              "Payment per period (loan payments): negative",
+              "Future value (remaining balance): zero",
+              "Present value (loan amount): positive",
+            ],
+            example: {
+              solveFor: "PV" as SolveFor,
+              pmt: "-400",
+              fv: "0",
+              rate: "6.5",
+              periods: "60",
+              compoundFreq: "12",
+              paymentFreq: "12",
+            },
+          };
+        case "PMT":
+          return {
+            title: "Payment Example: Solve for the loan payment amount",
+            bullets: [
+              "Present value (loan amount): positive",
+              "Future value (remaining balance): zero",
+              "Payment per period (required payment): negative",
+            ],
+            example: {
+              solveFor: "PMT" as SolveFor,
+              pv: "400000",
+              fv: "0",
+              rate: "6",
+              periods: "360",
+              compoundFreq: "12",
+              paymentFreq: "12",
+            },
+          };
+        case "RATE":
+          return {
+            title: "Interest Rate Example: Solve for the loan interest rate",
+            bullets: [
+              "Present value (loan amount): positive",
+              "Payment per period (loan payments): negative",
+              "Future value (remaining balance): zero",
+            ],
+            example: {
+              solveFor: "RATE" as SolveFor,
+              pv: "25000",
+              pmt: "-500",
+              fv: "0",
+              periods: "60",
+              compoundFreq: "12",
+              paymentFreq: "12",
+            },
+          };
+        case "NPER":
+          return {
+            title:
+              "Number of Periods Example: Solve for time to pay off credit card",
+            bullets: [
+              "Present value (credit card balance): positive",
+              "Payment per period (monthly payments): negative",
+              "Future value (remaining balance): zero",
+            ],
+            example: {
+              solveFor: "NPER" as SolveFor,
+              pv: "4000",
+              pmt: "-250",
+              fv: "0",
+              rate: "18",
+              compoundFreq: "365",
+              paymentFreq: "12",
+              paymentFreqMode: "different" as PaymentFrequencyMode,
+            },
+          };
+      }
     }
-    return examples[exampleMode]?.[0]
   }
 
   const HowToUseInfoBox = () => {
@@ -396,13 +588,13 @@ export function TVMCalculator() {
                   </div>
                   {currentExample && (
                     <div className="space-y-2">
-                      <p className="text-foreground font-medium">{currentExample.title}</p>
+                      <p className="text-foreground font-bold">{currentExample.title}</p>
                       <ul className="space-y-1 ml-4 list-disc">
                         {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
                       </ul>
                       <button
                         onClick={(e) => { e.stopPropagation(); loadExample(currentExample.example) }}
-                        className="text-primary hover:underline text-sm"
+                        className="hover:underline text-sm text-[var(--color-teal)] transition-colors mt-2"
                       >
                         See numeric example
                       </button>
@@ -612,8 +804,8 @@ export function TVMCalculator() {
           </section>
 
           {/* Results Card */}
-          <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
-            <CardContent className="p-0">
+          <Card className="w-full lg:w-1/2">
+            <CardContent className="w-full  bg-[var(--card-background)] rounded-3xl p-[32px]">
               <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
               {calcError ? (
                 <p className="text-destructive font-medium text-lg">{calcError}</p>
