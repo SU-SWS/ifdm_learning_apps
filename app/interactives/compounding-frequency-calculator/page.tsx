@@ -138,13 +138,15 @@ export default function CompoundInterestCalculator() {
                       setInitialAmountError(
                         "Initial amount cannot exceed $100,000,000.",
                       );
-                      return;
+                      setInitialAmount(numericPart); // ← update state even on error
+                    } else {
+                      setInitialAmountError("");
+                      setInitialAmount(numericPart);
                     }
-                    setInitialAmountError("");
-                    setInitialAmount(numericPart);
                   }}
                   onBlur={() => {
-                    if (initialAmount.startsWith(".")) setInitialAmount("0" + initialAmount);
+                    if (initialAmount.startsWith("."))
+                      setInitialAmount("0" + initialAmount);
                   }}
                   min="0"
                   className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -175,6 +177,7 @@ export default function CompoundInterestCalculator() {
                   id="annual-rate"
                   type="text"
                   value={annualRate}
+                  // Annual rate onChange
                   onChange={(e) => {
                     const input = e.target.value;
                     const numericPart = input.replace(/[^0-9.]/g, "");
@@ -186,13 +189,15 @@ export default function CompoundInterestCalculator() {
                       setAnnualRateError(
                         "Annual interest rate cannot exceed 1,000%.",
                       );
-                      return;
+                      setAnnualRate(numericPart); // ← update state even on error
+                    } else {
+                      setAnnualRateError("");
+                      setAnnualRate(numericPart);
                     }
-                    setAnnualRateError("");
-                    setAnnualRate(numericPart);
                   }}
                   onBlur={() => {
-                    if (annualRate.startsWith(".")) setAnnualRate("0" + annualRate);
+                    if (annualRate.startsWith("."))
+                      setAnnualRate("0" + annualRate);
                   }}
                   className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
@@ -248,12 +253,17 @@ export default function CompoundInterestCalculator() {
                   }}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min="0"
-                  max={maxPeriods}
                 />
               </div>
               {Number(periods) > maxPeriods && (
-                <p role="alert" className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold">
-                  Number of periods cannot exceed {maxPeriods.toLocaleString("en-US")} ({selectedOption.label.toLowerCase()} compounding caps at 100 years).
+                <p
+                  role="alert"
+                  className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
+                >
+                  Number of periods cannot exceed{" "}
+                  {maxPeriods.toLocaleString("en-US")} (
+                  {selectedOption.label.toLowerCase()} compounding caps at 100
+                  years).
                 </p>
               )}
             </div>
@@ -276,7 +286,9 @@ export default function CompoundInterestCalculator() {
                 <select
                   id="compounding-frequency"
                   value={selectedCompounding}
-                  onChange={(e) => setSelectedCompounding(e.target.value as CompoundingPeriod)}
+                  onChange={(e) =>
+                    setSelectedCompounding(e.target.value as CompoundingPeriod)
+                  }
                   className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                 >
                   {compoundingOptions.map((option) => (
@@ -344,7 +356,10 @@ export default function CompoundInterestCalculator() {
             <table className="w-full">
               <thead>
                 <tr>
-                  <th scope="col" className="w-1/4 font-semibold text-left px-4 py-3">
+                  <th
+                    scope="col"
+                    className="w-1/4 font-semibold text-left px-4 py-3"
+                  >
                     Compounding Frequency
                   </th>
                   <th
@@ -420,19 +435,22 @@ export default function CompoundInterestCalculator() {
                 </div>
                 <div className="mt-1">
                   <span className="block font-semibold">Final Amount</span>
-                  <span className="block overflow-auto">{hasError ? "-" : formatCurrency(result.finalAmount)}</span>
+                  <span className="block overflow-auto">
+                    {hasError ? "-" : formatCurrency(result.finalAmount)}
+                  </span>
                 </div>
                 <div className="mt-1">
                   <span className="block font-semibold">Interest Accrued</span>
-                  <span className="block overflow-x-auto">{hasError ? "-" : formatCurrency(result.interestEarned)}</span>
+                  <span className="block overflow-x-auto">
+                    {hasError ? "-" : formatCurrency(result.interestEarned)}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
           <p className="pt-3 font-bold text-sm">
-            Over the same time period, more frequent compounding results in
-            more interest accrued, assuming the annual interest rate stays the
-            same.
+            Over the same time period, more frequent compounding results in more
+            interest accrued, assuming the annual interest rate stays the same.
           </p>
         </section>
       </div>
