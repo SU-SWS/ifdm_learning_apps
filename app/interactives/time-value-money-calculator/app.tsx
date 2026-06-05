@@ -588,13 +588,13 @@ export function TVMCalculator() {
                   </div>
                   {currentExample && (
                     <div className="space-y-2">
-                      <p className="text-foreground font-medium">{currentExample.title}</p>
+                      <p className="text-foreground font-bold">{currentExample.title}</p>
                       <ul className="space-y-1 ml-4 list-disc">
                         {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
                       </ul>
                       <button
                         onClick={(e) => { e.stopPropagation(); loadExample(currentExample.example) }}
-                        className="text-primary hover:underline text-sm"
+                        className="hover:underline text-sm text-[var(--color-teal)] transition-colors mt-2"
                       >
                         See numeric example
                       </button>
