@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
+import { Button } from "@/app/ui/components/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 import {
   Select,
@@ -52,6 +53,28 @@ export default function PresentValueCalculator() {
   const [finalAmountError, setFinalAmountError] = useState<string>("");
   const [paymentInterestRateError, setPaymentInterestRateError] = useState<string>("");
   const [numberOfPaymentsError, setNumberOfPaymentsError] = useState<string>("");
+
+  const resetSingle = () => {
+    setFutureValue("");
+    setInterestRate("");
+    setTimePeriod("");
+    setCompoundingFrequency("annually");
+    setFutureValueError("");
+    setInterestRateError("");
+    setTimePeriodError("");
+  }
+
+  const resetSeries = () => {
+    setPaymentAmount("");
+    setPaymentInterestRate("");
+    setNumberOfPayments("");
+    setPaymentFrequency("annually");
+    setFinalAmount("");
+    setPaymentAmountError("");
+    setPaymentInterestRateError("");
+    setNumberOfPaymentsError("");
+    setFinalAmountError("");
+  }
 
   const singleCalculations = useMemo(() => {
     const fv = parseFloat(futureValue) || 0
@@ -158,6 +181,12 @@ export default function PresentValueCalculator() {
                             );
                             return;
                           }
+                          if (val > 1000000000) {
+                            setFutureValueError(
+                              "Future value cannot exceed 1,000,000,000.",
+                            );
+                            return;
+                          }
                           setFutureValueError("");
                           setFutureValue(raw);
                         }}
@@ -167,6 +196,8 @@ export default function PresentValueCalculator() {
                           else setFutureValue("");
                         }}
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        min={0}
+                        max={1000000000}
                       />
                     </div>
                     {futureValueError && (
@@ -197,9 +228,9 @@ export default function PresentValueCalculator() {
                         onChange={(e) => {
                           const raw = e.target.value;
                           const val = Number(raw);
-                          if (val > 100) {
+                          if (val > 1000) {
                             setInterestRateError(
-                              "Annual interest rate cannot exceed 100%.",
+                              "Annual interest rate cannot exceed 1000%.",
                             );
                           } else {
                             setInterestRateError("");
@@ -214,7 +245,7 @@ export default function PresentValueCalculator() {
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${interestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                         min={0}
                         max={100}
-                        step={0.1}
+                        step={0.01}
                       />
                       <span
                         aria-hidden="true"
@@ -307,6 +338,15 @@ export default function PresentValueCalculator() {
                       The compounding frequency is equal to the payment
                       frequency.
                     </p>
+                    <Button
+                      type="button"
+                      variant="lagunita"
+                      size="sm"
+                      className="font-medium px-8 mt-4"
+                      onClick={resetSingle}
+                    >
+                      Reset
+                    </Button>
                   </div>
                 </div>
 
@@ -497,7 +537,7 @@ export default function PresentValueCalculator() {
                         onChange={(e) => {
                           const raw = e.target.value;
                           const val = Number(raw);
-                          if (val > 100) {
+                          if (val > 1000) {
                             setPaymentInterestRateError(
                               "Annual interest rate cannot exceed 100%.",
                             );
@@ -514,7 +554,7 @@ export default function PresentValueCalculator() {
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                         min={0}
                         max={100}
-                        step={0.1}
+                        step={0.01}
                       />
                       <span
                         aria-hidden="true"
@@ -607,6 +647,15 @@ export default function PresentValueCalculator() {
                       The compounding frequency is equal to the payment
                       frequency.
                     </p>
+                    <Button
+                      type="button"
+                      variant="lagunita"
+                      size="sm"
+                      className="mt-4 font-medium px-8"
+                      onClick={resetSeries}
+                    >
+                      Reset
+                    </Button>
                   </div>
                 </div>
 
