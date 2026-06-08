@@ -433,7 +433,8 @@ export function TVMCalculator() {
               fv: "30000",
               rate: "3.5",
               compoundFreq: "12",
-              paymentFreq: "12",
+              paymentFreqMode: "different" as PaymentFrequencyMode,
+              paymentFreq: "26",
             },
           };
       }
@@ -518,7 +519,7 @@ export function TVMCalculator() {
               "Number of Periods Example: Solve for time to pay off credit card",
             bullets: [
               "Present value (credit card balance): positive",
-              "Payment per period (monthly payments): negative",
+              "Payment per period (bi-weekly payments): negative",
               "Future value (remaining balance): zero",
             ],
             example: {
@@ -528,7 +529,7 @@ export function TVMCalculator() {
               fv: "0",
               rate: "18",
               compoundFreq: "365",
-              paymentFreq: "12",
+              paymentFreq: "26",
               paymentFreqMode: "different" as PaymentFrequencyMode,
             },
           };
@@ -625,6 +626,7 @@ export function TVMCalculator() {
                 onClick={() => {
                   if (option.value !== solveFor) {
                     setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
+                    setPaymentFrequencyMode("same")
                   }
                   setSolveFor(option.value)
                 }}
@@ -804,7 +806,7 @@ export function TVMCalculator() {
           </section>
 
           {/* Results Card */}
-          <Card className="w-full lg:w-1/2">
+          <Card className="w-full hidden md:block lg:w-1/2">
             <CardContent className="w-full  bg-[var(--card-background)] rounded-3xl p-[32px]">
               <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
               {calcError ? (
@@ -820,7 +822,7 @@ export function TVMCalculator() {
 
         {/* Mobile sticky footer */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-center justify-between">
             <div>
               <div className="text-xs ">{currentOption?.label}</div>
               {calcError ? (
