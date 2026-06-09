@@ -8,8 +8,8 @@
     "build": "echo \" \" > public/.nojekyll && next build && cp CNAME out/CNAME",
     "build:staging": "echo \" \" > public/.nojekyll && NEXT_BASE_PATH=/ifdm_learning_apps_staging next build",
     "predeploy": "node scripts/check-branch.js 1.x && yarn build",
-    "deploy": "gh-pages -d out",
-    "deploy:staging": "node scripts/check-branch.js dev && yarn build:staging && gh-pages -d out -r git@github.com:SU-SWS/ifdm_learning_apps_staging.git",
+    "deploy": "gh-pages -d out --dotfiles",
+    "deploy:staging": "node scripts/check-branch.js dev && yarn build:staging && gh-pages -d out --dotfiles -r git@github.com:SU-SWS/ifdm_learning_apps_staging.git",
     "start": "next start",
     "lint": "next lint"
   },
