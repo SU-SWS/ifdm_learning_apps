@@ -182,7 +182,7 @@
   --color-symbols: oklch(0.985 0 0);
   --color-inline-error: #F4795B;
   --results-card-empty: oklch(0.985 0 0);
-  --info-popup-background: rgba(239, 255, 252, 1);
+  --info-popup-background: rgba(35, 35, 35, 1);
 }
 
 @layer base {
