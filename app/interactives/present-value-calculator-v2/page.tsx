@@ -468,7 +468,7 @@ export default function PresentValueCalculator() {
                           role="tooltip"
                           className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-[var(--info-popup-background)] border-1 border-grey-border text-xs p-4 invisible group-hover:visible group-focus-within:visible opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none z-10"
                         >
-                          A lump sum recieved or paid at the end of the payment
+                          A lump sum received or paid at the end of the payment
                           series (also called final value or future value).
                         </div>
                       </div>
