@@ -64,6 +64,7 @@ export function TVMCalculator() {
   const [result, setResult] = useState<number | null>(null)
   const [calcError, setCalcError] = useState<string>("")
   const [fieldErrors, setFieldErrors] = useState<FieldError[]>([])
+  const [signError, setSignError] = useState<string>("")
   const [showHowToUse, setShowHowToUse] = useState<boolean>(false)
   const [showExamples, setShowExamples] = useState<boolean>(false)
   const [exampleMode, setExampleMode] = useState<"saving" | "borrowing">("saving")
@@ -149,8 +150,11 @@ export function TVMCalculator() {
   const getFieldError = (field: string): string | undefined =>
     fieldErrors.find(e => e.field === field)?.message
 
+  const displayError = calcError || signError
+
   const calculate = useCallback(() => {
     setCalcError("")
+    setSignError("")
     
     // ── Don't calculate (or show errors) until all required fields are filled ──
   const requiredFields: Record<SolveFor, string[]> = {
@@ -189,6 +193,19 @@ export function TVMCalculator() {
     const timingMultiplier = paymentTiming === "beginning" ? (1 + ratePerPeriod) : 1
 
     try {
+      // Require opposite signs for RATE/NPER solves: at least one cash flow must have opposite sign
+      if ((solveFor === "RATE" || solveFor === "NPER")) {
+        const allPositive = pv > 0 && pmt > 0 && fv > 0
+        const allNegative = pv < 0 && pmt < 0 && fv < 0
+        if (allPositive || allNegative) {
+          const which = solveFor === "RATE" ? "rate" : "number of periods"
+          setSignError(
+            `These values can't be solved. To find the ${which}, money paid out and money received need opposite signs — for example, enter what you invest as negative and what you receive as positive.`
+          )
+          setResult(null)
+          return
+        }
+      }
       let calculatedValue: number
 
       switch (solveFor) {
@@ -264,10 +281,24 @@ export function TVMCalculator() {
         case "NPER": {
           if (ratePerPeriod === 0) {
             if (pmt === 0 && payment === "0") throw new Error("Payment cannot be 0 when rate is 0")
-            calculatedValue = pmt === 0 ? 0 : -(pv + fv) / pmt
+            const calculatedNper = pmt === 0 ? 0 : -(pv + fv) / pmt
+            if (!isFinite(calculatedNper) || calculatedNper <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            calculatedValue = calculatedNper
           } else {
             const pmtAdj = pmt * timingMultiplier
-            calculatedValue = Math.log((pmtAdj - fv * ratePerPeriod) / (pmtAdj + pv * ratePerPeriod)) / Math.log(1 + ratePerPeriod)
+            const numerator = pmtAdj - fv * ratePerPeriod
+            const denominator = pmtAdj + pv * ratePerPeriod
+            const ratio = numerator / denominator
+            if (ratio <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            const calculatedNper = Math.log(ratio) / Math.log(1 + ratePerPeriod)
+            if (!isFinite(calculatedNper) || calculatedNper <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            calculatedValue = calculatedNper
           }
           break
         }
@@ -567,8 +598,8 @@ export function TVMCalculator() {
               </button>
               {showExamples && (
                 <div className="ml-4 pl-4 border-l-2 border-border/50 space-y-4">
-                  <div className="flex items-center text-xs">
-                    <span className=" mr-1">I am:</span>
+                  <div className="flex items-center text-sm">
+                    <span className="mr-1">I am:</span>
                     {(["saving", "borrowing"] as const).map(mode => (
                       <button
                         key={mode}
@@ -577,10 +608,10 @@ export function TVMCalculator() {
                           setExampleMode(mode)
                           setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
                         }}
-                        className={`px-1.5 py-0.5 rounded border transition-colors ${
+                        className={`px-1.5 py-0.5 mr-2 rounded border transition-colors ${
                           exampleMode === mode
-                            ? "border-green-500 bg-green-500/10 text-green-600"
-                            : "border-transparent  hover:text-foreground"
+                            ? "border-[var(--color-navy)] bg-white text-[var(--color-navy)]"
+                            : "border-white hover:underline hover:text-foreground"
                         }`}
                       >
                         {mode}
@@ -660,7 +691,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setPresentValue)}
                     className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("presentValue") && <p className="text-sm text-destructive">{getFieldError("presentValue")}</p>}
+                {getFieldError("presentValue") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("presentValue")}</p>}
               </div>
             )}
 
@@ -675,7 +706,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
                     className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-destructive">{getFieldError("payment")}</p>}
+                {getFieldError("payment") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>}
               </div>
             )}
 
@@ -690,7 +721,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setFutureValue)}
                     className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("futureValue") && <p className="text-sm text-destructive">{getFieldError("futureValue")}</p>}
+                {getFieldError("futureValue") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("futureValue")}</p>}
               </div>
             )}
 
@@ -705,7 +736,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
                     className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-destructive">{getFieldError("payment")}</p>}
+                {getFieldError("payment") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>}
               </div>
             )}
 
@@ -720,7 +751,7 @@ export function TVMCalculator() {
                     className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-destructive" : ""}`} />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
                 </div>
-                {getFieldError("annualRate") && <p className="text-sm text-destructive">{getFieldError("annualRate")}</p>}
+                {getFieldError("annualRate") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("annualRate")}</p>}
               </div>
             )}
 
@@ -731,7 +762,7 @@ export function TVMCalculator() {
                 <Input id="periods" type="text" inputMode="numeric" value={periods}
                   onChange={(e) => { const val = e.target.value; if (val === "" || /^\d*$/.test(val)) setPeriods(val) }}
                   className={`border-border bg-card ${getFieldError("periods") ? "border-destructive" : ""}`} />
-                {getFieldError("periods") && <p className="text-sm text-destructive">{getFieldError("periods")}</p>}
+                {getFieldError("periods") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("periods")}</p>}
               </div>
             )}
 
@@ -809,8 +840,8 @@ export function TVMCalculator() {
           <Card className="w-full hidden md:block lg:w-1/2">
             <CardContent className="w-full  bg-[var(--card-background)] rounded-3xl p-[32px]">
               <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
-              {calcError ? (
-                <p className="text-destructive font-medium text-lg">{calcError}</p>
+              {displayError ? (
+                <p className="text-[var(--color-inline-error)]">{displayError}</p>
               ) : result !== null ? (
                 <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">{formatResult(result)}</p>
               ) : (
@@ -825,8 +856,8 @@ export function TVMCalculator() {
           <div className="flex flex-col items-center justify-between">
             <div>
               <div className="text-xs ">{currentOption?.label}</div>
-              {calcError ? (
-                <p className="text-destructive font-medium">{calcError}</p>
+              {displayError ? (
+                <p className="text-[var(--color-inline-error)] font-medium">{displayError}</p>
               ) : result !== null ? (
                 <p className="text-2xl font-bold text-primary">{formatResult(result)}</p>
               ) : (
