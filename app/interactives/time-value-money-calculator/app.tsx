@@ -14,6 +14,8 @@ import {
 } from "@/app/ui/components/select"
 import { Info, ChevronDown, ChevronUp } from "lucide-react"
 import ThemeToggle from "@/app/lib/theme-toggle"
+import { FaPlus, FaMinus } from "react-icons/fa6"
+
 
 type SolveFor = "FV" | "PV" | "PMT" | "RATE" | "NPER"
 type PaymentTiming = "end" | "beginning"
@@ -66,7 +68,6 @@ export function TVMCalculator() {
   const [fieldErrors, setFieldErrors] = useState<FieldError[]>([])
   const [signError, setSignError] = useState<string>("")
   const [showHowToUse, setShowHowToUse] = useState<boolean>(false)
-  const [showExamples, setShowExamples] = useState<boolean>(false)
   const [exampleMode, setExampleMode] = useState<"saving" | "borrowing">("saving")
 
   const loadExample = (example: {
@@ -583,24 +584,17 @@ export function TVMCalculator() {
         {showHowToUse && (
           <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm  space-y-4">
             <div className="space-y-2">
-              <p className="text-foreground font-medium">Cash Flow Signs</p>
+              <p className="text-foreground font-bold">Cash Flow Signs</p>
               <p>This calculator uses signs to show the direction of money:</p>
-              <ul className="space-y-1 ml-4">
-                <li><strong className="text-foreground">Positive (+):</strong> cash inflow (money you receive)</li>
-                <li><strong className="text-foreground">Negative (−):</strong> cash outflow (money you pay)</li>
-              </ul>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowExamples(!showExamples) }}
-                className="flex items-center gap-2 hover:text-primary transition-colors mt-2"
-              >
-                <span className="text-foreground font-medium">Examples</span>
-                {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {showExamples && (
-                <div className="ml-4 pl-4 border-l-2 border-border/50 space-y-4">
-                  <div className="flex items-center text-sm">
-                    <span className="mr-1">I am:</span>
-                    {(["saving", "borrowing"] as const).map(mode => (
+              <div className="flex flex-row gap-2">
+                <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaPlus /> <strong >Positive &mdash; money you receive (cash in)</strong></div>
+                <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaMinus /> <strong >Negative &mdash; money you pay (cash out)</strong></div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center text-sm gap-3">
+                  <span className="mr-1">Example — I am:</span>
+                  <div className="inline-flex overflow-hidden rounded-md border border-border">
+                    {(["saving", "borrowing"] as const).map((mode, index) => (
                       <button
                         key={mode}
                         onClick={(e) => {
@@ -608,18 +602,19 @@ export function TVMCalculator() {
                           setExampleMode(mode)
                           setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
                         }}
-                        className={`px-1.5 py-0.5 mr-2 rounded border transition-colors ${
+                        className={`px-3 py-1 text-sm font-medium transition-colors ${
                           exampleMode === mode
-                            ? "border-[var(--color-navy)] bg-white text-[var(--color-navy)]"
-                            : "border-white hover:underline hover:text-foreground"
-                        }`}
+                            ? "hover:text-white hover:bg-[var(--color-lagunita)] bg-[var(--card-background)]"
+                            : "hover:text-white hover:bg-[var(--color-lagunita)] text-foreground"
+                        } ${index > 0 ? "border-l border-border" : ""}`}
                       >
                         {mode}
                       </button>
                     ))}
                   </div>
-                  {currentExample && (
-                    <div className="space-y-2">
+                </div>
+                {currentExample && (
+                    <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm ">
                       <p className="text-foreground font-bold">{currentExample.title}</p>
                       <ul className="space-y-1 ml-4 list-disc">
                         {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
@@ -633,9 +628,8 @@ export function TVMCalculator() {
                     </div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
         )}
       </div>
     )
@@ -678,7 +672,7 @@ export function TVMCalculator() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-5 w-full lg:w-1/2">
+          <section aria-label="Calculator inputs" className="space-y-5 mb-25 m:mb-0 w-full lg:w-1/2">
 
             {/* Present Value */}
             {solveFor !== "PV" && (
@@ -832,7 +826,7 @@ export function TVMCalculator() {
             </div>
 
             <div className="pt-2">
-              <Button onClick={clearAll} variant="lagunita" className="font-medium px-8">Reset</Button>
+              <Button onClick={clearAll} variant="lagunita" className="hidden md:block font-medium px-8">Reset</Button>
             </div>
           </section>
 
@@ -852,18 +846,16 @@ export function TVMCalculator() {
         </div>
 
         {/* Mobile sticky footer */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-8 shadow-lg">
           <div className="flex flex-col items-center justify-between">
-            <div>
-              <div className="text-xs ">{currentOption?.label}</div>
+              <div className="text-sm">{currentOption?.label}</div>
               {displayError ? (
                 <p className="text-[var(--color-inline-error)] font-medium">{displayError}</p>
               ) : result !== null ? (
                 <p className="text-2xl font-bold text-primary">{formatResult(result)}</p>
               ) : (
-                <p className="text-xl font-medium /50">Enter values above</p>
+                <p className="text-xl font-medium mb-2">Enter values above</p>
               )}
-            </div>
             <Button onClick={clearAll} variant="lagunita" size="sm">Reset</Button>
           </div>
         </div>
