@@ -292,7 +292,7 @@ export default function MortgageCalculator() {
                       </div>
                     </div>
                     <div className="relative">
-                      <span className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
+                      <span className="absolute text-[var(--color-symbols)] left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                       <input
                         type="number"
                         placeholder=""
@@ -335,8 +335,8 @@ export default function MortgageCalculator() {
                           />
                           <span className={`text-xs transition ${
                             downPaymentMode === 'percentage'
-                              ? 'text-black font-semibold'
-                              : 'text-black'
+                              ? 'font-semibold'
+                              : ''
                           }`}>
                             Percent
                           </span>
@@ -351,14 +351,16 @@ export default function MortgageCalculator() {
                               // FIX: Use unrounded calculatedHomePrice for accurate conversion
                               const amountValue = calculatedHomePrice * (downPaymentPercent / 100);
                               setDownPaymentAmount(amountValue);
-                              setDownPaymentAmountInput(Math.round(amountValue).toString());
+                              setDownPaymentAmountInput(
+                                calculatedHomePrice > 0 ? Math.round(amountValue).toString() : ''
+                              );
                             }}
                             className="w-4 h-4 accent-lagunita cursor-pointer"
                           />
                           <span className={`text-xs transition ${
                             downPaymentMode === 'dollar'
-                              ? 'text-black font-semibold'
-                              : 'text-black'
+                              ? 'font-semibold'
+                              : ''
                           }`}>
                             Dollars
                           </span>
@@ -392,7 +394,10 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                          <span
+                          aria-hidden="true"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none"
+                        >
                             %
                           </span>
                         </div>
@@ -445,7 +450,7 @@ export default function MortgageCalculator() {
                         }}
                         className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-medium text-gray-500 ">%</span>
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                     </div>
                   </div>
 
@@ -510,11 +515,12 @@ export default function MortgageCalculator() {
                                 }
                               }}
                               className="w-4 h-4 accent-lagunita cursor-pointer"
+                              step="0.01"
                             />
                             <span className={`text-xs transition ${
                               propertyTaxMode === 'percentage'
-                                ? 'text-black font-semibold'
-                                : 'text-black'
+                                ? 'font-semibold'
+                                : ''
                             }`}>
                               Percent
                             </span>
@@ -535,8 +541,8 @@ export default function MortgageCalculator() {
                             />
                             <span className={`text-xs transition ${
                               propertyTaxMode === 'dollar'
-                                ? 'text-black font-semibold'
-                                : 'text-black'
+                                ? 'font-semibold'
+                                : ''
                             }`}>
                               Dollars
                             </span>
@@ -548,6 +554,7 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <input
                             type="number"
+                            step="0.01"
                             value={propertyTaxPercent || ''}
                             onChange={(e) => {
                               const raw = e.target.value;
@@ -559,7 +566,7 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
                           </span>
                         </div>
@@ -567,6 +574,7 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <input
                             type="number"
+                            step="0.01"
                             value={Math.round(propertyTaxAmount) || ''}
                             onChange={(e) => {
                               const raw = e.target.value;
@@ -578,7 +586,7 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
                       )}
                     </div>
@@ -607,8 +615,8 @@ export default function MortgageCalculator() {
                             />
                             <span className={`text-xs transition ${
                               homeInsuranceMode === 'percentage'
-                                ? 'text-black font-semibold'
-                                : 'text-black'
+                                ? 'font-semibold'
+                                : ''
                             }`}>
                               Percent
                             </span>
@@ -629,8 +637,8 @@ export default function MortgageCalculator() {
                             />
                             <span className={`text-xs transition ${
                               homeInsuranceMode === 'dollar'
-                                ? 'text-black font-semibold'
-                                : 'text-black'
+                                ? 'font-semibold'
+                                : ''
                             }`}>
                               Dollars
                             </span>
@@ -642,6 +650,7 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <input
                             type="number"
+                            step="0.01"
                             value={homeInsurancePercent || ''}
                             onChange={(e) => {
                               const raw = e.target.value;
@@ -653,7 +662,7 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
                           </span>
                         </div>
@@ -661,6 +670,7 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <input
                             type="number"
+                            step="0.01"
                             value={Math.round(homeInsuranceAmount) || ''}
                             onChange={(e) => {
                               const raw = e.target.value;
@@ -672,7 +682,7 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
                       )}
                     </div>
@@ -681,7 +691,7 @@ export default function MortgageCalculator() {
                     <div className="pb-5">
                       <label className="block text-sm font-semibold">HOA dues (monthly)</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] font-medium">$</span>
                         <input
                           type="number"
                           placeholder=""
@@ -824,7 +834,7 @@ export default function MortgageCalculator() {
                       Home price
                     </label>
                     <div className="relative">
-                      <span className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                       <input
                         type="number"
                         placeholder=""
@@ -882,8 +892,8 @@ export default function MortgageCalculator() {
                           />
                           <span className={`text-xs transition ${
                             downPaymentMode === 'percentage'
-                              ? 'text-black font-semibold'
-                              : 'text-black'
+                              ? 'font-semibold'
+                              : ''
                           }`}>
                             Percent
                           </span>
@@ -898,14 +908,16 @@ export default function MortgageCalculator() {
                               // FIX: Use homePrice (unrounded) for accurate conversion
                               const amountValue = Number(homePrice) * (downPaymentPercent / 100);
                               setDownPaymentAmount(amountValue);
-                              setDownPaymentAmountInput(Math.round(amountValue).toString());
+                              setDownPaymentAmountInput(
+                                Number(homePrice) > 0 ? Math.round(amountValue).toString() : ''
+                              );
                             }}
                             className="w-4 h-4 accent-lagunita cursor-pointer"
                           />
                           <span className={`text-xs transition ${
                             downPaymentMode === 'dollar'
-                              ? 'text-black font-semibold'
-                              : 'text-black'
+                              ? 'font-semibold'
+                              : ''
                           }`}>
                             Dollars
                           </span>
@@ -938,7 +950,7 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
                           </span>
                         </div>
@@ -974,7 +986,7 @@ export default function MortgageCalculator() {
                             }}
                             className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
                       )}
                       <p className="text-xs mt-1">Enter 0 if no down payment is planned.</p>
@@ -1001,7 +1013,7 @@ export default function MortgageCalculator() {
                         }}
                         className="w-full pr-8 pl-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span className="absolute right-3 text-gray-500 top-1/2 -translate-y-1/2 font-medium">%</span>
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                     </div>
                   </div>
 
@@ -1044,7 +1056,7 @@ export default function MortgageCalculator() {
 
                   {/* Optional Section */}
                   <div className="pt-4 border-t border-gray-200">
-                    <h3 className="text-lg font-semibold mb-4">Optional</h3>
+                    <h3 className="text-lg font-semibold mb-4">Additional housing costs</h3>
 
                     {/*  Property Taxes */}
                     <div className="pb-5">
@@ -1066,6 +1078,7 @@ export default function MortgageCalculator() {
                                   setPropertyTaxPercent(0);
                                 }
                               }}
+                              step="0.01"
                               className="w-4 h-4 accent-lagunita cursor-pointer"
                             />
                             <span className="text-xs">Percent</span>
@@ -1102,7 +1115,7 @@ export default function MortgageCalculator() {
                               }}
                               className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                               %
                             </span>
                           </>
@@ -1120,7 +1133,7 @@ export default function MortgageCalculator() {
                               }}
                               className="w-full pl-8 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                           </>
                         )}
                       </div>
@@ -1182,7 +1195,7 @@ export default function MortgageCalculator() {
                               }}
                               className="w-full pl-4 pr-16 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                               %
                             </span>
                           </>
