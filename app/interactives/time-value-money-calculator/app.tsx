@@ -156,7 +156,7 @@ export function TVMCalculator() {
   const calculate = useCallback(() => {
     setCalcError("")
     setSignError("")
-    
+
     // ── Don't calculate (or show errors) until all required fields are filled ──
   const requiredFields: Record<SolveFor, string[]> = {
     FV: [presentValue, annualRate, periods],
@@ -194,10 +194,11 @@ export function TVMCalculator() {
     const timingMultiplier = paymentTiming === "beginning" ? (1 + ratePerPeriod) : 1
 
     try {
-      // Require opposite signs for RATE/NPER solves: at least one cash flow must have opposite sign
+      // Require opposite signs for RATE/NPER solves: at least one cash flow must have opposite sign.
+      // When pmt === 0, pv and fv alone must have opposite signs.
       if ((solveFor === "RATE" || solveFor === "NPER")) {
-        const allPositive = pv > 0 && pmt > 0 && fv > 0
-        const allNegative = pv < 0 && pmt < 0 && fv < 0
+        const allPositive = pmt === 0 ? (pv > 0 && fv > 0) : (pv > 0 && pmt > 0 && fv > 0)
+        const allNegative = pmt === 0 ? (pv < 0 && fv < 0) : (pv < 0 && pmt < 0 && fv < 0)
         if (allPositive || allNegative) {
           const which = solveFor === "RATE" ? "rate" : "number of periods"
           setSignError(
@@ -672,7 +673,7 @@ export function TVMCalculator() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-5 mb-25 m:mb-0 w-full lg:w-1/2">
+          <section aria-label="Calculator inputs" className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2">
 
             {/* Present Value */}
             {solveFor !== "PV" && (
