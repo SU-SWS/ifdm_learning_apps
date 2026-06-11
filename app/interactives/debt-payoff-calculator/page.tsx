@@ -177,10 +177,11 @@ export default function DebtPayoffCalculator() {
                       <div className="relative">
                         <Input
                           id="debt-amount"
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
+                          value={debtAmount === 0 ? "" : debtAmount.toLocaleString("en-US")}
+                          onChange={(e) => setDebtAmount(Number(e.target.value.replace(/,/g, "")) || 0)}
                           min="1"
-                          value={debtAmount === 0 ? "" : debtAmount}
-                          onChange={(e) => setDebtAmount(Number(e.target.value) || 0)}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
@@ -188,7 +189,7 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="interest-rate" className="font-medium">Annual interest rate (%)</Label>
+                        <Label htmlFor="interest-rate" className="font-medium">Annual interest rate</Label>
                         <InfoPopover title="Annual interest rate (%)">This is the annual percentage rate (APR) charged by your lender.</InfoPopover>
                       </div>
                       <div className="relative">
@@ -199,14 +200,17 @@ export default function DebtPayoffCalculator() {
                           value={interestRate === 0 ? "" : interestRate}
                           onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
                           min="0.1"
-                          className="relative font-bold block w-full text-lagunita rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="relative font-bold block w-full text-[var(--color-teal)] rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                          %
+                        </span>
                       </div>
                     </div>
 
                     <div className="space-y-2 relative">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="compounding" className="font-medium">Compounding frequency</Label>
+                        <Label htmlFor="compounding-select" className="font-medium">Compounding frequency</Label>
                         <InfoPopover title="Compounding frequency"> How often interest is applied and payments are made. Most loans compound monthly.</InfoPopover>
                       </div>
                       <div className="flex items-center gap-2">
@@ -245,10 +249,11 @@ export default function DebtPayoffCalculator() {
                       <div className="relative">
                         <Input
                           id="payment"
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
+                          value={payment === 0 ? "" : payment.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onChange={(e) => setPayment(Number(e.target.value.replace(/,/g, "")) || 0)}
                           step="0.01"
-                          value={payment === 0 ? "" : payment}
-                          onChange={(e) => setPayment(Number(e.target.value) || 0)}
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
 
@@ -258,20 +263,21 @@ export default function DebtPayoffCalculator() {
                     <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Label className="text-medium font-bold">Additional payment per period (optional)</Label>
+                          <Label htmlFor="addtlpayment" className="text-medium font-bold">Additional payment per period (optional)</Label>
                           <InfoPopover title="Additional payment per period (optional)">Enter a fixed extra amount you plan to pay each month.</InfoPopover>
                         </div>
                       </div>
                       <div className="relative">
                         <Input
                           id="addtlpayment"
-                          type="number"
                           step="0.01"
                           min="0"
-                          value={additionalPayment}
-                          onChange={(e) => setAdditionalPayment(e.target.value === "" ? "" : Number(e.target.value))}
-                          onBlur={(e) => setAdditionalPayment(e.target.value === "" ? 0 : Number(e.target.value))}
-                          className="font-bold text-lagunita block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          type="text"
+                          inputMode="numeric"
+                          value={additionalPayment === "" ? "" : Number(additionalPayment).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          onChange={(e) => setAdditionalPayment(e.target.value === "" ? "" : Number(e.target.value.replace(/,/g, "")))}
+                          onBlur={(e) => setAdditionalPayment(e.target.value === "" ? 0 : Number(e.target.value.replace(/,/g, "")))}
+                          className="font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                       <p className="text-sm">
@@ -281,15 +287,15 @@ export default function DebtPayoffCalculator() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+                <Card aria-live="polite" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                   <CardHeader>
                     <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">Your payoff summary</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="rounded-lg mb-6 text-center">
                       <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">Time to pay off</p>
-                      <p className="text-3xl font-bold text-lagunita mb-2">{formatTime(payoffResult.timeInMonths)}</p>
-                      <p className="text-medium font-semibold text-lagunita">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
+                      <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">{formatTime(payoffResult.timeInMonths)}</p>
+                      <p className="text-medium font-semibold text-[var(--color-teal)]">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
                     </div>
 
                     <div className="innerwrapper">
@@ -315,7 +321,7 @@ export default function DebtPayoffCalculator() {
                         <div className="w-full sm:w-[50%] p-4 bg-lagunita font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none">
                           Interest saved:
                         </div>
-                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-lagunita-lighter text-lagunita">
+                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
                           {formatCurrency(payoffResult.interestSaved)}
                         </div>
                       </div>
@@ -344,9 +350,10 @@ export default function DebtPayoffCalculator() {
                       <div className="relative">
                         <Input
                           id="debt-amount-2"
-                          type="number"
-                          value={debtAmount === 0 ? "" : debtAmount}
-                          onChange={(e) => setDebtAmount(Number(e.target.value) || 0)}
+                          type="text"
+                          inputMode="numeric"
+                          value={debtAmount === 0 ? "" : debtAmount.toLocaleString("en-US")}
+                          onChange={(e) => setDebtAmount(Number(e.target.value.replace(/,/g, "")) || 0)}
                           min="1"
                           className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
@@ -355,7 +362,7 @@ export default function DebtPayoffCalculator() {
 
                     <div className="space-y-2 relative">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="interest-rate-2" className="font-medium">Annual interest rate (%)</Label>
+                        <Label htmlFor="interest-rate-2" className="font-medium">Annual interest rate</Label>
                         <InfoPopover title="Annual interest rate (%)">This is the annual percentage rate (APR) charged by your lender.</InfoPopover>
                       </div>
                       <div className="relative">
@@ -368,12 +375,15 @@ export default function DebtPayoffCalculator() {
                           min="0.1"
                           className="font-bold text-lagunita block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                          %
+                        </span>
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="compounding-2" className="font-medium">Compounding frequency</Label>
+                        <Label htmlFor="compounding-select-2" className="font-medium">Compounding frequency</Label>
                         <InfoPopover title="Compounding frequency">How often interest is applied and payments are made. Most loans compound monthly.</InfoPopover>
                       </div>
                       <div className="flex items-center gap-2">
@@ -410,7 +420,10 @@ export default function DebtPayoffCalculator() {
                         <InfoPopover title="Target time to payoff">How long do you want to take to pay off this debt?</InfoPopover>
                       </div>
                       <div className="flex flex-row gap-4 w-full">
-                        <div className="flex flex-row w-1/2 gap-2 items-center">
+                        <div className="flex flex-row-reverse w-1/2 gap-2 items-center">
+                          <Label htmlFor="target-years" className="text-sm text-muted-foreground flex-none">
+                            Years
+                          </Label>
                           <div className="relative grow">
                             <Input
                               id="target-years"
@@ -421,9 +434,6 @@ export default function DebtPayoffCalculator() {
                               className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
                           </div>
-                          <Label htmlFor="target-years" className="text-sm text-muted-foreground flex-none">
-                            Years
-                          </Label>
                         </div>
                         <div className="flex flex-row w-1/2 gap-2 items-center">
                           <div className="relative grow">
@@ -442,24 +452,24 @@ export default function DebtPayoffCalculator() {
                           </Label>
                         </div>
                       </div>
-                      <div className="text-md font-semibold text-lagunita">
+                      <div className="text-md font-semibold text-[var(--color-teal)]">
                         Total: {targetYears} year{targetYears !== 1 ? "s" : ""} {targetMonths} month{targetMonths !== 1 ? "s" : ""}
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+                <Card aria-live="polite" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                   <CardHeader className="">
                     <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">Required payment</CardTitle>
                   </CardHeader>
                   <CardContent className="">
                     <div className="rounded-lg mb-6 text-center">
                       <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">Payment per period</p>
-                      <p className="text-4xl font-bold text-lagunita mb-2">
+                      <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                         {formatCurrency(requiredPaymentResult.requiredPayment)}
                       </p>
-                      <p className="text-lagunita text-lg font-semibold">To pay off in {formatTime(targetYears * 12 + targetMonths)}</p>
+                      <p className="text-[var(--color-teal)] text-lg font-semibold">To pay off in {formatTime(targetYears * 12 + targetMonths)}</p>
                     </div>
 
                     <div className="innerwrapper">
