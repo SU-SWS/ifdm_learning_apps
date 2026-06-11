@@ -47,6 +47,34 @@ function calculateCompoundInterest(
 const MAX_INITIAL_AMOUNT = 100_000_000 // 100 million
 const MAX_ANNUAL_RATE = 1000 // 1,000%
 
+const periodPluralLabels: Record<CompoundingPeriod, string> = {
+  annually: "years",
+  "semi-annually": "semi-annual periods",
+  quarterly: "quarters",
+  monthly: "months",
+  biweekly: "bi-weekly periods",
+  weekly: "weeks",
+  daily: "days",
+}
+
+const freqLabels: Record<CompoundingPeriod, string> = {
+  annually: "annual",
+  "semi-annually": "semiannual",
+  quarterly: "quarterly",
+  monthly: "monthly",
+  biweekly: "biweekly",
+  weekly: "weekly",
+  daily: "daily",
+}
+
+function buildPeriodsRangeError(compounding: CompoundingPeriod, max: number): string {
+  const label = periodPluralLabels[compounding]
+  const maxFormatted = max.toLocaleString("en-US")
+  const base = `Enter a number of ${label} between 0 and ${maxFormatted}.`
+  if (compounding === "annually") return base
+  return `${base} (${maxFormatted} periods = 100 years with ${freqLabels[compounding]} compounding).`
+}
+
 export default function CompoundInterestCalculator() {
   const [initialAmount, setInitialAmount] = useState<string>("")
   const [annualRate, setAnnualRate] = useState<string>("")
@@ -81,10 +109,8 @@ export default function CompoundInterestCalculator() {
 
   const [initialAmountError, setInitialAmountError] = useState<string>("")
   const [annualRateError, setAnnualRateError] = useState<string>("")
-  const hasError =
-  !!initialAmountError ||
-  !!annualRateError ||
-  Number(periods) > maxPeriods
+  const [periodsError, setPeriodsError] = useState<string>("")
+  const hasError = !!initialAmountError || !!annualRateError || !!periodsError
 
   type CompoundingPeriod = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
 
@@ -136,9 +162,9 @@ export default function CompoundInterestCalculator() {
                       numericValue > MAX_INITIAL_AMOUNT
                     ) {
                       setInitialAmountError(
-                        "Initial amount cannot exceed $100,000,000.",
+                        "Enter an amount between $0 and $100,000,000.",
                       );
-                      setInitialAmount(numericPart); // ← update state even on error
+                      setInitialAmount(numericPart);
                     } else {
                       setInitialAmountError("");
                       setInitialAmount(numericPart);
@@ -147,6 +173,8 @@ export default function CompoundInterestCalculator() {
                   onBlur={() => {
                     if (initialAmount.startsWith("."))
                       setInitialAmount("0" + initialAmount);
+                    if (!initialAmount)
+                      setTimeout(() => setInitialAmountError("Enter an initial amount."), 150);
                   }}
                   min="0"
                   className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -177,7 +205,6 @@ export default function CompoundInterestCalculator() {
                   id="annual-rate"
                   type="text"
                   value={annualRate}
-                  // Annual rate onChange
                   onChange={(e) => {
                     const input = e.target.value;
                     const numericPart = input.replace(/[^0-9.]/g, "");
@@ -187,9 +214,9 @@ export default function CompoundInterestCalculator() {
                       numericValue > MAX_ANNUAL_RATE
                     ) {
                       setAnnualRateError(
-                        "Annual interest rate cannot exceed 1,000%.",
+                        "Enter a rate between 0% and 1,000%.",
                       );
-                      setAnnualRate(numericPart); // ← update state even on error
+                      setAnnualRate(numericPart);
                     } else {
                       setAnnualRateError("");
                       setAnnualRate(numericPart);
@@ -198,6 +225,8 @@ export default function CompoundInterestCalculator() {
                   onBlur={() => {
                     if (annualRate.startsWith("."))
                       setAnnualRate("0" + annualRate);
+                    if (!annualRate)
+                      setTimeout(() => setAnnualRateError("Please enter an interest rate."), 150);
                   }}
                   className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
@@ -241,29 +270,33 @@ export default function CompoundInterestCalculator() {
                   value={periods}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "" || Number(val) >= 0) setPeriods(val);
+                    if (val === "" || Number(val) >= 0) {
+                      setPeriods(val);
+                      if (val !== "" && Number(val) > maxPeriods) {
+                        setPeriodsError(buildPeriodsRangeError(selectedCompounding, maxPeriods));
+                      } else {
+                        setPeriodsError("");
+                      }
+                    }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                   onBlur={() => {
-                    if (periods.startsWith(".")) {
-                      setPeriods("0" + periods);
-                    }
+                    if (periods.startsWith(".")) setPeriods("0" + periods);
+                    if (!periods)
+                      setTimeout(() => setPeriodsError("Enter a number of compounding periods."), 150);
                   }}
-                  className="block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${periodsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
                 />
               </div>
-              {Number(periods) > maxPeriods && (
+              {periodsError && (
                 <p
                   role="alert"
                   className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                 >
-                  Number of periods cannot exceed{" "}
-                  {maxPeriods.toLocaleString("en-US")} (
-                  {selectedOption.label.toLowerCase()} compounding caps at 100
-                  years).
+                  {periodsError}
                 </p>
               )}
             </div>
@@ -286,9 +319,19 @@ export default function CompoundInterestCalculator() {
                 <select
                   id="compounding-frequency"
                   value={selectedCompounding}
-                  onChange={(e) =>
-                    setSelectedCompounding(e.target.value as CompoundingPeriod)
-                  }
+                  onChange={(e) => {
+                    const newFreq = e.target.value as CompoundingPeriod
+                    setSelectedCompounding(newFreq)
+                    if (periods !== "") {
+                      const newOption = compoundingOptions.find(o => o.value === newFreq)!
+                      const newMax = newOption.periodsPerYear * 100
+                      if (Number(periods) > newMax) {
+                        setPeriodsError(buildPeriodsRangeError(newFreq, newMax))
+                      } else {
+                        setPeriodsError("")
+                      }
+                    }
+                  }}
                   className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
                 >
                   {compoundingOptions.map((option) => (
