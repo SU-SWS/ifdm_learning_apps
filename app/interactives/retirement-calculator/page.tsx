@@ -422,7 +422,6 @@ export default function RetirementCalculator() {
 
                 {frozenRequiredBalance > 0 && results.fvCurrentSavings >= results.requiredBalance ? (
                   <div className="border-2 px-4 py-3 rounded-xl">
-                    {/* Fix 7: h3 for sub-heading within results */}
                     <h3 className="text-xl font-bold mb-4">Good news!</h3>
                     <p className="mt-3 mb-6 text-sm">
                       With an expected {inputs.expectedReturnBeforeRetirement}% annual
@@ -439,7 +438,7 @@ export default function RetirementCalculator() {
                       )}
                     </p>
                   </div>
-                ) : (
+                ) : frozenRequiredBalance > 0 ? (
                   <>
                     <h3 className="mb-1 font-bold text-lg">Required Annual Savings</h3>
                     <p className="text-4xl font-bold text-[var(--color-teal)]">
@@ -476,7 +475,7 @@ export default function RetirementCalculator() {
                       </div>
                     </div>
                   </>
-                )}
+                ) : null}
               </>
             )}
           </div>

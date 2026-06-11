@@ -219,7 +219,7 @@ export default function MortgageCalculator() {
 
           <Tabs
             value={mode}
-            onValueChange={(v) => setMode(v)}
+            onValueChange={(v) => { setMode(v); setShowRateError(false); }}
             className="w-full"
           >
             <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
