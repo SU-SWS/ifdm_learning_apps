@@ -14,6 +14,8 @@ import {
 } from "@/app/ui/components/select"
 import { Info, ChevronDown, ChevronUp } from "lucide-react"
 import ThemeToggle from "@/app/lib/theme-toggle"
+import { FaPlus, FaMinus } from "react-icons/fa6"
+
 
 type SolveFor = "FV" | "PV" | "PMT" | "RATE" | "NPER"
 type PaymentTiming = "end" | "beginning"
@@ -64,8 +66,8 @@ export function TVMCalculator() {
   const [result, setResult] = useState<number | null>(null)
   const [calcError, setCalcError] = useState<string>("")
   const [fieldErrors, setFieldErrors] = useState<FieldError[]>([])
+  const [signError, setSignError] = useState<string>("")
   const [showHowToUse, setShowHowToUse] = useState<boolean>(false)
-  const [showExamples, setShowExamples] = useState<boolean>(false)
   const [exampleMode, setExampleMode] = useState<"saving" | "borrowing">("saving")
 
   const loadExample = (example: {
@@ -149,9 +151,12 @@ export function TVMCalculator() {
   const getFieldError = (field: string): string | undefined =>
     fieldErrors.find(e => e.field === field)?.message
 
+  const displayError = calcError || signError
+
   const calculate = useCallback(() => {
     setCalcError("")
-    
+    setSignError("")
+
     // ── Don't calculate (or show errors) until all required fields are filled ──
   const requiredFields: Record<SolveFor, string[]> = {
     FV: [presentValue, annualRate, periods],
@@ -189,6 +194,20 @@ export function TVMCalculator() {
     const timingMultiplier = paymentTiming === "beginning" ? (1 + ratePerPeriod) : 1
 
     try {
+      // Require opposite signs for RATE/NPER solves: at least one cash flow must have opposite sign.
+      // When pmt === 0, pv and fv alone must have opposite signs.
+      if ((solveFor === "RATE" || solveFor === "NPER")) {
+        const allPositive = pmt === 0 ? (pv > 0 && fv > 0) : (pv > 0 && pmt > 0 && fv > 0)
+        const allNegative = pmt === 0 ? (pv < 0 && fv < 0) : (pv < 0 && pmt < 0 && fv < 0)
+        if (allPositive || allNegative) {
+          const which = solveFor === "RATE" ? "rate" : "number of periods"
+          setSignError(
+            `These values can't be solved. To find the ${which}, money paid out and money received need opposite signs — for example, enter what you invest as negative and what you receive as positive.`
+          )
+          setResult(null)
+          return
+        }
+      }
       let calculatedValue: number
 
       switch (solveFor) {
@@ -264,10 +283,24 @@ export function TVMCalculator() {
         case "NPER": {
           if (ratePerPeriod === 0) {
             if (pmt === 0 && payment === "0") throw new Error("Payment cannot be 0 when rate is 0")
-            calculatedValue = pmt === 0 ? 0 : -(pv + fv) / pmt
+            const calculatedNper = pmt === 0 ? 0 : -(pv + fv) / pmt
+            if (!isFinite(calculatedNper) || calculatedNper <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            calculatedValue = calculatedNper
           } else {
             const pmtAdj = pmt * timingMultiplier
-            calculatedValue = Math.log((pmtAdj - fv * ratePerPeriod) / (pmtAdj + pv * ratePerPeriod)) / Math.log(1 + ratePerPeriod)
+            const numerator = pmtAdj - fv * ratePerPeriod
+            const denominator = pmtAdj + pv * ratePerPeriod
+            const ratio = numerator / denominator
+            if (ratio <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            const calculatedNper = Math.log(ratio) / Math.log(1 + ratePerPeriod)
+            if (!isFinite(calculatedNper) || calculatedNper <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            calculatedValue = calculatedNper
           }
           break
         }
@@ -433,7 +466,8 @@ export function TVMCalculator() {
               fv: "30000",
               rate: "3.5",
               compoundFreq: "12",
-              paymentFreq: "12",
+              paymentFreqMode: "different" as PaymentFrequencyMode,
+              paymentFreq: "26",
             },
           };
       }
@@ -518,7 +552,7 @@ export function TVMCalculator() {
               "Number of Periods Example: Solve for time to pay off credit card",
             bullets: [
               "Present value (credit card balance): positive",
-              "Payment per period (monthly payments): negative",
+              "Payment per period (bi-weekly payments): negative",
               "Future value (remaining balance): zero",
             ],
             example: {
@@ -528,7 +562,7 @@ export function TVMCalculator() {
               fv: "0",
               rate: "18",
               compoundFreq: "365",
-              paymentFreq: "12",
+              paymentFreq: "26",
               paymentFreqMode: "different" as PaymentFrequencyMode,
             },
           };
@@ -551,24 +585,17 @@ export function TVMCalculator() {
         {showHowToUse && (
           <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm  space-y-4">
             <div className="space-y-2">
-              <p className="text-foreground font-medium">Cash Flow Signs</p>
+              <p className="text-foreground font-bold">Cash Flow Signs</p>
               <p>This calculator uses signs to show the direction of money:</p>
-              <ul className="space-y-1 ml-4">
-                <li><strong className="text-foreground">Positive (+):</strong> cash inflow (money you receive)</li>
-                <li><strong className="text-foreground">Negative (−):</strong> cash outflow (money you pay)</li>
-              </ul>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowExamples(!showExamples) }}
-                className="flex items-center gap-2 hover:text-primary transition-colors mt-2"
-              >
-                <span className="text-foreground font-medium">Examples</span>
-                {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {showExamples && (
-                <div className="ml-4 pl-4 border-l-2 border-border/50 space-y-4">
-                  <div className="flex items-center text-xs">
-                    <span className=" mr-1">I am:</span>
-                    {(["saving", "borrowing"] as const).map(mode => (
+              <div className="flex flex-row gap-2">
+                <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaPlus /> <strong >Positive &mdash; money you receive (cash in)</strong></div>
+                <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaMinus /> <strong >Negative &mdash; money you pay (cash out)</strong></div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center text-sm gap-3">
+                  <span className="mr-1">Example — I am:</span>
+                  <div className="inline-flex overflow-hidden rounded-md border border-border">
+                    {(["saving", "borrowing"] as const).map((mode, index) => (
                       <button
                         key={mode}
                         onClick={(e) => {
@@ -576,18 +603,19 @@ export function TVMCalculator() {
                           setExampleMode(mode)
                           setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
                         }}
-                        className={`px-1.5 py-0.5 rounded border transition-colors ${
+                        className={`px-3 py-1 text-sm font-medium transition-colors ${
                           exampleMode === mode
-                            ? "border-green-500 bg-green-500/10 text-green-600"
-                            : "border-transparent  hover:text-foreground"
-                        }`}
+                            ? "hover:text-white hover:bg-[var(--color-lagunita)] bg-[var(--card-background)]"
+                            : "hover:text-white hover:bg-[var(--color-lagunita)] text-foreground"
+                        } ${index > 0 ? "border-l border-border" : ""}`}
                       >
                         {mode}
                       </button>
                     ))}
                   </div>
-                  {currentExample && (
-                    <div className="space-y-2">
+                </div>
+                {currentExample && (
+                    <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm ">
                       <p className="text-foreground font-bold">{currentExample.title}</p>
                       <ul className="space-y-1 ml-4 list-disc">
                         {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
@@ -601,9 +629,8 @@ export function TVMCalculator() {
                     </div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
         )}
       </div>
     )
@@ -625,6 +652,7 @@ export function TVMCalculator() {
                 onClick={() => {
                   if (option.value !== solveFor) {
                     setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
+                    setPaymentFrequencyMode("same")
                   }
                   setSolveFor(option.value)
                 }}
@@ -645,7 +673,7 @@ export function TVMCalculator() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-5 w-full lg:w-1/2">
+          <section aria-label="Calculator inputs" className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2">
 
             {/* Present Value */}
             {solveFor !== "PV" && (
@@ -658,7 +686,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setPresentValue)}
                     className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("presentValue") && <p className="text-sm text-destructive">{getFieldError("presentValue")}</p>}
+                {getFieldError("presentValue") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("presentValue")}</p>}
               </div>
             )}
 
@@ -673,7 +701,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
                     className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-destructive">{getFieldError("payment")}</p>}
+                {getFieldError("payment") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>}
               </div>
             )}
 
@@ -688,7 +716,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setFutureValue)}
                     className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("futureValue") && <p className="text-sm text-destructive">{getFieldError("futureValue")}</p>}
+                {getFieldError("futureValue") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("futureValue")}</p>}
               </div>
             )}
 
@@ -703,7 +731,7 @@ export function TVMCalculator() {
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
                     className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-destructive">{getFieldError("payment")}</p>}
+                {getFieldError("payment") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>}
               </div>
             )}
 
@@ -718,7 +746,7 @@ export function TVMCalculator() {
                     className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-destructive" : ""}`} />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
                 </div>
-                {getFieldError("annualRate") && <p className="text-sm text-destructive">{getFieldError("annualRate")}</p>}
+                {getFieldError("annualRate") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("annualRate")}</p>}
               </div>
             )}
 
@@ -729,7 +757,7 @@ export function TVMCalculator() {
                 <Input id="periods" type="text" inputMode="numeric" value={periods}
                   onChange={(e) => { const val = e.target.value; if (val === "" || /^\d*$/.test(val)) setPeriods(val) }}
                   className={`border-border bg-card ${getFieldError("periods") ? "border-destructive" : ""}`} />
-                {getFieldError("periods") && <p className="text-sm text-destructive">{getFieldError("periods")}</p>}
+                {getFieldError("periods") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("periods")}</p>}
               </div>
             )}
 
@@ -799,16 +827,16 @@ export function TVMCalculator() {
             </div>
 
             <div className="pt-2">
-              <Button onClick={clearAll} variant="lagunita" className="font-medium px-8">Reset</Button>
+              <Button onClick={clearAll} variant="lagunita" className="hidden md:block font-medium px-8">Reset</Button>
             </div>
           </section>
 
           {/* Results Card */}
-          <Card className="w-full lg:w-1/2">
+          <Card className="w-full hidden md:block lg:w-1/2">
             <CardContent className="w-full  bg-[var(--card-background)] rounded-3xl p-[32px]">
               <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
-              {calcError ? (
-                <p className="text-destructive font-medium text-lg">{calcError}</p>
+              {displayError ? (
+                <p className="text-[var(--color-inline-error)]">{displayError}</p>
               ) : result !== null ? (
                 <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">{formatResult(result)}</p>
               ) : (
@@ -819,18 +847,16 @@ export function TVMCalculator() {
         </div>
 
         {/* Mobile sticky footer */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs ">{currentOption?.label}</div>
-              {calcError ? (
-                <p className="text-destructive font-medium">{calcError}</p>
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-8 shadow-lg">
+          <div className="flex flex-col items-center justify-between">
+              <div className="text-sm">{currentOption?.label}</div>
+              {displayError ? (
+                <p className="text-[var(--color-inline-error)] font-medium">{displayError}</p>
               ) : result !== null ? (
                 <p className="text-2xl font-bold text-primary">{formatResult(result)}</p>
               ) : (
-                <p className="text-xl font-medium /50">Enter values above</p>
+                <p className="text-xl font-medium mb-2">Enter values above</p>
               )}
-            </div>
             <Button onClick={clearAll} variant="lagunita" size="sm">Reset</Button>
           </div>
         </div>
