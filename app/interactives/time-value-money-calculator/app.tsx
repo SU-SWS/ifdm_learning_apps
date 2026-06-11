@@ -585,7 +585,7 @@ export function TVMCalculator() {
         {showHowToUse && (
           <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm  space-y-4">
             <div className="space-y-2">
-              <p className="text-foreground font-bold">Cash Flow Signs</p>
+              <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
               <p>This calculator uses signs to show the direction of money:</p>
               <div className="flex flex-row gap-2">
                 <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaPlus /> <strong >Positive &mdash; money you receive (cash in)</strong></div>
@@ -603,7 +603,7 @@ export function TVMCalculator() {
                           setExampleMode(mode)
                           setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
                         }}
-                        className={`px-3 py-1 text-sm font-medium transition-colors ${
+                        className={`px-3 py-1 text-sm font-medium cursor-pointer capitalize transition-colors ${
                           exampleMode === mode
                             ? "hover:text-white hover:bg-[var(--color-lagunita)] bg-[var(--card-background)]"
                             : "hover:text-white hover:bg-[var(--color-lagunita)] text-foreground"
@@ -616,13 +616,13 @@ export function TVMCalculator() {
                 </div>
                 {currentExample && (
                     <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm ">
-                      <p className="text-foreground font-bold">{currentExample.title}</p>
+                      <h3 className="text-foreground font-bold mb-3">{currentExample.title}</h3>
                       <ul className="space-y-1 ml-4 list-disc">
                         {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
                       </ul>
                       <button
                         onClick={(e) => { e.stopPropagation(); loadExample(currentExample.example) }}
-                        className="hover:underline text-sm text-[var(--color-teal)] transition-colors mt-2"
+                        className="cursor-pointer underline hover:no-underline text-sm text-[var(--color-teal)] transition-colors mt-2"
                       >
                         See numeric example
                       </button>
@@ -645,6 +645,7 @@ export function TVMCalculator() {
 
         {/* Solve-for tabs */}
         <div className="mb-6">
+          <h2 className="sr-only">Solve for</h2>
           <div className="flex flex-wrap gap-2">
             {SOLVE_OPTIONS.map((option) => (
               <button
@@ -656,7 +657,7 @@ export function TVMCalculator() {
                   }
                   setSolveFor(option.value)
                 }}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
+                className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
                   solveFor === option.value
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-transparent  border-border hover:text-foreground hover:border-foreground/30"
@@ -811,7 +812,7 @@ export function TVMCalculator() {
               <div className="flex rounded-md border border-border overflow-hidden w-fit">
                 {(["end", "beginning"] as const).map((timing, i) => (
                   <button key={timing} type="button" onClick={() => setPaymentTiming(timing)}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-border" : ""} ${
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-border" : ""} ${
                       paymentTiming === timing
                         ? "bg-primary text-primary-foreground"
                         : "bg-card  hover:text-foreground"
