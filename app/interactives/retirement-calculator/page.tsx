@@ -61,7 +61,6 @@ export default function RetirementCalculator() {
     inputs.retirementLength > 0
 
   const results = useMemo(() => {
-    const realReturnDuringRetirement = inputs.expectedReturnDuringRetirement / 100
     const realReturnBeforeRetirement = inputs.expectedReturnBeforeRetirement / 100
 
     // Fix 2: Use frozen value for savings tab, fresh calculation for balance tab
@@ -398,7 +397,7 @@ export default function RetirementCalculator() {
                   </>
                 ) : (
                   <div className="border-2 px-4 py-3 rounded-xl">
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm">
                       The required retirement balance will appear here. Enter
                       annual retirement spending, expected retirement length
                       (years), and expected annual return during retirement.
