@@ -15,6 +15,11 @@ const formatCurrency = (amount: number) =>
     maximumFractionDigits: 2,
   })
 
+const formatNumberWithCommas = (value: string): string => {
+  const num = value.replace(/,/g, "")
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
 export default function MortgageCalculator() {
   const [activeTab, setActiveTab] = useState("current-balance")
 
@@ -41,6 +46,7 @@ export default function MortgageCalculator() {
     totalSavings: number
     breakEvenMonths: number
     breakEvenMessage: string
+    closingCosts: number
   } | null>(null)
 
   const [refErrors, setRefErrors] = useState<{
@@ -113,9 +119,7 @@ export default function MortgageCalculator() {
 
     if (Object.keys(errors).length > 0) return;
 
-    const currentMonthlyPayment = currentR === 0
-    ? currentBal / currentM
-    : (currentBal * (currentR * Math.pow(1 + currentR, currentM))) / (Math.pow(1 + currentR, currentM) - 1)
+    const currentMonthlyPayment = Number.parseFloat(refCurrentMonthlyPayment) || 0
 
     const newMonthlyPayment = newR === 0
       ? newLoanAmount / newM
@@ -127,11 +131,9 @@ export default function MortgageCalculator() {
 
     if (monthsInHouse > 0) {
       // ── Planned-stay comparison ─────────────────────────────────
-      // Months actually used for each loan (can't exceed the loan term)
       const currentMonthsToUse = Math.min(monthsInHouse, currentM)
       const newMonthsToUse = Math.min(monthsInHouse, newM)
 
-      // Helper: remaining principal after n payments
       const remainingBalance = (
         principal: number,
         monthlyRate: number,
@@ -154,16 +156,12 @@ export default function MortgageCalculator() {
         );
       };
 
-      // Total paid out of pocket over the planned stay
       const totalCurrentPaid = currentMonthlyPayment * currentMonthsToUse
       const totalNewPaid = newMonthlyPayment * newMonthsToUse + closingCosts
 
-      // Remaining principal at point of sale — higher balance = more owed at sale
       const currentRemainingBal = remainingBalance(currentBal, currentR, currentM, currentMonthsToUse)
       const newRemainingBal = remainingBalance(newLoanAmount, newR, newM, newMonthsToUse)
 
-      // Net cost = what you paid + what you still owe at sale
-      // Lower net cost = better deal
       const currentNetCost = totalCurrentPaid + currentRemainingBal
       const newNetCost = totalNewPaid + newRemainingBal
 
@@ -179,7 +177,7 @@ export default function MortgageCalculator() {
         breakEvenMonths = totalSavings > 0 ? 0 : Infinity
       }
 
-      const breakEvenMessage = breakEvenMonths === Infinity 
+      const breakEvenMessage = breakEvenMonths === Infinity
         ? "You will not break even with this refinance"
         : `Break even in ${Math.ceil(breakEvenMonths)} months`
 
@@ -192,6 +190,7 @@ export default function MortgageCalculator() {
         totalSavings,
         breakEvenMonths,
         breakEvenMessage,
+        closingCosts,
       })
 
     } else {
@@ -204,7 +203,6 @@ export default function MortgageCalculator() {
 
       if (monthlySavings > 0) {
         breakEvenMonths = closingCosts > 0 ? closingCosts / monthlySavings : 0
-
       } else if (monthlySavings < 0) {
         if (totalSavings > 0) {
           breakEvenMonths = closingCosts > 0 ? closingCosts / (-monthlySavings) : 0
@@ -215,7 +213,7 @@ export default function MortgageCalculator() {
         breakEvenMonths = totalSavings > 0 ? 0 : Infinity
       }
 
-      const breakEvenMessage = breakEvenMonths === Infinity 
+      const breakEvenMessage = breakEvenMonths === Infinity
         ? "You will not break even with this refinance"
         : `Break even in ${Math.ceil(breakEvenMonths)} months`
 
@@ -228,6 +226,7 @@ export default function MortgageCalculator() {
         totalSavings,
         breakEvenMonths,
         breakEvenMessage,
+        closingCosts,
       })
     }
   }
@@ -277,20 +276,19 @@ export default function MortgageCalculator() {
                             onChange={(e) => setMonthsRemaining(e.target.value)}
                             min="0"
                             step="1"
+                            aria-describedby={monthsRemaining ? "months-hint" : undefined}
                             className="pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {monthsRemaining && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none" aria-hidden="true">
                               months
                             </span>
                           )}
                         </div>
                         {monthsRemaining && (
-                          <p className="mt-3 text-[14px]">
+                          <p id="months-hint" className="mt-3 text-[14px]">
                             {monthsRemaining} months ={" "}
-                            {(Number.parseFloat(monthsRemaining) / 12).toFixed(
-                              1,
-                            )}{" "}
+                            {(Number.parseFloat(monthsRemaining) / 12).toFixed(1)}{" "}
                             years
                           </p>
                         )}
@@ -304,6 +302,7 @@ export default function MortgageCalculator() {
                           <div className="relative group">
                             <button
                               type="button"
+                              aria-label="Interest rate help"
                               aria-describedby="rate-tooltip"
                               className="cursor-help text-[#A7C1CC] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
                             >
@@ -334,7 +333,7 @@ export default function MortgageCalculator() {
                             className="pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           {annualRate && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                               %
                             </span>
                           )}
@@ -348,34 +347,36 @@ export default function MortgageCalculator() {
                         <div className="relative">
                           <Input
                             id="payment"
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             placeholder=""
-                            value={monthlyPayment}
-                            onChange={(e) => setMonthlyPayment(e.target.value)}
+                            value={
+                              monthlyPayment
+                                ? formatNumberWithCommas(monthlyPayment)
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setMonthlyPayment(e.target.value.replace(/,/g, ""))
+                            }
                             min="0"
                             step="0.01"
                             autoComplete="off"
-                            data-lpignore="true" // LastPass
-                            data-1p-ignore // 1Password
-                            data-bwignore // Bitwarden
-                            data-form-type="other" // Dashlane specifically
+                            data-lpignore="true"
+                            data-1p-ignore
+                            data-bwignore
+                            data-form-type="other"
                             className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                             $
                           </span>
                         </div>
                       </div>
 
-                      {/* Reset — only visible once there's a result */}
                       {currentBalance !== null && (
-                        <button
-                          onClick={handleReset}
-                          className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-lagunita text-navy bg-transparent hover:border-navy hover:text-navy hover:underline cursor-pointer transition-colors w-full md:w-auto justify-center md:justify-start"
-                        >
-                          <FaRotateLeft size={14} />
-                          Reset
-                        </button>
+                        <Button onClick={handleReset} variant="lagunita" className="flex items-center gap-2 font-medium px-8">
+                          Reset<FaRotateLeft size={14} aria-hidden="true" />
+                        </Button>
                       )}
                     </div>
 
@@ -390,17 +391,14 @@ export default function MortgageCalculator() {
                           <p className="text-md font-bold mb-1">
                             Estimated current balance
                           </p>
-                          <p className="text-4xl font-bold text-lagunita">
+                          <p className="text-4xl font-bold text-[var(--color-teal)]">
                             ${formatCurrency(currentBalance)}
                           </p>
-                          <p className="mt-2 text-sm text-[var(--results-card-empty)]">
-                            Based on the remaining monthly payments
-                          </p>
                           <Button
-                            className="mt-4 px-6 py-6 whitespace-normal bg-navy border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full md:w-auto"
+                            className="mt-4 px-6 py-6 whitespace-normal bg-navy border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
                             onClick={() => setActiveTab("refinance")}
                           >
-                            Continue to refinance
+                            Continue to refinance analysis
                           </Button>
                         </>
                       ) : (
@@ -436,9 +434,9 @@ export default function MortgageCalculator() {
                         then come back here to explore refinance options.
                         <button
                           onClick={() => setActiveTab("current-balance")}
-                          className="pl-2 inline-flex items-center gap-2 whitespace-nowrap text-lagunita font-semibold hover:underline cursor-pointer"
+                          className="pl-2 inline-flex items-center gap-2 whitespace-nowrap text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
                         >
-                          Calculate current balance <FaArrowRight size={12} />
+                          Calculate current balance <FaArrowRight size={12} aria-hidden="true" />
                         </button>
                       </p>
                     </div>
@@ -449,7 +447,7 @@ export default function MortgageCalculator() {
                     <div className="flex flex-col gap-8">
                       {/* Current Loan Terms — read-only */}
                       <div>
-                        <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
+                        <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b border-lagunita pb-2">
                           Current Loan Terms
                         </h2>
                         {currentBalance !== null ? (
@@ -486,15 +484,15 @@ export default function MortgageCalculator() {
                                   Monthly payment:
                                 </dt>
                                 <dd className="font-bold inline-block">
-                                  ${refCurrentMonthlyPayment}
+                                  ${formatCurrency(
+                                    Number.parseFloat(refCurrentMonthlyPayment) || 0,
+                                  )}
                                 </dd>
                               </div>
                               <div>
                                 <button
-                                  onClick={() =>
-                                    setActiveTab("current-balance")
-                                  }
-                                  className="mt-2 flex items-center gap-2 text-sm text-lagunita font-semibold hover:underline cursor-pointer"
+                                  onClick={() => setActiveTab("current-balance")}
+                                  className="mt-2 flex items-center gap-2 text-sm text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
                                 >
                                   <FaArrowLeft size={12} aria-hidden="true" />{" "}
                                   Edit current balance
@@ -513,7 +511,7 @@ export default function MortgageCalculator() {
 
                       {/* New Loan Terms — inputs */}
                       <div>
-                        <h2 className="mb-4 text-lg text-lagunita font-semibold border-b border-lagunita pb-2">
+                        <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b border-lagunita pb-2">
                           New Loan Terms
                         </h2>
 
@@ -527,22 +525,32 @@ export default function MortgageCalculator() {
                           <div className="relative">
                             <Input
                               id="ref-new-loan-amount"
-                              type="number"
+                              type="text"
+                              inputMode="numeric"
                               placeholder=""
-                              value={refNewLoanAmount}
+                              value={
+                                refNewLoanAmount
+                                  ? formatNumberWithCommas(refNewLoanAmount)
+                                  : ""
+                              }
                               onChange={(e) =>
-                                setRefNewLoanAmount(e.target.value)
+                                setRefNewLoanAmount(
+                                  e.target.value.replace(/,/g, ""),
+                                )
                               }
                               min="0"
                               step="0.01"
+                              aria-describedby={refErrors.newLoanAmount ? "loan-amount-error" : undefined}
+                              aria-invalid={!!refErrors.newLoanAmount}
                               className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                               $
                             </span>
                           </div>
                           {refErrors.newLoanAmount && (
                             <p
+                              id="loan-amount-error"
                               role="alert"
                               className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                             >
@@ -567,23 +575,27 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewMonths(e.target.value)}
                               min="0"
                               step="1"
+                              aria-describedby={[
+                                refNewMonths ? "new-months-hint" : "",
+                                refErrors.newMonths ? "new-months-error" : "",
+                              ].filter(Boolean).join(" ") || undefined}
+                              aria-invalid={!!refErrors.newMonths}
                               className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none" aria-hidden="true">
                               months
                             </span>
                           </div>
                           {refNewMonths && (
-                            <p className="mt-3 text-[14px]">
+                            <p id="new-months-hint" className="mt-3 text-[14px]">
                               {refNewMonths} months ={" "}
-                              {(Number.parseFloat(refNewMonths) / 12).toFixed(
-                                1,
-                              )}{" "}
+                              {(Number.parseFloat(refNewMonths) / 12).toFixed(1)}{" "}
                               years
                             </p>
                           )}
                           {refErrors.newMonths && (
                             <p
+                              id="new-months-error"
                               role="alert"
                               className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]"
                             >
@@ -608,16 +620,19 @@ export default function MortgageCalculator() {
                               onChange={(e) => setRefNewRate(e.target.value)}
                               min="0"
                               step="0.1"
+                              aria-describedby={refErrors.newRate ? "new-rate-error" : undefined}
+                              aria-invalid={!!refErrors.newRate}
                               className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-[var(--color-inline-error)] border-2" : ""}`}
                             />
                             {refNewRate && (
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lagunita font-bold pointer-events-none">
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-teal)] font-bold pointer-events-none" aria-hidden="true">
                                 %
                               </span>
                             )}
                           </div>
                           {refErrors.newRate && (
                             <p
+                              id="new-rate-error"
                               role="alert"
                               className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]"
                             >
@@ -626,9 +641,8 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="my-6 border-b border-lagunita" />
-
                         <div className="mb-5 relative">
+                          <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b border-lagunita pb-2">Optional</h2>
                           <Label
                             className="font-semibold"
                             htmlFor="ref-closing"
@@ -636,23 +650,30 @@ export default function MortgageCalculator() {
                             Closing costs & fees
                           </Label>
                           <div className="relative">
-                            {refClosingCosts && (
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold pointer-events-none">
-                                $
-                              </span>
-                            )}
                             <Input
                               id="ref-closing"
-                              type="number"
+                              type="text"
+                              inputMode="numeric"
                               placeholder=""
-                              value={refClosingCosts}
+                              value={
+                                refClosingCosts
+                                  ? formatNumberWithCommas(refClosingCosts)
+                                  : ""
+                              }
                               onChange={(e) =>
-                                setRefClosingCosts(e.target.value)
+                                setRefClosingCosts(
+                                  e.target.value.replace(/,/g, ""),
+                                )
                               }
                               min="0"
                               step="0.01"
-                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-6" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refClosingCosts ? "pl-8" : ""}`}
                             />
+                            {refClosingCosts && (
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
+                                $
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -674,7 +695,7 @@ export default function MortgageCalculator() {
                               step="1"
                               className="pr-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none">
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none" aria-hidden="true">
                               years
                             </span>
                           </div>
@@ -684,12 +705,12 @@ export default function MortgageCalculator() {
                         {refinanceResults ? (
                           <div className="flex gap-4">
                             <Button
-                              className="h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white flex-1"
+                              className="h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white flex-1"
                               onClick={calculateRefinance}
                             >
                               Recalculate
                             </Button>
-                            <button
+                            <Button
                               onClick={() => {
                                 setRefinanceResults(null);
                                 setRefNewLoanAmount("");
@@ -699,15 +720,15 @@ export default function MortgageCalculator() {
                                 setRefYearsIn("");
                                 setRefErrors({});
                               }}
-                              className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-lagunita text-navy bg-transparent hover:border-navy hover:text-navy hover:underline cursor-pointer transition-colors flex-1 justify-center"
+                              variant="lagunita"
+                              className="h-18 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                             >
-                              <FaRotateLeft size={14} aria-hidden="true" />
-                              Reset new loan terms
-                            </button>
+                              Reset new loan terms<FaRotateLeft size={14} aria-hidden="true" />
+                            </Button>
                           </div>
                         ) : (
                           <Button
-                            className="h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-lagunita text-white w-full"
+                            className="h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full"
                             onClick={calculateRefinance}
                           >
                             Compare Refinance Options
@@ -719,11 +740,15 @@ export default function MortgageCalculator() {
                     {/* ── Right column — results or empty state ───────────────── */}
                     <div>
                       {refinanceResults ? (
-                        <div className="bg-[var(--card-background)] rounded-xl p-8">
+                        <div
+                          className="bg-[var(--card-background)] rounded-xl p-8"
+                          aria-live="polite"
+                          aria-atomic="true"
+                        >
                           <div className="mb-6">
                             {refinanceResults.totalSavings >= 0 ? (
                               <>
-                                <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-[var(--color-teal)] flex items-center gap-2">
                                   Refinancing may be worth it
                                 </h3>
                                 <p className="text-sm mt-1 text-[var(--results-card-empty)]">
@@ -733,7 +758,7 @@ export default function MortgageCalculator() {
                               </>
                             ) : (
                               <>
-                                <h3 className="text-lg font-bold text-lagunita flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-[var(--color-teal)] flex items-center gap-2">
                                   Refinancing may not be worth it
                                 </h3>
                                 <p className="text-sm mt-1 text-[var(--results-card-empty)]">
@@ -752,10 +777,7 @@ export default function MortgageCalculator() {
                                   New monthly payment:
                                 </div>
                                 <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                                  $
-                                  {formatCurrency(
-                                    refinanceResults.newMonthlyPayment,
-                                  )}
+                                  ${formatCurrency(refinanceResults.newMonthlyPayment)}
                                 </div>
                               </div>
 
@@ -766,10 +788,7 @@ export default function MortgageCalculator() {
                                     : "Monthly increase:"}
                                 </div>
                                 <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                                  $
-                                  {formatCurrency(
-                                    Math.abs(refinanceResults.monthlySavings),
-                                  )}
+                                  ${formatCurrency(Math.abs(refinanceResults.monthlySavings))}
                                 </div>
                               </div>
 
@@ -778,24 +797,18 @@ export default function MortgageCalculator() {
                                   Closing costs & fees:
                                 </div>
                                 <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                                  $
-                                  {formatCurrency(
-                                    Number.parseFloat(refClosingCosts) || 0,
-                                  )}
+                                  ${formatCurrency(refinanceResults.closingCosts)}
                                 </div>
                               </div>
 
                               <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
-                                <div className="w-full sm:w-[50%] text-md p-4 font-bold bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
+                                <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark items-center">
                                   {refinanceResults.totalSavings >= 0
                                     ? "Estimated savings over planned stay:"
                                     : "Estimated total cost difference:"}
                                 </div>
                                 <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
-                                  $
-                                  {formatCurrency(
-                                    Math.abs(refinanceResults.totalSavings),
-                                  )}
+                                  ${formatCurrency(Math.abs(refinanceResults.totalSavings))}
                                 </div>
                               </div>
                             </div>
