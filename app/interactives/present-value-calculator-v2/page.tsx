@@ -89,6 +89,7 @@ export default function PresentValueCalculator() {
   // Warning states (amber — calc still runs)
   const [interestRateWarning, setInterestRateWarning] = useState<string>("")
   const [paymentInterestRateWarning, setPaymentInterestRateWarning] = useState<string>("")
+  const [futureValueWarning, setFutureValueWarning] = useState<string>("")
 
   // Derived max periods for each tab
   const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
@@ -134,6 +135,7 @@ export default function PresentValueCalculator() {
     setTimePeriod("")
     setCompoundingFrequency("annually")
     setFutureValueError("")
+    setFutureValueWarning("")
     setInterestRateError("")
     setTimePeriodError("")
     setInterestRateWarning("")
@@ -249,35 +251,56 @@ export default function PresentValueCalculator() {
                         inputMode="numeric"
                         value={futureValue}
                         onChange={(e) => {
-                          const raw = e.target.value
+                          const raw = e.target.value;
                           if (raw === "") {
-                            setFutureValueError("")
-                            setFutureValue("")
-                            return
+                            setFutureValueError("");
+                            setFutureValueWarning("");
+                            setFutureValue("");
+                            return;
                           }
-                          const val = Number(raw)
+                          const val = Number(raw);
                           if (val < 0 || val > 1_000_000_000) {
-                            setFutureValueError("Enter an amount between 0 and 1,000,000,000.")
-                            setFutureValue(raw)
-                            return
+                            setFutureValueError(
+                              "Enter an amount between 0 and 1,000,000,000.",
+                            );
+                            setFutureValueWarning("");
+                            setFutureValue(raw);
+                            return;
                           }
-                          setFutureValueError("")
-                          setFutureValue(raw)
+                          setFutureValueError("");
+                          setFutureValueWarning(
+                            val === 0
+                              ? "A future value of $0 has no present value to calculate."
+                              : "",
+                          );
+                          setFutureValue(raw);
                         }}
                         onBlur={(e) => {
-                          const raw = e.target.value
-                          const val = parseFloat(raw)
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
                           if (raw === "" || isNaN(val)) {
-                            setFutureValue("")
-                            setTimeout(() => setFutureValueError("Please enter a future value to calculate."), 150)
+                            setFutureValue("");
+                            setFutureValueWarning("");
+                            setTimeout(
+                              () =>
+                                setFutureValueError(
+                                  "Please enter a future value to calculate.",
+                                ),
+                              150,
+                            );
                           } else if (val < 0 || val > 1_000_000_000) {
-                            setFutureValue(String(val))
+                            setFutureValue(String(val));
                           } else {
-                            setFutureValueError("")
-                            setFutureValue(String(val))
+                            setFutureValueError("");
+                            setFutureValueWarning(
+                              val === 0
+                                ? "A future value of $0 has no present value to calculate."
+                                : "",
+                            );
+                            setFutureValue(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : futureValueWarning ? "border-amber-500 border-2" : ""}`}
                         min={0}
                         max={1000000000}
                       />
@@ -288,6 +311,11 @@ export default function PresentValueCalculator() {
                         className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                       >
                         {futureValueError}
+                      </p>
+                    )}
+                    {futureValueWarning && (
+                      <p className="mt-1 text-sm text-amber-600 font-semibold">
+                        {futureValueWarning}
                       </p>
                     )}
                   </div>
@@ -308,42 +336,54 @@ export default function PresentValueCalculator() {
                         inputMode="numeric"
                         value={interestRate}
                         onChange={(e) => {
-                          const raw = e.target.value
+                          const raw = e.target.value;
                           if (raw === "") {
-                            setInterestRateError("")
-                            setInterestRateWarning("")
-                            setInterestRate("")
-                            return
+                            setInterestRateError("");
+                            setInterestRateWarning("");
+                            setInterestRate("");
+                            return;
                           }
-                          const val = Number(raw)
+                          const val = Number(raw);
                           if (val < 0 || val > 1000) {
-                            setInterestRateError("Enter a rate between 0% and 1,000%.")
-                            setInterestRateWarning("")
-                            setInterestRate(raw)
+                            setInterestRateError(
+                              "Enter a rate between 0% and 1,000%.",
+                            );
+                            setInterestRateWarning("");
+                            setInterestRate(raw);
                           } else {
-                            setInterestRateError("")
+                            setInterestRateError("");
                             if (val === 0) {
-                              setInterestRateWarning("At 0%, present value equals future value, no discounting occurs.")
+                              setInterestRateWarning(
+                                "At 0%, present value equals future value, no discounting occurs.",
+                              );
                             } else if (val > 50) {
-                              setInterestRateWarning("Rates above 50% are unusual.")
+                              setInterestRateWarning(
+                                "Rates above 50% are unusual.",
+                              );
                             } else {
-                              setInterestRateWarning("")
+                              setInterestRateWarning("");
                             }
-                            setInterestRate(raw)
+                            setInterestRate(raw);
                           }
                         }}
                         onBlur={(e) => {
-                          const raw = e.target.value
-                          const val = parseFloat(raw)
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
                           if (raw === "" || isNaN(val)) {
-                            setInterestRate("")
-                            setInterestRateWarning("")
-                            setTimeout(() => setInterestRateError("Please enter an interest rate."), 150)
+                            setInterestRate("");
+                            setInterestRateWarning("");
+                            setTimeout(
+                              () =>
+                                setInterestRateError(
+                                  "Please enter an interest rate.",
+                                ),
+                              150,
+                            );
                           } else if (val < 0 || val > 1000) {
-                            setInterestRate(String(val))
+                            setInterestRate(String(val));
                           } else {
-                            setInterestRateError("")
-                            setInterestRate(String(val))
+                            setInterestRateError("");
+                            setInterestRate(String(val));
                           }
                         }}
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${interestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -387,30 +427,41 @@ export default function PresentValueCalculator() {
                       inputMode="numeric"
                       value={timePeriod}
                       onChange={(e) => {
-                        const raw = e.target.value
+                        const raw = e.target.value;
                         if (raw === "") {
-                          setTimePeriod("")
-                          setTimePeriodError("")
-                          return
+                          setTimePeriod("");
+                          setTimePeriodError("");
+                          return;
                         }
-                        const val = Number(raw)
+                        const val = Number(raw);
                         if (val < 0 || val > singleMaxPeriods) {
-                          setTimePeriod("")
-                          setTimePeriodError(buildPeriodsRangeError(compoundingFrequency, singleMaxPeriods))
-                          return
+                          setTimePeriod("");
+                          setTimePeriodError(
+                            buildPeriodsRangeError(
+                              compoundingFrequency,
+                              singleMaxPeriods,
+                            ),
+                          );
+                          return;
                         }
-                        setTimePeriodError("")
-                        setTimePeriod(raw)
+                        setTimePeriodError("");
+                        setTimePeriod(raw);
                       }}
                       onBlur={(e) => {
-                        const raw = e.target.value
+                        const raw = e.target.value;
                         if (raw === "") {
                           if (!timePeriodError) {
-                            setTimeout(() => setTimePeriodError("Please enter the number of periods."), 150)
+                            setTimeout(
+                              () =>
+                                setTimePeriodError(
+                                  "Please enter the number of periods.",
+                                ),
+                              150,
+                            );
                           }
                         } else {
-                          const val = parseFloat(raw)
-                          if (!isNaN(val)) setTimePeriod(String(val))
+                          const val = parseFloat(raw);
+                          if (!isNaN(val)) setTimePeriod(String(val));
                         }
                       }}
                       className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -430,26 +481,33 @@ export default function PresentValueCalculator() {
 
                   {/* Compounding Frequency */}
                   <div className="space-y-2">
-                    <Label id="single-compounding-frequency-label" className="block font-semibold text-foreground mb-2">
+                    <Label
+                      id="single-compounding-frequency-label"
+                      className="block font-semibold text-foreground mb-2"
+                    >
                       Compounding frequency
                     </Label>
                     <Select
                       value={compoundingFrequency}
                       onValueChange={(value) => {
-                        const freq = value as CompoundingFrequency
-                        setCompoundingFrequency(freq)
+                        const freq = value as CompoundingFrequency;
+                        setCompoundingFrequency(freq);
                         if (timePeriod !== "") {
-                          const newMax = frequencyMap[freq].periods * 100
+                          const newMax = frequencyMap[freq].periods * 100;
                           if (Number(timePeriod) > newMax) {
-                            setTimePeriodError(buildPeriodsRangeError(freq, newMax))
+                            setTimePeriodError(
+                              buildPeriodsRangeError(freq, newMax),
+                            );
                           } else {
-                            setTimePeriodError("")
+                            setTimePeriodError("");
                           }
                         }
                       }}
                     >
-                      <SelectTrigger className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
-                      aria-labelledby="single-compounding-frequency-label">
+                      <SelectTrigger
+                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        aria-labelledby="single-compounding-frequency-label"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -484,7 +542,9 @@ export default function PresentValueCalculator() {
                     Present value
                   </h2>
                   <p className="text-3xl font-bold text-lagunita mb-5">
-                    {singleHasError ? "—" : formatCurrency(singleCalculations.presentValue)}
+                    {singleHasError
+                      ? "—"
+                      : formatCurrency(singleCalculations.presentValue)}
                   </p>
                   <div
                     aria-live="polite"
@@ -496,7 +556,9 @@ export default function PresentValueCalculator() {
                         Future value:
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                        {singleHasError ? "—" : formatCurrency(parseFloat(futureValue) || 0)}
+                        {singleHasError
+                          ? "—"
+                          : formatCurrency(parseFloat(futureValue) || 0)}
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -506,7 +568,13 @@ export default function PresentValueCalculator() {
                       <div
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!singleHasError && singleCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
-                        {singleHasError ? "—" : formatCurrency(suppressNegativeZero(singleCalculations.discountAmount))}
+                        {singleHasError
+                          ? "—"
+                          : formatCurrency(
+                              suppressNegativeZero(
+                                singleCalculations.discountAmount,
+                              ),
+                            )}
                       </div>
                     </div>
                   </div>
@@ -545,31 +613,33 @@ export default function PresentValueCalculator() {
                         inputMode="numeric"
                         value={paymentAmount}
                         onChange={(e) => {
-                          const raw = e.target.value
+                          const raw = e.target.value;
                           if (raw === "") {
-                            setPaymentAmountError("")
-                            setPaymentAmount("")
-                            return
+                            setPaymentAmountError("");
+                            setPaymentAmount("");
+                            return;
                           }
-                          const val = Number(raw)
+                          const val = Number(raw);
                           if (val < 0 || val > 100_000_000) {
-                            setPaymentAmountError("Enter an amount between $0 and $100,000,000.")
-                            setPaymentAmount(raw)
-                            return
+                            setPaymentAmountError(
+                              "Enter an amount between $0 and $100,000,000.",
+                            );
+                            setPaymentAmount(raw);
+                            return;
                           }
-                          setPaymentAmountError("")
-                          setPaymentAmount(raw)
+                          setPaymentAmountError("");
+                          setPaymentAmount(raw);
                         }}
                         onBlur={(e) => {
-                          const raw = e.target.value
-                          const val = parseFloat(raw)
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
                           if (raw === "" || isNaN(val)) {
-                            setPaymentAmount("")
+                            setPaymentAmount("");
                           } else if (val < 0 || val > 100_000_000) {
-                            setPaymentAmount(String(val))
+                            setPaymentAmount(String(val));
                           } else {
-                            setPaymentAmountError("")
-                            setPaymentAmount(String(val))
+                            setPaymentAmountError("");
+                            setPaymentAmount(String(val));
                           }
                         }}
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(paymentAmount) > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -625,35 +695,37 @@ export default function PresentValueCalculator() {
                         inputMode="numeric"
                         value={finalAmount}
                         onChange={(e) => {
-                          const raw = e.target.value
+                          const raw = e.target.value;
                           if (raw === "") {
-                            setFinalAmountError("")
-                            setFinalAmount("")
-                            return
+                            setFinalAmountError("");
+                            setFinalAmount("");
+                            return;
                           }
-                          const val = Number(raw)
+                          const val = Number(raw);
                           if (val < 0 || val > 1_000_000_000) {
-                            setFinalAmountError("Enter an amount between $0 and $1,000,000,000.")
-                            setFinalAmount(raw)
-                            return
+                            setFinalAmountError(
+                              "Enter an amount between $0 and $1,000,000,000.",
+                            );
+                            setFinalAmount(raw);
+                            return;
                           }
-                          setFinalAmountError("")
-                          setFinalAmount(raw)
+                          setFinalAmountError("");
+                          setFinalAmount(raw);
                         }}
                         onBlur={(e) => {
-                          const raw = e.target.value
+                          const raw = e.target.value;
                           if (raw === "") {
-                            setFinalAmount("")
-                            return
+                            setFinalAmount("");
+                            return;
                           }
-                          const val = parseFloat(raw)
+                          const val = parseFloat(raw);
                           if (isNaN(val)) {
-                            setFinalAmount("")
+                            setFinalAmount("");
                           } else if (val < 0 || val > 1_000_000_000) {
-                            setFinalAmount(String(val))
+                            setFinalAmount(String(val));
                           } else {
-                            setFinalAmountError("")
-                            setFinalAmount(String(val))
+                            setFinalAmountError("");
+                            setFinalAmount(String(val));
                           }
                         }}
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(finalAmount) > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -685,42 +757,54 @@ export default function PresentValueCalculator() {
                         inputMode="numeric"
                         value={paymentInterestRate}
                         onChange={(e) => {
-                          const raw = e.target.value
+                          const raw = e.target.value;
                           if (raw === "") {
-                            setPaymentInterestRateError("")
-                            setPaymentInterestRateWarning("")
-                            setPaymentInterestRate("")
-                            return
+                            setPaymentInterestRateError("");
+                            setPaymentInterestRateWarning("");
+                            setPaymentInterestRate("");
+                            return;
                           }
-                          const val = Number(raw)
+                          const val = Number(raw);
                           if (val < 0 || val > 1000) {
-                            setPaymentInterestRateError("Enter a rate between 0% and 1,000%.")
-                            setPaymentInterestRateWarning("")
-                            setPaymentInterestRate(raw)
+                            setPaymentInterestRateError(
+                              "Enter a rate between 0% and 1,000%.",
+                            );
+                            setPaymentInterestRateWarning("");
+                            setPaymentInterestRate(raw);
                           } else {
-                            setPaymentInterestRateError("")
+                            setPaymentInterestRateError("");
                             if (val === 0) {
-                              setPaymentInterestRateWarning("At 0%, present value equals the total of all payments and any final amount, without discounting.")
+                              setPaymentInterestRateWarning(
+                                "At 0%, present value equals the total of all payments and any final amount, without discounting.",
+                              );
                             } else if (val > 50) {
-                              setPaymentInterestRateWarning("Rates above 50% are very unusual.")
+                              setPaymentInterestRateWarning(
+                                "Rates above 50% are very unusual.",
+                              );
                             } else {
-                              setPaymentInterestRateWarning("")
+                              setPaymentInterestRateWarning("");
                             }
-                            setPaymentInterestRate(raw)
+                            setPaymentInterestRate(raw);
                           }
                         }}
                         onBlur={(e) => {
-                          const raw = e.target.value
-                          const val = parseFloat(raw)
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
                           if (raw === "" || isNaN(val)) {
-                            setPaymentInterestRate("")
-                            setPaymentInterestRateWarning("")
-                            setTimeout(() => setPaymentInterestRateError("Please enter an interest rate."), 150)
+                            setPaymentInterestRate("");
+                            setPaymentInterestRateWarning("");
+                            setTimeout(
+                              () =>
+                                setPaymentInterestRateError(
+                                  "Please enter an interest rate.",
+                                ),
+                              150,
+                            );
                           } else if (val < 0 || val > 1000) {
-                            setPaymentInterestRate(String(val))
+                            setPaymentInterestRate(String(val));
                           } else {
-                            setPaymentInterestRateError("")
-                            setPaymentInterestRate(String(val))
+                            setPaymentInterestRateError("");
+                            setPaymentInterestRate(String(val));
                           }
                         }}
                         className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -743,11 +827,12 @@ export default function PresentValueCalculator() {
                         {paymentInterestRateError}
                       </p>
                     )}
-                    {paymentInterestRateWarning && !paymentInterestRateError && (
-                      <p className="mt-1 text-sm text-amber-600 font-semibold">
-                        {paymentInterestRateWarning}
-                      </p>
-                    )}
+                    {paymentInterestRateWarning &&
+                      !paymentInterestRateError && (
+                        <p className="mt-1 text-sm text-amber-600 font-semibold">
+                          {paymentInterestRateWarning}
+                        </p>
+                      )}
                   </div>
 
                   {/* Number of Payments */}
@@ -764,30 +849,41 @@ export default function PresentValueCalculator() {
                       inputMode="numeric"
                       value={numberOfPayments}
                       onChange={(e) => {
-                        const raw = e.target.value
+                        const raw = e.target.value;
                         if (raw === "") {
-                          setNumberOfPayments("")
-                          setNumberOfPaymentsError("")
-                          return
+                          setNumberOfPayments("");
+                          setNumberOfPaymentsError("");
+                          return;
                         }
-                        const val = Number(raw)
+                        const val = Number(raw);
                         if (val < 0 || val > seriesMaxPeriods) {
-                          setNumberOfPayments("")
-                          setNumberOfPaymentsError(buildPeriodsRangeError(paymentFrequency, seriesMaxPeriods))
-                          return
+                          setNumberOfPayments("");
+                          setNumberOfPaymentsError(
+                            buildPeriodsRangeError(
+                              paymentFrequency,
+                              seriesMaxPeriods,
+                            ),
+                          );
+                          return;
                         }
-                        setNumberOfPaymentsError("")
-                        setNumberOfPayments(raw)
+                        setNumberOfPaymentsError("");
+                        setNumberOfPayments(raw);
                       }}
                       onBlur={(e) => {
-                        const raw = e.target.value
+                        const raw = e.target.value;
                         if (raw === "") {
                           if (!numberOfPaymentsError) {
-                            setTimeout(() => setNumberOfPaymentsError("Please enter the number of payments."), 150)
+                            setTimeout(
+                              () =>
+                                setNumberOfPaymentsError(
+                                  "Please enter the number of payments.",
+                                ),
+                              150,
+                            );
                           }
                         } else {
-                          const val = parseFloat(raw)
-                          if (!isNaN(val)) setNumberOfPayments(String(val))
+                          const val = parseFloat(raw);
+                          if (!isNaN(val)) setNumberOfPayments(String(val));
                         }
                       }}
                       className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${numberOfPaymentsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -807,26 +903,33 @@ export default function PresentValueCalculator() {
 
                   {/* Payment Frequency */}
                   <div className="space-y-2">
-                    <Label id="compounding-frequency-label" className="block font-semibold text-foreground mb-2">
+                    <Label
+                      id="compounding-frequency-label"
+                      className="block font-semibold text-foreground mb-2"
+                    >
                       Compounding frequency
                     </Label>
                     <Select
                       value={paymentFrequency}
                       onValueChange={(value) => {
-                        const freq = value as CompoundingFrequency
-                        setPaymentFrequency(freq)
+                        const freq = value as CompoundingFrequency;
+                        setPaymentFrequency(freq);
                         if (numberOfPayments !== "") {
-                          const newMax = frequencyMap[freq].periods * 100
+                          const newMax = frequencyMap[freq].periods * 100;
                           if (Number(numberOfPayments) > newMax) {
-                            setNumberOfPaymentsError(buildPeriodsRangeError(freq, newMax))
+                            setNumberOfPaymentsError(
+                              buildPeriodsRangeError(freq, newMax),
+                            );
                           } else {
-                            setNumberOfPaymentsError("")
+                            setNumberOfPaymentsError("");
                           }
                         }
                       }}
                     >
-                      <SelectTrigger className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
-                      aria-labelledby="compounding-frequency-label">
+                      <SelectTrigger
+                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        aria-labelledby="compounding-frequency-label"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -861,7 +964,9 @@ export default function PresentValueCalculator() {
                     Present value
                   </h2>
                   <p className="text-3xl font-bold text-lagunita mb-5">
-                    {seriesHasError ? "—" : formatCurrency(paymentCalculations.presentValue)}
+                    {seriesHasError
+                      ? "—"
+                      : formatCurrency(paymentCalculations.presentValue)}
                   </p>
                   {seriesHasError && (
                     <p className="text-sm text-muted-foreground mb-3">
@@ -874,7 +979,9 @@ export default function PresentValueCalculator() {
                         Total payments:
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                        {seriesHasError ? "—" : formatCurrency(paymentCalculations.totalPayments)}
+                        {seriesHasError
+                          ? "—"
+                          : formatCurrency(paymentCalculations.totalPayments)}
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -884,7 +991,13 @@ export default function PresentValueCalculator() {
                       <div
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!seriesHasError && paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
-                        {seriesHasError ? "—" : formatCurrency(suppressNegativeZero(paymentCalculations.discountAmount))}
+                        {seriesHasError
+                          ? "—"
+                          : formatCurrency(
+                              suppressNegativeZero(
+                                paymentCalculations.discountAmount,
+                              ),
+                            )}
                       </div>
                     </div>
                   </div>
@@ -895,5 +1008,5 @@ export default function PresentValueCalculator() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -52,6 +52,8 @@ interface FieldError {
   message: string
 }
 
+const SIGN_HELPER = "Money you pay out is negative; money you receive is positive."
+
 export function TVMCalculator() {
   const [presentValue, setPresentValue] = useState<string>("")
   const [futureValue, setFutureValue] = useState<string>("")
@@ -123,27 +125,27 @@ export function TVMCalculator() {
     if (solveFor !== "PV" && rawPv !== "" && rawPv !== "-") {
       const pv = parseFloat(rawPv)
       if (pv < CONSTRAINTS.presentValue.min || pv > CONSTRAINTS.presentValue.max)
-        errors.push({ field: "presentValue", message: `Must be between $${CONSTRAINTS.presentValue.min.toLocaleString()} and $${CONSTRAINTS.presentValue.max.toLocaleString()}` })
+        errors.push({ field: "presentValue", message: `Enter an amount between $${CONSTRAINTS.presentValue.min.toLocaleString()} and $${CONSTRAINTS.presentValue.max.toLocaleString()}` })
     }
     if (solveFor !== "FV" && rawFv !== "" && rawFv !== "-") {
       const fv = parseFloat(rawFv)
       if (fv < CONSTRAINTS.futureValue.min || fv > CONSTRAINTS.futureValue.max)
-        errors.push({ field: "futureValue", message: `Must be between $${CONSTRAINTS.futureValue.min.toLocaleString()} and $${CONSTRAINTS.futureValue.max.toLocaleString()}` })
+        errors.push({ field: "futureValue", message: `Enter an amount between $${CONSTRAINTS.futureValue.min.toLocaleString()} and $${CONSTRAINTS.futureValue.max.toLocaleString()}` })
     }
     if (solveFor !== "PMT" && rawPmt !== "" && rawPmt !== "-") {
       const pmt = parseFloat(rawPmt)
       if (pmt < CONSTRAINTS.payment.min || pmt > CONSTRAINTS.payment.max)
-        errors.push({ field: "payment", message: `Must be between $${CONSTRAINTS.payment.min.toLocaleString()} and $${CONSTRAINTS.payment.max.toLocaleString()}` })
+        errors.push({ field: "payment", message: `Enter an amount between $${CONSTRAINTS.payment.min.toLocaleString()} and $${CONSTRAINTS.payment.max.toLocaleString()}` })
     }
     if (solveFor !== "RATE" && rawRate !== "" && rawRate !== "-") {
       const rate = parseFloat(rawRate)
       if (rate < CONSTRAINTS.annualRate.min || rate > CONSTRAINTS.annualRate.max)
-        errors.push({ field: "annualRate", message: `Must be between ${CONSTRAINTS.annualRate.min}% and ${CONSTRAINTS.annualRate.max}%` })
+        errors.push({ field: "annualRate", message: `Enter a rate between ${CONSTRAINTS.annualRate.min}% and ${CONSTRAINTS.annualRate.max}%` })
     }
     if (solveFor !== "NPER" && rawPeriods !== "") {
       const n = parseFloat(rawPeriods)
       if (n < CONSTRAINTS.periods.min || n > CONSTRAINTS.periods.max)
-        errors.push({ field: "periods", message: `Must be between ${CONSTRAINTS.periods.min} and ${CONSTRAINTS.periods.max} periods` })
+        errors.push({ field: "periods", message: `Enter a value between ${CONSTRAINTS.periods.min} and ${CONSTRAINTS.periods.max} periods` })
     }
     return errors
   }, [presentValue, futureValue, payment, annualRate, periods, solveFor])
@@ -588,8 +590,8 @@ export function TVMCalculator() {
               <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
               <p>This calculator uses signs to show the direction of money:</p>
               <div className="flex flex-row gap-2">
-                <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaPlus /> <strong >Positive &mdash; money you receive (cash in)</strong></div>
-                <div className="text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaMinus /> <strong >Negative &mdash; money you pay (cash out)</strong></div>
+                <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaPlus /> <strong >Positive &mdash; money you receive (cash in)</strong></div>
+                <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaMinus /> <strong >Negative &mdash; money you pay (cash out)</strong></div>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center text-sm gap-3">
@@ -652,10 +654,14 @@ export function TVMCalculator() {
                 key={option.value}
                 onClick={() => {
                   if (option.value !== solveFor) {
-                    setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
-                    setPaymentFrequencyMode("same")
+                    setPresentValue("");
+                    setFutureValue("");
+                    setPayment("");
+                    setAnnualRate("");
+                    setPeriods("");
+                    setPaymentFrequencyMode("same");
                   }
-                  setSolveFor(option.value)
+                  setSolveFor(option.value);
                 }}
                 className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
                   solveFor === option.value
@@ -674,117 +680,275 @@ export function TVMCalculator() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2">
-
+          <section
+            aria-label="Calculator inputs"
+            className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2"
+          >
             {/* Present Value */}
             {solveFor !== "PV" && (
               <div className="space-y-2">
-                <Label htmlFor="pv" className="block font-semibold text-foreground mb-2">Present value</Label>
+                <Label
+                  htmlFor="pv"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Present value
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="pv" type="text" inputMode="decimal" value={presentValue}
-                    onChange={(e) => handleInputChange(e.target.value, setPresentValue)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setPresentValue)}
-                    className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-destructive" : ""}`} />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
+                  <Input
+                    id="pv"
+                    type="text"
+                    inputMode="decimal"
+                    value={presentValue}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setPresentValue)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setPresentValue)
+                    }
+                    className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                {getFieldError("presentValue") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("presentValue")}</p>}
+                {getFieldError("presentValue") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("presentValue")}
+                  </p>
+                )}
+                {presentValue && (
+                  <p className="mt-1 text-sm">
+                    {SIGN_HELPER}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Payment (early position for RATE/NPER) */}
             {(solveFor === "RATE" || solveFor === "NPER") && (
               <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per period</Label>
+                <Label
+                  htmlFor="pmt"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Payment per period
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="pmt" type="text" inputMode="decimal" value={payment}
-                    onChange={(e) => handleInputChange(e.target.value, setPayment)}
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
+                  <Input
+                    id="pmt"
+                    type="text"
+                    inputMode="decimal"
+                    value={payment}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setPayment)
+                    }
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
+                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>}
+                {getFieldError("payment") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("payment")}
+                  </p>
+                )}
+                {payment && (
+                  <p className="mt-1 text-sm">
+                    {SIGN_HELPER}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Future Value */}
             {solveFor !== "FV" && (
               <div className="space-y-2">
-                <Label htmlFor="fv" className="block font-semibold text-foreground mb-2">Future value</Label>
+                <Label
+                  htmlFor="fv"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Future value
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="fv" type="text" inputMode="decimal" value={futureValue}
-                    onChange={(e) => handleInputChange(e.target.value, setFutureValue)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setFutureValue)}
-                    className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-destructive" : ""}`} />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
+                  <Input
+                    id="fv"
+                    type="text"
+                    inputMode="decimal"
+                    value={futureValue}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setFutureValue)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setFutureValue)
+                    }
+                    className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                {getFieldError("futureValue") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("futureValue")}</p>}
+                {getFieldError("futureValue") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("futureValue")}
+                  </p>
+                )}
+                {futureValue && (
+                  <p className="mt-1 text-sm">
+                    {SIGN_HELPER}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Payment (normal position) */}
-            {solveFor !== "PMT" && solveFor !== "RATE" && solveFor !== "NPER" && (
-              <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per period</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="pmt" type="text" inputMode="decimal" value={payment}
-                    onChange={(e) => handleInputChange(e.target.value, setPayment)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
+            {solveFor !== "PMT" &&
+              solveFor !== "RATE" &&
+              solveFor !== "NPER" && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="pmt"
+                    className="block font-semibold text-foreground mb-2"
+                  >
+                    Payment per period
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                      $
+                    </span>
+                    <Input
+                      id="pmt"
+                      type="text"
+                      inputMode="decimal"
+                      value={payment}
+                      onChange={(e) =>
+                        handleInputChange(e.target.value, setPayment)
+                      }
+                      onBlur={(e) =>
+                        handleInputBlur(e.target.value, setPayment)
+                      }
+                      className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    />
+                  </div>
+                  {getFieldError("payment") && (
+                    <p className="text-sm text-[var(--color-inline-error)]">
+                      {getFieldError("payment")}
+                    </p>
+                  )}
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>}
-              </div>
-            )}
+              )}
 
             {/* Annual Rate */}
             {solveFor !== "RATE" && (
               <div className="space-y-2">
-                <Label htmlFor="rate" className="block font-semibold text-foreground mb-2">Annual interest rate</Label>
+                <Label
+                  htmlFor="rate"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Annual interest rate
+                </Label>
                 <div className="relative">
-                  <Input id="rate" type="text" inputMode="decimal" value={annualRate}
-                    onChange={(e) => handleInputChange(e.target.value, setAnnualRate)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setAnnualRate)}
-                    className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-destructive" : ""}`} />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
+                  <Input
+                    id="rate"
+                    type="text"
+                    inputMode="decimal"
+                    value={annualRate}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setAnnualRate)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setAnnualRate)
+                    }
+                    className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    %
+                  </span>
                 </div>
-                {getFieldError("annualRate") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("annualRate")}</p>}
+                {getFieldError("annualRate") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("annualRate")}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
               <div className="space-y-2">
-                <Label htmlFor="periods" className="block font-semibold text-foreground mb-2">Number of periods</Label>
-                <Input id="periods" type="text" inputMode="numeric" value={periods}
-                  onChange={(e) => { const val = e.target.value; if (val === "" || /^\d*$/.test(val)) setPeriods(val) }}
-                  className={`border-border bg-card ${getFieldError("periods") ? "border-destructive" : ""}`} />
-                {getFieldError("periods") && <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("periods")}</p>}
+                <Label
+                  htmlFor="periods"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Number of periods
+                </Label>
+                <Input
+                  id="periods"
+                  type="text"
+                  inputMode="numeric"
+                  value={periods}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^\d*$/.test(val)) setPeriods(val);
+                  }}
+                  className={`border-border bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                />
+                {getFieldError("periods") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("periods")}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Compounding Frequency */}
             <div className="space-y-2">
-              <Label htmlFor="compounding" className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
-              <Select value={compoundingFrequency} onValueChange={setCompoundingFrequency}>
-                <SelectTrigger id="compounding" className="border-border bg-card">
+              <Label
+                htmlFor="compounding"
+                className="block font-semibold text-foreground mb-2"
+              >
+                Compounding frequency
+              </Label>
+              <Select
+                value={compoundingFrequency}
+                onValueChange={setCompoundingFrequency}
+              >
+                <SelectTrigger
+                  id="compounding"
+                  className="border-border bg-card"
+                >
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
                 <SelectContent>
-                  {FREQUENCY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                  {FREQUENCY_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             {/* Payment Frequency */}
             <div className="space-y-3">
-              <Label className="block font-semibold text-foreground mb-2">Payments occur</Label>
+              <Label className="block font-semibold text-foreground mb-2">
+                Payments occur
+              </Label>
               <div className="flex items-center gap-4">
-                {(["same", "different"] as const).map(mode => (
-                  <label key={mode} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="paymentFrequencyMode" value={mode}
+                {(["same", "different"] as const).map((mode) => (
+                  <label
+                    key={mode}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="paymentFrequencyMode"
+                      value={mode}
                       checked={paymentFrequencyMode === mode}
                       onChange={() => setPaymentFrequencyMode(mode)}
-                      className="w-4 h-4 text-primary border-border focus:ring-primary" />
+                      className="w-4 h-4 text-primary border-border focus:ring-primary"
+                    />
                     <span className="text-sm text-foreground">
                       {mode === "same" ? "Same as compounding" : "Different"}
                     </span>
@@ -793,13 +957,28 @@ export function TVMCalculator() {
               </div>
               {paymentFrequencyMode === "different" && (
                 <div className="pt-2">
-                  <Label htmlFor="paymentFreq" className="text-sm font-medium text-foreground">Payment frequency</Label>
-                  <Select value={paymentFrequency} onValueChange={setPaymentFrequency}>
-                    <SelectTrigger id="paymentFreq" className="border-border bg-card mt-2">
+                  <Label
+                    htmlFor="paymentFreq"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Payment frequency
+                  </Label>
+                  <Select
+                    value={paymentFrequency}
+                    onValueChange={setPaymentFrequency}
+                  >
+                    <SelectTrigger
+                      id="paymentFreq"
+                      className="border-border bg-card mt-2"
+                    >
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
                     <SelectContent>
-                      {FREQUENCY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                      {FREQUENCY_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -808,10 +987,15 @@ export function TVMCalculator() {
 
             {/* Payment Timing */}
             <div className="space-y-2">
-              <Label className="block font-semibold text-foreground mb-2">Payment timing</Label>
+              <Label className="block font-semibold text-foreground mb-2">
+                Payment timing
+              </Label>
               <div className="flex rounded-md border border-border overflow-hidden w-fit">
                 {(["end", "beginning"] as const).map((timing, i) => (
-                  <button key={timing} type="button" onClick={() => setPaymentTiming(timing)}
+                  <button
+                    key={timing}
+                    type="button"
+                    onClick={() => setPaymentTiming(timing)}
                     className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-border" : ""} ${
                       paymentTiming === timing
                         ? "bg-primary text-primary-foreground"
@@ -823,23 +1007,37 @@ export function TVMCalculator() {
                 ))}
               </div>
               <p className="text-sm">
-                {paymentTiming === "end" ? "Payment made at the end of the period" : "Payment made at the beginning of the period"}
+                {paymentTiming === "end"
+                  ? "Payment made at the end of the period"
+                  : "Payment made at the beginning of the period"}
               </p>
             </div>
 
             <div className="pt-2">
-              <Button onClick={clearAll} variant="lagunita" className="hidden md:block font-medium px-8">Reset</Button>
+              <Button
+                onClick={clearAll}
+                variant="lagunita"
+                className="hidden md:block font-medium px-8"
+              >
+                Reset
+              </Button>
             </div>
           </section>
 
           {/* Results Card */}
           <Card className="w-full hidden md:block lg:w-1/2">
             <CardContent className="w-full  bg-[var(--card-background)] rounded-3xl p-[32px]">
-              <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
+              <h2 className="text-[20px] font-bold mb-1">
+                {currentOption?.label}
+              </h2>
               {displayError ? (
-                <p className="text-[var(--color-inline-error)]">{displayError}</p>
+                <p className="text-[var(--color-inline-error)]">
+                  {displayError}
+                </p>
               ) : result !== null ? (
-                <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">{formatResult(result)}</p>
+                <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
+                  {formatResult(result)}
+                </p>
               ) : (
                 <p className="text-2xl sm:text-3xl font-medium /50">—</p>
               )}
@@ -850,20 +1048,26 @@ export function TVMCalculator() {
         {/* Mobile sticky footer */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-8 shadow-lg">
           <div className="flex flex-col items-center justify-between">
-              <div className="text-sm">{currentOption?.label}</div>
-              {displayError ? (
-                <p className="text-[var(--color-inline-error)] font-medium">{displayError}</p>
-              ) : result !== null ? (
-                <p className="text-2xl font-bold text-primary">{formatResult(result)}</p>
-              ) : (
-                <p className="text-xl font-medium mb-2">Enter values above</p>
-              )}
-            <Button onClick={clearAll} variant="lagunita" size="sm">Reset</Button>
+            <div className="text-sm">{currentOption?.label}</div>
+            {displayError ? (
+              <p className="text-[var(--color-inline-error)] font-medium">
+                {displayError}
+              </p>
+            ) : result !== null ? (
+              <p className="text-2xl font-bold text-primary">
+                {formatResult(result)}
+              </p>
+            ) : (
+              <p className="text-xl font-medium mb-2">Enter values above</p>
+            )}
+            <Button onClick={clearAll} variant="lagunita" size="sm">
+              Reset
+            </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default TVMCalculator
