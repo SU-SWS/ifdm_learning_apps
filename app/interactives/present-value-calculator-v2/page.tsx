@@ -314,7 +314,7 @@ export default function PresentValueCalculator() {
                       </p>
                     )}
                     {futureValueWarning && (
-                      <p className="mt-1 text-sm text-amber-600 font-semibold">
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
                         {futureValueWarning}
                       </p>
                     )}
@@ -407,7 +407,7 @@ export default function PresentValueCalculator() {
                       </p>
                     )}
                     {interestRateWarning && !interestRateError && (
-                      <p className="mt-1 text-sm text-amber-600 font-semibold">
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
                         {interestRateWarning}
                       </p>
                     )}
@@ -829,7 +829,7 @@ export default function PresentValueCalculator() {
                     )}
                     {paymentInterestRateWarning &&
                       !paymentInterestRateError && (
-                        <p className="mt-1 text-sm text-amber-600 font-semibold">
+                        <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
                           {paymentInterestRateWarning}
                         </p>
                       )}
