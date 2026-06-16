@@ -373,7 +373,7 @@ export default function DebtPayoffCalculator() {
                           value={interestRate === 0 ? "" : interestRate}
                           onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
                           min="0.1"
-                          className="font-bold text-lagunita block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                           %
