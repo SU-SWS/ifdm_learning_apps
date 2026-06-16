@@ -6,6 +6,7 @@ import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { FaAngleDown } from "react-icons/fa";
 import InfoPopover from "@/app/ui/components/popover";
+import { Button } from "@/app/ui/components/button"
 
 type CompoundingPeriod = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
@@ -111,6 +112,16 @@ export default function CompoundInterestCalculator() {
   const [annualRateError, setAnnualRateError] = useState<string>("")
   const [periodsError, setPeriodsError] = useState<string>("")
   const hasError = !!initialAmountError || !!annualRateError || !!periodsError
+
+  const reset = () => {
+    setInitialAmount("")
+    setAnnualRate("")
+    setPeriods("")
+    setSelectedCompounding("monthly")
+    setInitialAmountError("")
+    setAnnualRateError("")
+    setPeriodsError("")
+  }
 
   type CompoundingPeriod = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
 
@@ -347,6 +358,15 @@ export default function CompoundInterestCalculator() {
                   <FaAngleDown />
                 </div>
               </div>
+              <Button
+                type="button"
+                variant="lagunita"
+                size="sm"
+                className="mt-4"
+                onClick={reset}
+              >
+                Reset
+              </Button>
             </div>
           </section>
 
