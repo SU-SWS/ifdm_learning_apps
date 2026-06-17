@@ -14,8 +14,7 @@ import {
   SelectValue,
 } from "@/app/ui/components/select"
 import ThemeToggle from "@/app/lib/theme-toggle"
-import { FaCircleInfo } from "react-icons/fa6"
-
+import InfoPopover from "@/app/ui/components/popover";
 
 type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
@@ -665,21 +664,10 @@ export default function PresentValueCalculator() {
                         Final amount (optional)
                       </Label>
                       <div className="relative group">
-                        <button
-                          type="button"
-                          aria-describedby="rate-tooltip"
-                          className="cursor-help text-[#A7C1CC] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
-                        >
-                          <FaCircleInfo size={16} aria-hidden="true" />
-                        </button>
-                        <div
-                          id="rate-tooltip"
-                          role="tooltip"
-                          className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md bg-[var(--info-popup-background)] border-1 border-grey-border text-xs p-4 invisible group-hover:visible group-focus-within:visible opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none z-10"
-                        >
+                        <InfoPopover title="Final amount">
                           A lump sum received or paid at the end of the payment
                           series (also called final value or future value).
-                        </div>
+                        </InfoPopover>
                       </div>
                     </div>
                     <div className="relative">
