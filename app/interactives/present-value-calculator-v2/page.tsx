@@ -101,9 +101,14 @@ export default function PresentValueCalculator() {
   const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
   const seriesMaxPeriods = frequencyMap[paymentFrequency].periods * 100
 
-  // Whether each tab has a blocking error that should suppress results.
-  const singleHasError = !!futureValueError || !!interestRateError || !!timePeriodError
-  const seriesHasError = !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
+  // A blank required field suppresses results (shows "—") even before an error
+  // message appears. finalAmount is optional and excluded from these checks.
+  const singleAnyFieldEmpty = futureValue === "" || interestRate === "" || timePeriod === ""
+  const seriesAnyFieldEmpty = paymentAmount === "" || paymentInterestRate === "" || numberOfPayments === ""
+
+  // Whether each tab has a blocking error (or empty required field) that should suppress results.
+  const singleHasError = singleAnyFieldEmpty || !!futureValueError || !!interestRateError || !!timePeriodError
+  const seriesHasError = seriesAnyFieldEmpty || !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
 
   // Debounced inputs for calculations — updates after 300ms pause in typing
   // to avoid recalculating on every keystroke.
@@ -649,6 +654,13 @@ export default function PresentValueCalculator() {
                           const val = parseFloat(raw);
                           if (raw === "" || isNaN(val)) {
                             setPaymentAmount("");
+                            setTimeout(
+                              () =>
+                                setPaymentAmountError(
+                                  "Please enter a payment amount.",
+                                ),
+                              150,
+                            );
                           } else if (val < 0 || val > 100_000_000) {
                             setPaymentAmount(String(val));
                           } else {
