@@ -18,6 +18,7 @@ import InfoPopover from "@/app/ui/components/popover";
 
 type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
+// All supported compounding frequencies with their periods-per-year multipliers and display labels.
 const frequencyMap: Record<CompoundingFrequency, { periods: number; label: string }> = {
   annually: { periods: 1, label: "Annually" },
   "semi-annually": { periods: 2, label: "Semi-annually" },
@@ -28,6 +29,7 @@ const frequencyMap: Record<CompoundingFrequency, { periods: number; label: strin
   daily: { periods: 365, label: "Daily" },
 }
 
+// Plural period labels used in range error messages (e.g. "Enter a number of months between...").
 const periodPluralLabels: Record<CompoundingFrequency, string> = {
   annually: "years",
   "semi-annually": "semi-annual periods",
@@ -38,6 +40,7 @@ const periodPluralLabels: Record<CompoundingFrequency, string> = {
   daily: "days",
 }
 
+// Adjective form of each frequency, used in the parenthetical part of range error messages.
 const freqLabels: Record<CompoundingFrequency, string> = {
   annually: "annual",
   "semi-annually": "semiannual",
@@ -48,6 +51,8 @@ const freqLabels: Record<CompoundingFrequency, string> = {
   daily: "daily",
 }
 
+// Builds the out-of-range error for the periods field. Non-annual frequencies
+// get a note showing how many periods equal 100 years at that frequency.
 function buildPeriodsRangeError(compounding: CompoundingFrequency, max: number): string {
   const label = periodPluralLabels[compounding]
   const maxFormatted = max.toLocaleString("en-US")
@@ -56,6 +61,7 @@ function buildPeriodsRangeError(compounding: CompoundingFrequency, max: number):
   return `${base} (${maxFormatted} periods = 100 years with ${freqLabels[compounding]} compounding).`
 }
 
+// Prevents -0 from displaying in results (e.g. when future value equals present value).
 function suppressNegativeZero(value: number): number {
   return Object.is(value, -0) ? 0 : value
 }
@@ -91,15 +97,16 @@ export default function PresentValueCalculator() {
   const [timePeriodWarning, setTimePeriodWarning] = useState<string>("")
   const [numberOfPaymentsWarning, setNumberOfPaymentsWarning] = useState<string>("")
 
-  // Derived max periods for each tab
+  // Upper bound for the periods input: 100 years worth of periods at the selected frequency.
   const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
   const seriesMaxPeriods = frequencyMap[paymentFrequency].periods * 100
 
-  // Whether each tab has a blocking error
+  // Whether each tab has a blocking error that should suppress results.
   const singleHasError = !!futureValueError || !!interestRateError || !!timePeriodError
   const seriesHasError = !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
 
   // Debounced inputs for calculations — updates after 300ms pause in typing
+  // to avoid recalculating on every keystroke.
   const [debouncedSingle, setDebouncedSingle] = useState({
     futureValue: "",
     interestRate: "",
@@ -129,6 +136,7 @@ export default function PresentValueCalculator() {
     return () => clearTimeout(t)
   }, [paymentAmount, paymentInterestRate, numberOfPayments, paymentFrequency, finalAmount])
 
+  // Clears all Single Amount inputs, errors, warnings, and resets frequency to default.
   const resetSingle = () => {
     setFutureValue("")
     setInterestRate("")
@@ -141,6 +149,7 @@ export default function PresentValueCalculator() {
     setTimePeriodWarning("")
   }
 
+  // Clears all Payment Series inputs, errors, warnings, and resets frequency to default.
   const resetSeries = () => {
     setPaymentAmount("")
     setPaymentInterestRate("")
@@ -155,6 +164,8 @@ export default function PresentValueCalculator() {
     setNumberOfPaymentsWarning("")
   }
 
+  // Calculates present value and discount amount for a single future lump sum.
+  // Uses PV = FV / (1 + r/n)^t where r is annual rate, n is periods/year, t is total periods.
   const singleCalculations = useMemo(() => {
     const fv = parseFloat(debouncedSingle.futureValue) || 0
     const rate = (parseFloat(debouncedSingle.interestRate) || 0) / 100
@@ -171,6 +182,8 @@ export default function PresentValueCalculator() {
     }
   }, [debouncedSingle])
 
+  // Calculates present value for a payment series plus an optional final lump sum.
+  // Uses the annuity PV formula; falls back to simple multiplication at 0% rate.
   const paymentCalculations = useMemo(() => {
     const rate = (parseFloat(debouncedSeries.paymentInterestRate) || 0) / 100
     const n = frequencyMap[debouncedSeries.paymentFrequency].periods
@@ -198,6 +211,7 @@ export default function PresentValueCalculator() {
     }
   }, [debouncedSeries])
 
+  // Formats a number as USD with two decimal places.
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -369,7 +383,13 @@ export default function PresentValueCalculator() {
                             setInterestRate(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${interestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                          interestRateError
+                          ? "border-[var(--color-inline-error)] border-2"
+                          : interestRateWarning
+                            ? "border-[var(--color-inline-warning)] border-2"
+                            : ""
+                        }`}
                         min={0}
                         max={1000}
                         step={0.01}
@@ -453,7 +473,7 @@ export default function PresentValueCalculator() {
                           if (!isNaN(val)) setTimePeriod(String(val));
                         }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : timePeriodWarning ? "border-[var(--color-inline-warning)] border-2" : ""}`}
                       min={0}
                       max={singleMaxPeriods}
                       step={1}
@@ -790,7 +810,11 @@ export default function PresentValueCalculator() {
                             setPaymentInterestRate(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError
+                        ? "border-[var(--color-inline-error)] border-2"
+                        : paymentInterestRateWarning
+                          ? "border-[var(--color-inline-warning)] border-2"
+                          : ""}`}
                         min={0}
                         max={1000}
                         step={0.01}
@@ -875,7 +899,13 @@ export default function PresentValueCalculator() {
                           if (!isNaN(val)) setNumberOfPayments(String(val));
                         }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${numberOfPaymentsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        numberOfPaymentsError
+                        ? "border-[var(--color-inline-error)] border-2"
+                        : numberOfPaymentsWarning
+                          ? "border-[var(--color-inline-warning)] border-2"
+                          : ""
+                      }`}
                       min={0}
                       max={seriesMaxPeriods}
                       step={1}

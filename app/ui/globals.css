@@ -123,7 +123,7 @@
   --color-teal: rgba(0, 124, 146, 1);
   --color-symbols: #616877;
   --color-inline-error: #8C1515;
-  --color-inline-warning: #C74632;
+  --color-inline-warning: #9A6207;
   --results-card-empty: rgba(102, 112, 133, 1);
   --info-popup-background: rgba(239, 255, 252, 1);
 }
@@ -182,7 +182,7 @@
   --color-teal: rgba(74, 203, 225, 1);
   --color-symbols: oklch(0.985 0 0);
   --color-inline-error: #F4795B;
-  --color-inline-warning: #E98300;
+  --color-inline-warning: #C37C09;
   --results-card-empty: oklch(0.985 0 0);
   --info-popup-background: rgba(35, 35, 35, 1);
 }
