@@ -20,16 +20,48 @@ const compoundingOptions: { value: CompoundingPeriod; label: string; periodsPerY
   { value: "daily", label: "Daily", periodsPerYear: 365 },
 ]
 
-function formatCurrency(value: number): string {
+function formatCurrency(value: number, decimals: number = 2): string {
   if (!isFinite(value)) return "-"
-  if (value >= 1_000_000_000_000) return `$${(value / 1_000_000_000_000).toFixed(2)}T`
-  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`
+  if (value >= 1e15) return "Too large to display"
+  if (value >= 1_000_000_000_000) return `$${(value / 1_000_000_000_000).toFixed(decimals)}T`
+  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(decimals)}B`
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(decimals)}M`
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value)
+}
+
+function formatPair(a: number, b: number): { aStr: string; bStr: string; tooLarge: boolean } {
+  const tooLarge = a >= 1e15 || b >= 1e15
+  if (tooLarge) {
+    return {
+      aStr: a >= 1e15 ? "Too large to display" : formatCurrency(a),
+      bStr: b >= 1e15 ? "Too large to display" : formatCurrency(b),
+      tooLarge: true,
+    }
+  }
+
+  // Only apply decimal extension for abbreviated values
+  const isAbbreviated = a >= 1_000_000 || b >= 1_000_000
+  if (!isAbbreviated) {
+    return { aStr: formatCurrency(a), bStr: formatCurrency(b), tooLarge: false }
+  }
+
+  let decimals = 2
+  while (decimals <= 4) {
+    const aStr = formatCurrency(a, decimals)
+    const bStr = formatCurrency(b, decimals)
+    if (aStr !== bStr || decimals === 4) {
+      return { aStr, bStr, tooLarge: false }
+    }
+    decimals++
+  }
+
+  // Unreachable but satisfies TS
+  return { aStr: formatCurrency(a), bStr: formatCurrency(b), tooLarge: false }
 }
 
 function calculateCompoundInterest(
@@ -73,7 +105,7 @@ function buildPeriodsRangeError(compounding: CompoundingPeriod, max: number): st
   const maxFormatted = max.toLocaleString("en-US")
   const base = `Enter a number of ${label} between 0 and ${maxFormatted}.`
   if (compounding === "annually") return base
-  return `${base} (${maxFormatted} periods = 100 years with ${freqLabels[compounding]} compounding).`
+  return `${base} (${maxFormatted} ${label} = 100 years with ${freqLabels[compounding]} compounding).`
 }
 
 export default function CompoundInterestCalculator() {
@@ -112,6 +144,11 @@ export default function CompoundInterestCalculator() {
   const [annualRateError, setAnnualRateError] = useState<string>("")
   const [periodsError, setPeriodsError] = useState<string>("")
   const hasError = !!initialAmountError || !!annualRateError || !!periodsError
+
+  const { aStr: balanceStr, bStr: interestStr, tooLarge: mainTooLarge } = formatPair(
+    selectedResult.finalAmount,
+    selectedResult.interestEarned
+  )
 
   const reset = () => {
     setInitialAmount("")
@@ -185,7 +222,13 @@ export default function CompoundInterestCalculator() {
                     if (initialAmount.startsWith("."))
                       setInitialAmount("0" + initialAmount);
                     if (!initialAmount)
-                      setTimeout(() => setInitialAmountError("Enter an initial amount."), 150);
+                      setTimeout(
+                        () =>
+                          setInitialAmountError(
+                            "Please enter an initial amount.",
+                          ),
+                        150,
+                      );
                   }}
                   min="0"
                   className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
@@ -224,9 +267,7 @@ export default function CompoundInterestCalculator() {
                       !isNaN(numericValue) &&
                       numericValue > MAX_ANNUAL_RATE
                     ) {
-                      setAnnualRateError(
-                        "Enter a rate between 0% and 1,000%.",
-                      );
+                      setAnnualRateError("Enter a rate between 0% and 1,000%.");
                       setAnnualRate(numericPart);
                     } else {
                       setAnnualRateError("");
@@ -237,7 +278,11 @@ export default function CompoundInterestCalculator() {
                     if (annualRate.startsWith("."))
                       setAnnualRate("0" + annualRate);
                     if (!annualRate)
-                      setTimeout(() => setAnnualRateError("Please enter an interest rate."), 150);
+                      setTimeout(
+                        () =>
+                          setAnnualRateError("Please enter an interest rate."),
+                        150,
+                      );
                   }}
                   className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
@@ -281,13 +326,19 @@ export default function CompoundInterestCalculator() {
                   value={periods}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "" || Number(val) >= 0) {
-                      setPeriods(val);
-                      if (val !== "" && Number(val) > maxPeriods) {
-                        setPeriodsError(buildPeriodsRangeError(selectedCompounding, maxPeriods));
-                      } else {
-                        setPeriodsError("");
-                      }
+                    const stripped = val.replace(/^0+(?=\d)/, "");
+                    const cleaned = stripped.replace(/(\.\d{2})\d+/, "$1");
+
+                    // Always show what the user typed
+                    setPeriods(cleaned);
+
+                    // Error logic runs independently
+                    if (cleaned !== "" && Number(cleaned) > maxPeriods) {
+                      setPeriodsError(
+                        buildPeriodsRangeError(selectedCompounding, maxPeriods),
+                      );
+                    } else {
+                      setPeriodsError("");
                     }
                   }}
                   onKeyDown={(e) => {
@@ -296,7 +347,13 @@ export default function CompoundInterestCalculator() {
                   onBlur={() => {
                     if (periods.startsWith(".")) setPeriods("0" + periods);
                     if (!periods)
-                      setTimeout(() => setPeriodsError("Enter a number of compounding periods."), 150);
+                      setTimeout(
+                        () =>
+                          setPeriodsError(
+                            "Please enter a number of compounding periods.",
+                          ),
+                        150,
+                      );
                   }}
                   className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${periodsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                   min="0"
@@ -331,15 +388,19 @@ export default function CompoundInterestCalculator() {
                   id="compounding-frequency"
                   value={selectedCompounding}
                   onChange={(e) => {
-                    const newFreq = e.target.value as CompoundingPeriod
-                    setSelectedCompounding(newFreq)
+                    const newFreq = e.target.value as CompoundingPeriod;
+                    setSelectedCompounding(newFreq);
                     if (periods !== "") {
-                      const newOption = compoundingOptions.find(o => o.value === newFreq)!
-                      const newMax = newOption.periodsPerYear * 100
+                      const newOption = compoundingOptions.find(
+                        (o) => o.value === newFreq,
+                      )!;
+                      const newMax = newOption.periodsPerYear * 100;
                       if (Number(periods) > newMax) {
-                        setPeriodsError(buildPeriodsRangeError(newFreq, newMax))
+                        setPeriodsError(
+                          buildPeriodsRangeError(newFreq, newMax),
+                        );
                       } else {
-                        setPeriodsError("")
+                        setPeriodsError("");
                       }
                     }
                   }}
@@ -378,15 +439,20 @@ export default function CompoundInterestCalculator() {
                 {getPeriodText(selectedCompounding, Number(periods))}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
-                {hasError ? "-" : formatCurrency(selectedResult.finalAmount)}
+                {hasError ? "-" : balanceStr}
               </p>
               <p className="text-[20px] font-bold mb-1">
                 Interest accrued over {periods}{" "}
                 {getPeriodText(selectedCompounding, Number(periods))}
               </p>
               <p className="text-3xl/normal font-bold text-foreground overflow-auto">
-                {hasError ? "-" : formatCurrency(selectedResult.interestEarned)}
+                {hasError ? "-" : interestStr}
               </p>
+              {!hasError && mainTooLarge && (
+                <p className="font-bold text-[var(--color-inline-error)] mt-2">
+                  Try a lower rate or fewer periods.
+                </p>
+              )}
               <p className="text-[16px] font-semibold text-foreground">
                 With{" "}
                 <span className="text-[var(--color-teal)]">
@@ -447,69 +513,82 @@ export default function CompoundInterestCalculator() {
                 </tr>
               </thead>
               <tbody>
-                {comparisonResults.map((result) => (
-                  <tr
-                    key={result.value}
-                    aria-current={
-                      selectedCompounding === result.value ? "true" : undefined
-                    }
-                    className={
-                      selectedCompounding === result.value
-                        ? "bg-[var(--grey-background)] text-[var(--color-teal)] font-bold"
-                        : ""
-                    }
-                  >
-                    <td className="px-4 py-3 border-b">{result.label}</td>
-                    <td className="text-right px-4 py-3 border-b overflow-x-auto">
-                      {result.totalPeriods % 1 === 0
-                        ? result.totalPeriods.toFixed(0)
-                        : result.totalPeriods.toFixed(2)}
-                    </td>
-                    <td className="text-right px-4 py-3 border-b overflow-x-auto">
-                      {hasError ? "-" : formatCurrency(result.finalAmount)}
-                    </td>
-                    <td className="text-right px-4 py-3 border-b overflow-x-auto">
-                      {hasError ? "-" : formatCurrency(result.interestEarned)}
-                    </td>
-                  </tr>
-                ))}
+                {comparisonResults.map((result) => {
+                  const { aStr: rowBalance, bStr: rowInterest } = formatPair(
+                    result.finalAmount,
+                    result.interestEarned,
+                  );
+                  const isSelected = selectedCompounding === result.value;
+                  return (
+                    <tr
+                      key={result.value}
+                      aria-current={isSelected ? "true" : undefined}
+                      className={
+                        isSelected
+                          ? "bg-[var(--grey-background)] text-[var(--color-teal)] font-bold"
+                          : ""
+                      }
+                    >
+                      <td className="px-4 py-3 border-b">{result.label}</td>
+                      <td className="text-right px-4 py-3 border-b">
+                        {result.totalPeriods % 1 === 0
+                          ? result.totalPeriods.toFixed(0)
+                          : result.totalPeriods.toFixed(2)}
+                      </td>
+                      <td className="text-right px-4 py-3 border-b">
+                        {hasError ? "-" : rowBalance}
+                      </td>
+                      <td className="text-right px-4 py-3 border-b">
+                        {hasError ? "-" : rowInterest}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
           {/* Card layout - visible on small screens only */}
           <div className="md:hidden space-y-3">
-            {comparisonResults.map((result) => (
-              <div
-                key={result.value}
-                className={`rounded-xl p-4 border ${
-                  selectedCompounding === result.value
-                    ? "bg-[var(--grey-background)] text-[var(--color-teal)] font-bold"
-                    : "bg-card"
-                }`}
-              >
-                <p className="font-bold mb-2">{result.label}</p>
-                <div>
-                  <span className="block font-semibold">Periods</span>
-                  <span className="block">
-                    {result.totalPeriods % 1 === 0
-                      ? result.totalPeriods.toFixed(0)
-                      : result.totalPeriods.toFixed(2)}
-                  </span>
+            {comparisonResults.map((result) => {
+              const { aStr: rowBalance, bStr: rowInterest } = formatPair(
+                result.finalAmount,
+                result.interestEarned,
+              );
+              return (
+                <div
+                  key={result.value}
+                  className={`rounded-xl p-4 border ${
+                    selectedCompounding === result.value
+                      ? "bg-[var(--grey-background)] text-[var(--color-teal)] font-bold"
+                      : "bg-card"
+                  }`}
+                >
+                  <p className="font-bold mb-2">{result.label}</p>
+                  <div>
+                    <span className="block font-semibold">Periods</span>
+                    <span className="block">
+                      {result.totalPeriods % 1 === 0
+                        ? result.totalPeriods.toFixed(0)
+                        : result.totalPeriods.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="mt-1">
+                    <span className="block font-semibold">Final Amount</span>
+                    <span className="block overflow-auto break-words">
+                      {hasError ? "-" : rowBalance}
+                    </span>
+                  </div>
+                  <div className="mt-1">
+                    <span className="block font-semibold">
+                      Interest Accrued
+                    </span>
+                    <span className="block overflow-auto break-words">
+                      {hasError ? "-" : rowInterest}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-1">
-                  <span className="block font-semibold">Final Amount</span>
-                  <span className="block overflow-auto">
-                    {hasError ? "-" : formatCurrency(result.finalAmount)}
-                  </span>
-                </div>
-                <div className="mt-1">
-                  <span className="block font-semibold">Interest Accrued</span>
-                  <span className="block overflow-x-auto">
-                    {hasError ? "-" : formatCurrency(result.interestEarned)}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <p className="pt-3 font-bold text-sm">
             Over the same time period, more frequent compounding results in more
