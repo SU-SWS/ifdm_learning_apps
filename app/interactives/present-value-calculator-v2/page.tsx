@@ -88,7 +88,8 @@ export default function PresentValueCalculator() {
   // Warning states (amber — calc still runs)
   const [interestRateWarning, setInterestRateWarning] = useState<string>("")
   const [paymentInterestRateWarning, setPaymentInterestRateWarning] = useState<string>("")
-  const [futureValueWarning, setFutureValueWarning] = useState<string>("")
+  const [timePeriodWarning, setTimePeriodWarning] = useState<string>("")
+  const [numberOfPaymentsWarning, setNumberOfPaymentsWarning] = useState<string>("")
 
   // Derived max periods for each tab
   const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
@@ -134,10 +135,10 @@ export default function PresentValueCalculator() {
     setTimePeriod("")
     setCompoundingFrequency("annually")
     setFutureValueError("")
-    setFutureValueWarning("")
     setInterestRateError("")
     setTimePeriodError("")
     setInterestRateWarning("")
+    setTimePeriodWarning("")
   }
 
   const resetSeries = () => {
@@ -151,6 +152,7 @@ export default function PresentValueCalculator() {
     setNumberOfPaymentsError("")
     setFinalAmountError("")
     setPaymentInterestRateWarning("")
+    setNumberOfPaymentsWarning("")
   }
 
   const singleCalculations = useMemo(() => {
@@ -253,7 +255,6 @@ export default function PresentValueCalculator() {
                           const raw = e.target.value;
                           if (raw === "") {
                             setFutureValueError("");
-                            setFutureValueWarning("");
                             setFutureValue("");
                             return;
                           }
@@ -262,16 +263,10 @@ export default function PresentValueCalculator() {
                             setFutureValueError(
                               "Enter an amount between 0 and 1,000,000,000.",
                             );
-                            setFutureValueWarning("");
                             setFutureValue(raw);
                             return;
                           }
                           setFutureValueError("");
-                          setFutureValueWarning(
-                            val === 0
-                              ? "A future value of $0 has no present value to calculate."
-                              : "",
-                          );
                           setFutureValue(raw);
                         }}
                         onBlur={(e) => {
@@ -279,7 +274,6 @@ export default function PresentValueCalculator() {
                           const val = parseFloat(raw);
                           if (raw === "" || isNaN(val)) {
                             setFutureValue("");
-                            setFutureValueWarning("");
                             setTimeout(
                               () =>
                                 setFutureValueError(
@@ -291,15 +285,10 @@ export default function PresentValueCalculator() {
                             setFutureValue(String(val));
                           } else {
                             setFutureValueError("");
-                            setFutureValueWarning(
-                              val === 0
-                                ? "A future value of $0 has no present value to calculate."
-                                : "",
-                            );
                             setFutureValue(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : futureValueWarning ? "border-amber-500 border-2" : ""}`}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                         min={0}
                         max={1000000000}
                       />
@@ -310,11 +299,6 @@ export default function PresentValueCalculator() {
                         className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                       >
                         {futureValueError}
-                      </p>
-                    )}
-                    {futureValueWarning && (
-                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
-                        {futureValueWarning}
                       </p>
                     )}
                   </div>
@@ -430,21 +414,27 @@ export default function PresentValueCalculator() {
                         if (raw === "") {
                           setTimePeriod("");
                           setTimePeriodError("");
+                          setTimePeriodWarning("");
                           return;
                         }
                         const val = Number(raw);
+                        setTimePeriod(raw);
                         if (val < 0 || val > singleMaxPeriods) {
-                          setTimePeriod("");
                           setTimePeriodError(
                             buildPeriodsRangeError(
                               compoundingFrequency,
                               singleMaxPeriods,
                             ),
                           );
-                          return;
+                          setTimePeriodWarning("");
+                        } else {
+                          setTimePeriodError("");
+                          setTimePeriodWarning(
+                            val === 0
+                              ? "0 periods = today. No periodic payments occur. Only a final amount today affects the present value."
+                              : "",
+                          );
                         }
-                        setTimePeriodError("");
-                        setTimePeriod(raw);
                       }}
                       onBlur={(e) => {
                         const raw = e.target.value;
@@ -474,6 +464,11 @@ export default function PresentValueCalculator() {
                         className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                       >
                         {timePeriodError}
+                      </p>
+                    )}
+                    {timePeriodWarning && !timePeriodError && (
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
+                        {timePeriodWarning}
                       </p>
                     )}
                   </div>
@@ -841,21 +836,27 @@ export default function PresentValueCalculator() {
                         if (raw === "") {
                           setNumberOfPayments("");
                           setNumberOfPaymentsError("");
+                          setNumberOfPaymentsWarning("");
                           return;
                         }
                         const val = Number(raw);
+                        setNumberOfPayments(raw);
                         if (val < 0 || val > seriesMaxPeriods) {
-                          setNumberOfPayments("");
                           setNumberOfPaymentsError(
                             buildPeriodsRangeError(
                               paymentFrequency,
                               seriesMaxPeriods,
                             ),
                           );
-                          return;
+                          setNumberOfPaymentsWarning("");
+                        } else {
+                          setNumberOfPaymentsError("");
+                          setNumberOfPaymentsWarning(
+                            val === 0
+                              ? "0 periods = today. No periodic payments occur. Only a final amount today affects the present value."
+                              : "",
+                          );
                         }
-                        setNumberOfPaymentsError("");
-                        setNumberOfPayments(raw);
                       }}
                       onBlur={(e) => {
                         const raw = e.target.value;
@@ -885,6 +886,11 @@ export default function PresentValueCalculator() {
                         className="mt-1 text-sm text-[var(--color-inline-error)] font-semibold"
                       >
                         {numberOfPaymentsError}
+                      </p>
+                    )}
+                    {numberOfPaymentsWarning && !numberOfPaymentsError && (
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
+                        {numberOfPaymentsWarning}
                       </p>
                     )}
                   </div>
