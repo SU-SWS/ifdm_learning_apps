@@ -393,7 +393,7 @@ export default function CompoundInterestCalculator() {
 
                     setPeriods(cleaned);
 
-                    if (cleaned !== "" && Number(cleaned) > maxPeriods) {
+                    if (cleaned !== "" && (Number(cleaned) < 0 || Number(cleaned) > maxPeriods)) {
                       setPeriodsError(
                         buildPeriodsRangeError(selectedCompounding, maxPeriods),
                       );
