@@ -18,9 +18,32 @@ This repository serves as source/hosting for an interactive learning tool. The g
 
 ---
 
-## Deployment
+## Environments
 
-Please see documentation on deployment and embedding here: [deployment.md](docs/deployment.md)
+| Environment | URL | Branch | Deploy command |
+|---|---|---|---|
+| Production | https://ifdm-learning.stanford.edu/ | `1.x` | `yarn deploy` |
+| Staging | https://su-sws.github.io/ifdm_learning_apps_staging/ | `dev` | `yarn deploy:staging` |
+
+### Development workflow
+
+New features are developed on feature branches, reviewed via pull request, then deployed to staging for QA before going to production:
+
+```
+feature/my-branch  →  PR into dev  →  yarn deploy:staging  →  review on staging
+                                                                       ↓ approved
+                                               PR into 1.x  →  yarn deploy  →  production
+```
+
+1. Create a feature branch off `dev` (or `1.x` for urgent fixes)
+2. Open a PR targeting `dev`
+3. After merge, deploy to staging and verify: `git checkout dev && git pull && yarn deploy:staging`
+4. Once staging looks good, open a PR from `dev` into `1.x`
+5. After merge, deploy to production: `git checkout 1.x && git pull && yarn deploy`
+
+The deploy scripts enforce branch — `yarn deploy` will fail if you're not on `1.x`, and `yarn deploy:staging` will fail if you're not on `dev`.
+
+For full deployment details and troubleshooting, see [docs/deployment.md](docs/deployment.md).
 
 ## Local Setup
 

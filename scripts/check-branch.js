@@ -1,11 +1,12 @@
 const { execSync } = require('child_process');
 
+const allowedBranch = process.argv[2] || '1.x';
+
 try {
     const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
 
-    if (branch !== '1.x') {
-        console.error(`Build blocked on all branches but 1.x`);
-        console.error('Builds are not allowed on this branch.');
+    if (branch !== allowedBranch) {
+        console.error(`Deploy blocked: must be on branch '${allowedBranch}' (currently on '${branch}').`);
         process.exit(1);
     }
 } catch (error) {

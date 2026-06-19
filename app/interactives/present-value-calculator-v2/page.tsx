@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
+import { Button } from "@/app/ui/components/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 import {
   Select,
@@ -13,9 +14,11 @@ import {
   SelectValue,
 } from "@/app/ui/components/select"
 import ThemeToggle from "@/app/lib/theme-toggle"
+import InfoPopover from "@/app/ui/components/popover";
 
 type CompoundingFrequency = "annually" | "semi-annually" | "quarterly" | "monthly" | "biweekly" | "weekly" | "daily"
 
+// All supported compounding frequencies with their periods-per-year multipliers and display labels.
 const frequencyMap: Record<CompoundingFrequency, { periods: number; label: string }> = {
   annually: { periods: 1, label: "Annually" },
   "semi-annually": { periods: 2, label: "Semi-annually" },
@@ -26,82 +29,194 @@ const frequencyMap: Record<CompoundingFrequency, { periods: number; label: strin
   daily: { periods: 365, label: "Daily" },
 }
 
+// Plural period labels used in range error messages (e.g. "Enter a number of months between...").
+const periodPluralLabels: Record<CompoundingFrequency, string> = {
+  annually: "years",
+  "semi-annually": "semi-annual periods",
+  quarterly: "quarters",
+  monthly: "months",
+  biweekly: "bi-weekly periods",
+  weekly: "weeks",
+  daily: "days",
+}
+
+// Adjective form of each frequency, used in the parenthetical part of range error messages.
+const freqLabels: Record<CompoundingFrequency, string> = {
+  annually: "annual",
+  "semi-annually": "semiannual",
+  quarterly: "quarterly",
+  monthly: "monthly",
+  biweekly: "biweekly",
+  weekly: "weekly",
+  daily: "daily",
+}
+
+// Builds the out-of-range error for the periods field. Non-annual frequencies
+// get a note showing how many periods equal 100 years at that frequency.
+function buildPeriodsRangeError(compounding: CompoundingFrequency, max: number): string {
+  const label = periodPluralLabels[compounding]
+  const maxFormatted = max.toLocaleString("en-US")
+  const base = `Enter a number of ${label} between 0 and ${maxFormatted}.`
+  if (compounding === "annually") return base
+  return `${base} (${maxFormatted} periods = 100 years with ${freqLabels[compounding]} compounding).`
+}
+
+// Prevents -0 from displaying in results (e.g. when future value equals present value).
+function suppressNegativeZero(value: number): number {
+  return Object.is(value, -0) ? 0 : value
+}
+
 export default function PresentValueCalculator() {
   const [activeTab, setActiveTab] = useState("single")
-  
+
   // Single Amount State
-  const [futureValue, setFutureValue] = useState(0)
-  const [interestRate, setInterestRate] = useState(0)
-  const [timePeriod, setTimePeriod] = useState(0)
+  const [futureValue, setFutureValue] = useState<string>("")
+  const [interestRate, setInterestRate] = useState<string>("")
+  const [timePeriod, setTimePeriod] = useState<string>("")
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("annually")
 
   // Payment Series State
-  const [paymentAmount, setPaymentAmount] = useState(0)
-  const [paymentInterestRate, setPaymentInterestRate] = useState(0)
-  const [numberOfPayments, setNumberOfPayments] = useState(0)
+  const [paymentAmount, setPaymentAmount] = useState<string>("")
+  const [paymentInterestRate, setPaymentInterestRate] = useState<string>("")
+  const [numberOfPayments, setNumberOfPayments] = useState<string>("")
   const [paymentFrequency, setPaymentFrequency] = useState<CompoundingFrequency>("annually")
-  const [finalAmount, setFinalAmount] = useState(0)
+  const [finalAmount, setFinalAmount] = useState<string>("")
 
   // Error states
-  const [futureValueError, setFutureValueError] = useState<string>("");
-  const [interestRateError, setInterestRateError] = useState<string>("");
-  const [timePeriodError, setTimePeriodError] = useState<string>("");
-  const [paymentAmountError, setPaymentAmountError] = useState<string>("");
-  const [finalAmountError, setFinalAmountError] = useState<string>("");
-  const [paymentInterestRateError, setPaymentInterestRateError] =
-    useState<string>("");
-  const [numberOfPaymentsError, setNumberOfPaymentsError] = useState<string>("");
+  const [futureValueError, setFutureValueError] = useState<string>("")
+  const [interestRateError, setInterestRateError] = useState<string>("")
+  const [timePeriodError, setTimePeriodError] = useState<string>("")
+  const [paymentAmountError, setPaymentAmountError] = useState<string>("")
+  const [finalAmountError, setFinalAmountError] = useState<string>("")
+  const [paymentInterestRateError, setPaymentInterestRateError] = useState<string>("")
+  const [numberOfPaymentsError, setNumberOfPaymentsError] = useState<string>("")
 
+  // Warning states (amber — calc still runs)
+  const [interestRateWarning, setInterestRateWarning] = useState<string>("")
+  const [paymentInterestRateWarning, setPaymentInterestRateWarning] = useState<string>("")
+  const [timePeriodWarning, setTimePeriodWarning] = useState<string>("")
+  const [numberOfPaymentsWarning, setNumberOfPaymentsWarning] = useState<string>("")
+
+  // Upper bound for the periods input: 100 years worth of periods at the selected frequency.
+  const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
+  const seriesMaxPeriods = frequencyMap[paymentFrequency].periods * 100
+
+  // A blank required field suppresses results (shows "—") even before an error
+  // message appears. finalAmount is optional and excluded from these checks.
+  const singleAnyFieldEmpty = futureValue === "" || interestRate === "" || timePeriod === ""
+  const seriesAnyFieldEmpty = paymentAmount === "" || paymentInterestRate === "" || numberOfPayments === ""
+
+  // Whether each tab has a blocking error (or empty required field) that should suppress results.
+  const singleHasError = singleAnyFieldEmpty || !!futureValueError || !!interestRateError || !!timePeriodError
+  const seriesHasError = seriesAnyFieldEmpty || !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
+
+  // Debounced inputs for calculations — updates after 300ms pause in typing
+  // to avoid recalculating on every keystroke.
+  const [debouncedSingle, setDebouncedSingle] = useState({
+    futureValue: "",
+    interestRate: "",
+    timePeriod: "",
+    compoundingFrequency: "annually" as CompoundingFrequency,
+  })
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedSingle({ futureValue, interestRate, timePeriod, compoundingFrequency }),
+      300,
+    )
+    return () => clearTimeout(t)
+  }, [futureValue, interestRate, timePeriod, compoundingFrequency])
+
+  const [debouncedSeries, setDebouncedSeries] = useState({
+    paymentAmount: "",
+    paymentInterestRate: "",
+    numberOfPayments: "",
+    paymentFrequency: "annually" as CompoundingFrequency,
+    finalAmount: "",
+  })
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedSeries({ paymentAmount, paymentInterestRate, numberOfPayments, paymentFrequency, finalAmount }),
+      300,
+    )
+    return () => clearTimeout(t)
+  }, [paymentAmount, paymentInterestRate, numberOfPayments, paymentFrequency, finalAmount])
+
+  // Clears all Single Amount inputs, errors, warnings, and resets frequency to default.
+  const resetSingle = () => {
+    setFutureValue("")
+    setInterestRate("")
+    setTimePeriod("")
+    setCompoundingFrequency("annually")
+    setFutureValueError("")
+    setInterestRateError("")
+    setTimePeriodError("")
+    setInterestRateWarning("")
+    setTimePeriodWarning("")
+  }
+
+  // Clears all Payment Series inputs, errors, warnings, and resets frequency to default.
+  const resetSeries = () => {
+    setPaymentAmount("")
+    setPaymentInterestRate("")
+    setNumberOfPayments("")
+    setPaymentFrequency("annually")
+    setFinalAmount("")
+    setPaymentAmountError("")
+    setPaymentInterestRateError("")
+    setNumberOfPaymentsError("")
+    setFinalAmountError("")
+    setPaymentInterestRateWarning("")
+    setNumberOfPaymentsWarning("")
+  }
+
+  // Calculates present value and discount amount for a single future lump sum.
+  // Uses PV = FV / (1 + r/n)^t where r is annual rate, n is periods/year, t is total periods.
   const singleCalculations = useMemo(() => {
-    const rate = interestRate / 100
-    const n = frequencyMap[compoundingFrequency].periods
-    const totalPeriods = timePeriod // CHANGED: use input directly as total periods
+    const fv = parseFloat(debouncedSingle.futureValue) || 0
+    const rate = (parseFloat(debouncedSingle.interestRate) || 0) / 100
+    const n = frequencyMap[debouncedSingle.compoundingFrequency].periods
+    const totalPeriods = parseFloat(debouncedSingle.timePeriod) || 0
     const periodRate = rate / n
-    const presentValue = futureValue / Math.pow(1 + periodRate, totalPeriods)
-    const discountAmount = futureValue - presentValue
+    const presentValue = fv / Math.pow(1 + periodRate, totalPeriods)
+    const discountAmount = fv - presentValue
 
     return {
       presentValue,
       discountAmount,
       totalPeriods,
     }
-  }, [futureValue, interestRate, timePeriod, compoundingFrequency])
+  }, [debouncedSingle])
 
+  // Calculates present value for a payment series plus an optional final lump sum.
+  // Uses the annuity PV formula; falls back to simple multiplication at 0% rate.
   const paymentCalculations = useMemo(() => {
-    const rate = paymentInterestRate / 100;
-    const n = frequencyMap[paymentFrequency].periods;
-    const periodRate = rate / n;
+    const rate = (parseFloat(debouncedSeries.paymentInterestRate) || 0) / 100
+    const n = frequencyMap[debouncedSeries.paymentFrequency].periods
+    const periods = parseFloat(debouncedSeries.numberOfPayments) || 0
+    const pa = parseFloat(debouncedSeries.paymentAmount) || 0
+    const fa = parseFloat(debouncedSeries.finalAmount) || 0
+    const periodRate = rate / n
 
-    let pvPayments: number;
+    let pvPayments: number
     if (periodRate === 0) {
-      pvPayments = paymentAmount * numberOfPayments;
+      pvPayments = pa * periods
     } else {
-      pvPayments =
-        paymentAmount *
-        ((1 - Math.pow(1 + periodRate, -numberOfPayments)) / periodRate);
+      pvPayments = pa * ((1 - Math.pow(1 + periodRate, -periods)) / periodRate)
     }
 
-    // PV of the lump sum final amount discounted over all periods
-    const pvFinalAmount =
-      finalAmount / Math.pow(1 + periodRate, numberOfPayments);
-
-    const presentValue = pvPayments + pvFinalAmount;
-    const totalPayments = paymentAmount * numberOfPayments + finalAmount;
-    const discountAmount = totalPayments - presentValue;
+    const pvFinalAmount = fa / Math.pow(1 + periodRate, periods)
+    const presentValue = pvPayments + pvFinalAmount
+    const totalPayments = pa * periods + fa
+    const discountAmount = totalPayments - presentValue
 
     return {
       presentValue,
       totalPayments,
       discountAmount,
-    };
-  }, [
-    paymentAmount,
-    finalAmount,
-    paymentInterestRate,
-    numberOfPayments,
-    paymentFrequency,
-  ]);
+    }
+  }, [debouncedSeries])
 
+  // Formats a number as USD with two decimal places.
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -114,7 +229,6 @@ export default function PresentValueCalculator() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <h1 className="sr-only mb-2">Present Value Calculator</h1>
         <ThemeToggle />
         <div className="flex flex-col md:flex-row gap-8">
@@ -132,10 +246,11 @@ export default function PresentValueCalculator() {
             <TabsContent value="single" className="space-y-8">
               <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
                 <div className="w-full md:w-1/2 space-y-6 bg-transparent">
-                  {/* Future Value Input */}
                   <p>
                     Enter a future value to calculate what it is worth today.
                   </p>
+
+                  {/* Future Value */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="future-value"
@@ -144,27 +259,57 @@ export default function PresentValueCalculator() {
                       Future value
                     </Label>
                     <div className="relative">
-                      <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
+                      <span
+                        aria-hidden="true"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]"
+                      >
                         $
                       </span>
                       <Input
                         id="future-value"
                         type="number"
                         inputMode="numeric"
-                        value={futureValue === 0 ? "" : futureValue}
+                        value={futureValue}
                         onChange={(e) => {
-                          const val =
-                            e.target.value === "" ? 0 : Number(e.target.value);
-                          if (val < 0) {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setFutureValueError("");
+                            setFutureValue("");
+                            return;
+                          }
+                          const val = Number(raw);
+                          if (val < 0 || val > 1_000_000_000) {
                             setFutureValueError(
-                              "Future value must be greater than 0.",
+                              "Enter an amount between 0 and 1,000,000,000.",
                             );
+                            setFutureValue(raw);
                             return;
                           }
                           setFutureValueError("");
-                          setFutureValue(val);
+                          setFutureValue(raw);
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${futureValue > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        onBlur={(e) => {
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
+                          if (raw === "" || isNaN(val)) {
+                            setFutureValue("");
+                            setTimeout(
+                              () =>
+                                setFutureValueError(
+                                  "Please enter a future value to calculate.",
+                                ),
+                              150,
+                            );
+                          } else if (val < 0 || val > 1_000_000_000) {
+                            setFutureValue(String(val));
+                          } else {
+                            setFutureValueError("");
+                            setFutureValue(String(val));
+                          }
+                        }}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        min={0}
+                        max={1000000000}
                       />
                     </div>
                     {futureValueError && (
@@ -177,7 +322,7 @@ export default function PresentValueCalculator() {
                     )}
                   </div>
 
-                  {/* Interest Rate Input */}
+                  {/* Interest Rate */}
                   <div className="space-y-2">
                     <div className="relative">
                       <Label
@@ -191,25 +336,73 @@ export default function PresentValueCalculator() {
                         aria-label="Annual interest rate, percent"
                         type="number"
                         inputMode="numeric"
-                        value={interestRate === 0 ? "" : interestRate}
+                        value={interestRate}
                         onChange={(e) => {
-                          const val =
-                            e.target.value === "" ? 0 : Number(e.target.value);
-                          if (val > 100) {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setInterestRateError("");
+                            setInterestRateWarning("");
+                            setInterestRate("");
+                            return;
+                          }
+                          const val = Number(raw);
+                          if (val < 0 || val > 1000) {
                             setInterestRateError(
-                              "Annual interest rate cannot exceed 100%.",
+                              "Enter a rate between 0% and 1,000%.",
                             );
+                            setInterestRateWarning("");
+                            setInterestRate(raw);
                           } else {
                             setInterestRateError("");
-                            setInterestRate(val);
+                            if (val === 0) {
+                              setInterestRateWarning(
+                                "At 0%, present value equals future value, no discounting occurs.",
+                              );
+                            } else if (val > 50) {
+                              setInterestRateWarning(
+                                "Rates above 50% are unusual.",
+                              );
+                            } else {
+                              setInterestRateWarning("");
+                            }
+                            setInterestRate(raw);
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${interestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        onBlur={(e) => {
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
+                          if (raw === "" || isNaN(val)) {
+                            setInterestRate("");
+                            setInterestRateWarning("");
+                            setTimeout(
+                              () =>
+                                setInterestRateError(
+                                  "Please enter an interest rate.",
+                                ),
+                              150,
+                            );
+                          } else if (val < 0 || val > 1000) {
+                            setInterestRate(String(val));
+                          } else {
+                            setInterestRateError("");
+                            setInterestRate(String(val));
+                          }
+                        }}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                          interestRateError
+                          ? "border-[var(--color-inline-error)] border-2"
+                          : interestRateWarning
+                            ? "border-[var(--color-inline-warning)] border-2"
+                            : ""
+                        }`}
                         min={0}
-                        max={100}
-                        step={0.1}
+                        max={1000}
+                        step={0.01}
                       />
-                      <span aria-hidden="true" className="absolute right-4 top-[3.3em] -translate-y-1/2 pointer-events-none text-[var(--color-symbols)]">
+                      <span
+                        aria-hidden="true"
+                        className="absolute right-4 top-[3.3em] -translate-y-1/2 pointer-events-none text-[var(--color-symbols)]"
+                      >
                         %
                       </span>
                     </div>
@@ -221,9 +414,14 @@ export default function PresentValueCalculator() {
                         {interestRateError}
                       </p>
                     )}
+                    {interestRateWarning && !interestRateError && (
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
+                        {interestRateWarning}
+                      </p>
+                    )}
                   </div>
 
-                  {/* Time Period Input */}
+                  {/* Time Period */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="time-period"
@@ -235,22 +433,54 @@ export default function PresentValueCalculator() {
                       id="time-period"
                       type="number"
                       inputMode="numeric"
-                      value={timePeriod === 0 ? "" : timePeriod}
+                      value={timePeriod}
                       onChange={(e) => {
-                        const val =
-                          e.target.value === "" ? 0 : Number(e.target.value);
-                        if (val < 1) {
-                          setTimePeriodError(
-                            "Number of compounding periods must be greater than 0.",
-                          );
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setTimePeriod("");
+                          setTimePeriodError("");
+                          setTimePeriodWarning("");
                           return;
                         }
-                        setTimePeriodError("");
-                        setTimePeriod(val);
+                        const val = Number(raw);
+                        setTimePeriod(raw);
+                        if (val < 0 || val > singleMaxPeriods) {
+                          setTimePeriodError(
+                            buildPeriodsRangeError(
+                              compoundingFrequency,
+                              singleMaxPeriods,
+                            ),
+                          );
+                          setTimePeriodWarning("");
+                        } else {
+                          setTimePeriodError("");
+                          setTimePeriodWarning(
+                            val === 0
+                              ? "0 periods = today. No periodic payments occur. Only a final amount today affects the present value."
+                              : "",
+                          );
+                        }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : ""}`}
-                      min={1}
-                      max={1000}
+                      onBlur={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          if (!timePeriodError) {
+                            setTimeout(
+                              () =>
+                                setTimePeriodError(
+                                  "Please enter the number of periods.",
+                                ),
+                              150,
+                            );
+                          }
+                        } else {
+                          const val = parseFloat(raw);
+                          if (!isNaN(val)) setTimePeriod(String(val));
+                        }
+                      }}
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : timePeriodWarning ? "border-[var(--color-inline-warning)] border-2" : ""}`}
+                      min={0}
+                      max={singleMaxPeriods}
                       step={1}
                     />
                     {timePeriodError && (
@@ -261,20 +491,42 @@ export default function PresentValueCalculator() {
                         {timePeriodError}
                       </p>
                     )}
+                    {timePeriodWarning && !timePeriodError && (
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
+                        {timePeriodWarning}
+                      </p>
+                    )}
                   </div>
 
                   {/* Compounding Frequency */}
                   <div className="space-y-2">
-                    <Label className="block font-semibold text-foreground mb-2">
+                    <Label
+                      id="single-compounding-frequency-label"
+                      className="block font-semibold text-foreground mb-2"
+                    >
                       Compounding frequency
                     </Label>
                     <Select
                       value={compoundingFrequency}
-                      onValueChange={(value) =>
-                        setCompoundingFrequency(value as CompoundingFrequency)
-                      }
+                      onValueChange={(value) => {
+                        const freq = value as CompoundingFrequency;
+                        setCompoundingFrequency(freq);
+                        if (timePeriod !== "") {
+                          const newMax = frequencyMap[freq].periods * 100;
+                          if (Number(timePeriod) > newMax) {
+                            setTimePeriodError(
+                              buildPeriodsRangeError(freq, newMax),
+                            );
+                          } else {
+                            setTimePeriodError("");
+                          }
+                        }
+                      }}
                     >
-                      <SelectTrigger className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base">
+                      <SelectTrigger
+                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        aria-labelledby="single-compounding-frequency-label"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -287,20 +539,32 @@ export default function PresentValueCalculator() {
                         )}
                       </SelectContent>
                     </Select>
+                    <p className="text-sm mt-1">
+                      The compounding frequency is equal to the payment
+                      frequency.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="lagunita"
+                      size="sm"
+                      className="font-medium px-8 mt-4"
+                      onClick={resetSingle}
+                    >
+                      Reset
+                    </Button>
                   </div>
                 </div>
 
-                {/* Results Section */}
+                {/* Results */}
                 <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
-                  {/* Main Present Value Display */}
                   <h2 className="text-[var(--text-navy)] text-[22px] font-bold">
                     Present value
                   </h2>
                   <p className="text-3xl font-bold text-lagunita mb-5">
-                    {formatCurrency(singleCalculations.presentValue)}
+                    {singleHasError
+                      ? "—"
+                      : formatCurrency(singleCalculations.presentValue)}
                   </p>
-
-                  {/* Breakdown */}
                   <div
                     aria-live="polite"
                     aria-atomic="true"
@@ -311,7 +575,9 @@ export default function PresentValueCalculator() {
                         Future value:
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                        {formatCurrency(futureValue)}
+                        {singleHasError
+                          ? "—"
+                          : formatCurrency(parseFloat(futureValue) || 0)}
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -319,9 +585,15 @@ export default function PresentValueCalculator() {
                         Discount amount:
                       </div>
                       <div
-                        className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${singleCalculations.discountAmount < 0 ? "text-berry" : ""}`}
+                        className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!singleHasError && singleCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
-                        {formatCurrency(singleCalculations.discountAmount)}
+                        {singleHasError
+                          ? "—"
+                          : formatCurrency(
+                              suppressNegativeZero(
+                                singleCalculations.discountAmount,
+                              ),
+                            )}
                       </div>
                     </div>
                   </div>
@@ -333,18 +605,19 @@ export default function PresentValueCalculator() {
             <TabsContent value="series" className="space-y-8">
               <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
                 <div className="bg-transparent w-full md:w-1/2 space-y-6">
-                  {/* Payment Amount Input */}
                   <p>
-                    Find what a series of payments is worth today. Enter a
-                    payment amount and number of payments to calculate the
-                    present value.
+                    Find what a series of payments is worth today. Enter the
+                    payment per period and number of periods (payments) to
+                    calculate the present value.
                   </p>
+
+                  {/* Payment Amount */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="payment-amount"
                       className="block font-semibold text-foreground mb-2"
                     >
-                      Payment amount
+                      Payment per period
                     </Label>
                     <div className="relative">
                       <span
@@ -357,20 +630,45 @@ export default function PresentValueCalculator() {
                         id="payment-amount"
                         type="number"
                         inputMode="numeric"
-                        value={paymentAmount === 0 ? "" : paymentAmount}
+                        value={paymentAmount}
                         onChange={(e) => {
-                          const val =
-                            e.target.value === "" ? 0 : Number(e.target.value);
-                          if (val < 0) {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setPaymentAmountError("");
+                            setPaymentAmount("");
+                            return;
+                          }
+                          const val = Number(raw);
+                          if (val < 0 || val > 100_000_000) {
                             setPaymentAmountError(
-                              "Payment amount must be greater than 0.",
+                              "Enter an amount between $0 and $100,000,000.",
                             );
+                            setPaymentAmount(raw);
                             return;
                           }
                           setPaymentAmountError("");
-                          setPaymentAmount(val);
+                          setPaymentAmount(raw);
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentAmount > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        onBlur={(e) => {
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
+                          if (raw === "" || isNaN(val)) {
+                            setPaymentAmount("");
+                            setTimeout(
+                              () =>
+                                setPaymentAmountError(
+                                  "Please enter a payment amount.",
+                                ),
+                              150,
+                            );
+                          } else if (val < 0 || val > 100_000_000) {
+                            setPaymentAmount(String(val));
+                          } else {
+                            setPaymentAmountError("");
+                            setPaymentAmount(String(val));
+                          }
+                        }}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(paymentAmount) > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                       />
                     </div>
                     {paymentAmountError && (
@@ -383,14 +681,22 @@ export default function PresentValueCalculator() {
                     )}
                   </div>
 
-                  {/* Final Amount Input */}
+                  {/* Final Amount */}
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="final-amount"
-                      className="block font-semibold text-foreground mb-2"
-                    >
-                      Final amount (optional)
-                    </Label>
+                    <div className="space-y-2 flex items-center gap-1 mb-1">
+                      <Label
+                        htmlFor="final-amount"
+                        className="block font-semibold text-foreground mb-2"
+                      >
+                        Final amount (optional)
+                      </Label>
+                      <div className="relative group">
+                        <InfoPopover title="Final amount">
+                          A lump sum received or paid at the end of the payment
+                          series (also called final value or future value).
+                        </InfoPopover>
+                      </div>
+                    </div>
                     <div className="relative">
                       <span
                         aria-hidden="true"
@@ -402,20 +708,42 @@ export default function PresentValueCalculator() {
                         id="final-amount"
                         type="number"
                         inputMode="numeric"
-                        value={finalAmount === 0 ? "" : finalAmount}
+                        value={finalAmount}
                         onChange={(e) => {
-                          const val =
-                            e.target.value === "" ? 0 : Number(e.target.value);
-                          if (val < 0) {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setFinalAmountError("");
+                            setFinalAmount("");
+                            return;
+                          }
+                          const val = Number(raw);
+                          if (val < 0 || val > 1_000_000_000) {
                             setFinalAmountError(
-                              "Final amount cannot be negative.",
+                              "Enter an amount between $0 and $1,000,000,000.",
                             );
+                            setFinalAmount(raw);
                             return;
                           }
                           setFinalAmountError("");
-                          setFinalAmount(val);
+                          setFinalAmount(raw);
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${finalAmount > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        onBlur={(e) => {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setFinalAmount("");
+                            return;
+                          }
+                          const val = parseFloat(raw);
+                          if (isNaN(val)) {
+                            setFinalAmount("");
+                          } else if (val < 0 || val > 1_000_000_000) {
+                            setFinalAmount(String(val));
+                          } else {
+                            setFinalAmountError("");
+                            setFinalAmount(String(val));
+                          }
+                        }}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(finalAmount) > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
                       />
                     </div>
                     {finalAmountError && (
@@ -428,7 +756,7 @@ export default function PresentValueCalculator() {
                     )}
                   </div>
 
-                  {/* Interest Rate Input */}
+                  {/* Payment Interest Rate */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="payment-interest-rate"
@@ -442,25 +770,66 @@ export default function PresentValueCalculator() {
                         aria-label="Annual interest rate, percent"
                         type="number"
                         inputMode="numeric"
-                        value={
-                          paymentInterestRate === 0 ? "" : paymentInterestRate
-                        }
+                        value={paymentInterestRate}
                         onChange={(e) => {
-                          const val =
-                            e.target.value === "" ? 0 : Number(e.target.value);
-                          if (val > 100) {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setPaymentInterestRateError("");
+                            setPaymentInterestRateWarning("");
+                            setPaymentInterestRate("");
+                            return;
+                          }
+                          const val = Number(raw);
+                          if (val < 0 || val > 1000) {
                             setPaymentInterestRateError(
-                              "Annual interest rate cannot exceed 100%.",
+                              "Enter a rate between 0% and 1,000%.",
                             );
+                            setPaymentInterestRateWarning("");
+                            setPaymentInterestRate(raw);
                           } else {
                             setPaymentInterestRateError("");
-                            setPaymentInterestRate(val);
+                            if (val === 0) {
+                              setPaymentInterestRateWarning(
+                                "At 0%, present value equals the total of all payments and any final amount, without discounting.",
+                              );
+                            } else if (val > 50) {
+                              setPaymentInterestRateWarning(
+                                "Rates above 50% are very unusual.",
+                              );
+                            } else {
+                              setPaymentInterestRateWarning("");
+                            }
+                            setPaymentInterestRate(raw);
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        onBlur={(e) => {
+                          const raw = e.target.value;
+                          const val = parseFloat(raw);
+                          if (raw === "" || isNaN(val)) {
+                            setPaymentInterestRate("");
+                            setPaymentInterestRateWarning("");
+                            setTimeout(
+                              () =>
+                                setPaymentInterestRateError(
+                                  "Please enter an interest rate.",
+                                ),
+                              150,
+                            );
+                          } else if (val < 0 || val > 1000) {
+                            setPaymentInterestRate(String(val));
+                          } else {
+                            setPaymentInterestRateError("");
+                            setPaymentInterestRate(String(val));
+                          }
+                        }}
+                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError
+                        ? "border-[var(--color-inline-error)] border-2"
+                        : paymentInterestRateWarning
+                          ? "border-[var(--color-inline-warning)] border-2"
+                          : ""}`}
                         min={0}
-                        max={100}
-                        step={0.1}
+                        max={1000}
+                        step={0.01}
                       />
                       <span
                         aria-hidden="true"
@@ -477,36 +846,80 @@ export default function PresentValueCalculator() {
                         {paymentInterestRateError}
                       </p>
                     )}
+                    {paymentInterestRateWarning &&
+                      !paymentInterestRateError && (
+                        <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
+                          {paymentInterestRateWarning}
+                        </p>
+                      )}
                   </div>
 
-                  {/* Number of Payments Input */}
+                  {/* Number of Payments */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="number-of-payments"
                       className="block font-semibold text-foreground mb-2"
                     >
-                      Number of payments
+                      Number of compounding periods (payments)
                     </Label>
                     <Input
                       id="number-of-payments"
                       type="number"
                       inputMode="numeric"
-                      value={numberOfPayments === 0 ? "" : numberOfPayments}
+                      value={numberOfPayments}
                       onChange={(e) => {
-                        const val =
-                          e.target.value === "" ? 0 : Number(e.target.value);
-                        if (val < 1) {
-                          setNumberOfPaymentsError(
-                            "Number of payments must be greater than 0.",
-                          );
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setNumberOfPayments("");
+                          setNumberOfPaymentsError("");
+                          setNumberOfPaymentsWarning("");
                           return;
                         }
-                        setNumberOfPaymentsError("");
-                        setNumberOfPayments(val);
+                        const val = Number(raw);
+                        setNumberOfPayments(raw);
+                        if (val < 0 || val > seriesMaxPeriods) {
+                          setNumberOfPaymentsError(
+                            buildPeriodsRangeError(
+                              paymentFrequency,
+                              seriesMaxPeriods,
+                            ),
+                          );
+                          setNumberOfPaymentsWarning("");
+                        } else {
+                          setNumberOfPaymentsError("");
+                          setNumberOfPaymentsWarning(
+                            val === 0
+                              ? "0 periods = today. No periodic payments occur. Only a final amount today affects the present value."
+                              : "",
+                          );
+                        }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${numberOfPaymentsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
-                      min={1}
-                      max={1000}
+                      onBlur={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          if (!numberOfPaymentsError) {
+                            setTimeout(
+                              () =>
+                                setNumberOfPaymentsError(
+                                  "Please enter the number of payments.",
+                                ),
+                              150,
+                            );
+                          }
+                        } else {
+                          const val = parseFloat(raw);
+                          if (!isNaN(val)) setNumberOfPayments(String(val));
+                        }
+                      }}
+                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        numberOfPaymentsError
+                        ? "border-[var(--color-inline-error)] border-2"
+                        : numberOfPaymentsWarning
+                          ? "border-[var(--color-inline-warning)] border-2"
+                          : ""
+                      }`}
+                      min={0}
+                      max={seriesMaxPeriods}
                       step={1}
                     />
                     {numberOfPaymentsError && (
@@ -517,20 +930,42 @@ export default function PresentValueCalculator() {
                         {numberOfPaymentsError}
                       </p>
                     )}
+                    {numberOfPaymentsWarning && !numberOfPaymentsError && (
+                      <p className="mt-1 text-sm text-[var(--color-inline-warning)] font-semibold">
+                        {numberOfPaymentsWarning}
+                      </p>
+                    )}
                   </div>
 
                   {/* Payment Frequency */}
                   <div className="space-y-2">
-                    <Label className="block font-semibold text-foreground mb-2">
+                    <Label
+                      id="compounding-frequency-label"
+                      className="block font-semibold text-foreground mb-2"
+                    >
                       Compounding frequency
                     </Label>
                     <Select
                       value={paymentFrequency}
-                      onValueChange={(value) =>
-                        setPaymentFrequency(value as CompoundingFrequency)
-                      }
+                      onValueChange={(value) => {
+                        const freq = value as CompoundingFrequency;
+                        setPaymentFrequency(freq);
+                        if (numberOfPayments !== "") {
+                          const newMax = frequencyMap[freq].periods * 100;
+                          if (Number(numberOfPayments) > newMax) {
+                            setNumberOfPaymentsError(
+                              buildPeriodsRangeError(freq, newMax),
+                            );
+                          } else {
+                            setNumberOfPaymentsError("");
+                          }
+                        }
+                      }}
                     >
-                      <SelectTrigger className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base">
+                      <SelectTrigger
+                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        aria-labelledby="compounding-frequency-label"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -543,26 +978,46 @@ export default function PresentValueCalculator() {
                         )}
                       </SelectContent>
                     </Select>
+                    <p className="text-sm mt-1">
+                      The compounding frequency is equal to the payment
+                      frequency.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="lagunita"
+                      size="sm"
+                      className="mt-4 font-medium px-8"
+                      onClick={resetSeries}
+                    >
+                      Reset
+                    </Button>
                   </div>
                 </div>
 
-                {/* Results Section */}
+                {/* Results */}
                 <div className="w-full md:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
                   <h2 className="text-[var(--text-navy)] text-[22px] font-bold">
                     Present value
                   </h2>
                   <p className="text-3xl font-bold text-lagunita mb-5">
-                    {formatCurrency(paymentCalculations.presentValue)}
+                    {seriesHasError
+                      ? "—"
+                      : formatCurrency(paymentCalculations.presentValue)}
                   </p>
-
-                  {/* Breakdown */}
+                  {seriesHasError && (
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Fix the fields on the left to see results.
+                    </p>
+                  )}
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Total payments:
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-                        {formatCurrency(paymentCalculations.totalPayments)}
+                        {seriesHasError
+                          ? "—"
+                          : formatCurrency(paymentCalculations.totalPayments)}
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -570,9 +1025,15 @@ export default function PresentValueCalculator() {
                         Discount amount:
                       </div>
                       <div
-                        className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}
+                        className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!seriesHasError && paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
-                        {formatCurrency(paymentCalculations.discountAmount)}
+                        {seriesHasError
+                          ? "—"
+                          : formatCurrency(
+                              suppressNegativeZero(
+                                paymentCalculations.discountAmount,
+                              ),
+                            )}
                       </div>
                     </div>
                   </div>

@@ -14,6 +14,8 @@ import {
 } from "@/app/ui/components/select"
 import { Info, ChevronDown, ChevronUp } from "lucide-react"
 import ThemeToggle from "@/app/lib/theme-toggle"
+import { FaPlus, FaMinus } from "react-icons/fa6"
+
 
 type SolveFor = "FV" | "PV" | "PMT" | "RATE" | "NPER"
 type PaymentTiming = "end" | "beginning"
@@ -50,6 +52,8 @@ interface FieldError {
   message: string
 }
 
+const SIGN_HELPER = "Money you pay out is negative; money you receive is positive."
+
 export function TVMCalculator() {
   const [presentValue, setPresentValue] = useState<string>("")
   const [futureValue, setFutureValue] = useState<string>("")
@@ -64,8 +68,8 @@ export function TVMCalculator() {
   const [result, setResult] = useState<number | null>(null)
   const [calcError, setCalcError] = useState<string>("")
   const [fieldErrors, setFieldErrors] = useState<FieldError[]>([])
+  const [signError, setSignError] = useState<string>("")
   const [showHowToUse, setShowHowToUse] = useState<boolean>(false)
-  const [showExamples, setShowExamples] = useState<boolean>(false)
   const [exampleMode, setExampleMode] = useState<"saving" | "borrowing">("saving")
 
   const loadExample = (example: {
@@ -121,27 +125,27 @@ export function TVMCalculator() {
     if (solveFor !== "PV" && rawPv !== "" && rawPv !== "-") {
       const pv = parseFloat(rawPv)
       if (pv < CONSTRAINTS.presentValue.min || pv > CONSTRAINTS.presentValue.max)
-        errors.push({ field: "presentValue", message: `Must be between $${CONSTRAINTS.presentValue.min.toLocaleString()} and $${CONSTRAINTS.presentValue.max.toLocaleString()}` })
+        errors.push({ field: "presentValue", message: `Enter an amount between $${CONSTRAINTS.presentValue.min.toLocaleString()} and $${CONSTRAINTS.presentValue.max.toLocaleString()}` })
     }
     if (solveFor !== "FV" && rawFv !== "" && rawFv !== "-") {
       const fv = parseFloat(rawFv)
       if (fv < CONSTRAINTS.futureValue.min || fv > CONSTRAINTS.futureValue.max)
-        errors.push({ field: "futureValue", message: `Must be between $${CONSTRAINTS.futureValue.min.toLocaleString()} and $${CONSTRAINTS.futureValue.max.toLocaleString()}` })
+        errors.push({ field: "futureValue", message: `Enter an amount between $${CONSTRAINTS.futureValue.min.toLocaleString()} and $${CONSTRAINTS.futureValue.max.toLocaleString()}` })
     }
     if (solveFor !== "PMT" && rawPmt !== "" && rawPmt !== "-") {
       const pmt = parseFloat(rawPmt)
       if (pmt < CONSTRAINTS.payment.min || pmt > CONSTRAINTS.payment.max)
-        errors.push({ field: "payment", message: `Must be between $${CONSTRAINTS.payment.min.toLocaleString()} and $${CONSTRAINTS.payment.max.toLocaleString()}` })
+        errors.push({ field: "payment", message: `Enter an amount between $${CONSTRAINTS.payment.min.toLocaleString()} and $${CONSTRAINTS.payment.max.toLocaleString()}` })
     }
     if (solveFor !== "RATE" && rawRate !== "" && rawRate !== "-") {
       const rate = parseFloat(rawRate)
       if (rate < CONSTRAINTS.annualRate.min || rate > CONSTRAINTS.annualRate.max)
-        errors.push({ field: "annualRate", message: `Must be between ${CONSTRAINTS.annualRate.min}% and ${CONSTRAINTS.annualRate.max}%` })
+        errors.push({ field: "annualRate", message: `Enter a rate between ${CONSTRAINTS.annualRate.min}% and ${CONSTRAINTS.annualRate.max}%` })
     }
     if (solveFor !== "NPER" && rawPeriods !== "") {
       const n = parseFloat(rawPeriods)
       if (n < CONSTRAINTS.periods.min || n > CONSTRAINTS.periods.max)
-        errors.push({ field: "periods", message: `Must be between ${CONSTRAINTS.periods.min} and ${CONSTRAINTS.periods.max} periods` })
+        errors.push({ field: "periods", message: `Enter a value between ${CONSTRAINTS.periods.min} and ${CONSTRAINTS.periods.max} periods` })
     }
     return errors
   }, [presentValue, futureValue, payment, annualRate, periods, solveFor])
@@ -149,9 +153,12 @@ export function TVMCalculator() {
   const getFieldError = (field: string): string | undefined =>
     fieldErrors.find(e => e.field === field)?.message
 
+  const displayError = calcError || signError
+
   const calculate = useCallback(() => {
     setCalcError("")
-    
+    setSignError("")
+
     // ── Don't calculate (or show errors) until all required fields are filled ──
   const requiredFields: Record<SolveFor, string[]> = {
     FV: [presentValue, annualRate, periods],
@@ -189,6 +196,20 @@ export function TVMCalculator() {
     const timingMultiplier = paymentTiming === "beginning" ? (1 + ratePerPeriod) : 1
 
     try {
+      // Require opposite signs for RATE/NPER solves: at least one cash flow must have opposite sign.
+      // When pmt === 0, pv and fv alone must have opposite signs.
+      if ((solveFor === "RATE" || solveFor === "NPER")) {
+        const allPositive = pmt === 0 ? (pv > 0 && fv > 0) : (pv > 0 && pmt > 0 && fv > 0)
+        const allNegative = pmt === 0 ? (pv < 0 && fv < 0) : (pv < 0 && pmt < 0 && fv < 0)
+        if (allPositive || allNegative) {
+          const which = solveFor === "RATE" ? "rate" : "number of periods"
+          setSignError(
+            `These values can't be solved. To find the ${which}, money paid out and money received need opposite signs — for example, enter what you invest as negative and what you receive as positive.`
+          )
+          setResult(null)
+          return
+        }
+      }
       let calculatedValue: number
 
       switch (solveFor) {
@@ -264,10 +285,24 @@ export function TVMCalculator() {
         case "NPER": {
           if (ratePerPeriod === 0) {
             if (pmt === 0 && payment === "0") throw new Error("Payment cannot be 0 when rate is 0")
-            calculatedValue = pmt === 0 ? 0 : -(pv + fv) / pmt
+            const calculatedNper = pmt === 0 ? 0 : -(pv + fv) / pmt
+            if (!isFinite(calculatedNper) || calculatedNper <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            calculatedValue = calculatedNper
           } else {
             const pmtAdj = pmt * timingMultiplier
-            calculatedValue = Math.log((pmtAdj - fv * ratePerPeriod) / (pmtAdj + pv * ratePerPeriod)) / Math.log(1 + ratePerPeriod)
+            const numerator = pmtAdj - fv * ratePerPeriod
+            const denominator = pmtAdj + pv * ratePerPeriod
+            const ratio = numerator / denominator
+            if (ratio <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            const calculatedNper = Math.log(ratio) / Math.log(1 + ratePerPeriod)
+            if (!isFinite(calculatedNper) || calculatedNper <= 0) {
+              throw new Error("These payments are too small to reach this future value. Try a larger payment, a higher rate, or a lower target.")
+            }
+            calculatedValue = calculatedNper
           }
           break
         }
@@ -433,7 +468,8 @@ export function TVMCalculator() {
               fv: "30000",
               rate: "3.5",
               compoundFreq: "12",
-              paymentFreq: "12",
+              paymentFreqMode: "different" as PaymentFrequencyMode,
+              paymentFreq: "26",
             },
           };
       }
@@ -518,7 +554,7 @@ export function TVMCalculator() {
               "Number of Periods Example: Solve for time to pay off credit card",
             bullets: [
               "Present value (credit card balance): positive",
-              "Payment per period (monthly payments): negative",
+              "Payment per period (bi-weekly payments): negative",
               "Future value (remaining balance): zero",
             ],
             example: {
@@ -528,7 +564,7 @@ export function TVMCalculator() {
               fv: "0",
               rate: "18",
               compoundFreq: "365",
-              paymentFreq: "12",
+              paymentFreq: "26",
               paymentFreqMode: "different" as PaymentFrequencyMode,
             },
           };
@@ -551,24 +587,17 @@ export function TVMCalculator() {
         {showHowToUse && (
           <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm  space-y-4">
             <div className="space-y-2">
-              <p className="text-foreground font-medium">Cash Flow Signs</p>
+              <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
               <p>This calculator uses signs to show the direction of money:</p>
-              <ul className="space-y-1 ml-4">
-                <li><strong className="text-foreground">Positive (+):</strong> cash inflow (money you receive)</li>
-                <li><strong className="text-foreground">Negative (−):</strong> cash outflow (money you pay)</li>
-              </ul>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowExamples(!showExamples) }}
-                className="flex items-center gap-2 hover:text-primary transition-colors mt-2"
-              >
-                <span className="text-foreground font-medium">Examples</span>
-                {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {showExamples && (
-                <div className="ml-4 pl-4 border-l-2 border-border/50 space-y-4">
-                  <div className="flex items-center text-xs">
-                    <span className=" mr-1">I am:</span>
-                    {(["saving", "borrowing"] as const).map(mode => (
+              <div className="flex flex-row gap-2">
+                <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaPlus /> <strong >Positive &mdash; money you receive (cash in)</strong></div>
+                <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2"><FaMinus /> <strong >Negative &mdash; money you pay (cash out)</strong></div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center text-sm gap-3">
+                  <span className="mr-1">Example — I am:</span>
+                  <div className="inline-flex overflow-hidden rounded-md border border-border">
+                    {(["saving", "borrowing"] as const).map((mode, index) => (
                       <button
                         key={mode}
                         onClick={(e) => {
@@ -576,34 +605,34 @@ export function TVMCalculator() {
                           setExampleMode(mode)
                           setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
                         }}
-                        className={`px-1.5 py-0.5 rounded border transition-colors ${
+                        className={`px-3 py-1 text-sm font-medium cursor-pointer capitalize transition-colors ${
                           exampleMode === mode
-                            ? "border-green-500 bg-green-500/10 text-green-600"
-                            : "border-transparent  hover:text-foreground"
-                        }`}
+                            ? "hover:text-white hover:bg-[var(--color-lagunita)] bg-[var(--card-background)]"
+                            : "hover:text-white hover:bg-[var(--color-lagunita)] text-foreground"
+                        } ${index > 0 ? "border-l border-border" : ""}`}
                       >
                         {mode}
                       </button>
                     ))}
                   </div>
-                  {currentExample && (
-                    <div className="space-y-2">
-                      <p className="text-foreground font-bold">{currentExample.title}</p>
+                </div>
+                {currentExample && (
+                    <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm ">
+                      <h3 className="text-foreground font-bold mb-3">{currentExample.title}</h3>
                       <ul className="space-y-1 ml-4 list-disc">
                         {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
                       </ul>
                       <button
                         onClick={(e) => { e.stopPropagation(); loadExample(currentExample.example) }}
-                        className="hover:underline text-sm text-[var(--color-teal)] transition-colors mt-2"
+                        className="cursor-pointer underline hover:no-underline text-sm text-[var(--color-teal)] transition-colors mt-2"
                       >
                         See numeric example
                       </button>
                     </div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
         )}
       </div>
     )
@@ -618,17 +647,23 @@ export function TVMCalculator() {
 
         {/* Solve-for tabs */}
         <div className="mb-6">
+          <h2 className="sr-only">Solve for</h2>
           <div className="flex flex-wrap gap-2">
             {SOLVE_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 onClick={() => {
                   if (option.value !== solveFor) {
-                    setPresentValue(""); setFutureValue(""); setPayment(""); setAnnualRate(""); setPeriods("")
+                    setPresentValue("");
+                    setFutureValue("");
+                    setPayment("");
+                    setAnnualRate("");
+                    setPeriods("");
+                    setPaymentFrequencyMode("same");
                   }
-                  setSolveFor(option.value)
+                  setSolveFor(option.value);
                 }}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
+                className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
                   solveFor === option.value
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-transparent  border-border hover:text-foreground hover:border-foreground/30"
@@ -645,117 +680,275 @@ export function TVMCalculator() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-5 w-full lg:w-1/2">
-
+          <section
+            aria-label="Calculator inputs"
+            className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2"
+          >
             {/* Present Value */}
             {solveFor !== "PV" && (
               <div className="space-y-2">
-                <Label htmlFor="pv" className="block font-semibold text-foreground mb-2">Present value</Label>
+                <Label
+                  htmlFor="pv"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Present value
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="pv" type="text" inputMode="decimal" value={presentValue}
-                    onChange={(e) => handleInputChange(e.target.value, setPresentValue)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setPresentValue)}
-                    className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-destructive" : ""}`} />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
+                  <Input
+                    id="pv"
+                    type="text"
+                    inputMode="decimal"
+                    value={presentValue}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setPresentValue)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setPresentValue)
+                    }
+                    className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                {getFieldError("presentValue") && <p className="text-sm text-destructive">{getFieldError("presentValue")}</p>}
+                {getFieldError("presentValue") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("presentValue")}
+                  </p>
+                )}
+                {presentValue && (
+                  <p className="mt-1 text-sm">
+                    {SIGN_HELPER}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Payment (early position for RATE/NPER) */}
             {(solveFor === "RATE" || solveFor === "NPER") && (
               <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per period</Label>
+                <Label
+                  htmlFor="pmt"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Payment per period
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="pmt" type="text" inputMode="decimal" value={payment}
-                    onChange={(e) => handleInputChange(e.target.value, setPayment)}
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
+                  <Input
+                    id="pmt"
+                    type="text"
+                    inputMode="decimal"
+                    value={payment}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setPayment)
+                    }
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
+                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-destructive">{getFieldError("payment")}</p>}
+                {getFieldError("payment") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("payment")}
+                  </p>
+                )}
+                {payment && (
+                  <p className="mt-1 text-sm">
+                    {SIGN_HELPER}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Future Value */}
             {solveFor !== "FV" && (
               <div className="space-y-2">
-                <Label htmlFor="fv" className="block font-semibold text-foreground mb-2">Future value</Label>
+                <Label
+                  htmlFor="fv"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Future value
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="fv" type="text" inputMode="decimal" value={futureValue}
-                    onChange={(e) => handleInputChange(e.target.value, setFutureValue)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setFutureValue)}
-                    className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-destructive" : ""}`} />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
+                  <Input
+                    id="fv"
+                    type="text"
+                    inputMode="decimal"
+                    value={futureValue}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setFutureValue)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setFutureValue)
+                    }
+                    className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                {getFieldError("futureValue") && <p className="text-sm text-destructive">{getFieldError("futureValue")}</p>}
+                {getFieldError("futureValue") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("futureValue")}
+                  </p>
+                )}
+                {futureValue && (
+                  <p className="mt-1 text-sm">
+                    {SIGN_HELPER}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Payment (normal position) */}
-            {solveFor !== "PMT" && solveFor !== "RATE" && solveFor !== "NPER" && (
-              <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">Payment per period</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input id="pmt" type="text" inputMode="decimal" value={payment}
-                    onChange={(e) => handleInputChange(e.target.value, setPayment)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-destructive" : ""}`} />
+            {solveFor !== "PMT" &&
+              solveFor !== "RATE" &&
+              solveFor !== "NPER" && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="pmt"
+                    className="block font-semibold text-foreground mb-2"
+                  >
+                    Payment per period
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                      $
+                    </span>
+                    <Input
+                      id="pmt"
+                      type="text"
+                      inputMode="decimal"
+                      value={payment}
+                      onChange={(e) =>
+                        handleInputChange(e.target.value, setPayment)
+                      }
+                      onBlur={(e) =>
+                        handleInputBlur(e.target.value, setPayment)
+                      }
+                      className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    />
+                  </div>
+                  {getFieldError("payment") && (
+                    <p className="text-sm text-[var(--color-inline-error)]">
+                      {getFieldError("payment")}
+                    </p>
+                  )}
                 </div>
-                {getFieldError("payment") && <p className="text-sm text-destructive">{getFieldError("payment")}</p>}
-              </div>
-            )}
+              )}
 
             {/* Annual Rate */}
             {solveFor !== "RATE" && (
               <div className="space-y-2">
-                <Label htmlFor="rate" className="block font-semibold text-foreground mb-2">Annual interest rate</Label>
+                <Label
+                  htmlFor="rate"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Annual interest rate
+                </Label>
                 <div className="relative">
-                  <Input id="rate" type="text" inputMode="decimal" value={annualRate}
-                    onChange={(e) => handleInputChange(e.target.value, setAnnualRate)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setAnnualRate)}
-                    className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-destructive" : ""}`} />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
+                  <Input
+                    id="rate"
+                    type="text"
+                    inputMode="decimal"
+                    value={annualRate}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setAnnualRate)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setAnnualRate)
+                    }
+                    className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    %
+                  </span>
                 </div>
-                {getFieldError("annualRate") && <p className="text-sm text-destructive">{getFieldError("annualRate")}</p>}
+                {getFieldError("annualRate") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("annualRate")}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
               <div className="space-y-2">
-                <Label htmlFor="periods" className="block font-semibold text-foreground mb-2">Number of periods</Label>
-                <Input id="periods" type="text" inputMode="numeric" value={periods}
-                  onChange={(e) => { const val = e.target.value; if (val === "" || /^\d*$/.test(val)) setPeriods(val) }}
-                  className={`border-border bg-card ${getFieldError("periods") ? "border-destructive" : ""}`} />
-                {getFieldError("periods") && <p className="text-sm text-destructive">{getFieldError("periods")}</p>}
+                <Label
+                  htmlFor="periods"
+                  className="block font-semibold text-foreground mb-2"
+                >
+                  Number of periods
+                </Label>
+                <Input
+                  id="periods"
+                  type="text"
+                  inputMode="numeric"
+                  value={periods}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^\d*$/.test(val)) setPeriods(val);
+                  }}
+                  className={`border-border bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                />
+                {getFieldError("periods") && (
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("periods")}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Compounding Frequency */}
             <div className="space-y-2">
-              <Label htmlFor="compounding" className="block font-semibold text-foreground mb-2">Compounding frequency</Label>
-              <Select value={compoundingFrequency} onValueChange={setCompoundingFrequency}>
-                <SelectTrigger id="compounding" className="border-border bg-card">
+              <Label
+                htmlFor="compounding"
+                className="block font-semibold text-foreground mb-2"
+              >
+                Compounding frequency
+              </Label>
+              <Select
+                value={compoundingFrequency}
+                onValueChange={setCompoundingFrequency}
+              >
+                <SelectTrigger
+                  id="compounding"
+                  className="border-border bg-card"
+                >
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
                 <SelectContent>
-                  {FREQUENCY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                  {FREQUENCY_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             {/* Payment Frequency */}
             <div className="space-y-3">
-              <Label className="block font-semibold text-foreground mb-2">Payments occur</Label>
+              <Label className="block font-semibold text-foreground mb-2">
+                Payments occur
+              </Label>
               <div className="flex items-center gap-4">
-                {(["same", "different"] as const).map(mode => (
-                  <label key={mode} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="paymentFrequencyMode" value={mode}
+                {(["same", "different"] as const).map((mode) => (
+                  <label
+                    key={mode}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="paymentFrequencyMode"
+                      value={mode}
                       checked={paymentFrequencyMode === mode}
                       onChange={() => setPaymentFrequencyMode(mode)}
-                      className="w-4 h-4 text-primary border-border focus:ring-primary" />
+                      className="w-4 h-4 text-primary border-border focus:ring-primary"
+                    />
                     <span className="text-sm text-foreground">
                       {mode === "same" ? "Same as compounding" : "Different"}
                     </span>
@@ -764,13 +957,28 @@ export function TVMCalculator() {
               </div>
               {paymentFrequencyMode === "different" && (
                 <div className="pt-2">
-                  <Label htmlFor="paymentFreq" className="text-sm font-medium text-foreground">Payment frequency</Label>
-                  <Select value={paymentFrequency} onValueChange={setPaymentFrequency}>
-                    <SelectTrigger id="paymentFreq" className="border-border bg-card mt-2">
+                  <Label
+                    htmlFor="paymentFreq"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Payment frequency
+                  </Label>
+                  <Select
+                    value={paymentFrequency}
+                    onValueChange={setPaymentFrequency}
+                  >
+                    <SelectTrigger
+                      id="paymentFreq"
+                      className="border-border bg-card mt-2"
+                    >
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
                     <SelectContent>
-                      {FREQUENCY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                      {FREQUENCY_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -779,11 +987,16 @@ export function TVMCalculator() {
 
             {/* Payment Timing */}
             <div className="space-y-2">
-              <Label className="block font-semibold text-foreground mb-2">Payment timing</Label>
+              <Label className="block font-semibold text-foreground mb-2">
+                Payment timing
+              </Label>
               <div className="flex rounded-md border border-border overflow-hidden w-fit">
                 {(["end", "beginning"] as const).map((timing, i) => (
-                  <button key={timing} type="button" onClick={() => setPaymentTiming(timing)}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-border" : ""} ${
+                  <button
+                    key={timing}
+                    type="button"
+                    onClick={() => setPaymentTiming(timing)}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-border" : ""} ${
                       paymentTiming === timing
                         ? "bg-primary text-primary-foreground"
                         : "bg-card  hover:text-foreground"
@@ -794,23 +1007,37 @@ export function TVMCalculator() {
                 ))}
               </div>
               <p className="text-sm">
-                {paymentTiming === "end" ? "Payment made at the end of the period" : "Payment made at the beginning of the period"}
+                {paymentTiming === "end"
+                  ? "Payment made at the end of the period"
+                  : "Payment made at the beginning of the period"}
               </p>
             </div>
 
             <div className="pt-2">
-              <Button onClick={clearAll} variant="lagunita" className="font-medium px-8">Reset</Button>
+              <Button
+                onClick={clearAll}
+                variant="lagunita"
+                className="hidden md:block font-medium px-8"
+              >
+                Reset
+              </Button>
             </div>
           </section>
 
           {/* Results Card */}
-          <Card className="w-full lg:w-1/2">
+          <Card className="w-full hidden md:block lg:w-1/2">
             <CardContent className="w-full  bg-[var(--card-background)] rounded-3xl p-[32px]">
-              <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
-              {calcError ? (
-                <p className="text-destructive font-medium text-lg">{calcError}</p>
+              <h2 className="text-[20px] font-bold mb-1">
+                {currentOption?.label}
+              </h2>
+              {displayError ? (
+                <p className="text-[var(--color-inline-error)]">
+                  {displayError}
+                </p>
               ) : result !== null ? (
-                <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">{formatResult(result)}</p>
+                <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
+                  {formatResult(result)}
+                </p>
               ) : (
                 <p className="text-2xl sm:text-3xl font-medium /50">—</p>
               )}
@@ -819,24 +1046,28 @@ export function TVMCalculator() {
         </div>
 
         {/* Mobile sticky footer */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs ">{currentOption?.label}</div>
-              {calcError ? (
-                <p className="text-destructive font-medium">{calcError}</p>
-              ) : result !== null ? (
-                <p className="text-2xl font-bold text-primary">{formatResult(result)}</p>
-              ) : (
-                <p className="text-xl font-medium /50">Enter values above</p>
-              )}
-            </div>
-            <Button onClick={clearAll} variant="lagunita" size="sm">Reset</Button>
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-8 shadow-lg">
+          <div className="flex flex-col items-center justify-between">
+            <div className="text-sm">{currentOption?.label}</div>
+            {displayError ? (
+              <p className="text-[var(--color-inline-error)] font-medium">
+                {displayError}
+              </p>
+            ) : result !== null ? (
+              <p className="text-2xl font-bold text-primary">
+                {formatResult(result)}
+              </p>
+            ) : (
+              <p className="text-xl font-medium mb-2">Enter values above</p>
+            )}
+            <Button onClick={clearAll} variant="lagunita" size="sm">
+              Reset
+            </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default TVMCalculator

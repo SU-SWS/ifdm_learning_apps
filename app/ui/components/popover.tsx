@@ -66,7 +66,7 @@ export default function InfoPopover({
             >
               <X className="w-6 h-6 text-[var(--color-teal)] font-bold" />
             </a>
-            <h3 id="info-popover-title" className="font-semibold text-sm mb-1 text-[var(--foreground)]">
+            <h3 id="info-popover-title" className="sr-only font-semibold text-sm mb-1 text-[var(--foreground)]">
               {title}
             </h3>
             <div id="info-popover-body" className="text-sm text-[var(--foreground)]">
