@@ -58,7 +58,7 @@ function buildPeriodsRangeError(compounding: CompoundingFrequency, max: number):
   const maxFormatted = max.toLocaleString("en-US")
   const base = `Enter a number of ${label} between 0 and ${maxFormatted}.`
   if (compounding === "annually") return base
-  return `${base} (${maxFormatted} periods = 100 years with ${freqLabels[compounding]} compounding).`
+  return `${base} (${maxFormatted} ${label} = 100 years with ${freqLabels[compounding]} compounding).`
 }
 
 // Prevents -0 from displaying in results (e.g. when future value equals present value).
@@ -296,7 +296,7 @@ export default function PresentValueCalculator() {
                             setTimeout(
                               () =>
                                 setFutureValueError(
-                                  "Please enter a future value to calculate.",
+                                  "Please enter a future value.",
                                 ),
                               150,
                             );
