@@ -325,6 +325,10 @@ export default function CompoundInterestCalculator() {
                   value={annualRate}
                   onChange={(e) => {
                     const raw = e.target.value;
+
+                    // Prevent runaway strings before numeric parsing
+                    if (raw.length > 10) return;
+
                     const numericValue = parseFloat(raw);
                     if (raw === "") {
                       setAnnualRateError("");
@@ -505,15 +509,19 @@ export default function CompoundInterestCalculator() {
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
               <h2 className="text-[20px] font-bold mb-1">
-                Balance after {periods}{" "}
-                {getPeriodText(selectedCompounding, Number(periods))}
+                Balance after{" "}
+                {hasError
+                  ? "-"
+                  : `${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
                 {hasError ? "-" : balanceStr}
               </p>
               <p className="text-[20px] font-bold mb-1">
-                Interest accrued over {periods}{" "}
-                {getPeriodText(selectedCompounding, Number(periods))}
+                Interest accrued over{" "}
+                {hasError
+                  ? "-"
+                  : `${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </p>
               <p className="text-3xl/normal font-bold text-foreground overflow-auto">
                 {hasError ? "-" : interestStr}
@@ -601,9 +609,11 @@ export default function CompoundInterestCalculator() {
                     >
                       <td className="px-4 py-3 border-b">{result.label}</td>
                       <td className="text-right px-4 py-3 border-b">
-                        {result.totalPeriods % 1 === 0
-                          ? result.totalPeriods.toFixed(0)
-                          : result.totalPeriods.toFixed(2)}
+                        {hasError
+                          ? "-"
+                          : result.totalPeriods % 1 === 0
+                            ? result.totalPeriods.toFixed(0)
+                            : result.totalPeriods.toFixed(2)}
                       </td>
                       <td className="text-right px-4 py-3 border-b">
                         {hasError ? "-" : rowBalance}
@@ -637,9 +647,11 @@ export default function CompoundInterestCalculator() {
                   <div>
                     <span className="block font-semibold">Periods</span>
                     <span className="block">
-                      {result.totalPeriods % 1 === 0
-                        ? result.totalPeriods.toFixed(0)
-                        : result.totalPeriods.toFixed(2)}
+                      {hasError
+                        ? "-"
+                        : result.totalPeriods % 1 === 0
+                          ? result.totalPeriods.toFixed(0)
+                          : result.totalPeriods.toFixed(2)}
                     </span>
                   </div>
                   <div className="mt-1">
