@@ -560,7 +560,7 @@ export default function PresentValueCalculator() {
                   <h2 className="text-[var(--text-navy)] text-[22px] font-bold">
                     Present value
                   </h2>
-                  <p className="text-3xl font-bold text-lagunita mb-5">
+                  <p className="text-3xl font-bold text-[var(--color-teal)] mb-5">
                     {singleHasError
                       ? "—"
                       : formatCurrency(singleCalculations.presentValue)}
@@ -999,7 +999,7 @@ export default function PresentValueCalculator() {
                   <h2 className="text-[var(--text-navy)] text-[22px] font-bold">
                     Present value
                   </h2>
-                  <p className="text-3xl font-bold text-lagunita mb-5">
+                  <p className="text-3xl font-bold text-[var(--color-teal)] mb-5">
                     {seriesHasError
                       ? "—"
                       : formatCurrency(paymentCalculations.presentValue)}
