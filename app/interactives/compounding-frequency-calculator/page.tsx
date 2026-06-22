@@ -325,10 +325,6 @@ export default function CompoundInterestCalculator() {
                   value={annualRate}
                   onChange={(e) => {
                     const raw = e.target.value;
-
-                    // Prevent runaway strings before numeric parsing
-                    if (raw.length > 10) return;
-
                     const numericValue = parseFloat(raw);
                     if (raw === "") {
                       setAnnualRateError("");
