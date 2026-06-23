@@ -15,6 +15,7 @@ import {
 import { Info, ChevronDown, ChevronUp } from "lucide-react"
 import ThemeToggle from "@/app/lib/theme-toggle"
 import { FaPlus, FaMinus } from "react-icons/fa6"
+import { Tabs, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 
 type SolveFor = "FV" | "PV" | "PMT" | "RATE" | "NPER"
 type PaymentTiming = "end" | "beginning"
@@ -654,28 +655,29 @@ export default function Page() {
         {/* Solve-for tabs */}
         <div className="mb-6">
           <h2 className="sr-only">Solve for</h2>
-          <div className="flex flex-wrap gap-2">
-            {SOLVE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => {
-                  if (option.value !== solveFor) {
-                    setPresentValue(""); setFutureValue(""); setPayment("")
-                    setAnnualRate(""); setPeriods("")
-                    setPaymentFrequencyMode("same")
-                  }
-                  setSolveFor(option.value)
-                }}
-                className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-md transition-colors border ${
-                  solveFor === option.value
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-transparent border-border hover:text-foreground hover:border-foreground/30"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            value={solveFor}
+            onValueChange={(value) => {
+              const next = value as SolveFor
+              if (next !== solveFor) {
+                setPresentValue("")
+                setFutureValue("")
+                setPayment("")
+                setAnnualRate("")
+                setPeriods("")
+                setPaymentFrequencyMode("same")
+              }
+              setSolveFor(next)
+            }}
+          >
+            <TabsList className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 mb-0 p-0 w-full">
+              {SOLVE_OPTIONS.map((option) => (
+                <TabsTrigger key={option.value} value={option.value}>
+                  {option.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
 
         <HowToUseInfoBox />
@@ -903,8 +905,8 @@ export default function Page() {
                     onClick={() => setPaymentTiming(timing)}
                     className={`cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-border" : ""} ${
                       paymentTiming === timing
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-card hover:text-foreground"
+                        ? "bg-lagunita text-white"
+                        : " hover:text-foreground"
                     }`}
                   >
                     {timing.charAt(0).toUpperCase() + timing.slice(1)}
