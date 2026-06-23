@@ -559,20 +559,20 @@ export default function Page() {
           <div className="space-y-2">
             <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
             <p>This calculator uses signs to show the direction of money:</p>
-            <div className="flex flex-row gap-2">
-              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2">
-                <FaPlus />
-                <strong>Positive &mdash; money you receive (cash in)</strong>
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-col sm:flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-1/2">
+                <FaPlus className="hidden sm:block"/>
+                <strong>Positive: money you receive (cash in)</strong>
               </div>
-              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md border border-border px-3 py-2 max-w-1/2">
-                <FaMinus />
-                <strong>Negative &mdash; money you pay (cash out)</strong>
+              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-col sm:flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-1/2">
+                <FaMinus className="hidden sm:block"/>
+                <strong>Negative: money you pay (cash out)</strong>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center text-sm gap-3">
-                <span className="mr-1">Example — I am:</span>
+                <span className="mr-1">Example, I am:</span>
                 <div className="inline-flex overflow-hidden rounded-md border border-border">
                   {(["saving", "borrowing"] as const).map((mode, index) => (
                     <button
@@ -596,7 +596,7 @@ export default function Page() {
               </div>
 
               {currentExample && (
-                <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm">
+                <>
                   <h3 className="text-foreground font-bold mb-3">{currentExample.title}</h3>
                   <ul className="space-y-1 ml-4 list-disc">
                     {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
@@ -607,7 +607,7 @@ export default function Page() {
                   >
                     See numeric example
                   </button>
-                </div>
+                </>
               )}
             </div>
           </div>
