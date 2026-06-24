@@ -126,6 +126,8 @@
   --color-inline-warning: #9A6207;
   --results-card-empty: rgba(102, 112, 133, 1);
   --info-popup-background: rgba(239, 255, 252, 1);
+  --sticky-footer-background: #95C0CB;
+  --sticky-footer-text: #000000;
 }
 
 .dark {
