@@ -58,8 +58,6 @@ interface FieldError {
   message: string
 }
 
-const SIGN_HELPER = "Money you pay out is negative; money you receive is positive."
-
 export default function Page() {
   const [presentValue,         setPresentValue]         = useState<string>("")
   const [futureValue,          setFutureValue]          = useState<string>("")
@@ -720,9 +718,6 @@ export default function Page() {
                 {getFieldError("presentValue") && (
                   <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("presentValue")}</p>
                 )}
-                {presentValue && (
-                  <p className="mt-1 text-sm">{SIGN_HELPER}</p>
-                )}
               </div>
             )}
 
@@ -747,9 +742,6 @@ export default function Page() {
                 {getFieldError("payment") && (
                   <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>
                 )}
-                {payment && (
-                  <p className="mt-1 text-sm">{SIGN_HELPER}</p>
-                )}
               </div>
             )}
 
@@ -773,9 +765,6 @@ export default function Page() {
                 </div>
                 {getFieldError("futureValue") && (
                   <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("futureValue")}</p>
-                )}
-                {futureValue && (
-                  <p className="mt-1 text-sm">{SIGN_HELPER}</p>
                 )}
               </div>
             )}
@@ -880,7 +869,7 @@ export default function Page() {
                       value={mode}
                       checked={paymentFrequencyMode === mode}
                       onChange={() => setPaymentFrequencyMode(mode)}
-                      className="w-4 h-4 text-primary border-border focus:ring-primary"
+                      className="w-4 h-4 accent-lagunita cursor-pointer"
                     />
                     <span className="text-sm text-foreground">
                       {mode === "same" ? "Same as compounding" : "Different"}
