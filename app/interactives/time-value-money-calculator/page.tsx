@@ -560,12 +560,12 @@ export default function Page() {
             <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
             <p>This calculator uses signs to show the direction of money:</p>
             <div className="flex flex-col sm:flex-row gap-2 mb-4">
-              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-col sm:flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-1/2">
-                <FaPlus className="hidden sm:block"/>
+              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
+                <FaPlus />
                 <strong>Positive: money you receive (cash in)</strong>
               </div>
-              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-col sm:flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-1/2">
-                <FaMinus className="hidden sm:block"/>
+              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
+                <FaMinus/>
                 <strong>Negative: money you pay (cash out)</strong>
               </div>
             </div>
@@ -618,31 +618,44 @@ export default function Page() {
 
   // ── Result panel content ───────────────────────────────────────────────────
 
-  const ResultDisplay = ({ size = "desktop" }: { size?: "desktop" | "mobile" }) => {
-    const largeText  = size === "desktop" ? "text-3xl/normal" : "text-2xl"
-    const medText    = size === "desktop" ? "text-2xl sm:text-3xl" : "text-xl"
+  const ResultDisplay = ({
+    size = "desktop",
+    className = "",
+  }: {
+    size?: "desktop" | "mobile";
+    className?: string;
+  }) => {
+    const largeText = size === "desktop" ? "text-3xl/normal" : "text-2xl";
+    const medText = size === "desktop" ? "text-2xl sm:text-3xl" : "text-xl";
 
     if (displayError) {
-      return <p className="text-[var(--color-inline-error)]">{displayError}</p>
+      return (
+        <p className={`text-[var(--color-inline-error)] ${className}`}>
+          {displayError}
+        </p>
+      );
     }
     if (resultOverflow) {
       return (
-        <div>
-          <p className={`${largeText} font-bold text-[var(--color-teal)] mb-1`}>Too large to display.</p>
+        <div className={className}>
+          <p className={`${largeText} font-bold text-[var(--color-teal)] mb-1`}>
+            Too large to display.
+          </p>
           <p className="text-sm">Try a lower rate or fewer periods.</p>
         </div>
-      )
+      );
     }
     if (result !== null) {
       return (
-        <p className={`${largeText} font-bold text-[var(--color-teal)] mb-5 overflow-auto`}>
+        <p
+          className={`${largeText} font-bold text-[var(--color-teal)] mb-5 overflow-auto ${className}`}
+        >
           {formatResult(result)}
         </p>
-      )
+      );
     }
-    // Incomplete / no result yet — always show "—", never $0 or stale value
-    return <p className={`${medText} font-medium /50`}>—</p>
-  }
+    return <p className={`${medText} font-medium /50 ${className}`}>—</p>;
+  };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -670,7 +683,7 @@ export default function Page() {
               setSolveFor(next)
             }}
           >
-            <TabsList className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 mb-0 p-0 w-full">
+            <TabsList className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 mb-0 p-0 w-full [&_button]:h-12 md:[&_button]:h-16 lg:[&_button]:h-18">
               {SOLVE_OPTIONS.map((option) => (
                 <TabsTrigger key={option.value} value={option.value}>
                   {option.label}
@@ -937,10 +950,10 @@ export default function Page() {
         </div>
 
         {/* Mobile sticky footer */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-8 shadow-lg">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
           <div className="flex flex-col items-center justify-between">
             <div className="text-sm">{currentOption?.label}</div>
-            <ResultDisplay size="mobile" />
+            <ResultDisplay size="mobile" className="text-[var(--sticky-footer-text)]"/>
             <Button onClick={clearAll} variant="lagunita" size="sm">Reset</Button>
           </div>
         </div>
