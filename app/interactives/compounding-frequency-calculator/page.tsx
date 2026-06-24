@@ -260,25 +260,29 @@ export default function CompoundInterestCalculator() {
                   type="text"
                   value={initialAmount}
                   onChange={(e) => {
-                    const input = e.target.value;
-                    const numericPart = input.replace(/[^0-9.]/g, "");
-                    const numericValue = parseFloat(numericPart);
+                    const raw = e.target.value;
+                    const numericValue = parseFloat(raw);
+                    if (raw === "") {
+                      setInitialAmountError("");
+                      setInitialAmount("");
+                      return;
+                    }
                     if (
                       !isNaN(numericValue) &&
-                      numericValue > MAX_INITIAL_AMOUNT
+                      (numericValue < 0 || numericValue > MAX_INITIAL_AMOUNT)
                     ) {
                       setInitialAmountError(
                         "Enter an amount between $0 and $100,000,000.",
                       );
-                      setInitialAmount(numericPart);
+                      setInitialAmount(raw);
                     } else {
                       setInitialAmountError("");
-                      setInitialAmount(numericPart);
+                      setInitialAmount(raw);
                     }
-                    flagSkippedFields("initialAmount")
+                    flagSkippedFields("initialAmount");
                   }}
                   onBlur={() => {
-                    flagSkippedFields("initialAmount")
+                    flagSkippedFields("initialAmount");
                     if (initialAmount.startsWith("."))
                       setInitialAmount("0" + initialAmount);
                     if (!initialAmount)
@@ -317,26 +321,30 @@ export default function CompoundInterestCalculator() {
               <div className="relative">
                 <Input
                   id="annual-rate"
-                  type="text"
+                  type="number"
                   value={annualRate}
                   onChange={(e) => {
-                    const input = e.target.value;
-                    const numericPart = input.replace(/[^0-9.]/g, "");
-                    const numericValue = parseFloat(numericPart);
+                    const raw = e.target.value;
+                    const numericValue = parseFloat(raw);
+                    if (raw === "") {
+                      setAnnualRateError("");
+                      setAnnualRate("");
+                      return;
+                    }
                     if (
                       !isNaN(numericValue) &&
-                      numericValue > MAX_ANNUAL_RATE
+                      (numericValue < 0 || numericValue > MAX_ANNUAL_RATE)
                     ) {
                       setAnnualRateError("Enter a rate between 0% and 1,000%.");
-                      setAnnualRate(numericPart);
+                      setAnnualRate(raw);
                     } else {
                       setAnnualRateError("");
-                      setAnnualRate(numericPart);
+                      setAnnualRate(raw);
                     }
-                    flagSkippedFields("annualRate")
+                    flagSkippedFields("annualRate");
                   }}
                   onBlur={() => {
-                    flagSkippedFields("annualRate")
+                    flagSkippedFields("annualRate");
                     if (annualRate.startsWith("."))
                       setAnnualRate("0" + annualRate);
                     if (!annualRate)
@@ -393,20 +401,20 @@ export default function CompoundInterestCalculator() {
 
                     setPeriods(cleaned);
 
-                    if (cleaned !== "" && (Number(cleaned) < 0 || Number(cleaned) > maxPeriods)) {
+                    if (
+                      cleaned !== "" &&
+                      (Number(cleaned) < 0 || Number(cleaned) > maxPeriods)
+                    ) {
                       setPeriodsError(
                         buildPeriodsRangeError(selectedCompounding, maxPeriods),
                       );
                     } else {
                       setPeriodsError("");
                     }
-                    flagSkippedFields("periods")
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
+                    flagSkippedFields("periods");
                   }}
                   onBlur={() => {
-                    flagSkippedFields("periods")
+                    flagSkippedFields("periods");
                     if (periods.startsWith(".")) setPeriods("0" + periods);
                     if (!periods)
                       setTimeout(
@@ -497,15 +505,19 @@ export default function CompoundInterestCalculator() {
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
               <h2 className="text-[20px] font-bold mb-1">
-                Balance after {periods}{" "}
-                {getPeriodText(selectedCompounding, Number(periods))}
+                Balance after{" "}
+                {hasError
+                  ? "-"
+                  : `${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
                 {hasError ? "-" : balanceStr}
               </p>
               <p className="text-[20px] font-bold mb-1">
-                Interest accrued over {periods}{" "}
-                {getPeriodText(selectedCompounding, Number(periods))}
+                Interest accrued over{" "}
+                {hasError
+                  ? "-"
+                  : `${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </p>
               <p className="text-3xl/normal font-bold text-foreground overflow-auto">
                 {hasError ? "-" : interestStr}
@@ -593,9 +605,11 @@ export default function CompoundInterestCalculator() {
                     >
                       <td className="px-4 py-3 border-b">{result.label}</td>
                       <td className="text-right px-4 py-3 border-b">
-                        {result.totalPeriods % 1 === 0
-                          ? result.totalPeriods.toFixed(0)
-                          : result.totalPeriods.toFixed(2)}
+                        {hasError
+                          ? "-"
+                          : result.totalPeriods % 1 === 0
+                            ? result.totalPeriods.toFixed(0)
+                            : result.totalPeriods.toFixed(2)}
                       </td>
                       <td className="text-right px-4 py-3 border-b">
                         {hasError ? "-" : rowBalance}
@@ -629,9 +643,11 @@ export default function CompoundInterestCalculator() {
                   <div>
                     <span className="block font-semibold">Periods</span>
                     <span className="block">
-                      {result.totalPeriods % 1 === 0
-                        ? result.totalPeriods.toFixed(0)
-                        : result.totalPeriods.toFixed(2)}
+                      {hasError
+                        ? "-"
+                        : result.totalPeriods % 1 === 0
+                          ? result.totalPeriods.toFixed(0)
+                          : result.totalPeriods.toFixed(2)}
                     </span>
                   </div>
                   <div className="mt-1">
