@@ -29,8 +29,8 @@ export default function DebtPayoffCalculator() {
   const [debtAmount, setDebtAmount] = useState(30000)
   const [interestRate, setInterestRate] = useState(4)
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("monthly")
-  const [payment, setPayment] = useState(303.74)
-  const [additionalPayment, setAdditionalPayment] = useState<number | "">(0)
+  const [payment, setPayment] = useState<number | string>(303.74)
+  const [additionalPayment, setAdditionalPayment] = useState<number | string>(0)
   const [targetYears, setTargetYears] = useState(10)
   const [targetMonths, setTargetMonths] = useState(11)
 
@@ -58,8 +58,8 @@ export default function DebtPayoffCalculator() {
     const annualRate = interestRate / 100
     const periodsPerYear = getCompoundingPeriodsPerYear(compoundingFrequency)
     const periodicRate = annualRate / periodsPerYear
-    const addlPayment = typeof additionalPayment === "number" ? additionalPayment : 0
-    const totalPayment = payment + addlPayment
+    const addlPayment = typeof additionalPayment === "string" ? Number(additionalPayment) || 0 : additionalPayment
+    const totalPayment = (typeof payment === "string" ? Number(payment) || 0 : payment) + addlPayment
 
     if (totalPayment <= principal * periodicRate) {
       // Payment doesn't cover interest
@@ -80,12 +80,14 @@ export default function DebtPayoffCalculator() {
 
     // Calculate interest saved with additional payment
     let interestSaved = 0
-    if (addlPayment > 0) {
-      const basePayment = payment
-      const baseNumPeriods = -Math.log(1 - (principal * periodicRate) / basePayment) / Math.log(1 + periodicRate)
-      const baseTotalPaid = basePayment * baseNumPeriods
-      const baseInterest = baseTotalPaid - principal
-      interestSaved = baseInterest - totalInterest
+      if (addlPayment > 0) {
+      const basePayment = typeof payment === "string" ? Number(payment) || 0 : payment
+      if (basePayment > principal * periodicRate) {
+        const baseNumPeriods = -Math.log(1 - (principal * periodicRate) / basePayment) / Math.log(1 + periodicRate)
+        const baseTotalPaid = basePayment * baseNumPeriods
+        const baseInterest = baseTotalPaid - principal
+        interestSaved = baseInterest - totalInterest
+      }
     }
 
     const payoffDate = new Date()
@@ -126,7 +128,7 @@ export default function DebtPayoffCalculator() {
   const requiredPaymentResult = calculateRequiredPayment()
 
   const formatCurrency = (amount: number): string => {
-    if (!isFinite(amount)) return "$∞"
+    if (!isFinite(amount)) return "-"
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -140,7 +142,7 @@ export default function DebtPayoffCalculator() {
   }
 
   const formatTime = (months: number): string => {
-    if (!isFinite(months)) return "∞"
+    if (!isFinite(months)) return "-"
     const years = Math.floor(months / 12)
     const remainingMonths = months % 12
     if (years === 0) return `${remainingMonths} month${remainingMonths !== 1 ? "s" : ""}`
@@ -156,353 +158,529 @@ export default function DebtPayoffCalculator() {
         <h1 className="sr-only">Debt Payoff Calculator</h1>
         {/* Mode Selection */}
         <div className="mb-8">
+          <Tabs defaultValue="time" className="w-full">
+            <TabsList className="flex flex-col sm:grid w-full sm:grid-cols-2 mb-6">
+              <TabsTrigger value="time">
+                Calculate Time to Pay Off Debt
+              </TabsTrigger>
+              <TabsTrigger value="payment">
+                Calculate Required Payment
+              </TabsTrigger>
+            </TabsList>
 
-        <Tabs defaultValue="time" className="w-full">
-          <TabsList className="flex flex-col sm:grid w-full sm:grid-cols-2 mb-6">
-            <TabsTrigger value="time">Calculate Time to Pay Off Debt</TabsTrigger>
-            <TabsTrigger value="payment">Calculate Required Payment</TabsTrigger>
-          </TabsList>
-
-          {/* Time to pay off tab. */}
-          <TabsContent value="time">
-            <>
-              <div className="grid md:grid-cols-2 gap-8">
-                <Card className="mb-6">
-                  <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="debt-amount" className="font-medium">Debt amount</Label>
-                        <InfoPopover title="Debt amount">This is your total balance owed or what you would like to pay off.</InfoPopover>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="debt-amount"
-                          type="text"
-                          inputMode="numeric"
-                          value={debtAmount === 0 ? "" : debtAmount.toLocaleString("en-US")}
-                          onChange={(e) => setDebtAmount(Number(e.target.value.replace(/,/g, "")) || 0)}
-                          min="1"
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="interest-rate" className="font-medium">Annual interest rate</Label>
-                        <InfoPopover title="Annual interest rate (%)">This is the annual percentage rate (APR) charged by your lender.</InfoPopover>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="interest-rate"
-                          type="number"
-                          step="0.1"
-                          value={interestRate === 0 ? "" : interestRate}
-                          onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
-                          min="0.1"
-                          className="relative font-bold block w-full text-[var(--color-teal)] rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
-                          %
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 relative">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="compounding-select" className="font-medium">Compounding frequency</Label>
-                        <InfoPopover title="Compounding frequency"> How often interest is applied and payments are made. Most loans compound monthly.</InfoPopover>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={compoundingFrequency}
-                          onChange={(e) => setCompoundingFrequency(e.target.value as CompoundingFrequency)}
-                          id="compounding-select"
-                          aria-describedby="compounding-desc"
-                          className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
-                        >
-                          <option value="daily">Daily</option>
-                          <option value="weekly">Weekly</option>
-                          <option value="bi-weekly">Bi-weekly</option>
-                          <option value="monthly">Monthly</option>
-                          <option value="quarterly">Quarterly</option>
-                          <option value="semi-annually">Semi-Annually</option>
-                          <option value="annually">Annually</option>
-                        </select>
-                        <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
-                          <FaAngleDown />
-                        </div>
-                      </div>
-                      <div id="compounding-desc" className="sr-only">
-                            Current selection: {compoundingFrequency}
-                      </div>
-                      <p className="text-sm">
-                        The compounding frequency is equal to your payment frequency. For example, in the monthly case, you
-                        make 12 debt payments per year.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="payment" className="font-medium">Payment per compounding period</Label>
-                        <InfoPopover title="Payment per compounding period">This is the amount you pay each period at the selected frequency (e.g. $100 per month)</InfoPopover>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="payment"
-                          type="text"
-                          inputMode="numeric"
-                          value={payment === 0 ? "" : payment.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          onChange={(e) => setPayment(Number(e.target.value.replace(/,/g, "")) || 0)}
-                          step="0.01"
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
-                      <div className="flex items-center justify-between">
+            {/* Time to pay off tab. */}
+            <TabsContent value="time">
+              <>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Card className="mb-6">
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="addtlpayment" className="text-medium font-bold">Additional payment per period (optional)</Label>
-                          <InfoPopover title="Additional payment per period (optional)">Enter a fixed extra amount you plan to pay each month.</InfoPopover>
+                          <Label htmlFor="debt-amount" className="font-medium">
+                            Debt amount
+                          </Label>
+                          <InfoPopover title="Debt amount">
+                            This is your total balance owed or what you would
+                            like to pay off.
+                          </InfoPopover>
                         </div>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="addtlpayment"
-                          step="0.01"
-                          min="0"
-                          type="text"
-                          inputMode="numeric"
-                          value={additionalPayment === "" ? "" : Number(additionalPayment).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          onChange={(e) => setAdditionalPayment(e.target.value === "" ? "" : Number(e.target.value.replace(/,/g, "")))}
-                          onBlur={(e) => setAdditionalPayment(e.target.value === "" ? 0 : Number(e.target.value.replace(/,/g, "")))}
-                          className="font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-                      <p className="text-sm">
-                        Each steady extra payment reduces your total interest.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card aria-live="polite" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                  <CardHeader>
-                    <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">Your payoff summary</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="rounded-lg mb-6 text-center">
-                      <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">Time to pay off</p>
-                      <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">{formatTime(payoffResult.timeInMonths)}</p>
-                      <p className="text-medium font-semibold text-[var(--color-teal)]">Debt-free by {formatDate(payoffResult.payoffDate)}</p>
-                    </div>
-
-                    <div className="innerwrapper">
-                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
-                        <div className="w-full sm:w-[50%] p-4 font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none text-white bg-navy">
-                          Total interest:
-                        </div>
-                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                          {formatCurrency(payoffResult.totalInterest)}
+                        <div className="relative">
+                          <Input
+                            id="debt-amount"
+                            type="text"
+                            inputMode="numeric"
+                            value={
+                              debtAmount === 0
+                                ? ""
+                                : debtAmount.toLocaleString("en-US")
+                            }
+                            onChange={(e) =>
+                              setDebtAmount(
+                                Number(e.target.value.replace(/,/g, "")) || 0,
+                              )
+                            }
+                            min="1"
+                            className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
-                        <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
-                          Total amount paid:
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="interest-rate"
+                            className="font-medium"
+                          >
+                            Annual interest rate
+                          </Label>
+                          <InfoPopover title="Annual interest rate (%)">
+                            This is the annual percentage rate (APR) charged by
+                            your lender.
+                          </InfoPopover>
                         </div>
-                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                          {formatCurrency(payoffResult.totalAmountPaid)}
+                        <div className="relative">
+                          <Input
+                            id="interest-rate"
+                            type="number"
+                            step="0.1"
+                            value={interestRate === 0 ? "" : interestRate}
+                            onChange={(e) =>
+                              setInterestRate(Number(e.target.value) || 0)
+                            }
+                            min="0.1"
+                            className="relative font-bold block w-full text-[var(--color-teal)] rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            %
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-lagunita-lighter">
-                        <div className="w-full sm:w-[50%] p-4 bg-lagunita font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none">
-                          Interest saved:
+                      <div className="space-y-2 relative">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="compounding-select"
+                            className="font-medium"
+                          >
+                            Compounding frequency
+                          </Label>
+                          <InfoPopover title="Compounding frequency">
+                            {" "}
+                            How often interest is applied and payments are made.
+                            Most loans compound monthly.
+                          </InfoPopover>
                         </div>
-                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
-                          {formatCurrency(payoffResult.interestSaved)}
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={compoundingFrequency}
+                            onChange={(e) =>
+                              setCompoundingFrequency(
+                                e.target.value as CompoundingFrequency,
+                              )
+                            }
+                            id="compounding-select"
+                            aria-describedby="compounding-desc"
+                            className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
+                          >
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="bi-weekly">Bi-weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="semi-annually">Semi-Annually</option>
+                            <option value="annually">Annually</option>
+                          </select>
+                          <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
+                            <FaAngleDown />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <p className="text-center text-medium font-semibold pt-6 text-[var(--text-navy)]">
-                      You&#39;re turning your loan into a plan. A little extra now means freedom sooner.
-                    </p>
-                  </CardContent>
-                </Card>
-
-              </div>
-            </>
-          </TabsContent>
-          
-          {/* Calculate required payment tab. */}
-          <TabsContent value="payment">
-            <>
-              <div className="grid md:grid-cols-2 gap-8">
-                <Card className="mb-6">
-                  <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="debt-amount-2" className="font-medium">Debt amount</Label>
-                        <InfoPopover title="Debt amount">This is your total balance owed or what you would like to pay off.</InfoPopover>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="debt-amount-2"
-                          type="text"
-                          inputMode="numeric"
-                          value={debtAmount === 0 ? "" : debtAmount.toLocaleString("en-US")}
-                          onChange={(e) => setDebtAmount(Number(e.target.value.replace(/,/g, "")) || 0)}
-                          min="1"
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 relative">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="interest-rate-2" className="font-medium">Annual interest rate</Label>
-                        <InfoPopover title="Annual interest rate (%)">This is the annual percentage rate (APR) charged by your lender.</InfoPopover>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="interest-rate-2"
-                          type="number"
-                          step="0.1"
-                          value={interestRate === 0 ? "" : interestRate}
-                          onChange={(e) => setInterestRate(Number(e.target.value) || 0)}
-                          min="0.1"
-                          className="font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
-                          %
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="compounding-select-2" className="font-medium">Compounding frequency</Label>
-                        <InfoPopover title="Compounding frequency">How often interest is applied and payments are made. Most loans compound monthly.</InfoPopover>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                        value={compoundingFrequency}
-                        onChange={(e) => setCompoundingFrequency(e.target.value as CompoundingFrequency)}
-                        id="compounding-select-2"
-                        className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
-                        aria-describedby="compounding-desc-2"
-                      >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="bi-weekly">Bi-weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="semi-annually">Semi-Annually</option>
-                        <option value="annually">Annually</option>
-                      </select>
-                        <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
-                          <FaAngleDown />
-                        </div>
-                      </div>
-                      <div id="compounding-desc-2" className="sr-only">
+                        <div id="compounding-desc" className="sr-only">
                           Current selection: {compoundingFrequency}
+                        </div>
+                        <p className="text-sm">
+                          The compounding frequency is equal to your payment
+                          frequency. For example, in the monthly case, you make
+                          12 debt payments per year.
+                        </p>
                       </div>
-                      <p className="text-sm">
-                        The compounding frequency is equal to your payment frequency. For example, in the monthly case, you
-                        make 12 debt payments per year.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label className="font-medium">Target time to payoff</Label>
-                        <InfoPopover title="Target time to payoff">How long do you want to take to pay off this debt?</InfoPopover>
-                      </div>
-                      <div className="flex flex-row gap-4 w-full">
-                        <div className="flex flex-row-reverse w-1/2 gap-2 items-center">
-                          <Label htmlFor="target-years" className="text-sm text-muted-foreground flex-none">
-                            Years
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="payment" className="font-medium">
+                            Payment per compounding period
                           </Label>
-                          <div className="relative grow">
-                            <Input
-                              id="target-years"
-                              type="number"
-                              min="0"
-                              value={targetYears === 0 ? "" : targetYears}
-                              onChange={(e) => setTargetYears(Number(e.target.value) || 0)}
-                              className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            />
+                          <InfoPopover title="Payment per compounding period">
+                            This is the amount you pay each period at the
+                            selected frequency (e.g. $100 per month)
+                          </InfoPopover>
+                        </div>
+                        <div className="relative">
+                          <Input
+                            id="payment"
+                            type="text"
+                            inputMode="numeric"
+                            value={
+                              typeof payment === "string"
+                                ? payment
+                                : payment === 0
+                                  ? ""
+                                  : payment.toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
+                            }
+                            onChange={(e) =>
+                              setPayment(e.target.value.replace(/[^0-9.]/g, ""))
+                            }
+                            onBlur={(e) => {
+                              const val = Number(
+                                e.target.value.replace(/,/g, ""),
+                              );
+                              setPayment(isNaN(val) ? 0 : val);
+                            }}
+                            step="0.01"
+                            className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Label
+                              htmlFor="addtlpayment"
+                              className="text-medium font-bold"
+                            >
+                              Additional payment per period (optional)
+                            </Label>
+                            <InfoPopover title="Additional payment per period (optional)">
+                              Enter a fixed extra amount you plan to pay each
+                              month.
+                            </InfoPopover>
                           </div>
                         </div>
-                        <div className="flex flex-row w-1/2 gap-2 items-center">
-                          <div className="relative grow">
-                            <Input
-                              id="target-months"
-                              type="number"
-                              min="0"
-                              max="11"
-                              value={targetMonths === 0 ? "" : targetMonths}
-                              onChange={(e) => setTargetMonths(Math.min(11, Math.max(0, Number(e.target.value)) || 0))}
-                              className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            />
+                        <div className="relative">
+                          <Input
+                            id="addtlpayment"
+                            step="0.01"
+                            min="0"
+                            type="text"
+                            inputMode="numeric"
+                            value={
+                              typeof additionalPayment === "string"
+                                ? additionalPayment
+                                : additionalPayment === 0
+                                  ? ""
+                                  : Number(additionalPayment).toLocaleString(
+                                      "en-US",
+                                      {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      },
+                                    )
+                            }
+                            onChange={(e) =>
+                              setAdditionalPayment(
+                                e.target.value.replace(/[^0-9.]/g, ""),
+                              )
+                            }
+                            onBlur={(e) => {
+                              const val = Number(
+                                e.target.value.replace(/,/g, ""),
+                              );
+                              setAdditionalPayment(isNaN(val) ? 0 : val);
+                            }}
+                            className="font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                        </div>
+                        <p className="text-sm">
+                          Each steady extra payment reduces your total interest.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card
+                    aria-live="polite"
+                    className="bg-[var(--card-background)] rounded-3xl p-[32px]"
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">
+                        Your payoff summary
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="rounded-lg mb-6 text-center">
+                        <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">
+                          Time to pay off
+                        </p>
+                        <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">
+                          {formatTime(payoffResult.timeInMonths)}
+                        </p>
+                        <p className="text-medium font-semibold text-[var(--color-teal)]">
+                          Debt-free by {formatDate(payoffResult.payoffDate)}
+                        </p>
+                      </div>
+
+                      <div className="innerwrapper">
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                          <div className="w-full sm:w-[50%] p-4 font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none text-white bg-navy">
+                            Total interest:
                           </div>
-                          <Label htmlFor="target-months" className="text-sm text-muted-foreground flex-none">
-                            Months
-                          </Label>
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                            {formatCurrency(payoffResult.totalInterest)}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                          <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
+                            Total amount paid:
+                          </div>
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                            {formatCurrency(payoffResult.totalAmountPaid)}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-lagunita-lighter">
+                          <div className="w-full sm:w-[50%] p-4 bg-lagunita font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none">
+                            Interest saved:
+                          </div>
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
+                            {formatCurrency(payoffResult.interestSaved)}
+                          </div>
                         </div>
                       </div>
-                      <div className="text-md font-semibold text-[var(--color-teal)]">
-                        Total: {targetYears} year{targetYears !== 1 ? "s" : ""} {targetMonths} month{targetMonths !== 1 ? "s" : ""}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card aria-live="polite" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                  <CardHeader className="">
-                    <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">Required payment</CardTitle>
-                  </CardHeader>
-                  <CardContent className="">
-                    <div className="rounded-lg mb-6 text-center">
-                      <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">Payment per period</p>
-                      <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
-                        {formatCurrency(requiredPaymentResult.requiredPayment)}
+                      <p className="text-center text-medium font-semibold pt-6 text-[var(--text-navy)]">
+                        You&#39;re turning your loan into a plan. A little extra
+                        now means freedom sooner.
                       </p>
-                      <p className="text-[var(--color-teal)] text-lg font-semibold">To pay off in {formatTime(targetYears * 12 + targetMonths)}</p>
-                    </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            </TabsContent>
 
-                    <div className="innerwrapper">
-                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
-                        <div className="w-full sm:w-[50%] p-4 font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none text-white bg-navy">
-                          Total interest:
+            {/* Calculate required payment tab. */}
+            <TabsContent value="payment">
+              <>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Card className="mb-6">
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="debt-amount-2"
+                            className="font-medium"
+                          >
+                            Debt amount
+                          </Label>
+                          <InfoPopover title="Debt amount">
+                            This is your total balance owed or what you would
+                            like to pay off.
+                          </InfoPopover>
                         </div>
-                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                          {formatCurrency(requiredPaymentResult.totalInterest)}
+                        <div className="relative">
+                          <Input
+                            id="debt-amount-2"
+                            type="text"
+                            inputMode="numeric"
+                            value={
+                              debtAmount === 0
+                                ? ""
+                                : debtAmount.toLocaleString("en-US")
+                            }
+                            onChange={(e) =>
+                              setDebtAmount(
+                                Number(e.target.value.replace(/,/g, "")) || 0,
+                              )
+                            }
+                            min="1"
+                            className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
-                        <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
-                          Total amount paid:
+                      <div className="space-y-2 relative">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="interest-rate-2"
+                            className="font-medium"
+                          >
+                            Annual interest rate
+                          </Label>
+                          <InfoPopover title="Annual interest rate (%)">
+                            This is the annual percentage rate (APR) charged by
+                            your lender.
+                          </InfoPopover>
                         </div>
-                        <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                          {formatCurrency(requiredPaymentResult.totalAmountPaid)}
+                        <div className="relative">
+                          <Input
+                            id="interest-rate-2"
+                            type="number"
+                            step="0.1"
+                            value={interestRate === 0 ? "" : interestRate}
+                            onChange={(e) =>
+                              setInterestRate(Number(e.target.value) || 0)
+                            }
+                            min="0.1"
+                            className="font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            %
+                          </span>
                         </div>
                       </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="compounding-select-2"
+                            className="font-medium"
+                          >
+                            Compounding frequency
+                          </Label>
+                          <InfoPopover title="Compounding frequency">
+                            How often interest is applied and payments are made.
+                            Most loans compound monthly.
+                          </InfoPopover>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={compoundingFrequency}
+                            onChange={(e) =>
+                              setCompoundingFrequency(
+                                e.target.value as CompoundingFrequency,
+                              )
+                            }
+                            id="compounding-select-2"
+                            className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
+                            aria-describedby="compounding-desc-2"
+                          >
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="bi-weekly">Bi-weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="semi-annually">Semi-Annually</option>
+                            <option value="annually">Annually</option>
+                          </select>
+                          <div className="pointer-events-none  ml-[-40px] text-gray-400 text-lg">
+                            <FaAngleDown />
+                          </div>
+                        </div>
+                        <div id="compounding-desc-2" className="sr-only">
+                          Current selection: {compoundingFrequency}
+                        </div>
+                        <p className="text-sm">
+                          The compounding frequency is equal to your payment
+                          frequency. For example, in the monthly case, you make
+                          12 debt payments per year.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label className="font-medium">
+                            Target time to payoff
+                          </Label>
+                          <InfoPopover title="Target time to payoff">
+                            How long do you want to take to pay off this debt?
+                          </InfoPopover>
+                        </div>
+                        <div className="flex flex-row gap-4 w-full">
+                          <div className="flex flex-row-reverse w-1/2 gap-2 items-center">
+                            <Label
+                              htmlFor="target-years"
+                              className="text-sm text-muted-foreground flex-none"
+                            >
+                              Years
+                            </Label>
+                            <div className="relative grow">
+                              <Input
+                                id="target-years"
+                                type="number"
+                                min="0"
+                                value={targetYears === 0 ? "" : targetYears}
+                                onChange={(e) =>
+                                  setTargetYears(Number(e.target.value) || 0)
+                                }
+                                className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex flex-row w-1/2 gap-2 items-center">
+                            <div className="relative grow">
+                              <Input
+                                id="target-months"
+                                type="number"
+                                min="0"
+                                max="11"
+                                value={targetMonths === 0 ? "" : targetMonths}
+                                onChange={(e) =>
+                                  setTargetMonths(
+                                    Math.min(
+                                      11,
+                                      Math.max(0, Number(e.target.value)) || 0,
+                                    ),
+                                  )
+                                }
+                                className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                            </div>
+                            <Label
+                              htmlFor="target-months"
+                              className="text-sm text-muted-foreground flex-none"
+                            >
+                              Months
+                            </Label>
+                          </div>
+                        </div>
+                        <div className="text-md font-semibold text-[var(--color-teal)]">
+                          Total: {targetYears} year
+                          {targetYears !== 1 ? "s" : ""} {targetMonths} month
+                          {targetMonths !== 1 ? "s" : ""}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card
+                    aria-live="polite"
+                    className="bg-[var(--card-background)] rounded-3xl p-[32px]"
+                  >
+                    <CardHeader className="">
+                      <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">
+                        Required payment
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="">
+                      <div className="rounded-lg mb-6 text-center">
+                        <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">
+                          Payment per period
+                        </p>
+                        <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
+                          {formatCurrency(
+                            requiredPaymentResult.requiredPayment,
+                          )}
+                        </p>
+                        <p className="text-[var(--color-teal)] text-lg font-semibold">
+                          To pay off in{" "}
+                          {formatTime(targetYears * 12 + targetMonths)}
+                        </p>
+                      </div>
+
+                      <div className="innerwrapper">
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                          <div className="w-full sm:w-[50%] p-4 font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none text-white bg-navy">
+                            Total interest:
+                          </div>
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                            {formatCurrency(
+                              requiredPaymentResult.totalInterest,
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                          <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
+                            Total amount paid:
+                          </div>
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+                            {formatCurrency(
+                              requiredPaymentResult.totalAmountPaid,
+                            )}
+                          </div>
+                        </div>
                       </div>
                       <p className="text-center text-medium font-semibold pt-6 text-[var(--text-navy)]">
                         You&#39;re turning your loan into a plan.
                       </p>
-                  </CardContent>
-                </Card>
-
-              </div>
-            </>
-          </TabsContent>
-        </Tabs>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
-    </div>
-  )
+  );
 }
