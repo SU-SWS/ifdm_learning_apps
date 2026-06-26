@@ -88,85 +88,96 @@ export default function InflationCalculator() {
           {/* Parameters Panel */}
           <Card>
             <CardContent className="space-y-6">
-              <div className="relative">
+              {/* Initial Price */}
+              <div className="space-y-2">
                 <Label htmlFor="initial-price" className="text-md font-medium">
                   Initial price:
                 </Label>
-                <span
-                  className="absolute left-3 top-8.5 text-[var(--color-symbols)] pointer-events-none"
-                  aria-hidden="true"
-                >
-                  $
-                </span>
-                <Input
-                  id="initial-price"
-                  type="text"
-                  inputMode="numeric"
-                  value={initialPriceDisplay}
-                  onChange={(e) => {
-                    const stripped = e.target.value.replace(/,/g, "");
-                    // Allow only digits and a single decimal point
-                    if (stripped !== "" && !/^\d*\.?\d*$/.test(stripped))
-                      return;
-                    setInitialPriceRaw(stripped);
-                    const num = parseFloat(stripped);
-                    if (!isNaN(num)) {
-                      setInitialPriceDisplay(
-                        num.toLocaleString("en-US", {
-                          maximumFractionDigits: 2,
-                        }),
-                      );
-                    } else {
-                      setInitialPriceDisplay(stripped);
-                    }
-                  }}
-                  onFocus={() => {
-                    // Strip commas so the user can edit cleanly
-                    setInitialPriceDisplay(initialPriceRaw);
-                  }}
-                  onBlur={() => {
-                    const num = parseFloat(initialPriceRaw);
-                    if (!isNaN(num)) {
-                      setInitialPriceDisplay(formatWithCommas(num));
-                    } else {
-                      setInitialPriceDisplay(initialPriceRaw);
-                    }
-                  }}
-                  aria-invalid={priceError !== null}
-                  aria-describedby={
-                    priceError ? "initial-price-error" : undefined
-                  }
-                  className={`bg-[var(--input-background)] text-[var(--input-text)] text-md  w-full rounded-md shadow-sm pl-8 border pr-10 ${
-                    priceError
-                      ? "border-2 border-[var(--color-inline-error)] focus:ring-red-500"
-                      : "bg-[var(--input-border)]"
-                  }`}
-                />
-                {priceErrorMessage && (
-                  <p
-                    id="initial-price-error"
-                    role="alert"
-                    className="text-sm text-[var(--color-inline-error)] mt-1"
+                <div className="relative">
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none"
                   >
-                    {priceErrorMessage}
-                  </p>
-                )}
+                    $
+                  </span>
+                  <Input
+                    id="initial-price"
+                    type="text"
+                    inputMode="numeric"
+                    value={initialPriceDisplay}
+                    onChange={(e) => {
+                      const stripped = e.target.value.replace(/,/g, "");
+                      if (stripped !== "" && !/^\d*\.?\d*$/.test(stripped))
+                        return;
+                      setInitialPriceRaw(stripped);
+                      const num = parseFloat(stripped);
+                      if (!isNaN(num)) {
+                        setInitialPriceDisplay(
+                          num.toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          }),
+                        );
+                      } else {
+                        setInitialPriceDisplay(stripped);
+                      }
+                    }}
+                    onFocus={() => {
+                      setInitialPriceDisplay(initialPriceRaw);
+                    }}
+                    onBlur={() => {
+                      const num = parseFloat(initialPriceRaw);
+                      if (!isNaN(num)) {
+                        setInitialPriceDisplay(formatWithCommas(num));
+                      } else {
+                        setInitialPriceDisplay(initialPriceRaw);
+                      }
+                    }}
+                    aria-invalid={priceError !== null}
+                    aria-describedby="initial-price-error"
+                    className={`bg-[var(--input-background)] text-[var(--input-text)] text-md w-full rounded-md shadow-sm pl-7 border pr-10 ${
+                      priceError
+                        ? "border-2 border-[var(--color-inline-error)]"
+                        : "bg-[var(--input-border)]"
+                    }`}
+                  />
+                </div>
+                {/* Always rendered so aria-describedby always resolves */}
+                <p
+                  id="initial-price-error"
+                  role="alert"
+                  className={`text-sm font-semibold mt-1 ${
+                    priceErrorMessage
+                      ? "text-[var(--color-inline-error)]"
+                      : "sr-only"
+                  }`}
+                >
+                  {priceErrorMessage ?? ""}
+                </p>
               </div>
 
               {/* Inflation Rate Slider */}
-              <div className="space-y-3 relative">
+              <div className="space-y-3">
                 <div className="flex sm:items-center space-between gap-2 flex-col sm:flex-row">
-                  <Label className="text-md font-bold">
+                  <Label
+                    htmlFor="inflation-rate-slider"
+                    className="text-md font-bold"
+                  >
                     Annual inflation rate (%):
                   </Label>
                   <Badge
                     className={`${getInflationColor(inflationRate)} text-black font-bold`}
                   >
-                    {inflationRate.toFixed(1)}% -{" "}
+                    {inflationRate.toFixed(1)}%{" "}
                     {getInflationLabel(inflationRate)}
                   </Badge>
                 </div>
                 <CustomSlider
+                  id="inflation-rate-slider"
+                  aria-label="Annual inflation rate"
+                  aria-valuemin={0}
+                  aria-valuemax={15}
+                  aria-valuenow={inflationRate}
+                  aria-valuetext={`${inflationRate.toFixed(1)} percent`}
                   value={[inflationRate]}
                   onValueChange={(value) => setInflationRate(value[0])}
                   max={15}
@@ -174,7 +185,10 @@ export default function InflationCalculator() {
                   step={0.1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-md font-medium font-poppins">
+                <div
+                  className="flex justify-between text-md font-medium font-poppins"
+                  aria-hidden="true"
+                >
                   <span>0%</span>
                   <span>15%</span>
                 </div>
@@ -182,15 +196,28 @@ export default function InflationCalculator() {
 
               {/* Time Period Slider */}
               <div className="space-y-3">
-                <div className="flex items-center">
-                  <Label className="text-md font-bold">
-                    Time period:&nbsp;
+                <div className="flex items-center gap-1">
+                  <Label
+                    htmlFor="time-period-slider"
+                    className="text-md font-bold"
+                  >
+                    Time period:
                   </Label>
-                  <span className="text-md font-semibold flex items-center gap-1">
+                  <span
+                    className="text-md font-semibold"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
                     {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                   </span>
                 </div>
                 <CustomSlider
+                  id="time-period-slider"
+                  aria-label="Time period in years"
+                  aria-valuemin={1}
+                  aria-valuemax={50}
+                  aria-valuenow={timePeriod}
+                  aria-valuetext={`${timePeriod} year${timePeriod !== 1 ? "s" : ""}`}
                   value={[timePeriod]}
                   onValueChange={(value) => setTimePeriod(value[0])}
                   max={50}
@@ -199,7 +226,10 @@ export default function InflationCalculator() {
                   className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"
                 />
-                <div className="flex justify-between text-md font-medium font-poppins">
+                <div
+                  className="flex justify-between text-md font-medium font-poppins"
+                  aria-hidden="true"
+                >
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>
@@ -215,21 +245,20 @@ export default function InflationCalculator() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-md font-bold font-poppins text-[var(--color-teal)]">
-                After {timePeriod} year{timePeriod !== 1 ? "s" : ""}
-              </span>
-              <div className="pt-4">
-                <div className="rounded-lg">
-                  <div className="innerwrapper">
-                    <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
-                      <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
-                        Future price:
-                      </div>
-                      <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
-                        {futureValue !== null
-                          ? formatCurrency(futureValue)
-                          : "—"}
-                      </div>
+              <div
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <span className="text-md font-bold font-poppins text-[var(--color-teal)]">
+                  After {timePeriod} year{timePeriod !== 1 ? "s" : ""}
+                </span>
+                <div className="pt-4 rounded-lg">
+                  <div className="flex flex-row mb-1 bg-[var(--results-white-background)] rounded-lg">
+                    <div className="w-[50%] text-md nowrap p-4 font-bold text-black rounded-l-lg bg-grey-med-dark flex items-center">
+                      Future price:
+                    </div>
+                    <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
+                      {futureValue !== null ? formatCurrency(futureValue) : "—"}
                     </div>
                   </div>
                 </div>
