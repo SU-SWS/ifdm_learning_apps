@@ -507,7 +507,7 @@ export default function CompoundInterestCalculator() {
               <h2 className="text-[20px] font-bold mb-1">
                 Balance after
                 {hasError
-                  ? " "
+                  ? ""
                   : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
