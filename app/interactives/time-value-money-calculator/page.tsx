@@ -161,19 +161,19 @@ export default function Page() {
     if (solveFor !== "PV" && rawPv !== "" && rawPv !== "-") {
       const pv = parseFloat(rawPv)
       if (pv < CONSTRAINTS.presentValue.min || pv > CONSTRAINTS.presentValue.max)
-        errors.push({ field: "presentValue", message: `Enter an amount between $${CONSTRAINTS.presentValue.min.toLocaleString()} and $${CONSTRAINTS.presentValue.max.toLocaleString()}.` })
+        errors.push({ field: "presentValue", message: `Enter an amount between -$${Math.abs(CONSTRAINTS.presentValue.min).toLocaleString()} and $${CONSTRAINTS.presentValue.max.toLocaleString()}.` })
     }
 
     if (solveFor !== "FV" && rawFv !== "" && rawFv !== "-") {
       const fv = parseFloat(rawFv)
       if (fv < CONSTRAINTS.futureValue.min || fv > CONSTRAINTS.futureValue.max)
-        errors.push({ field: "futureValue", message: `Enter an amount between $${CONSTRAINTS.futureValue.min.toLocaleString()} and $${CONSTRAINTS.futureValue.max.toLocaleString()}.` })
+        errors.push({ field: "futureValue", message: `Enter an amount between -$${Math.abs(CONSTRAINTS.futureValue.min).toLocaleString()} and $${CONSTRAINTS.futureValue.max.toLocaleString()}.` })
     }
 
     if (solveFor !== "PMT" && rawPmt !== "" && rawPmt !== "-") {
       const pmt = parseFloat(rawPmt)
       if (pmt < CONSTRAINTS.payment.min || pmt > CONSTRAINTS.payment.max)
-        errors.push({ field: "payment", message: `Enter an amount between $${CONSTRAINTS.payment.min.toLocaleString()} and $${CONSTRAINTS.payment.max.toLocaleString()}.` })
+        errors.push({ field: "payment", message: `Enter an amount between -$${Math.abs(CONSTRAINTS.payment.min).toLocaleString()} and $${CONSTRAINTS.payment.max.toLocaleString()}.` })
     }
 
     if (solveFor !== "RATE" && rawRate !== "" && rawRate !== "-") {
@@ -303,9 +303,12 @@ export default function Page() {
               throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
             }
             const ratePerPeriodCalc = Math.pow(ratio, 1 / n) - 1
-            calculatedValue = paymentFrequencyMode === "different" && compFreq !== pmtFreq
-              ? (Math.pow(1 + ratePerPeriodCalc, pmtFreq) - 1) * 100
-              : ratePerPeriodCalc * compFreq * 100
+            calculatedValue =
+              paymentFrequencyMode === "different" && compFreq !== pmtFreq
+                ? (Math.pow(1 + ratePerPeriodCalc, pmtFreq / compFreq) - 1) *
+                  compFreq *
+                  100
+                : ratePerPeriodCalc * compFreq * 100;
             break
           }
           // Newton-Raphson solve
@@ -318,9 +321,12 @@ export default function Page() {
               ? pv + pmt * n + fv
               : pv * cf + pmt * ((cf - 1) / guess) * currentTiming + fv
             if (Math.abs(eq) < 0.0001) {
-              calculatedRate = paymentFrequencyMode === "different" && compFreq !== pmtFreq
-                ? (Math.pow(1 + guess, pmtFreq) - 1) * 100
-                : guess * compFreq * 100
+              calculatedRate =
+                paymentFrequencyMode === "different" && compFreq !== pmtFreq
+                  ? (Math.pow(1 + guess, pmtFreq / compFreq) - 1) *
+                    compFreq *
+                    100
+                  : guess * compFreq * 100;
               break
             }
             const delta      = 0.0001
@@ -541,79 +547,6 @@ export default function Page() {
   const currentOption  = SOLVE_OPTIONS.find(o => o.value === solveFor)
   const currentExample = getExample()
 
-  const HowToUseInfoBox = () => (
-    <div className="mb-6">
-      <button
-        onClick={() => setShowHowToUse(!showHowToUse)}
-        className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 hover:bg-muted/70 transition-colors text-left"
-      >
-        <Info className="w-5 h-5 flex-shrink-0" />
-        <span className="text-sm font-medium text-foreground flex-1">How to use this calculator</span>
-        {showHowToUse ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-      </button>
-
-      {showHowToUse && (
-        <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
-            <p>This calculator uses signs to show the direction of money:</p>
-            <div className="flex flex-col sm:flex-row gap-2 mb-4">
-              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
-                <FaPlus />
-                <strong>Positive: money you receive (cash in)</strong>
-              </div>
-              <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
-                <FaMinus/>
-                <strong>Negative: money you pay (cash out)</strong>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center text-sm gap-3">
-                <span className="mr-1">Example, I am:</span>
-                <div className="inline-flex overflow-hidden rounded-md border border-border">
-                  {(["saving", "borrowing"] as const).map((mode, index) => (
-                    <button
-                      key={mode}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setExampleMode(mode)
-                        setPresentValue(""); setFutureValue(""); setPayment("")
-                        setAnnualRate(""); setPeriods("")
-                      }}
-                      className={`px-3 py-1 text-sm font-medium cursor-pointer capitalize transition-colors ${
-                        exampleMode === mode
-                          ? "hover:text-white hover:bg-[var(--color-lagunita)] bg-[var(--card-background)]"
-                          : "hover:text-white hover:bg-[var(--color-lagunita)] text-foreground"
-                      } ${index > 0 ? "border-l border-border" : ""}`}
-                    >
-                      {mode}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {currentExample && (
-                <>
-                  <h3 className="text-foreground font-bold mb-3">{currentExample.title}</h3>
-                  <ul className="space-y-1 ml-4 list-disc">
-                    {currentExample.bullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)}
-                  </ul>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); loadExample(currentExample.example) }}
-                    className="cursor-pointer underline hover:no-underline text-sm text-[var(--color-teal)] transition-colors mt-2"
-                  >
-                    See numeric example
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-
   // ── Result panel content ───────────────────────────────────────────────────
 
   const ResultDisplay = ({
@@ -669,16 +602,17 @@ export default function Page() {
           <Tabs
             value={solveFor}
             onValueChange={(value) => {
-              const next = value as SolveFor
+              const next = value as SolveFor;
               if (next !== solveFor) {
-                setPresentValue("")
-                setFutureValue("")
-                setPayment("")
-                setAnnualRate("")
-                setPeriods("")
-                setPaymentFrequencyMode("same")
+                setPresentValue("");
+                setFutureValue("");
+                setPayment("");
+                setAnnualRate("");
+                setPeriods("");
+                setPaymentFrequencyMode("same");
+                setPaymentTiming("end");
               }
-              setSolveFor(next)
+              setSolveFor(next);
             }}
           >
             <TabsList className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 mb-0 p-0 w-full [&_button]:h-12 md:[&_button]:h-16 lg:[&_button]:h-18">
@@ -691,32 +625,133 @@ export default function Page() {
           </Tabs>
         </div>
 
-        <HowToUseInfoBox />
+        {/* How To Use Info Accordion box */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowHowToUse(!showHowToUse)}
+            className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 hover:bg-muted/70 transition-colors text-left"
+          >
+            <Info className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm font-medium text-foreground flex-1">
+              How to use this calculator
+            </span>
+            {showHowToUse ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+
+          {showHowToUse && (
+            <div className="mt-2 p-4 rounded-lg bg-muted/30 border border-border/50 text-sm space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
+                <p>
+                  This calculator uses signs to show the direction of money:
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                  <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
+                    <FaPlus />
+                    <strong>Positive: money you receive (cash in)</strong>
+                  </div>
+                  <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
+                    <FaMinus />
+                    <strong>Negative: money you pay (cash out)</strong>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center text-sm gap-3">
+                    <span className="mr-1">Example, I am:</span>
+                    <div className="inline-flex overflow-hidden rounded-md border border-border">
+                      {(["saving", "borrowing"] as const).map((mode, index) => (
+                        <button
+                          key={mode}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExampleMode(mode);
+                            setPresentValue("");
+                            setFutureValue("");
+                            setPayment("");
+                            setAnnualRate("");
+                            setPeriods("");
+                          }}
+                          className={`px-3 py-1 text-sm font-medium cursor-pointer capitalize transition-colors ${
+                            exampleMode === mode
+                              ? "hover:text-white hover:bg-[var(--color-lagunita)] bg-[var(--card-background)]"
+                              : "hover:text-white hover:bg-[var(--color-lagunita)] text-foreground"
+                          } ${index > 0 ? "border-l border-border" : ""}`}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {currentExample && (
+                    <>
+                      <h3 className="text-foreground font-bold mb-3">
+                        {currentExample.title}
+                      </h3>
+                      <ul className="space-y-1 ml-4 list-disc">
+                        {currentExample.bullets.map((bullet, idx) => (
+                          <li key={idx}>{bullet}</li>
+                        ))}
+                      </ul>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          loadExample(currentExample.example);
+                        }}
+                        className="cursor-pointer underline hover:no-underline text-sm text-[var(--color-teal)] transition-colors mt-2"
+                      >
+                        See numeric example
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Fields */}
-          <section aria-label="Calculator inputs" className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2">
-
+          <section
+            aria-label="Calculator inputs"
+            className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2"
+          >
             {/* Present Value */}
             {solveFor !== "PV" && (
               <div className="space-y-2">
-                <Label htmlFor="pv" className="block font-semibold text-foreground mb-2">
+                <Label
+                  htmlFor="pv"
+                  className="block font-semibold text-foreground mb-2"
+                >
                   Present value
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
                   <Input
                     id="pv"
                     type="text"
                     inputMode="decimal"
                     value={presentValue}
-                    onChange={(e) => handleInputChange(e.target.value, setPresentValue)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setPresentValue)}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setPresentValue)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setPresentValue)
+                    }
                     className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("presentValue") && (
-                  <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("presentValue")}</p>
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("presentValue")}
+                  </p>
                 )}
               </div>
             )}
@@ -724,23 +759,32 @@ export default function Page() {
             {/* Payment — early position for RATE/NPER */}
             {(solveFor === "RATE" || solveFor === "NPER") && (
               <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">
+                <Label
+                  htmlFor="pmt"
+                  className="block font-semibold text-foreground mb-2"
+                >
                   Payment per period
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
                   <Input
                     id="pmt"
                     type="text"
                     inputMode="decimal"
                     value={payment}
-                    onChange={(e) => handleInputChange(e.target.value, setPayment)}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setPayment)
+                    }
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
                     className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("payment") && (
-                  <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("payment")}
+                  </p>
                 )}
               </div>
             )}
@@ -748,55 +792,82 @@ export default function Page() {
             {/* Future Value */}
             {solveFor !== "FV" && (
               <div className="space-y-2">
-                <Label htmlFor="fv" className="block font-semibold text-foreground mb-2">
+                <Label
+                  htmlFor="fv"
+                  className="block font-semibold text-foreground mb-2"
+                >
                   Future value
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                    $
+                  </span>
                   <Input
                     id="fv"
                     type="text"
                     inputMode="decimal"
                     value={futureValue}
-                    onChange={(e) => handleInputChange(e.target.value, setFutureValue)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setFutureValue)}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setFutureValue)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setFutureValue)
+                    }
                     className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("futureValue") && (
-                  <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("futureValue")}</p>
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("futureValue")}
+                  </p>
                 )}
               </div>
             )}
 
             {/* Payment — normal position for FV/PV */}
-            {solveFor !== "PMT" && solveFor !== "RATE" && solveFor !== "NPER" && (
-              <div className="space-y-2">
-                <Label htmlFor="pmt" className="block font-semibold text-foreground mb-2">
-                  Payment per period
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                  <Input
-                    id="pmt"
-                    type="text"
-                    inputMode="decimal"
-                    value={payment}
-                    onChange={(e) => handleInputChange(e.target.value, setPayment)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
-                  />
+            {solveFor !== "PMT" &&
+              solveFor !== "RATE" &&
+              solveFor !== "NPER" && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="pmt"
+                    className="block font-semibold text-foreground mb-2"
+                  >
+                    Payment per period
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                      $
+                    </span>
+                    <Input
+                      id="pmt"
+                      type="text"
+                      inputMode="decimal"
+                      value={payment}
+                      onChange={(e) =>
+                        handleInputChange(e.target.value, setPayment)
+                      }
+                      onBlur={(e) =>
+                        handleInputBlur(e.target.value, setPayment)
+                      }
+                      className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    />
+                  </div>
+                  {getFieldError("payment") && (
+                    <p className="text-sm text-[var(--color-inline-error)]">
+                      {getFieldError("payment")}
+                    </p>
+                  )}
                 </div>
-                {getFieldError("payment") && (
-                  <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("payment")}</p>
-                )}
-              </div>
-            )}
+              )}
 
             {/* Annual Interest Rate */}
             {solveFor !== "RATE" && (
               <div className="space-y-2">
-                <Label htmlFor="rate" className="block font-semibold text-foreground mb-2">
+                <Label
+                  htmlFor="rate"
+                  className="block font-semibold text-foreground mb-2"
+                >
                   Annual interest rate
                 </Label>
                 <div className="relative">
@@ -805,14 +876,22 @@ export default function Page() {
                     type="text"
                     inputMode="decimal"
                     value={annualRate}
-                    onChange={(e) => handleInputChange(e.target.value, setAnnualRate)}
-                    onBlur={(e) => handleInputBlur(e.target.value, setAnnualRate)}
+                    onChange={(e) =>
+                      handleInputChange(e.target.value, setAnnualRate)
+                    }
+                    onBlur={(e) =>
+                      handleInputBlur(e.target.value, setAnnualRate)
+                    }
                     className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    %
+                  </span>
                 </div>
                 {getFieldError("annualRate") && (
-                  <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("annualRate")}</p>
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("annualRate")}
+                  </p>
                 )}
               </div>
             )}
@@ -820,7 +899,10 @@ export default function Page() {
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
               <div className="space-y-2">
-                <Label htmlFor="periods" className="block font-semibold text-foreground mb-2">
+                <Label
+                  htmlFor="periods"
+                  className="block font-semibold text-foreground mb-2"
+                >
                   Number of periods
                 </Label>
                 <Input
@@ -829,29 +911,42 @@ export default function Page() {
                   inputMode="numeric"
                   value={periods}
                   onChange={(e) => {
-                    const val = e.target.value
-                    if (val === "" || /^\d*$/.test(val)) setPeriods(val)
+                    const val = e.target.value;
+                    if (val === "" || /^\d*$/.test(val)) setPeriods(val);
                   }}
                   className={`border-border bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                 />
                 {getFieldError("periods") && (
-                  <p className="text-sm text-[var(--color-inline-error)]">{getFieldError("periods")}</p>
+                  <p className="text-sm text-[var(--color-inline-error)]">
+                    {getFieldError("periods")}
+                  </p>
                 )}
               </div>
             )}
 
             {/* Compounding Frequency */}
             <div className="space-y-2">
-              <Label htmlFor="compounding" className="block font-semibold text-foreground mb-2">
+              <Label
+                htmlFor="compounding"
+                className="block font-semibold text-foreground mb-2"
+              >
                 Compounding frequency
               </Label>
-              <Select value={compoundingFrequency} onValueChange={setCompoundingFrequency}>
-                <SelectTrigger id="compounding" className="border-border bg-card">
+              <Select
+                value={compoundingFrequency}
+                onValueChange={setCompoundingFrequency}
+              >
+                <SelectTrigger
+                  id="compounding"
+                  className="border-border bg-card"
+                >
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
                 <SelectContent>
                   {FREQUENCY_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -859,10 +954,15 @@ export default function Page() {
 
             {/* Payment Frequency */}
             <div className="space-y-3">
-              <Label className="block font-semibold text-foreground mb-2">Payments occur</Label>
+              <Label className="block font-semibold text-foreground mb-2">
+                Payments occur
+              </Label>
               <div className="flex items-center gap-4">
                 {(["same", "different"] as const).map((mode) => (
-                  <label key={mode} className="flex items-center gap-2 cursor-pointer">
+                  <label
+                    key={mode}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <input
                       type="radio"
                       name="paymentFrequencyMode"
@@ -879,16 +979,27 @@ export default function Page() {
               </div>
               {paymentFrequencyMode === "different" && (
                 <div className="pt-2">
-                  <Label htmlFor="paymentFreq" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="paymentFreq"
+                    className="text-sm font-medium text-foreground"
+                  >
                     Payment frequency
                   </Label>
-                  <Select value={paymentFrequency} onValueChange={setPaymentFrequency}>
-                    <SelectTrigger id="paymentFreq" className="border-border bg-card mt-2">
+                  <Select
+                    value={paymentFrequency}
+                    onValueChange={setPaymentFrequency}
+                  >
+                    <SelectTrigger
+                      id="paymentFreq"
+                      className="border-border bg-card mt-2"
+                    >
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
                     <SelectContent>
                       {FREQUENCY_OPTIONS.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -898,7 +1009,9 @@ export default function Page() {
 
             {/* Payment Timing */}
             <div className="space-y-2">
-              <Label className="block font-semibold text-foreground mb-2">Payment timing</Label>
+              <Label className="block font-semibold text-foreground mb-2">
+                Payment timing
+              </Label>
               <div className="flex rounded-md border border-border overflow-hidden w-fit">
                 {(["end", "beginning"] as const).map((timing, i) => (
                   <button
@@ -923,7 +1036,11 @@ export default function Page() {
             </div>
 
             <div className="pt-2">
-              <Button onClick={clearAll} variant="lagunita" className="hidden md:block font-medium px-8">
+              <Button
+                onClick={clearAll}
+                variant="lagunita"
+                className="hidden md:block font-medium px-8"
+              >
                 Reset
               </Button>
             </div>
@@ -932,7 +1049,9 @@ export default function Page() {
           {/* Results Card — desktop */}
           <Card className="w-full hidden md:block lg:w-1/2">
             <CardContent className="w-full bg-[var(--card-background)] rounded-3xl p-[32px]">
-              <h2 className="text-[20px] font-bold mb-1">{currentOption?.label}</h2>
+              <h2 className="text-[20px] font-bold mb-1">
+                {currentOption?.label}
+              </h2>
               <ResultDisplay size="desktop" />
             </CardContent>
           </Card>
@@ -942,11 +1061,16 @@ export default function Page() {
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
           <div className="flex flex-col items-center justify-between">
             <div className="text-sm">{currentOption?.label}</div>
-            <ResultDisplay size="mobile" className="text-[var(--sticky-footer-text)]"/>
-            <Button onClick={clearAll} variant="lagunita" size="sm">Reset</Button>
+            <ResultDisplay
+              size="mobile"
+              className="text-[var(--sticky-footer-text)]"
+            />
+            <Button onClick={clearAll} variant="lagunita" size="sm">
+              Reset
+            </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
