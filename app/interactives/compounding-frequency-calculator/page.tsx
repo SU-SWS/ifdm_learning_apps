@@ -505,19 +505,19 @@ export default function CompoundInterestCalculator() {
           <Card className="w-full lg:w-1/2 bg-[var(--card-background)] rounded-3xl p-[32px]">
             <CardContent className="p-0">
               <h2 className="text-[20px] font-bold mb-1">
-                Balance after{" "}
+                Balance after
                 {hasError
-                  ? "-"
-                  : `${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
+                  ? " "
+                  : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
                 {hasError ? "-" : balanceStr}
               </p>
               <p className="text-[20px] font-bold mb-1">
-                Interest accrued over{" "}
+                Interest accrued over
                 {hasError
-                  ? "-"
-                  : `${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
+                  ? ""
+                  : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </p>
               <p className="text-3xl/normal font-bold text-foreground overflow-auto">
                 {hasError ? "-" : interestStr}
