@@ -15,27 +15,41 @@ type CompoundingFrequency =
   | "semi-annually"
   | "annually";
 
-const frequencyMap: Record<CompoundingFrequency, { periods: number; label: string; periodLabel: string }> = {
-  daily:            { periods: 365, label: "Daily",          periodLabel: "days" },
-  weekly:           { periods: 52,  label: "Weekly",         periodLabel: "weeks" },
-  "bi-weekly":      { periods: 26,  label: "Bi-weekly",      periodLabel: "bi-weekly periods" },
-  monthly:          { periods: 12,  label: "Monthly",        periodLabel: "months" },
-  quarterly:        { periods: 4,   label: "Quarterly",      periodLabel: "quarters" },
-  "semi-annually":  { periods: 2,   label: "Semi-annually",  periodLabel: "semi-annual periods" },
-  annually:         { periods: 1,   label: "Annually",       periodLabel: "years" },
+const frequencyMap: Record<
+  CompoundingFrequency,
+  { periods: number; label: string; periodLabel: string }
+> = {
+  daily: { periods: 365, label: "Daily", periodLabel: "days" },
+  weekly: { periods: 52, label: "Weekly", periodLabel: "weeks" },
+  "bi-weekly": {
+    periods: 26,
+    label: "Bi-weekly",
+    periodLabel: "bi-weekly periods",
+  },
+  monthly: { periods: 12, label: "Monthly", periodLabel: "months" },
+  quarterly: { periods: 4, label: "Quarterly", periodLabel: "quarters" },
+  "semi-annually": {
+    periods: 2,
+    label: "Semi-annually",
+    periodLabel: "semi-annual periods",
+  },
+  annually: { periods: 1, label: "Annually", periodLabel: "years" },
 };
 
 const freqAdjective: Record<CompoundingFrequency, string> = {
-  daily:           "daily",
-  weekly:          "weekly",
-  "bi-weekly":     "biweekly",
-  monthly:         "monthly",
-  quarterly:       "quarterly",
+  daily: "daily",
+  weekly: "weekly",
+  "bi-weekly": "biweekly",
+  monthly: "monthly",
+  quarterly: "quarterly",
   "semi-annually": "semiannual",
-  annually:        "annual",
+  annually: "annual",
 };
 
-function buildPeriodsRangeError(freq: CompoundingFrequency, max: number): string {
+function buildPeriodsRangeError(
+  freq: CompoundingFrequency,
+  max: number,
+): string {
   const { periodLabel } = frequencyMap[freq];
   const maxFormatted = max.toLocaleString("en-US");
   if (freq === "annually") {
@@ -79,7 +93,8 @@ export default function InterestRateVisual() {
   const [periodsInfo, setPeriodsInfo] = useState("");
 
   // Compounding
-  const [compounding, setCompounding] = useState<CompoundingFrequency>("annually");
+  const [compounding, setCompounding] =
+    useState<CompoundingFrequency>("annually");
 
   // Debounced values for calculation
   const [debounced, setDebounced] = useState({
@@ -91,7 +106,13 @@ export default function InterestRateVisual() {
 
   useEffect(() => {
     const t = setTimeout(
-      () => setDebounced({ amount: amountRaw, rate: rateRaw, periods: periodsRaw, compounding }),
+      () =>
+        setDebounced({
+          amount: amountRaw,
+          rate: rateRaw,
+          periods: periodsRaw,
+          compounding,
+        }),
       300,
     );
     return () => clearTimeout(t);
@@ -123,8 +144,10 @@ export default function InterestRateVisual() {
     const calculatedInterest = calculatedTotal - amount;
 
     return {
-      interestAmount: mode === "saving" ? calculatedInterest : -calculatedInterest,
-      totalAmount: mode === "saving" ? calculatedTotal : amount + calculatedInterest,
+      interestAmount:
+        mode === "saving" ? calculatedInterest : -calculatedInterest,
+      totalAmount:
+        mode === "saving" ? calculatedTotal : amount + calculatedInterest,
     };
   }, [debounced, hasError, mode]);
 
@@ -135,7 +158,9 @@ export default function InterestRateVisual() {
     setAmountRaw(stripped);
     const num = parseFloat(stripped);
     if (!isNaN(num)) {
-      setAmountDisplay(num.toLocaleString("en-US", { maximumFractionDigits: 2 }));
+      setAmountDisplay(
+        num.toLocaleString("en-US", { maximumFractionDigits: 2 }),
+      );
       if (num < 0 || num > AMOUNT_MAX) {
         setAmountError("Enter an amount between $0 and $100,000,000.");
       } else {
@@ -231,7 +256,11 @@ export default function InterestRateVisual() {
     const raw = e.target.value;
     if (raw === "" || isNaN(parseFloat(raw))) {
       setPeriodsRaw("");
-      setTimeout(() => setPeriodsError("Please enter the number of compounding periods."), 150);
+      setTimeout(
+        () =>
+          setPeriodsError("Please enter the number of compounding periods."),
+        150,
+      );
     }
   };
 
@@ -268,10 +297,14 @@ export default function InterestRateVisual() {
               aria-pressed={mode === "saving"}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
-                <div className={`text-3xl self-center ${mode === "saving" ? "text-white" : "text-palo-verde group-hover:text-white"}`}>
+                <div
+                  className={`text-3xl self-center ${mode === "saving" ? "text-white" : "text-palo-verde group-hover:text-white"}`}
+                >
                   <FaPiggyBank />
                 </div>
-                <div className={`self-center ${mode === "saving" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"}`}>
+                <div
+                  className={`self-center ${mode === "saving" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"}`}
+                >
                   Saving
                 </div>
               </div>
@@ -282,10 +315,14 @@ export default function InterestRateVisual() {
               aria-pressed={mode === "borrowing"}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
-                <div className={`text-3xl self-center ${mode === "borrowing" ? "text-white" : "text-berry group-hover:text-white"}`}>
+                <div
+                  className={`text-3xl self-center ${mode === "borrowing" ? "text-white" : "text-berry group-hover:text-white"}`}
+                >
                   <FaArrowTrendDown />
                 </div>
-                <div className={`self-center ${mode === "borrowing" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"}`}>
+                <div
+                  className={`self-center ${mode === "borrowing" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"}`}
+                >
                   Borrowing
                 </div>
               </div>
@@ -295,7 +332,6 @@ export default function InterestRateVisual() {
 
         {/* Row 1: Amount + Rate */}
         <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
-
           {/* Initial Amount */}
           <div className="flex-1 min-w-[150px] space-y-1">
             <label
@@ -385,7 +421,6 @@ export default function InterestRateVisual() {
 
         {/* Row 2: Periods + Compounding */}
         <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
-
           {/* Periods */}
           <div className="flex-1 min-w-[150px] space-y-1">
             <label
@@ -490,11 +525,17 @@ export default function InterestRateVisual() {
               </div>
 
               {/* Interest row */}
-              <div className={`flex flex-col sm:flex-row rounded-lg mb-1 ${mode === "saving" ? "bg-palo-verde-light" : "bg-berry-light"}`}>
-                <div className={`w-full sm:w-[50%] p-4 font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none ${mode === "saving" ? "bg-palo-verde" : "bg-berry"}`}>
+              <div
+                className={`flex flex-col sm:flex-row rounded-lg mb-1 ${mode === "saving" ? "bg-palo-verde-light" : "bg-berry-light"}`}
+              >
+                <div
+                  className={`w-full sm:w-[50%] p-4 font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none ${mode === "saving" ? "bg-palo-verde" : "bg-berry"}`}
+                >
                   {mode === "saving" ? "Interest earned" : "Interest paid"}:
                 </div>
-                <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "bg-palo-verde-light text-palo-verde" : "bg-berry-light text-berry"}`}>
+                <div
+                  className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "bg-palo-verde-light text-palo-verde" : "bg-berry-light text-berry"}`}
+                >
                   {hasError ? "-" : formatCurrency(Math.abs(interestAmount))}
                 </div>
               </div>
@@ -518,7 +559,8 @@ export default function InterestRateVisual() {
                 </h2>
               ) : (
                 <h2 className="text-md font-bold text-berry mb-2">
-                  <FaArrowTrendDown className="w-[1.7em] h-[1.7em]" /> When you borrow:
+                  <FaArrowTrendDown className="w-[1.7em] h-[1.7em]" /> When you
+                  borrow:
                 </h2>
               )}
               <p className="text-[var(--foreground)] mb-2 text-md">
