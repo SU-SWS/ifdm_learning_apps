@@ -64,9 +64,9 @@ export default function Page() {
   const [payment,              setPayment]              = useState<string>("")
   const [annualRate,           setAnnualRate]           = useState<string>("")
   const [periods,              setPeriods]              = useState<string>("")
-  const [compoundingFrequency, setCompoundingFrequency] = useState<string>("12")
+  const [compoundingFrequency, setCompoundingFrequency] = useState<string>("1")
   const [paymentFrequencyMode, setPaymentFrequencyMode] = useState<PaymentFrequencyMode>("same")
-  const [paymentFrequency,     setPaymentFrequency]     = useState<string>("12")
+  const [paymentFrequency,     setPaymentFrequency]     = useState<string>("1")
   const [paymentTiming,        setPaymentTiming]        = useState<PaymentTiming>("end")
   const [solveFor,             setSolveFor]             = useState<SolveFor>("FV")
   const [result,               setResult]               = useState<number | null>(null)
@@ -106,6 +106,17 @@ export default function Page() {
     paymentFrequencyMode === "same" ? compoundingFrequency : paymentFrequency,
     [paymentFrequencyMode, compoundingFrequency, paymentFrequency]
   )
+
+  const isActivelyCalculating = useMemo(() => {
+    const requiredFilled: Record<SolveFor, string[]> = {
+      FV: [annualRate, periods],
+      PV: [annualRate, periods],
+      PMT: [annualRate, periods],
+      RATE: [periods],
+      NPER: [annualRate],
+    };
+    return requiredFilled[solveFor].every((f) => f.trim() !== "");
+  }, [solveFor, annualRate, periods]);
 
   const getPeriodUnitLabel = useCallback((): string => {
     switch (effectivePaymentFrequency) {
@@ -206,12 +217,12 @@ export default function Page() {
 
     // Completeness guard: suppress results until every required input is filled
     const requiredFields: Record<SolveFor, string[]> = {
-      FV:   [presentValue, annualRate, periods],
-      PV:   [futureValue, annualRate, periods],
-      PMT:  [presentValue, futureValue, annualRate, periods],
-      RATE: [presentValue, futureValue, periods],
-      NPER: [presentValue, futureValue, annualRate],
-    }
+      FV: [annualRate, periods],
+      PV: [annualRate, periods],
+      PMT: [annualRate, periods],
+      RATE: [periods],
+      NPER: [annualRate],
+    };
     const allFilled = requiredFields[solveFor].every(f => f.trim() !== "")
 
     // Always validate filled fields so range errors show as soon as all
@@ -251,7 +262,7 @@ export default function Page() {
         if (allPositive || allNegative) {
           const which = solveFor === "RATE" ? "rate" : "number of periods"
           setSignError(
-            `The ${which} can't be solved for. To find the ${which}, money paid out and money received need opposite signs — for example, enter what you pay as negative and what you receive as positive.`
+            `The ${which} can't be solved for. To find the ${which}, money paid out and money received need opposite signs. Enter what you pay as negative and what you receive as positive.`
           )
           setResult(null)
           return
@@ -273,7 +284,7 @@ export default function Page() {
 
         case "PV": {
           if (ratePerPeriod === 0) {
-            calculatedValue = -(fv - pmt * n)
+            calculatedValue = -(fv + pmt * n)
           } else {
             const cf = Math.pow(1 + ratePerPeriod, n)
             calculatedValue = -(fv / cf + pmt * ((cf - 1) / (ratePerPeriod * cf)) * timingMultiplier)
@@ -417,7 +428,7 @@ export default function Page() {
   const clearAll = () => {
     setPresentValue(""); setFutureValue(""); setPayment("")
     setAnnualRate(""); setPeriods("")
-    setCompoundingFrequency("12"); setPaymentFrequencyMode("same")
+    setCompoundingFrequency("1"); setPaymentFrequencyMode("same")
     setPaymentFrequency("12"); setPaymentTiming("end")
     setResult(null); setResultOverflow(false)
     setCalcError(""); setSignError(""); setFieldErrors([])
@@ -739,6 +750,7 @@ export default function Page() {
                     type="text"
                     inputMode="decimal"
                     value={presentValue}
+                    placeholder={isActivelyCalculating ? "0" : ""}
                     onChange={(e) =>
                       handleInputChange(e.target.value, setPresentValue)
                     }
@@ -774,6 +786,7 @@ export default function Page() {
                     type="text"
                     inputMode="decimal"
                     value={payment}
+                    placeholder={isActivelyCalculating ? "0" : ""}
                     onChange={(e) =>
                       handleInputChange(e.target.value, setPayment)
                     }
@@ -807,6 +820,7 @@ export default function Page() {
                     type="text"
                     inputMode="decimal"
                     value={futureValue}
+                    placeholder={isActivelyCalculating ? "0" : ""}
                     onChange={(e) =>
                       handleInputChange(e.target.value, setFutureValue)
                     }
@@ -844,6 +858,7 @@ export default function Page() {
                       type="text"
                       inputMode="decimal"
                       value={payment}
+                      placeholder={isActivelyCalculating ? "0" : ""}
                       onChange={(e) =>
                         handleInputChange(e.target.value, setPayment)
                       }
