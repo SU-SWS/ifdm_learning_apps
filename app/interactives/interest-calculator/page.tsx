@@ -58,10 +58,6 @@ function buildPeriodsRangeError(
   return `Enter a number of ${periodLabel} between 0 and ${maxFormatted}. (${maxFormatted} ${periodLabel} = 100 years with ${freqAdjective[freq]} compounding).`;
 }
 
-function formatWithCommas(value: number): string {
-  return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
-}
-
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -71,6 +67,7 @@ const formatCurrency = (value: number) =>
   }).format(value);
 
 const AMOUNT_MAX = 100_000_000;
+const AMOUNT_MIN = 1;
 const RATE_MAX = 1000;
 
 export default function InterestRateVisual() {
@@ -154,15 +151,15 @@ export default function InterestRateVisual() {
   // Amount handlers
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const stripped = e.target.value.replace(/,/g, "");
-    if (stripped !== "" && !/^\d*\.?\d*$/.test(stripped)) return;
+    if (stripped !== "" && !/^\d*$/.test(stripped)) return;
     setAmountRaw(stripped);
-    const num = parseFloat(stripped);
+    const num = parseInt(stripped, 10);
     if (!isNaN(num)) {
-      setAmountDisplay(
-        num.toLocaleString("en-US", { maximumFractionDigits: 2 }),
-      );
-      if (num < 0 || num > AMOUNT_MAX) {
-        setAmountError("Enter an amount between $0 and $100,000,000.");
+      setAmountDisplay(num.toLocaleString("en-US"));
+      if (num < AMOUNT_MIN || num > AMOUNT_MAX) {
+        setAmountError(
+          `Enter a whole dollar amount between $${AMOUNT_MIN} and $${AMOUNT_MAX.toLocaleString("en-US")}.`,
+        );
       } else {
         setAmountError("");
       }
@@ -173,15 +170,17 @@ export default function InterestRateVisual() {
   };
 
   const handleAmountBlur = () => {
-    const num = parseFloat(amountRaw);
+    const num = parseInt(amountRaw, 10);
     if (amountRaw === "" || isNaN(num)) {
       setAmountRaw("");
       setAmountDisplay("");
       setTimeout(() => setAmountError("Please enter an initial amount."), 150);
     } else {
-      setAmountDisplay(formatWithCommas(num));
-      if (num < 0 || num > AMOUNT_MAX) {
-        setAmountError("Enter an amount between $0 and $100,000,000.");
+      setAmountDisplay(num.toLocaleString("en-US"));
+      if (num < AMOUNT_MIN || num > AMOUNT_MAX) {
+        setAmountError(
+          `Enter a whole dollar amount between $${AMOUNT_MIN} and $${AMOUNT_MAX.toLocaleString("en-US")}.`,
+        );
       } else {
         setAmountError("");
       }
