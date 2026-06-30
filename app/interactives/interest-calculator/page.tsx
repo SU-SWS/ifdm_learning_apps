@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { FaPiggyBank } from "react-icons/fa";
 import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import ThemeToggle from "@/app/lib/theme-toggle";
 
 type CompoundingFrequency =
@@ -16,8 +15,7 @@ type CompoundingFrequency =
   | "annually";
 
 const frequencyMap: Record<
-  CompoundingFrequency,
-  { periods: number; label: string; periodLabel: string }
+  CompoundingFrequency, { periods: number; label: string; periodLabel: string }
 > = {
   daily: { periods: 365, label: "Daily", periodLabel: "days" },
   weekly: { periods: 52, label: "Weekly", periodLabel: "weeks" },
@@ -286,9 +284,7 @@ export default function InterestRateVisual() {
       <div className="mb-8">
         {/* Mode toggle */}
         <div className="flex flex-col mb-6">
-          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">
-            I am:
-          </h2>
+          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
           <div className="flex-1 flex gap-4">
             <button
               className={`group min-w-[150px] flex-1 py-2 px-3 text-md font-bold rounded-lg border-1 border-palo-verde hover:bg-[var(--button-green)] ${mode === "saving" ? "bg-palo-verde" : ""}`}
