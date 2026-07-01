@@ -323,7 +323,7 @@ export default function MortgageCalculator() {
   const showPaymentResults = mode === 'payment' && !v.paymentBlocking;
   const affordCoral = mode === 'afford' && (v.affordWrongValue || limitReached);
   const paymentCoral = mode === 'payment' && v.paymentWrongValue;
-  const emptyResultsString = "Enter values to see your estimate";
+  const emptyResultsString = "Enter values to see your estimate.";
   const fixFieldsString = "Please fix the highlighted fields to see your estimate.";
   const limitString = "That payment is too high to calculate. Try a lower amount to see your estimate.";
 
@@ -353,15 +353,15 @@ export default function MortgageCalculator() {
   const CoralCard = ({ message }: { message: string }) => (
     <div
       role="alert"
-      className="min-h-[28rem] flex items-center justify-center rounded-3xl border border-red-200 bg-red-50 px-6 py-8 text-center text-red-900"
+      className="min-h-[28rem] text-center text-[var(--color-inline-error)]"
     >
       <p className="text-lg font-semibold">{message}</p>
     </div>
   );
 
   const EmptyPanel = () => (
-    <div className="min-h-[28rem] flex items-center justify-center">
-      <p className="text-lg font-bold text-gray-500 italic">{emptyResultsString}</p>
+    <div className="min-h-[28rem] text-center">
+      <p className="text-lg font-bold">{emptyResultsString}</p>
     </div>
   );
 
