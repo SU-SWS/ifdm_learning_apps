@@ -109,6 +109,7 @@ export default function PresentValueCalculator() {
   // Whether each tab has a blocking error (or empty required field) that should suppress results.
   const singleHasError = singleAnyFieldEmpty || !!futureValueError || !!interestRateError || !!timePeriodError
   const seriesHasError = seriesAnyFieldEmpty || !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
+  const seriesHasValidationError = !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
 
   // Debounced inputs for calculations — updates after 300ms pause in typing
   // to avoid recalculating on every keystroke.
@@ -1004,7 +1005,7 @@ export default function PresentValueCalculator() {
                       ? "—"
                       : formatCurrency(paymentCalculations.presentValue)}
                   </p>
-                  {seriesHasError && (
+                  {seriesHasValidationError && (
                     <p className="text-sm text-muted-foreground mb-3">
                       Fix the fields on the left to see results.
                     </p>
