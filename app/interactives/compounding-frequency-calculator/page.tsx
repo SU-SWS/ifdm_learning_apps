@@ -121,7 +121,7 @@ export default function CompoundInterestCalculator() {
   const [initialAmount, setInitialAmount] = useState<string>("")
   const [annualRate, setAnnualRate] = useState<string>("")
   const [periods, setPeriods] = useState<string>("")
-  const [selectedCompounding, setSelectedCompounding] = useState<CompoundingPeriod>("monthly")
+  const [selectedCompounding, setSelectedCompounding] = useState<CompoundingPeriod>("annually")
 
   // Error state is declared early so setters are available to flagSkippedFields.
   const [initialAmountError, setInitialAmountError] = useState<string>("")
