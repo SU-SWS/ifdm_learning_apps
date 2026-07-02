@@ -346,7 +346,7 @@ export default function InterestRateVisual() {
           <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
           <div className="flex-1 flex gap-4">
             <button
-              className={`group min-w-[150px] flex-1 py-2 px-3 text-md font-bold rounded-lg border-1 border-lagunita hover:bg-lagunita ${mode === "saving" ? "bg-lagunita" : ""}`}
+              className={`group min-w-[150px] flex-1 px-4 py-2 h-18 text-md font-bold rounded-lg border-1 border-lagunita hover:bg-lagunita ${mode === "saving" ? "bg-lagunita" : ""}`}
               onClick={() => setMode("saving")}
               aria-pressed={mode === "saving"}
             >
@@ -359,7 +359,7 @@ export default function InterestRateVisual() {
               </div>
             </button>
             <button
-              className={`group min-w-[150px] flex-1 py-2 px-3 text-md font-bold rounded-lg border-1 border-berry hover:bg-[var(--button-berry)] ${mode === "borrowing" ? "bg-berry" : ""}`}
+              className={`group min-w-[150px] flex-1 px-4 py-2 h-18 text-md font-bold rounded-lg border-1 border-berry hover:bg-[var(--button-berry)] ${mode === "borrowing" ? "bg-berry" : ""}`}
               onClick={() => setMode("borrowing")}
               aria-pressed={mode === "borrowing"}
             >
@@ -566,15 +566,28 @@ export default function InterestRateVisual() {
           {/* RIGHT: results */}
           <div className="p-4 rounded-lg bg-[var(--card-background)]">
             <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">
-              Results:
+              {mode === "saving" ? "What you'll have" : "What you'd owe"}
             </h2>
             <div aria-live="polite" aria-atomic="true">
               <div className="innerwrapper">
                 {hasError && (
-                  <p className="text font-bold text-[var(--color-inline-error)] mb-3">
+                  <p className="font-bold text-[var(--color-inline-error)] mb-3">
                     {hasValidationError
                       ? "Fix the highlighted field to see results."
-                      : "Enter values above to see results."}
+                      : ""}
+                  </p>
+                )}
+                {/* Too-large remedial line, shown once under the results */}
+                {resultTooLarge && (
+                  <p className="font-bold m-2 text-[var(--color-inline-error)]">
+                    Try a lower rate or fewer periods.
+                  </p>
+                )}
+
+                {/* Second helper: borrowing context, shown under the results */}
+                {mode === "borrowing" && !hasError && (
+                  <p className="font-bold m-2 text-[var(--foreground)]">
+                    This shows how the balance grows if left unpaid.
                   </p>
                 )}
 
@@ -621,13 +634,6 @@ export default function InterestRateVisual() {
                         : formatCurrency(totalAmount)}
                   </div>
                 </div>
-
-                {/* Too-large remedial line, shown once under the results */}
-                {resultTooLarge && (
-                  <p className="text-sm font-semibold mt-2 text-[var(--color-inline-error)]">
-                    Try a lower rate or fewer periods.
-                  </p>
-                )}
               </div>
 
               {/* Explanation */}
