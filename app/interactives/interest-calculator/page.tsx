@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { FaPiggyBank } from "react-icons/fa";
-import { FaArrowTrendDown, FaAngleDown } from "react-icons/fa6";
+import { FaAngleDown } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
+import { Button } from "@/app/ui/components/button"
 
 type CompoundingFrequency =
   | "daily"
@@ -44,6 +44,16 @@ const freqAdjective: Record<CompoundingFrequency, string> = {
   annually: "annual",
 };
 
+// Maximum span the periods field allows, expressed in years.
+const MAX_YEARS = 300;
+
+// Any result at or beyond this magnitude is treated as too large to display.
+const DISPLAY_CEILING = 1e15;
+
+// Catches Infinity, -Infinity, NaN, or anything past the display ceiling.
+const isTooLarge = (value: number) =>
+  !Number.isFinite(value) || Math.abs(value) > DISPLAY_CEILING;
+
 function buildPeriodsRangeError(
   freq: CompoundingFrequency,
   max: number,
@@ -53,8 +63,25 @@ function buildPeriodsRangeError(
   if (freq === "annually") {
     return `Enter a number of years between 0 and ${maxFormatted}.`;
   }
-  return `Enter a number of ${periodLabel} between 0 and ${maxFormatted}. (${maxFormatted} ${periodLabel} = 100 years with ${freqAdjective[freq]} compounding).`;
+  return `Enter a number of ${periodLabel} between 0 and ${maxFormatted}. (${maxFormatted} ${periodLabel} = ${MAX_YEARS} years with ${freqAdjective[freq]} compounding).`;
 }
+
+// Adds thousands separators while preserving a leading minus sign and a decimal
+// point the user is still typing (e.g. "-" stays "-", "1000." stays "1,000.",
+// ".5" stays ".5", "-1000" stays "-1,000").
+const formatWithCommas = (raw: string): string => {
+  if (raw === "" || raw === "-") return raw;
+  const negative = raw.startsWith("-");
+  const unsigned = negative ? raw.slice(1) : raw;
+  const sign = negative ? "-" : "";
+  const [intPart, decPart] = unsigned.split(".");
+  const intFormatted =
+    intPart === "" ? "" : parseInt(intPart, 10).toLocaleString("en-US");
+  if (unsigned.includes(".")) {
+    return `${sign}${intFormatted}.${decPart ?? ""}`;
+  }
+  return `${sign}${intFormatted}`;
+};
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -68,21 +95,25 @@ const AMOUNT_MAX = 100_000_000;
 const AMOUNT_MIN = 1;
 const RATE_MAX = 1000;
 
+// Whole dollars (8) + decimal point + 2 cents = 12 characters of headroom.
+// The optional minus sign is not counted against this budget.
+const AMOUNT_MAX_CHARS = 12;
+
 export default function InterestRateVisual() {
   const [mode, setMode] = useState<"saving" | "borrowing">("saving");
 
   // Amount
-  const [amountRaw, setAmountRaw] = useState("100");
-  const [amountDisplay, setAmountDisplay] = useState("100");
+  const [amountRaw, setAmountRaw] = useState("");
+  const [amountDisplay, setAmountDisplay] = useState("");
   const [amountError, setAmountError] = useState("");
 
   // Rate
-  const [rateRaw, setRateRaw] = useState("5");
+  const [rateRaw, setRateRaw] = useState("");
   const [rateError, setRateError] = useState("");
   const [rateWarning, setRateWarning] = useState("");
 
   // Periods
-  const [periodsRaw, setPeriodsRaw] = useState("10");
+  const [periodsRaw, setPeriodsRaw] = useState("");
   const [periodsError, setPeriodsError] = useState("");
   const [periodsWarning, setPeriodsWarning] = useState("");
   const [periodsInfo, setPeriodsInfo] = useState("");
@@ -93,9 +124,9 @@ export default function InterestRateVisual() {
 
   // Debounced values for calculation
   const [debounced, setDebounced] = useState({
-    amount: "100",
-    rate: "5",
-    periods: "10",
+    amount: "",
+    rate: "",
+    periods: "",
     compounding: "annually" as CompoundingFrequency,
   });
 
@@ -113,16 +144,14 @@ export default function InterestRateVisual() {
     return () => clearTimeout(t);
   }, [amountRaw, rateRaw, periodsRaw, compounding]);
 
-  const maxPeriods = frequencyMap[compounding].periods * 100;
+  const maxPeriods = frequencyMap[compounding].periods * MAX_YEARS;
 
   // Derived error state
-  const hasError =
-    amountRaw === "" ||
-    rateRaw === "" ||
-    periodsRaw === "" ||
-    !!amountError ||
-    !!rateError ||
-    !!periodsError;
+  const anyFieldEmpty =
+    amountRaw === "" || rateRaw === "" || periodsRaw === "";
+  const hasValidationError =
+    !!amountError || !!rateError || !!periodsError;
+  const hasError = anyFieldEmpty || hasValidationError;
 
   // Calculations
   const { interestAmount, totalAmount } = useMemo(() => {
@@ -146,38 +175,68 @@ export default function InterestRateVisual() {
     };
   }, [debounced, hasError, mode]);
 
+  // A finite, valid calculation whose magnitude is beyond what we can render.
+  const resultTooLarge =
+    !hasError && (isTooLarge(interestAmount) || isTooLarge(totalAmount));
+
+  // Reset everything back to the empty default state.
+  const handleReset = () => {
+    setMode("saving");
+    setAmountRaw("");
+    setAmountDisplay("");
+    setAmountError("");
+    setRateRaw("");
+    setRateError("");
+    setRateWarning("");
+    setPeriodsRaw("");
+    setPeriodsError("");
+    setPeriodsWarning("");
+    setPeriodsInfo("");
+    setCompounding("annually");
+    setDebounced({
+      amount: "",
+      rate: "",
+      periods: "",
+      compounding: "annually",
+    });
+  };
+
   // Amount handlers
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const stripped = e.target.value.replace(/,/g, "");
-    if (stripped !== "" && !/^\d*$/.test(stripped)) return;
+    // Allow empty, an optional leading minus, digits, an optional single decimal
+    // point, and up to 2 decimals. The minus is kept so an invalid negative
+    // entry stays visible and can be flagged rather than silently cleared.
+    if (stripped !== "" && !/^-?\d*\.?\d{0,2}$/.test(stripped)) return;
+    // Count value digits only; the sign does not eat into the character budget.
+    if (stripped.replace("-", "").length > AMOUNT_MAX_CHARS) return;
     setAmountRaw(stripped);
-    const num = parseInt(stripped, 10);
+    setAmountDisplay(formatWithCommas(stripped));
+    const num = parseFloat(stripped);
     if (!isNaN(num)) {
-      setAmountDisplay(num.toLocaleString("en-US"));
       if (num < AMOUNT_MIN || num > AMOUNT_MAX) {
         setAmountError(
-          `Enter a whole dollar amount between $${AMOUNT_MIN} and $${AMOUNT_MAX.toLocaleString("en-US")}.`,
+          `Enter an amount between $${AMOUNT_MIN} and $${AMOUNT_MAX.toLocaleString("en-US")}.`,
         );
       } else {
         setAmountError("");
       }
     } else {
-      setAmountDisplay(stripped);
       setAmountError("");
     }
   };
 
   const handleAmountBlur = () => {
-    const num = parseInt(amountRaw, 10);
+    const num = parseFloat(amountRaw);
     if (amountRaw === "" || isNaN(num)) {
       setAmountRaw("");
       setAmountDisplay("");
       setTimeout(() => setAmountError("Please enter an initial amount."), 150);
     } else {
-      setAmountDisplay(num.toLocaleString("en-US"));
+      setAmountDisplay(num.toLocaleString("en-US", { maximumFractionDigits: 2 }));
       if (num < AMOUNT_MIN || num > AMOUNT_MAX) {
         setAmountError(
-          `Enter a whole dollar amount between $${AMOUNT_MIN} and $${AMOUNT_MAX.toLocaleString("en-US")}.`,
+          `Enter an amount between $${AMOUNT_MIN} and $${AMOUNT_MAX.toLocaleString("en-US")}.`,
         );
       } else {
         setAmountError("");
@@ -203,7 +262,7 @@ export default function InterestRateVisual() {
       setRateError("");
       setRateWarning(
         val === 0
-          ? "At 0%, no interest is earned or charged — final amount equals initial amount."
+          ? "At 0%, no interest is earned or charged. Final amount equals initial amount."
           : "",
       );
     }
@@ -238,7 +297,7 @@ export default function InterestRateVisual() {
       setPeriodsError("");
       setPeriodsWarning(
         val === 0
-          ? "0 periods means no time passes — final amount will equal the initial amount."
+          ? "0 periods means no time passes. Final amount will equal the initial amount."
           : "",
       );
       setPeriodsInfo(
@@ -266,7 +325,7 @@ export default function InterestRateVisual() {
     const freq = e.target.value as CompoundingFrequency;
     setCompounding(freq);
     if (periodsRaw !== "") {
-      const newMax = frequencyMap[freq].periods * 100;
+      const newMax = frequencyMap[freq].periods * MAX_YEARS;
       const val = parseFloat(periodsRaw);
       if (val > newMax) {
         setPeriodsError(buildPeriodsRangeError(freq, newMax));
@@ -282,21 +341,16 @@ export default function InterestRateVisual() {
       <h1 className="sr-only">Interest Calculator</h1>
 
       <div className="mb-8">
-        {/* Mode toggle */}
+        {/* Mode toggle (spans the full width above the two columns) */}
         <div className="flex flex-col mb-6">
           <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
           <div className="flex-1 flex gap-4">
             <button
-              className={`group min-w-[150px] flex-1 py-2 px-3 text-md font-bold rounded-lg border-1 border-palo-verde hover:bg-[var(--button-green)] ${mode === "saving" ? "bg-palo-verde" : ""}`}
+              className={`group min-w-[150px] flex-1 py-2 px-3 text-md font-bold rounded-lg border-1 border-lagunita hover:bg-lagunita ${mode === "saving" ? "bg-lagunita" : ""}`}
               onClick={() => setMode("saving")}
               aria-pressed={mode === "saving"}
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
-                <div
-                  className={`text-3xl self-center ${mode === "saving" ? "text-white" : "text-palo-verde group-hover:text-white"}`}
-                >
-                  <FaPiggyBank />
-                </div>
                 <div
                   className={`self-center ${mode === "saving" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"}`}
                 >
@@ -311,11 +365,6 @@ export default function InterestRateVisual() {
             >
               <div className="flex-1 flex gap-3 align-center justify-center">
                 <div
-                  className={`text-3xl self-center ${mode === "borrowing" ? "text-white" : "text-berry group-hover:text-white"}`}
-                >
-                  <FaArrowTrendDown />
-                </div>
-                <div
                   className={`self-center ${mode === "borrowing" ? "text-white" : "text-[var(--foreground)] group-hover:text-white"}`}
                 >
                   Borrowing
@@ -325,244 +374,279 @@ export default function InterestRateVisual() {
           </div>
         </div>
 
-        {/* Row 1: Amount + Rate */}
-        <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
-          {/* Initial Amount */}
-          <div className="flex-1 min-w-[150px] space-y-1">
-            <label
-              htmlFor="initial-amount"
-              className="block text-md font-medium text-[var(--foreground)]"
-            >
-              Initial amount:
-            </label>
-            <div className="relative">
-              <span
-                aria-hidden="true"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none"
-              >
-                $
-              </span>
-              <input
-                id="initial-amount"
-                type="text"
-                inputMode="numeric"
-                placeholder="Enter amount"
-                value={amountDisplay}
-                onChange={handleAmountChange}
-                onFocus={() => setAmountDisplay(amountRaw)}
-                onBlur={handleAmountBlur}
-                aria-invalid={!!amountError}
-                aria-describedby="amount-msg"
-                className={`block w-full rounded-md shadow-sm py-2 pl-7 pr-10 border ${amountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
-              />
-            </div>
-            <p
-              id="amount-msg"
-              role="alert"
-              className={`text-sm font-semibold mt-1 ${amountError ? "text-[var(--color-inline-error)]" : "sr-only"}`}
-            >
-              {amountError || ""}
-            </p>
-          </div>
-
-          {/* Interest Rate */}
-          <div className="flex-1 min-w-[150px] space-y-1">
-            <label
-              htmlFor="interest-rate"
-              className="block text-md font-medium text-[var(--foreground)]"
-            >
-              Interest rate:
-            </label>
-            <div className="relative">
-              <input
-                id="interest-rate"
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={RATE_MAX}
-                step={0.1}
-                placeholder="Enter rate"
-                value={rateRaw}
-                onChange={handleRateChange}
-                onBlur={handleRateBlur}
-                aria-invalid={!!rateError}
-                aria-describedby="rate-msg"
-                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                  mode === "borrowing" ? "text-berry" : "text-lagunita"
-                } ${
-                  rateError
-                    ? "border-2 border-[var(--color-inline-error)]"
-                    : rateWarning
-                      ? "border-2 border-[var(--color-inline-warning)]"
-                      : ""
-                }`}
-              />
-            </div>
-            <p
-              id="rate-msg"
-              role={rateError ? "alert" : undefined}
-              className={`text-sm font-semibold mt-1 ${
-                rateError
-                  ? "text-[var(--color-inline-error)]"
-                  : rateWarning
-                    ? "text-[var(--color-inline-warning)]"
-                    : "sr-only"
-              }`}
-            >
-              {rateError || rateWarning || ""}
-            </p>
-          </div>
-        </div>
-
-        {/* Row 2: Periods + Compounding */}
-        <div className="flex flex-wrap gap-4 mb-6 flex-col md:flex-row">
-          {/* Periods */}
-          <div className="flex-1 min-w-[150px] space-y-1">
-            <label
-              htmlFor="periods"
-              className="block text-md font-medium text-[var(--foreground)]"
-            >
-              Number of compounding periods:
-            </label>
-            <div className="relative">
-              <input
-                id="periods"
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={maxPeriods}
-                step={1}
-                placeholder="Enter periods"
-                value={periodsRaw}
-                onChange={handlePeriodsChange}
-                onBlur={handlePeriodsBlur}
-                aria-invalid={!!periodsError}
-                aria-describedby="periods-msg"
-                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                  periodsError
-                    ? "border-2 border-[var(--color-inline-error)]"
-                    : periodsWarning
-                      ? "border-2 border-[var(--color-inline-warning)]"
-                      : ""
-                }`}
-              />
-            </div>
-            <p
-              id="periods-msg"
-              role={periodsError ? "alert" : undefined}
-              className={`text-sm font-semibold mt-1 ${
-                periodsError
-                  ? "text-[var(--color-inline-error)]"
-                  : periodsWarning
-                    ? "text-[var(--color-inline-warning)]"
-                    : periodsInfo
-                      ? "text-[var(--foreground)]"
-                      : "sr-only"
-              }`}
-            >
-              {periodsError || periodsWarning || periodsInfo || ""}
-            </p>
-          </div>
-
-          {/* Compounding */}
-          <div className="flex-1 min-w-[150px] space-y-1">
-            <label
-              htmlFor="compounding"
-              className="block text-md font-medium text-[var(--foreground)]"
-            >
-              Compounding:
-            </label>
-            <div className="relative">
-              <select
-                id="compounding"
-                value={compounding}
-                onChange={handleCompoundingChange}
-                className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
-              >
-                {Object.entries(frequencyMap).map(([key, { label }]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                <FaAngleDown />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Results */}
-        <div className="mt-6 p-4 rounded-lg bg-[var(--card-background)]">
-          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">
-            Results:
-          </h2>
-          <div
-            aria-live="polite"
-            aria-atomic="true"
-            className="lg:grid lg:grid-cols-2 lg:gap-15"
-          >
-            <div className="innerwrapper">
-              {hasError && (
-                <p className="text-sm text-[var(--foreground)] mb-3">
-                  Fix the highlighted field to see results.
-                </p>
-              )}
-
-              {/* Initial amount row */}
-              <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
-                <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
+        {/* Two-column layout: inputs on the left, results card on the right */}
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8 items-start">
+          {/* LEFT: inputs */}
+          <div>
+            {/* Amount + Rate */}
+            <div className="flex flex-col gap-6 mb-6">
+              {/* Initial Amount */}
+              <div className="flex-1 min-w-[150px] space-y-1">
+                <label
+                  htmlFor="initial-amount"
+                  className="block text-md font-medium text-[var(--foreground)]"
+                >
                   Initial amount:
+                </label>
+                <div className="relative">
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none"
+                  >
+                    $
+                  </span>
+                  <input
+                    id="initial-amount"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="Enter amount"
+                    value={amountDisplay}
+                    onChange={handleAmountChange}
+                    onFocus={() => setAmountDisplay(amountRaw)}
+                    onBlur={handleAmountBlur}
+                    aria-invalid={!!amountError}
+                    aria-describedby="amount-msg"
+                    className={`block w-full rounded-md shadow-sm py-2 pl-7 pr-10 border ${amountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  />
                 </div>
-                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                  {hasError ? "-" : formatCurrency(parseFloat(amountRaw) || 0)}
-                </div>
+                <p
+                  id="amount-msg"
+                  role="alert"
+                  className={`text-sm font-semibold mt-1 ${amountError ? "text-[var(--color-inline-error)]" : "sr-only"}`}
+                >
+                  {amountError || ""}
+                </p>
               </div>
 
-              {/* Interest row */}
-              <div
-                className={`flex flex-col sm:flex-row rounded-lg mb-1 ${mode === "saving" ? "bg-palo-verde-light" : "bg-berry-light"}`}
-              >
-                <div
-                  className={`w-full sm:w-[50%] p-4 font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none ${mode === "saving" ? "bg-palo-verde" : "bg-berry"}`}
+              {/* Interest Rate */}
+              <div className="flex-1 min-w-[150px] space-y-1">
+                <label
+                  htmlFor="interest-rate"
+                  className="block text-md font-medium text-[var(--foreground)]"
                 >
-                  {mode === "saving" ? "Interest earned" : "Interest paid"}:
+                  Annual interest rate:
+                </label>
+                <div className="relative">
+                  <input
+                    id="interest-rate"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={RATE_MAX}
+                    step={0.1}
+                    placeholder="Enter rate"
+                    value={rateRaw}
+                    onChange={handleRateChange}
+                    onBlur={handleRateBlur}
+                    aria-invalid={!!rateError}
+                    aria-describedby="rate-msg"
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      rateError
+                        ? "border-2 border-[var(--color-inline-error)]"
+                        : rateWarning
+                          ? "border-2 border-[var(--color-inline-warning)]"
+                          : ""
+                    }`}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none"
+                  >
+                    %
+                  </span>
                 </div>
-                <div
-                  className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "bg-palo-verde-light text-palo-verde" : "bg-berry-light text-berry"}`}
+                <p
+                  id="rate-msg"
+                  role={rateError ? "alert" : undefined}
+                  className={`text-sm font-semibold mt-1 ${
+                    rateError
+                      ? "text-[var(--color-inline-error)]"
+                      : rateWarning
+                        ? "text-[var(--color-inline-warning)]"
+                        : "sr-only"
+                  }`}
                 >
-                  {hasError ? "-" : formatCurrency(Math.abs(interestAmount))}
+                  {rateError || rateWarning || ""}
+                </p>
+              </div>
+            </div>
+
+            {/* Periods + Compounding */}
+            <div className="flex flex-col gap-6 mb-6">
+              {/* Periods */}
+              <div className="flex-1 min-w-[150px] space-y-1">
+                <label
+                  htmlFor="periods"
+                  className="block text-md font-medium text-[var(--foreground)]"
+                >
+                  Number of compounding periods:
+                </label>
+                <div className="relative">
+                  <input
+                    id="periods"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={maxPeriods}
+                    step={1}
+                    placeholder="Enter periods"
+                    value={periodsRaw}
+                    onChange={handlePeriodsChange}
+                    onBlur={handlePeriodsBlur}
+                    aria-invalid={!!periodsError}
+                    aria-describedby="periods-msg"
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      periodsError
+                        ? "border-2 border-[var(--color-inline-error)]"
+                        : periodsWarning
+                          ? "border-2 border-[var(--color-inline-warning)]"
+                          : ""
+                    }`}
+                  />
                 </div>
+                <p
+                  id="periods-msg"
+                  role={periodsError ? "alert" : undefined}
+                  className={`text-sm font-semibold mt-1 ${
+                    periodsError
+                      ? "text-[var(--color-inline-error)]"
+                      : periodsWarning
+                        ? "text-[var(--color-inline-warning)]"
+                        : periodsInfo
+                          ? "text-[var(--foreground)]"
+                          : "sr-only"
+                  }`}
+                >
+                  {periodsError || periodsWarning || periodsInfo || ""}
+                </p>
               </div>
 
-              {/* Final amount row */}
-              <div className="flex flex-col sm:flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
-                <div className="w-full sm:w-[50%] p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none">
-                  Final amount:
-                </div>
-                <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
-                  {hasError ? "-" : formatCurrency(totalAmount)}
+              {/* Compounding */}
+              <div className="flex-1 min-w-[150px] space-y-1">
+                <label
+                  htmlFor="compounding"
+                  className="block text-md font-medium text-[var(--foreground)]"
+                >
+                  Compounding:
+                </label>
+                <div className="relative">
+                  <select
+                    id="compounding"
+                    value={compounding}
+                    onChange={handleCompoundingChange}
+                    className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
+                  >
+                    {Object.entries(frequencyMap).map(([key, { label }]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    <FaAngleDown />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Explanation */}
-            <div className="mt-6 py-4 align-self-top lg:mt-0 lg:py-0">
-              {mode === "saving" ? (
-                <h2 className="text-md font-bold text-palo-verde mb-2">
-                  <FaPiggyBank className="w-[1.7em] h-[1.7em]" /> When you save:
-                </h2>
-              ) : (
-                <h2 className="text-md font-bold text-berry mb-2">
-                  <FaArrowTrendDown className="w-[1.7em] h-[1.7em]" /> When you
-                  borrow:
-                </h2>
-              )}
-              <p className="text-[var(--foreground)] mb-2 text-md">
-                {mode === "saving"
-                  ? "You are essentially a lender, and you get interest from those using your money."
-                  : "You are paying interest for the privilege of using someone else's money."}
-              </p>
+            {/* Reset */}
+            <div className="flex justify-start">
+              <Button
+                type="button"
+                variant="lagunita"
+                size="sm"
+                className="mt-4"
+                onClick={handleReset}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
+
+          {/* RIGHT: results */}
+          <div className="p-4 rounded-lg bg-[var(--card-background)]">
+            <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">
+              Results:
+            </h2>
+            <div aria-live="polite" aria-atomic="true">
+              <div className="innerwrapper">
+                {hasError && (
+                  <p className="text font-bold text-[var(--color-inline-error)] mb-3">
+                    {hasValidationError
+                      ? "Fix the highlighted field to see results."
+                      : "Enter values above to see results."}
+                  </p>
+                )}
+
+                {/* Initial amount row */}
+                <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
+                  <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
+                    Initial amount:
+                  </div>
+                  <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
+                    {hasError ? "-" : formatCurrency(parseFloat(amountRaw) || 0)}
+                  </div>
+                </div>
+
+                {/* Interest row */}
+                <div
+                  className={`flex flex-col sm:flex-row rounded-lg mb-1 ${mode === "saving" ? "bg-palo-verde-light" : "bg-berry-light"}`}
+                >
+                  <div
+                    className={`w-full sm:w-[50%] p-4 font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none ${mode === "saving" ? "bg-palo-verde" : "bg-berry"}`}
+                  >
+                    {mode === "saving" ? "Interest earned" : "Interest paid"}:
+                  </div>
+                  <div
+                    className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "bg-palo-verde-light text-palo-verde" : "bg-berry-light text-berry"}`}
+                  >
+                    {hasError
+                      ? "-"
+                      : resultTooLarge
+                        ? "Too large to display"
+                        : formatCurrency(Math.abs(interestAmount))}
+                  </div>
+                </div>
+
+                {/* Final amount row */}
+                <div className="flex flex-col sm:flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
+                  <div className="w-full sm:w-[50%] p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none">
+                    Final amount:
+                  </div>
+                  <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
+                    {hasError
+                      ? "-"
+                      : resultTooLarge
+                        ? "Too large to display"
+                        : formatCurrency(totalAmount)}
+                  </div>
+                </div>
+
+                {/* Too-large remedial line, shown once under the results */}
+                {resultTooLarge && (
+                  <p className="text-sm font-semibold mt-2 text-[var(--color-inline-error)]">
+                    Try a lower rate or fewer periods.
+                  </p>
+                )}
+              </div>
+
+              {/* Explanation */}
+              <div className="mt-6">
+                {mode === "saving" ? (
+                  <h2 className="text-md font-bold text-palo-verde mb-2">
+                    When you save:
+                  </h2>
+                ) : (
+                  <h2 className="text-md font-bold text-berry mb-2">
+                    When you borrow:
+                  </h2>
+                )}
+                <p className="text-[var(--foreground)] mb-2 text-md">
+                  {mode === "saving"
+                    ? "You are essentially a lender, and you get interest from those using your money."
+                    : "You are paying interest for the privilege of using someone else's money."}
+                </p>
+              </div>
             </div>
           </div>
         </div>
