@@ -323,7 +323,13 @@ export default function Page() {
             break
           }
           // Newton-Raphson solve
-          let guess = 0.1 / compFreq
+          // NOTE: `guess` represents the rate per PAYMENT period, since it is
+          // applied directly against `n` (a count of payment periods) below.
+          // The seed must therefore scale with pmtFreq, not compFreq. When
+          // paymentFrequencyMode is "same", pmtFreq === compFreq, so this is
+          // a no-op change for that case; it only matters (and fixes
+          // divergence/NaN results) when the two frequencies differ.
+          let guess = 0.1 / pmtFreq
           let calculatedRate: number | null = null
           for (let i = 0; i < 100; i++) {
             const currentTiming = paymentTiming === "beginning" ? (1 + guess) : 1
@@ -351,6 +357,12 @@ export default function Page() {
               // M3
               throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
             guess = guess - eq / deriv
+            // Guard rail: keep guess above -1 so (1 + guess) never goes
+            // non-positive. A negative base raised to the fractional
+            // exponent used during annualization (pmtFreq / compFreq)
+            // returns NaN, which otherwise surfaces as a false
+            // "Invalid result" error even when a valid rate exists.
+            if (guess <= -1) guess = -0.999999
             if (i === 99)
               // M3
               throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
