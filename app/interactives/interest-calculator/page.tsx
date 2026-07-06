@@ -603,7 +603,7 @@ export default function InterestRateVisual() {
 
                 {/* Interest row */}
                 <div
-                  className={`flex flex-col sm:flex-row rounded-lg mb-1 ${mode === "saving" ? "bg-palo-verde-light" : "bg-berry-light"}`}
+                  className="flex flex-col sm:flex-row rounded-lg mb-1 sm:bg-[var(--results-white-background)]"
                 >
                   <div
                     className={`w-full sm:w-[50%] p-4 font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none ${mode === "saving" ? "bg-palo-verde" : "bg-berry"}`}
@@ -611,7 +611,7 @@ export default function InterestRateVisual() {
                     {mode === "saving" ? "Interest earned" : "Interest paid"}:
                   </div>
                   <div
-                    className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "bg-palo-verde-light text-palo-verde" : "bg-berry-light text-berry"}`}
+                    className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "text-[var(--color-teal)]" : "text-[var(--color-berry)]"}`}
                   >
                     {hasError
                       ? "-"
@@ -622,11 +622,11 @@ export default function InterestRateVisual() {
                 </div>
 
                 {/* Final amount row */}
-                <div className="flex flex-col sm:flex-row mb-1 bg-[var(--results-blue-background)] rounded-lg">
-                  <div className="w-full sm:w-[50%] p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none">
+                <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
+                  <div className="w-full sm:w-[50%] p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none">
                     Final amount:
                   </div>
-                  <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis">
+                  <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
                     {hasError
                       ? "-"
                       : resultTooLarge
