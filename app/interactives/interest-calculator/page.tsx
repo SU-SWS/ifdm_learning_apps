@@ -611,7 +611,7 @@ export default function InterestRateVisual() {
                     {mode === "saving" ? "Interest earned" : "Interest paid"}:
                   </div>
                   <div
-                    className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "text-[var(--color-teal)]" : "text-[var(--color-berry)]"}`}
+                    className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "text-[var(--color-palo-verde-var)]" : "text-[var(--color-berry)]"}`}
                   >
                     {hasError
                       ? "-"
@@ -639,11 +639,11 @@ export default function InterestRateVisual() {
               {/* Explanation */}
               <div className="mt-6">
                 {mode === "saving" ? (
-                  <h2 className="text-md font-bold text-palo-verde mb-2">
+                  <h2 className="text-md font-bold text-[var(--color-palo-verde-var)] mb-2">
                     When you save:
                   </h2>
                 ) : (
-                  <h2 className="text-md font-bold text-berry mb-2">
+                  <h2 className="text-md font-bold text-[var(--color-berry)] mb-2">
                     When you borrow:
                   </h2>
                 )}
