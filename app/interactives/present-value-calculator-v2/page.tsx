@@ -540,10 +540,6 @@ export default function PresentValueCalculator() {
                         )}
                       </SelectContent>
                     </Select>
-                    <p className="text-sm mt-1">
-                      The compounding frequency is equal to the payment
-                      frequency.
-                    </p>
                     <Button
                       type="button"
                       variant="lagunita"
