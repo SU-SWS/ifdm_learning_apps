@@ -386,7 +386,7 @@ export default function InterestRateVisual() {
                   htmlFor="initial-amount"
                   className="block text-md font-medium text-[var(--foreground)]"
                 >
-                  Initial amount:
+                  Initial amount
                 </label>
                 <div className="relative">
                   <span
@@ -424,7 +424,7 @@ export default function InterestRateVisual() {
                   htmlFor="interest-rate"
                   className="block text-md font-medium text-[var(--foreground)]"
                 >
-                  Annual interest rate:
+                  Annual interest rate
                 </label>
                 <div className="relative">
                   <input
@@ -479,7 +479,7 @@ export default function InterestRateVisual() {
                   htmlFor="periods"
                   className="block text-md font-medium text-[var(--foreground)]"
                 >
-                  Number of compounding periods:
+                  Number of compounding periods
                 </label>
                 <div className="relative">
                   <input
@@ -527,7 +527,7 @@ export default function InterestRateVisual() {
                   htmlFor="compounding"
                   className="block text-md font-medium text-[var(--foreground)]"
                 >
-                  Compounding:
+                  Compounding frequency
                 </label>
                 <div className="relative">
                   <select
@@ -570,13 +570,6 @@ export default function InterestRateVisual() {
             </h2>
             <div aria-live="polite" aria-atomic="true">
               <div className="innerwrapper">
-                {hasError && (
-                  <p className="font-bold text-[var(--color-inline-error)] mb-3">
-                    {hasValidationError
-                      ? "Fix the highlighted field to see results."
-                      : ""}
-                  </p>
-                )}
                 {/* Too-large remedial line, shown once under the results */}
                 {resultTooLarge && (
                   <p className="font-bold m-2 text-[var(--color-inline-error)]">
