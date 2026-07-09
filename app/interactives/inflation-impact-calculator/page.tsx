@@ -98,7 +98,7 @@ export default function InflationCalculator() {
               {/* Initial Price */}
               <div className="space-y-2">
                 <Label htmlFor="initial-price" className="text-md font-medium">
-                  Initial price:
+                  Initial price
                 </Label>
                 <div className="relative">
                   <span
@@ -114,19 +114,9 @@ export default function InflationCalculator() {
                     value={initialPriceDisplay}
                     onChange={(e) => {
                       const stripped = e.target.value.replace(/,/g, "");
-                      if (stripped !== "" && !/^-?\d*\.?\d*$/.test(stripped))
-                        return;
+                      if (stripped !== "" && !/^-?\d*\.?\d*$/.test(stripped)) return;
                       setInitialPriceRaw(stripped);
-                      const num = parseFloat(stripped);
-                      if (!isNaN(num)) {
-                        setInitialPriceDisplay(
-                          num.toLocaleString("en-US", {
-                            maximumFractionDigits: 2,
-                          }),
-                        );
-                      } else {
-                        setInitialPriceDisplay(stripped);
-                      }
+                      setInitialPriceDisplay(stripped); // no comma formatting mid-edit
                     }}
                     onFocus={() => {
                       setInitialPriceDisplay(initialPriceRaw);
