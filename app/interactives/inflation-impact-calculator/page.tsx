@@ -40,13 +40,21 @@ const formatCurrency = (value: number) =>
 export default function InflationCalculator() {
   const [initialPriceRaw, setInitialPriceRaw] = useState("100");
   const [initialPriceDisplay, setInitialPriceDisplay] = useState("100");
+  const [priceBlurred, setPriceBlurred] = useState(false);
   const [inflationRate, setInflationRate] = useState(3.5);
   const [timePeriod, setTimePeriod] = useState(10);
   const [futureValue, setFutureValue] = useState<number | null>(0);
+  
 
   const numericPrice = parseFloat(initialPriceRaw);
   const priceError: PriceError = getPriceError(initialPriceRaw, numericPrice);
   const isValid = priceError === null && !isNaN(numericPrice);
+
+  // Range errors (including negatives) show live so the user sees the mistake as
+  // they type. The empty-field prompt waits until they have left the field.
+  const showRangeError = priceError === "range";
+  const showEmptyError = priceError === "empty" && priceBlurred;
+  const showError = showRangeError || showEmptyError;
 
   useEffect(() => {
     if (!isValid) {
@@ -71,12 +79,11 @@ export default function InflationCalculator() {
     return "bg-badge-red";
   };
 
-  const priceErrorMessage =
-    priceError === "empty"
+  const priceErrorMessage = showRangeError
+    ? "Enter an amount between $0.01 and $1,000,000,000."
+    : showEmptyError
       ? "Enter an initial amount to see the impact of inflation over time."
-      : priceError === "range"
-        ? "Enter an amount between $0.01 and $1,000,000,000."
-        : null;
+      : null;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -107,7 +114,7 @@ export default function InflationCalculator() {
                     value={initialPriceDisplay}
                     onChange={(e) => {
                       const stripped = e.target.value.replace(/,/g, "");
-                      if (stripped !== "" && !/^\d*\.?\d*$/.test(stripped))
+                      if (stripped !== "" && !/^-?\d*\.?\d*$/.test(stripped))
                         return;
                       setInitialPriceRaw(stripped);
                       const num = parseFloat(stripped);
@@ -125,6 +132,7 @@ export default function InflationCalculator() {
                       setInitialPriceDisplay(initialPriceRaw);
                     }}
                     onBlur={() => {
+                      setPriceBlurred(true);
                       const num = parseFloat(initialPriceRaw);
                       if (!isNaN(num)) {
                         setInitialPriceDisplay(formatWithCommas(num));
@@ -132,10 +140,10 @@ export default function InflationCalculator() {
                         setInitialPriceDisplay(initialPriceRaw);
                       }
                     }}
-                    aria-invalid={priceError !== null}
+                    aria-invalid={showError}
                     aria-describedby="initial-price-error"
                     className={`bg-[var(--input-background)] text-[var(--input-text)] text-md w-full rounded-md shadow-sm pl-7 border pr-10 ${
-                      priceError
+                      showError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : "bg-[var(--input-border)]"
                     }`}
