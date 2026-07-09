@@ -119,6 +119,7 @@ export default function InflationCalculator() {
                       setInitialPriceDisplay(stripped); // no comma formatting mid-edit
                     }}
                     onFocus={() => {
+                      setPriceBlurred(false);
                       setInitialPriceDisplay(initialPriceRaw);
                     }}
                     onBlur={() => {
