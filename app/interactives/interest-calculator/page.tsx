@@ -95,7 +95,7 @@ const AMOUNT_MAX = 100_000_000;
 const AMOUNT_MIN = 1;
 const RATE_MAX = 1000;
 
-// Whole dollars (8) + decimal point + 2 cents = 12 characters of headroom.
+// Whole dollars (9) + decimal point + 2 cents = 12 characters of headroom.
 // The optional minus sign is not counted against this budget.
 const AMOUNT_MAX_CHARS = 12;
 
@@ -167,11 +167,12 @@ export default function InterestRateVisual() {
     const calculatedTotal = amount * Math.pow(1 + periodicRate, periods);
     const calculatedInterest = calculatedTotal - amount;
 
+    // Saving and borrowing share the same magnitude; mode only affects the
+    // surrounding copy and colors, not the numbers. Display uses Math.abs on
+    // interest, so no sign handling is needed here.
     return {
-      interestAmount:
-        mode === "saving" ? calculatedInterest : -calculatedInterest,
-      totalAmount:
-        mode === "saving" ? calculatedTotal : amount + calculatedInterest,
+      interestAmount: calculatedInterest,
+      totalAmount: calculatedTotal,
     };
   }, [debounced, hasError, mode]);
 
