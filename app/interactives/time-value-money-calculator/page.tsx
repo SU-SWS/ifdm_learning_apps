@@ -322,53 +322,96 @@ export default function Page() {
                 : ratePerPeriodCalc * compFreq * 100;
             break
           }
-          // Newton-Raphson solve
-          // NOTE: `guess` represents the rate per PAYMENT period, since it is
-          // applied directly against `n` (a count of payment periods) below.
-          // The seed must therefore scale with pmtFreq, not compFreq. When
-          // paymentFrequencyMode is "same", pmtFreq === compFreq, so this is
-          // a no-op change for that case; it only matters (and fixes
-          // divergence/NaN results) when the two frequencies differ.
-          let guess = 0.1 / pmtFreq
-          let calculatedRate: number | null = null
-          for (let i = 0; i < 100; i++) {
-            const currentTiming = paymentTiming === "beginning" ? (1 + guess) : 1
-            const cf  = Math.pow(1 + guess, n)
-            const eq  = guess === 0
-              ? pv + pmt * n + fv
-              : pv * cf + pmt * ((cf - 1) / guess) * currentTiming + fv
-            if (Math.abs(eq) < 0.0001) {
-              calculatedRate =
-                paymentFrequencyMode === "different" && compFreq !== pmtFreq
-                  ? (Math.pow(1 + guess, pmtFreq / compFreq) - 1) *
-                    compFreq *
-                    100
-                  : guess * compFreq * 100;
-              break
-            }
-            const delta      = 0.0001
-            const nextTiming = paymentTiming === "beginning" ? (1 + guess + delta) : 1
-            const cfD  = Math.pow(1 + guess + delta, n)
-            const eqD  = (guess + delta) === 0
-              ? pv + pmt * n + fv
-              : pv * cfD + pmt * ((cfD - 1) / (guess + delta)) * nextTiming + fv
-            const deriv = (eqD - eq) / delta
-            if (Math.abs(deriv) < 0.0000001)
-              // M3
-              throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
-            guess = guess - eq / deriv
-            // Guard rail: keep guess above -1 so (1 + guess) never goes
-            // non-positive. A negative base raised to the fractional
-            // exponent used during annualization (pmtFreq / compFreq)
-            // returns NaN, which otherwise surfaces as a false
-            // "Invalid result" error even when a valid rate exists.
-            if (guess <= -1) guess = -0.999999
-            if (i === 99)
-              // M3
-              throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
+          // Solve for the per-period rate: scan for a sign change, then bisect.
+          //
+          // Replaces the earlier Newton-Raphson solver. Newton is seed-
+          // sensitive: for cash flows like PV < 0, PMT > 0, FV > 0 the
+          // objective can rise to a peak with its root sitting just below
+          // that peak (e.g. f is ~+14 at 280.23% and -101,700 at 300%), and
+          // a fixed seed can walk the wrong way off that slope. It also fails
+          // whenever the true rate lies outside the seed's basin, which is why
+          // "very high" rates specifically broke. Scanning the full supported
+          // annual-rate range (-99.99% to 1,000%) for the first sign change,
+          // then bisecting inside that bracket, has no seed sensitivity and
+          // handles a root tucked against a peak. It still reports M3 only when
+          // there is genuinely no crossing anywhere in the range.
+          //
+          // NOTE: `objective` is written in the rate per PAYMENT period (g),
+          // applied against `n` (a count of payment periods). `annualToG`
+          // converts a candidate ANNUAL rate to g using the same annualization
+          // the rest of the calculator uses, so "same" and "different"
+          // frequency modes stay consistent.
+          const objective = (g: number): number => {
+            if (g === 0) return pv + pmt * n + fv
+            const cf = Math.pow(1 + g, n)
+            const tm = paymentTiming === "beginning" ? 1 + g : 1
+            return pv * cf + pmt * ((cf - 1) / g) * tm + fv
           }
-          if (calculatedRate === null)
+
+          const annualToG = (annual: number): number =>
+            paymentFrequencyMode === "different" && compFreq !== pmtFreq
+              ? Math.pow(annual / (compFreq * 100) + 1, compFreq / pmtFreq) - 1
+              : annual / 100 / compFreq
+
+          const fAnnual = (annual: number): number => objective(annualToG(annual))
+
+          const RATE_LO = CONSTRAINTS.annualRate.min // -99.99
+          const RATE_HI = CONSTRAINTS.annualRate.max // 1,000
+          const RATE_STEPS = 2000 // ~0.55% resolution; a few thousand Math.pow calls, negligible cost
+
+          // Scan the whole range and keep the LAST (highest-rate) sign change.
+          // Some cash flows change sign twice (e.g. a loan received as +PV that
+          // is under-paid, leaving a +FV: the stream runs +, -, ..., -, +),
+          // which admits two valid rates. The economically meaningful answer is
+          // the higher one, and it matches what the previous Newton solver
+          // returned when seeded near 10%. For the common single-root case
+          // there is exactly one bracket, so this is identical to taking the
+          // first one.
+          let bracketLo: number | null = null
+          let bracketHi = 0
+          let bracketFLo = 0
+          let prevAnnual = RATE_LO
+          let prevF = fAnnual(prevAnnual)
+
+          if (prevF === 0) { bracketLo = RATE_LO; bracketHi = RATE_LO; bracketFLo = 0 }
+
+          for (let i = 1; i <= RATE_STEPS; i++) {
+            const annual = RATE_LO + ((RATE_HI - RATE_LO) * i) / RATE_STEPS
+            const f = fAnnual(annual)
+            if (f === 0) {
+              bracketLo = annual; bracketHi = annual; bracketFLo = 0
+              prevAnnual = annual; prevF = f
+              continue
+            }
+            // Sign change between prevAnnual and annual: remember this bracket.
+            if ((f > 0) !== (prevF > 0)) {
+              bracketLo = prevAnnual; bracketHi = annual; bracketFLo = prevF
+            }
+            prevAnnual = annual
+            prevF = f
+          }
+
+          if (bracketLo === null)
+            // M3
             throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
+
+          let calculatedRate = (bracketLo + bracketHi) / 2
+          if (bracketLo !== bracketHi) {
+            let lo = bracketLo
+            let hi = bracketHi
+            let fLo = bracketFLo
+            for (let j = 0; j < 100; j++) {
+              const mid = (lo + hi) / 2
+              const fMid = fAnnual(mid)
+              calculatedRate = mid
+              if (Math.abs(fMid) < 1e-7 || hi - lo < 1e-10) break
+              if ((fMid > 0) === (fLo > 0)) { lo = mid; fLo = fMid }
+              else { hi = mid }
+            }
+          }
+
+          // calculatedRate is already the annual rate (the search runs in
+          // annual space directly), so no re-annualization is needed.
           calculatedValue = calculatedRate
           break
         }
