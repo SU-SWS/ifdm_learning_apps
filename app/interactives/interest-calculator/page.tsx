@@ -116,7 +116,6 @@ export default function InterestRateVisual() {
   const [periodsRaw, setPeriodsRaw] = useState("");
   const [periodsError, setPeriodsError] = useState("");
   const [periodsWarning, setPeriodsWarning] = useState("");
-  const [periodsInfo, setPeriodsInfo] = useState("");
 
   // Compounding
   const [compounding, setCompounding] =
@@ -161,8 +160,7 @@ export default function InterestRateVisual() {
     const rate = (parseFloat(debounced.rate) || 0) / 100;
     const periodsPerYear = frequencyMap[debounced.compounding].periods;
     const periodicRate = rate / periodsPerYear;
-    // Round periods to nearest whole number per spec
-    const periods = Math.round(parseFloat(debounced.periods) || 0);
+    const periods = parseFloat(debounced.periods) || 0;
 
     const calculatedTotal = amount * Math.pow(1 + periodicRate, periods);
     const calculatedInterest = calculatedTotal - amount;
@@ -192,7 +190,6 @@ export default function InterestRateVisual() {
     setPeriodsRaw("");
     setPeriodsError("");
     setPeriodsWarning("");
-    setPeriodsInfo("");
     setCompounding("annually");
     setDebounced({
       amount: "",
@@ -285,7 +282,6 @@ export default function InterestRateVisual() {
       setPeriodsRaw("");
       setPeriodsError("");
       setPeriodsWarning("");
-      setPeriodsInfo("");
       return;
     }
     const val = parseFloat(raw);
@@ -293,17 +289,11 @@ export default function InterestRateVisual() {
     if (val < 0 || val > maxPeriods) {
       setPeriodsError(buildPeriodsRangeError(compounding, maxPeriods));
       setPeriodsWarning("");
-      setPeriodsInfo("");
     } else {
       setPeriodsError("");
       setPeriodsWarning(
         val === 0
           ? "0 periods means no time passes. Final amount will equal the initial amount."
-          : "",
-      );
-      setPeriodsInfo(
-        val > 0 && !Number.isInteger(val)
-          ? "Rounded to the nearest whole period for calculation."
           : "",
       );
     }
@@ -513,12 +503,10 @@ export default function InterestRateVisual() {
                       ? "text-[var(--color-inline-error)]"
                       : periodsWarning
                         ? "text-[var(--color-inline-warning)]"
-                        : periodsInfo
-                          ? "text-[var(--foreground)]"
-                          : "sr-only"
+                        : "sr-only"
                   }`}
                 >
-                  {periodsError || periodsWarning || periodsInfo || ""}
+                  {periodsError || periodsWarning || ""}
                 </p>
               </div>
 
@@ -575,13 +563,6 @@ export default function InterestRateVisual() {
                 {resultTooLarge && (
                   <p className="font-bold m-2 text-[var(--color-inline-error)]">
                     Try a lower rate or fewer periods.
-                  </p>
-                )}
-
-                {/* Second helper: borrowing context, shown under the results */}
-                {mode === "borrowing" && !hasError && (
-                  <p className="font-bold m-2 text-[var(--foreground)]">
-                    This shows how the balance grows if left unpaid.
                   </p>
                 )}
 
@@ -644,7 +625,7 @@ export default function InterestRateVisual() {
                 <p className="text-[var(--foreground)] mb-2 text-md">
                   {mode === "saving"
                     ? "You are essentially a lender, and you get interest from those using your money."
-                    : "You are paying interest for the privilege of using someone else's money."}
+                    : "You are paying interest for the privilege of using someone else's money. This shows how the balance grows if left unpaid."}
                 </p>
               </div>
             </div>
