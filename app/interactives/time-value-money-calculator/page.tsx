@@ -53,6 +53,12 @@ const CONSTRAINTS = {
 // Ceiling above which a solved output is "Too large to display"
 const OUTPUT_OVERFLOW_CEILING = 1e15
 
+// Cash-flow signs are valid (M1 handles all-same-sign) but no economically
+// meaningful rate exists: the only mathematical root sits below the -100%
+// display floor, so the scan finds no bracket in the sensible range.
+const MSG_NO_MEANINGFUL_RATE =
+  "No interest rate could be calculated for these inputs. Try adjusting your values, or double-check the cash flow amounts and timing."
+
 interface FieldError {
   field: string
   message: string
@@ -399,8 +405,9 @@ export default function Page() {
           }
 
           if (bracketLo === null)
-            // M3
-            throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
+            // Signs are already known to be mixed, so this is the
+            // "root exists only at a nonsensical rate" case, not a sign problem.
+            throw new Error(MSG_NO_MEANINGFUL_RATE)
 
           let solvedG = (bracketLo + bracketHi) / 2
           if (bracketLo !== bracketHi) {
@@ -459,7 +466,7 @@ export default function Page() {
       // The high side is intentionally uncapped. -100% exactly is allowed: it
       // is the legitimate total-loss result when fv = 0.
       if (solveFor === "RATE" && calculatedValue < -100)
-        throw new Error("No interest rate produces these values. Check that your cash flows include both a negative and a positive amount.")
+        throw new Error(MSG_NO_MEANINGFUL_RATE)
 
       // M5: output overflow ceiling — never render scientific notation
       if (
