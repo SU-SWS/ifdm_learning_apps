@@ -6,7 +6,9 @@ description: >-
   Verify the fix by re-running and comparing against a known-good baseline. Use
   when debugging unexpected behavior, changing financial math or validation
   logic, or before calling any nontrivial change "done" — especially in this
-  repo, which has no automated test suite and relies on manual verification.
+  repo, which has no automated test suite and relies on manual verification. Do
+  NOT use for feature requests, refactors, or style/copy changes with no
+  reported malfunction.
 ---
 
 # Run, Observe, Propose, Verify (ROPV)
@@ -42,6 +44,10 @@ Get the code executing so you can see real behavior, not imagined behavior.
 
 Write down the inputs you used. A repro you can't restate is not a repro.
 
+If you **cannot** reproduce the symptom, say so explicitly and ask the user for
+more detail (browser, console output, screenshot, exact inputs) rather than
+guessing. Do not propose a fix for a bug you haven't seen.
+
 ### 2. Observe
 Record what actually happens, precisely — before forming any theory.
 
@@ -59,7 +65,8 @@ Record what actually happens, precisely — before forming any theory.
 Only now form a fix, and make it the smallest change that the observation
 justifies.
 
-- State the root cause in one sentence, tied to the observed delta.
+- State one specific, falsifiable root-cause hypothesis, tied to the observed
+  delta — something a re-run can prove wrong, not a vague "probably rounding."
 - Prefer a one-line/one-value fix over a rewrite. If the fix is large, your
   diagnosis is probably incomplete — go back to Observe.
 - Predict, out loud, what the corrected output should be *before* you run it.
@@ -77,6 +84,11 @@ Re-run and confirm the prediction. This closes the loop.
 - Re-run `yarn lint` (and `yarn build:local` if you touched more than one file).
 - Report faithfully: state the before/after numbers and the exact inputs. If a
   case still fails or you skipped a check, say so.
+
+### If verification fails
+Do not silently retry a new guess. Stop, report what Verify actually showed, and
+treat that output as **new evidence for another Observe pass**. Each iteration
+ends with a report to the user, not a silent loop.
 
 ## Reporting template
 
