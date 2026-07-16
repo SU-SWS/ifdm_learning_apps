@@ -41,11 +41,14 @@ Note the `-v2` variants (`mortgage-calculator-v2`, `present-value-calculator-v2`
 
 **Shared UI is shadcn/ui.** Reusable primitives live in `app/ui/components/` (button, card, input, select, slider, tabs, etc.), generated via shadcn (`components.json`, "new-york" style, lucide icons). Use `cn()` from `app/lib/utils.ts` (clsx + tailwind-merge) for class composition. Import via the `@/*` alias mapped to the repo root (e.g. `@/app/ui/components/card`).
 
+See `docs/calculator-global-rules.md` for the full calculator conventions (input handling, error/warning states, formatting, math fallbacks).
+
 ## Styling conventions
 
 - **Tailwind v4** with CSS-first theming. The brand palette (Stanford colors: `lagunita`, `berry`, `palo-verde`, `navy`, `error #8C1515`, etc.) is defined as CSS variables in `app/ui/globals.css` under `@theme inline`, plus a few legacy tokens in `tailwind.config.js`. Prefer the named tokens over raw hex/rgba.
 - **Dark mode** is class-based (`darkMode: 'class'`). `app/lib/theme-toggle.tsx` toggles the `dark`/`light` class on `<html>` and persists to `localStorage`; it returns a placeholder until mounted to avoid hydration mismatch. Any color you add needs a dark-mode counterpart.
 - Fonts (Open Sans, Poppins) come from `app/ui/fonts.ts` via `next/font/google`.
+- Inline validation colors use `var(--color-inline-error)` and `var(--color-inline-warning)` (warning resolves to `#9A6207` light / `#C37C09` dark). See `docs/calculator-global-rules.md` sections 4-5.
 
 ## Gotchas
 

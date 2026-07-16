@@ -65,6 +65,8 @@ to sibling calculators or `-v2` variants — QA each file you touched.
       field.
 - [ ] Calc-level errors (e.g. no meaningful rate) show the intended message.
 - [ ] Clearing a bad input clears its error.
+- [ ] Exact token values and rules for each check are in `docs/calculator-global-rules.md`
+(warning hexes `#9A6207` / `#C37C09`, `var(--color-inline-error)`, etc.).
 
 ## 5. Dark mode & styling
 

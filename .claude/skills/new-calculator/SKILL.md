@@ -29,6 +29,8 @@ scaffolding and mirror its structure — do not invent a new shape.
 2. Confirm the inputs, the output(s), and the financial formula(s). If the math
    is nontrivial, derive and cross-check it first — invoke `rigorous-accountant`.
 3. Decide the constraints (min/max per field) and the validation rules.
+4. Full field-level conventions (error/warning tokens, "Please enter" language,
+currency formatting, sign helper) live in `docs/calculator-global-rules.md`.
 
 ## The pattern to follow
 
