@@ -494,7 +494,7 @@ export default function MortgageCalculator() {
           <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
             Total monthly housing cost:
           </div>
-          <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center">
+          <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
             {dash.total ? DASH : formatCurrency(results.totalMonthlyHousingCost || 0)}
           </div>
         </div>
