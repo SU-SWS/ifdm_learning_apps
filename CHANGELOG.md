@@ -9,7 +9,7 @@ Releases are identified by deploy date.
 
 ### [2026-07-15]
 
-- TVM interest-rate tab now reports that no meaningful rate could be calculated, instead of a misleading cash-flow-signs error, when the only root falls below the -100% floor (#___).
+- TVM interest-rate tab now reports that no meaningful rate could be calculated, instead of a misleading cash-flow-signs error, when the only root falls below the -100% floor (#159).
 
 ## [2026-07-10]
 
