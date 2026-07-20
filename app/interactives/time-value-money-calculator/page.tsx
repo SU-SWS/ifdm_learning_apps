@@ -734,7 +734,7 @@ export default function Page() {
               <div className="space-y-2">
                 <h3 className="text-foreground font-bold">Cash Flow Signs</h3>
                 <p>
-                  This calculator uses signs to show the direction of money:
+                  The calculator uses signs to show the direction that money flows:
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 mb-4">
                   <div className="bg-[var(--card-background)] text-foreground gap-4 flex flex-row justify-items-center items-center rounded-md px-3 py-2 max-w-full md:max-w-1/2">
