@@ -9,6 +9,8 @@ import {
   discountFactor,
   formatCurrency,
 } from "../lib/mortgage"
+import { Button } from "@/app/ui/components/button"
+
 
 type Tab = "current" | "refinance"
 
@@ -155,7 +157,7 @@ export function RefinanceCalculator() {
   return (
     <div className="mx-auto w-full max-w-5xl">
       {/* Tabs */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 [&_button]:cursor-pointer">
         <TabButton active={tab === "current"} onClick={() => setTab("current")}>
           Current Balance
         </TabButton>
@@ -207,13 +209,14 @@ export function RefinanceCalculator() {
             <div className="rounded-xl bg-panel p-6">
               <p className="text-sm font-medium text-panel-foreground/70">Estimated current balance</p>
               <p className="mt-1 text-4xl font-bold text-primary">{formatCurrency(currentBalance)}</p>
-              <button
+              <Button
                 type="button"
                 onClick={() => setTab("refinance")}
-                className="mt-5 rounded-md bg-navy px-5 py-3 text-sm font-semibold text-navy-foreground transition-opacity hover:opacity-90"
+                variant="lagunita"
+                className="mt-5 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
               >
                 Continue to refinance analysis
-              </button>
+              </Button>
             </div>
           ) : (
             <ResultPanel
@@ -355,13 +358,14 @@ function CurrentBalanceForm(props: {
       </Field>
 
       <div>
-        <button
+        <Button
           type="button"
           onClick={props.onReset}
-          className="inline-flex items-center gap-2 rounded-md bg-navy px-4 py-2.5 text-sm font-semibold text-navy-foreground transition-opacity hover:opacity-90"
+          variant="lagunita"
+          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
         >
           Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -399,13 +403,14 @@ function RefinanceForm(props: {
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
           <h2 className="text-base font-semibold text-primary">New Loan Terms</h2>
-          <button
+          <Button
             type="button"
             onClick={props.onEditBalance}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            variant="lagunita"
+            className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Edit current loan
-          </button>
+          </Button>
         </div>
 
         <Field label="New loan amount">
@@ -437,29 +442,32 @@ function RefinanceForm(props: {
       <div className="flex flex-wrap gap-3">
         {props.analyzed ? (
           <>
-            <button
+            <Button
               type="button"
               onClick={props.onAnalyze}
-              className="rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              variant="lagunita"
+              className="mt-5 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
             >
               Recalculate
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={props.onReset}
-              className="inline-flex items-center gap-2 rounded-md bg-navy px-5 py-3 text-sm font-semibold text-navy-foreground transition-opacity hover:opacity-90"
+              variant="lagunita"
+              className="mt-5 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
             >
               Reset new loan terms <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            </button>
+            </Button>
           </>
         ) : (
-          <button
+          <Button
             type="button"
             onClick={props.onAnalyze}
-            className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            variant="lagunita"
+            className="mt-5 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
           >
             Refinance analysis
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -502,7 +510,7 @@ function ResultPanel({
   //  - negative  → refinancing does not come out ahead (red / destructive)
   const verdict: "positive" | "negative" = worthIt ? "positive" : "negative"
   const headline = worthIt ? "Refinancing may be worth it" : "Refinancing may not be worth it"
-  const verdictColor = verdict === "positive" ? "text-primary" : "text-destructive"
+  const verdictColor = verdict === "positive" ? "text-primary" : "text-[var(--color-inline-error)]"
 
   return (
     <div className="rounded-xl bg-panel p-6">
@@ -624,7 +632,7 @@ function LoanComparison({ current, next }: { current: LoanTerms; next: LoanTerms
           <div className="px-4 py-3 text-right tabular-nums">
             <div className="text-sm font-bold text-foreground">{row.nxt}</div>
             {row.delta ? (
-              <div className={["text-xs font-medium", row.deltaGood ? "text-primary" : "text-destructive"].join(" ")}>
+              <div className={["text-xs font-medium", row.deltaGood ? "text-primary" : "text-[var(--color-inline-error)]"].join(" ")}>
                 {row.delta}
               </div>
             ) : null}
@@ -700,7 +708,7 @@ function CalculationBreakdown({
               <div key={row.label} className="flex items-center justify-between py-1.5 text-sm">
                 <span className="text-muted-foreground">{row.label}</span>
                 <span
-                  className={["tabular-nums font-medium", row.value < 0 ? "text-destructive" : "text-foreground"].join(
+                  className={["tabular-nums font-medium", row.value < 0 ? "text-[var(--color-inline-error)]" : "text-foreground"].join(
                     " ",
                   )}
                 >
@@ -711,7 +719,7 @@ function CalculationBreakdown({
             <div className="mt-1 flex items-center justify-between border-t border-border pt-2.5 text-sm">
               <span className="font-semibold text-foreground">Net value today</span>
               <span
-                className={["tabular-nums text-base font-bold", net < 0 ? "text-destructive" : "text-primary"].join(" ")}
+                className={["tabular-nums text-base font-bold", net < 0 ? "text-[var(--color-inline-error)]" : "text-primary"].join(" ")}
               >
                 {net < 0 ? `−${formatCurrency(Math.abs(net))}` : formatCurrency(net)}
               </span>
