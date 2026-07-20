@@ -5,7 +5,8 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
-## [Unreleased]
+## [2026-07-20]
+- TVM text change.
 
 ### [2026-07-15]
 
