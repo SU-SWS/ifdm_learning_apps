@@ -1,6 +1,8 @@
+"use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import { RefinanceCalculator } from "./components/refinance-calculator";
-import "./theme.css";
+import "@/app/ui/theme.css";
 
 // Same fonts the original standalone app used, so typography is unchanged.
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
