@@ -99,6 +99,11 @@ export default function MortgageCalculator() {
 
   const [results, setResults] = useState<Results>(EMPTY_RESULTS);
 
+  // Reset HOA when switching tabs
+  useEffect(() => {
+    setHoaDues('');
+  }, [mode]);
+
   const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
   const clampNonNegativeNumber = (value: number) => Math.max(0, Number(value) || 0);
 
@@ -357,8 +362,6 @@ export default function MortgageCalculator() {
     }).format(value);
   };
 
-  const fixFieldsString = "Please fix the highlighted fields to see your estimate.";
-  const limitString = "That payment is too high to calculate. Try a lower amount to see your estimate.";
   const DASH = "-";
 
   // Per-line dash flags: a result line shows "—" when any input it depends on
@@ -372,7 +375,7 @@ export default function MortgageCalculator() {
     monthlyMortgage: v.paymentBad,
     monthlyTax: v.affordPriceBlock || limitReached || v.taxBad,
     monthlyInsurance: v.affordPriceBlock || limitReached || v.insBad,
-    hoa: v.hoaBad,
+    hoa: v.hoaBad || hoaDues === "",
     total: false,
   };
   // Total dashes iff any component (mortgage + tax + insurance + HOA) is dashed.
@@ -384,14 +387,11 @@ export default function MortgageCalculator() {
     loanAmount: v.priceBad || v.dpBad,
     monthlyTax: v.priceBad || v.taxBad,
     monthlyInsurance: v.priceBad || v.insBad,
-    hoa: v.hoaBad,
+    hoa: v.hoaBad || hoaDues === "",
     total: false,
   };
   paymentDash.total = paymentDash.monthlyMortgage || paymentDash.monthlyTax || paymentDash.monthlyInsurance || paymentDash.hoa;
 
-  // Error message shown above the card (the card itself always stays visible).
-  const affordError = mode === 'afford' && (v.affordWrongValue || limitReached);
-  const paymentError = mode === 'payment' && v.paymentWrongValue;
 
   const handleReset = () => {
     setMonthlyPayment('');
@@ -420,15 +420,6 @@ export default function MortgageCalculator() {
     setResults(EMPTY_RESULTS);
   };
 
-  // Error banner shown ABOVE the results card (the card itself stays visible).
-  const CoralCard = ({ message }: { message: string }) => (
-    <div
-      role="alert"
-      className="mb-4 text-center text-[var(--color-inline-error)]"
-    >
-      <p className="text-lg font-semibold">{message}</p>
-    </div>
-  );
 
   type LineDash = {
     downPayment: boolean; loanAmount: boolean; monthlyMortgage: boolean;
@@ -808,7 +799,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => {
                               const raw = e.target.value;
                               setPropertyTaxPercentInput(raw);
-                              setPropertyTaxPercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                              setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                             }}
                             aria-label="Property tax percentage"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
@@ -899,7 +890,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => {
                               const raw = e.target.value;
                               setHomeInsurancePercentInput(raw);
-                              setHomeInsurancePercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                              setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                             }}
                             aria-label="Home insurance percentage"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
@@ -959,9 +950,6 @@ export default function MortgageCalculator() {
 
                 {/* Right Column - Results */}
                 <div className="pl-0">
-                  {affordError && (
-                    <CoralCard message={limitReached ? limitString : fixFieldsString} />
-                  )}
                   <Card aria-live="polite" aria-atomic="true" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-md font-bold">Estimated home price</CardTitle>
@@ -1248,7 +1236,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 setPropertyTaxPercentInput(raw);
-                                setPropertyTaxPercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                                setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                               }}
                               aria-label="Property tax percentage"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
@@ -1339,7 +1327,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 setHomeInsurancePercentInput(raw);
-                                setHomeInsurancePercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                                setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                               }}
                               aria-label="Home insurance percentage"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
@@ -1400,9 +1388,6 @@ export default function MortgageCalculator() {
 
                 {/* Right Column - Results */}
                 <div className="pl-0">
-                  {paymentError && (
-                    <CoralCard message={fixFieldsString} />
-                  )}
                   <Card aria-live="polite" aria-atomic="true" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-md font-bold">Estimated monthly mortgage payment</CardTitle>
