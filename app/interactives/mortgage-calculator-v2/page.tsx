@@ -762,8 +762,8 @@ export default function MortgageCalculator() {
                                     setPropertyTaxPercent(pct);
                                     setPropertyTaxPercentInput(String(pct));
                                   } else {
-                                    setPropertyTaxPercent(0);
-                                    setPropertyTaxPercentInput("0");
+                                    setPropertyTaxPercent(1.25);
+                                    setPropertyTaxPercentInput("1.25");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -933,10 +933,10 @@ export default function MortgageCalculator() {
                           id="hoa-dues-afford"
                           type="text"
                           inputMode="numeric"
-                          value={hoaDues ? Number(hoaDues).toLocaleString("en-US") : ""}
+                          value={hoaDues && !isNaN(Number(hoaDues)) ? Number(hoaDues).toLocaleString("en-US") : hoaDues}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/,/g, "");
-                            if (raw === "" || /^\d*$/.test(raw)) setHoaDues(raw);
+                            if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
                           aria-describedby={v.hoaMsg ? "hoa-dues-afford-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
@@ -1199,8 +1199,8 @@ export default function MortgageCalculator() {
                                     setPropertyTaxPercent(pct);
                                     setPropertyTaxPercentInput(String(pct));
                                   } else {
-                                    setPropertyTaxPercent(0);
-                                    setPropertyTaxPercentInput("0");
+                                    setPropertyTaxPercent(1.25);
+                                    setPropertyTaxPercentInput("1.25");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -1371,10 +1371,10 @@ export default function MortgageCalculator() {
                           id="hoa-dues-payment"
                           type="text"
                           inputMode="numeric"
-                          value={hoaDues ? Number(hoaDues).toLocaleString("en-US") : ""}
+                          value={hoaDues && !isNaN(Number(hoaDues)) ? Number(hoaDues).toLocaleString("en-US") : hoaDues}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/,/g, "");
-                            if (raw === "" || /^\d*$/.test(raw)) setHoaDues(raw);
+                            if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
                           aria-describedby={v.hoaMsg ? "hoa-dues-payment-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
