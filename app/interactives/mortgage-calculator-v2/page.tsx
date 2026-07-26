@@ -293,18 +293,22 @@ export default function MortgageCalculator() {
         ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
 
-      const totalMonthly = paymentAmount + monthlyTax + monthlyInsurance + hoaDuesNum;
+      const roundedMortgage = Math.round(paymentAmount);
+      const roundedTax = Math.round(monthlyTax);
+      const roundedInsurance = Math.round(monthlyInsurance);
+      const roundedHOA = Math.round(hoaDuesNum);
+      const totalMonthlyHousingCost = roundedMortgage + roundedTax + roundedInsurance + roundedHOA;
 
       setResults({
         homePrice: Math.round(computedHomePrice),
         downPayment: Math.round(downPayment),
         loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(paymentAmount),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(totalMonthly),
-        hoaDues: Math.round(hoaDuesNum),
-        totalMonthlyHousingCost: Math.round(totalMonthly),
+        monthlyMortgage: roundedMortgage,
+        monthlyTax: roundedTax,
+        monthlyInsurance: roundedInsurance,
+        totalMonthly: totalMonthlyHousingCost,
+        hoaDues: roundedHOA,
+        totalMonthlyHousingCost: totalMonthlyHousingCost,
       });
     } else {
       setLimitReached(false);
@@ -327,18 +331,22 @@ export default function MortgageCalculator() {
         ? (homePriceAmount * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
 
-      const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDuesNum;
+      const roundedMortgage = Math.round(monthlyMortgage);
+      const roundedTax = Math.round(monthlyTax);
+      const roundedInsurance = Math.round(monthlyInsurance);
+      const roundedHOA = Math.round(hoaDuesNum);
+      const totalMonthlyHousingCost = roundedMortgage + roundedTax + roundedInsurance + roundedHOA;
 
       setResults({
         homePrice: Math.round(homePriceAmount),
         downPayment: Math.round(downPayment),
         loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(monthlyMortgage),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(totalMonthly),
-        hoaDues: Math.round(hoaDuesNum),
-        totalMonthlyHousingCost: Math.round(totalMonthly),
+        monthlyMortgage: roundedMortgage,
+        monthlyTax: roundedTax,
+        monthlyInsurance: roundedInsurance,
+        totalMonthly: totalMonthlyHousingCost,
+        hoaDues: roundedHOA,
+        totalMonthlyHousingCost: totalMonthlyHousingCost,
       });
     }
   }, [
@@ -369,25 +377,25 @@ export default function MortgageCalculator() {
   // transitive — e.g. property taxes depend on the (computed) home price, which
   // in afford mode depends on payment/rate/down-payment.
   const affordDash = {
-    homePrice: v.affordPriceBlock || limitReached,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordPriceBlock || limitReached),
-    loanAmount: v.paymentBad || v.rateBad,
-    monthlyMortgage: v.paymentBad,
-    monthlyTax: v.affordPriceBlock || limitReached || v.taxBad,
-    monthlyInsurance: v.affordPriceBlock || limitReached || v.insBad,
-    hoa: v.hoaBad || hoaDues === "",
+    homePrice: v.affordBlocking || limitReached,
+    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordBlocking || limitReached),
+    loanAmount: v.affordBlocking || v.paymentBad || v.rateBad,
+    monthlyMortgage: v.affordBlocking || v.paymentBad,
+    monthlyTax: v.affordBlocking || limitReached || v.taxBad,
+    monthlyInsurance: v.affordBlocking || limitReached || v.insBad,
+    hoa: v.affordBlocking || v.hoaBad || hoaDues === "",
     total: false,
   };
   // Total dashes iff any component (mortgage + tax + insurance + HOA) is dashed.
   affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance || affordDash.hoa;
 
   const paymentDash = {
-    monthlyMortgage: v.priceBad || v.rateBad || v.dpBad,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.priceBad || v.dpBad),
-    loanAmount: v.priceBad || v.dpBad,
-    monthlyTax: v.priceBad || v.taxBad,
-    monthlyInsurance: v.priceBad || v.insBad,
-    hoa: v.hoaBad || hoaDues === "",
+    monthlyMortgage: v.paymentBlocking || v.priceBad || v.rateBad || v.dpBad,
+    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.paymentBlocking || v.priceBad || v.dpBad),
+    loanAmount: v.paymentBlocking || v.priceBad || v.dpBad,
+    monthlyTax: v.paymentBlocking || v.priceBad || v.taxBad,
+    monthlyInsurance: v.paymentBlocking || v.priceBad || v.insBad,
+    hoa: v.paymentBlocking || v.hoaBad || hoaDues === "",
     total: false,
   };
   paymentDash.total = paymentDash.monthlyMortgage || paymentDash.monthlyTax || paymentDash.monthlyInsurance || paymentDash.hoa;
