@@ -946,6 +946,8 @@ export default function MortgageCalculator() {
                             const raw = e.target.value.replace(/,/g, "");
                             if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
+                          onFocus={() => setFocusedField("hoaDues")}
+                          onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-afford-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
                           className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -1384,6 +1386,8 @@ export default function MortgageCalculator() {
                             const raw = e.target.value.replace(/,/g, "");
                             if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
+                          onFocus={() => setFocusedField("hoaDues")}
+                          onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-payment-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
                           className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
