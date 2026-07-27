@@ -99,6 +99,11 @@ export default function MortgageCalculator() {
 
   const [results, setResults] = useState<Results>(EMPTY_RESULTS);
 
+  // Reset HOA when switching tabs
+  useEffect(() => {
+    setHoaDues('');
+  }, [mode]);
+
   const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
   const clampNonNegativeNumber = (value: number) => Math.max(0, Number(value) || 0);
 
@@ -288,18 +293,22 @@ export default function MortgageCalculator() {
         ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
 
-      const totalMonthly = paymentAmount + monthlyTax + monthlyInsurance + hoaDuesNum;
+      const roundedMortgage = Math.round(paymentAmount);
+      const roundedTax = Math.round(monthlyTax);
+      const roundedInsurance = Math.round(monthlyInsurance);
+      const roundedHOA = Math.round(hoaDuesNum);
+      const totalMonthlyHousingCost = roundedMortgage + roundedTax + roundedInsurance + roundedHOA;
 
       setResults({
         homePrice: Math.round(computedHomePrice),
         downPayment: Math.round(downPayment),
         loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(paymentAmount),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(totalMonthly),
-        hoaDues: Math.round(hoaDuesNum),
-        totalMonthlyHousingCost: Math.round(totalMonthly),
+        monthlyMortgage: roundedMortgage,
+        monthlyTax: roundedTax,
+        monthlyInsurance: roundedInsurance,
+        totalMonthly: totalMonthlyHousingCost,
+        hoaDues: roundedHOA,
+        totalMonthlyHousingCost: totalMonthlyHousingCost,
       });
     } else {
       setLimitReached(false);
@@ -322,18 +331,22 @@ export default function MortgageCalculator() {
         ? (homePriceAmount * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
 
-      const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDuesNum;
+      const roundedMortgage = Math.round(monthlyMortgage);
+      const roundedTax = Math.round(monthlyTax);
+      const roundedInsurance = Math.round(monthlyInsurance);
+      const roundedHOA = Math.round(hoaDuesNum);
+      const totalMonthlyHousingCost = roundedMortgage + roundedTax + roundedInsurance + roundedHOA;
 
       setResults({
         homePrice: Math.round(homePriceAmount),
         downPayment: Math.round(downPayment),
         loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(monthlyMortgage),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(totalMonthly),
-        hoaDues: Math.round(hoaDuesNum),
-        totalMonthlyHousingCost: Math.round(totalMonthly),
+        monthlyMortgage: roundedMortgage,
+        monthlyTax: roundedTax,
+        monthlyInsurance: roundedInsurance,
+        totalMonthly: totalMonthlyHousingCost,
+        hoaDues: roundedHOA,
+        totalMonthlyHousingCost: totalMonthlyHousingCost,
       });
     }
   }, [
@@ -357,8 +370,6 @@ export default function MortgageCalculator() {
     }).format(value);
   };
 
-  const fixFieldsString = "Please fix the highlighted fields to see your estimate.";
-  const limitString = "That payment is too high to calculate. Try a lower amount to see your estimate.";
   const DASH = "-";
 
   // Per-line dash flags: a result line shows "—" when any input it depends on
@@ -366,32 +377,29 @@ export default function MortgageCalculator() {
   // transitive — e.g. property taxes depend on the (computed) home price, which
   // in afford mode depends on payment/rate/down-payment.
   const affordDash = {
-    homePrice: v.affordPriceBlock || limitReached,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordPriceBlock || limitReached),
-    loanAmount: v.paymentBad || v.rateBad,
-    monthlyMortgage: v.paymentBad,
-    monthlyTax: v.affordPriceBlock || limitReached || v.taxBad,
-    monthlyInsurance: v.affordPriceBlock || limitReached || v.insBad,
-    hoa: v.hoaBad,
+    homePrice: v.affordBlocking || limitReached,
+    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordBlocking || limitReached),
+    loanAmount: v.affordBlocking || v.paymentBad || v.rateBad,
+    monthlyMortgage: v.affordBlocking || v.paymentBad,
+    monthlyTax: v.affordBlocking || limitReached || v.taxBad,
+    monthlyInsurance: v.affordBlocking || limitReached || v.insBad,
+    hoa: v.affordBlocking || v.hoaBad || hoaDues === "",
     total: false,
   };
   // Total dashes iff any component (mortgage + tax + insurance + HOA) is dashed.
   affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance || affordDash.hoa;
 
   const paymentDash = {
-    monthlyMortgage: v.priceBad || v.rateBad || v.dpBad,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.priceBad || v.dpBad),
-    loanAmount: v.priceBad || v.dpBad,
-    monthlyTax: v.priceBad || v.taxBad,
-    monthlyInsurance: v.priceBad || v.insBad,
-    hoa: v.hoaBad,
+    monthlyMortgage: v.paymentBlocking || v.priceBad || v.rateBad || v.dpBad,
+    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.paymentBlocking || v.priceBad || v.dpBad),
+    loanAmount: v.paymentBlocking || v.priceBad || v.dpBad,
+    monthlyTax: v.paymentBlocking || v.priceBad || v.taxBad,
+    monthlyInsurance: v.paymentBlocking || v.priceBad || v.insBad,
+    hoa: v.paymentBlocking || v.hoaBad || hoaDues === "",
     total: false,
   };
   paymentDash.total = paymentDash.monthlyMortgage || paymentDash.monthlyTax || paymentDash.monthlyInsurance || paymentDash.hoa;
 
-  // Error message shown above the card (the card itself always stays visible).
-  const affordError = mode === 'afford' && (v.affordWrongValue || limitReached);
-  const paymentError = mode === 'payment' && v.paymentWrongValue;
 
   const handleReset = () => {
     setMonthlyPayment('');
@@ -420,15 +428,6 @@ export default function MortgageCalculator() {
     setResults(EMPTY_RESULTS);
   };
 
-  // Error banner shown ABOVE the results card (the card itself stays visible).
-  const CoralCard = ({ message }: { message: string }) => (
-    <div
-      role="alert"
-      className="mb-4 text-center text-[var(--color-inline-error)]"
-    >
-      <p className="text-lg font-semibold">{message}</p>
-    </div>
-  );
 
   type LineDash = {
     downPayment: boolean; loanAmount: boolean; monthlyMortgage: boolean;
@@ -771,8 +770,8 @@ export default function MortgageCalculator() {
                                     setPropertyTaxPercent(pct);
                                     setPropertyTaxPercentInput(String(pct));
                                   } else {
-                                    setPropertyTaxPercent(0);
-                                    setPropertyTaxPercentInput("0");
+                                    setPropertyTaxPercent(1.25);
+                                    setPropertyTaxPercentInput("1.25");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -808,7 +807,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => {
                               const raw = e.target.value;
                               setPropertyTaxPercentInput(raw);
-                              setPropertyTaxPercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                              setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                             }}
                             aria-label="Property tax percentage"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
@@ -899,7 +898,7 @@ export default function MortgageCalculator() {
                             onChange={(e) => {
                               const raw = e.target.value;
                               setHomeInsurancePercentInput(raw);
-                              setHomeInsurancePercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                              setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                             }}
                             aria-label="Home insurance percentage"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
@@ -942,11 +941,13 @@ export default function MortgageCalculator() {
                           id="hoa-dues-afford"
                           type="text"
                           inputMode="numeric"
-                          value={hoaDues ? Number(hoaDues).toLocaleString("en-US") : ""}
+                          value={hoaDues && !isNaN(Number(hoaDues)) ? Number(hoaDues).toLocaleString("en-US") : hoaDues}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/,/g, "");
-                            if (raw === "" || /^\d*$/.test(raw)) setHoaDues(raw);
+                            if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
+                          onFocus={() => setFocusedField("hoaDues")}
+                          onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-afford-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
                           className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -959,9 +960,6 @@ export default function MortgageCalculator() {
 
                 {/* Right Column - Results */}
                 <div className="pl-0">
-                  {affordError && (
-                    <CoralCard message={limitReached ? limitString : fixFieldsString} />
-                  )}
                   <Card aria-live="polite" aria-atomic="true" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-md font-bold">Estimated home price</CardTitle>
@@ -1211,8 +1209,8 @@ export default function MortgageCalculator() {
                                     setPropertyTaxPercent(pct);
                                     setPropertyTaxPercentInput(String(pct));
                                   } else {
-                                    setPropertyTaxPercent(0);
-                                    setPropertyTaxPercentInput("0");
+                                    setPropertyTaxPercent(1.25);
+                                    setPropertyTaxPercentInput("1.25");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -1248,7 +1246,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 setPropertyTaxPercentInput(raw);
-                                setPropertyTaxPercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                                setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                               }}
                               aria-label="Property tax percentage"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
@@ -1339,7 +1337,7 @@ export default function MortgageCalculator() {
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 setHomeInsurancePercentInput(raw);
-                                setHomeInsurancePercent(clampNonNegativeNumber(raw === "" ? 0 : Number(raw)));
+                                setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                               }}
                               aria-label="Home insurance percentage"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
@@ -1383,11 +1381,13 @@ export default function MortgageCalculator() {
                           id="hoa-dues-payment"
                           type="text"
                           inputMode="numeric"
-                          value={hoaDues ? Number(hoaDues).toLocaleString("en-US") : ""}
+                          value={hoaDues && !isNaN(Number(hoaDues)) ? Number(hoaDues).toLocaleString("en-US") : hoaDues}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/,/g, "");
-                            if (raw === "" || /^\d*$/.test(raw)) setHoaDues(raw);
+                            if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
+                          onFocus={() => setFocusedField("hoaDues")}
+                          onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-payment-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
                           className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -1400,9 +1400,6 @@ export default function MortgageCalculator() {
 
                 {/* Right Column - Results */}
                 <div className="pl-0">
-                  {paymentError && (
-                    <CoralCard message={fixFieldsString} />
-                  )}
                   <Card aria-live="polite" aria-atomic="true" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-md font-bold">Estimated monthly mortgage payment</CardTitle>
