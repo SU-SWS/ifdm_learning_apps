@@ -165,7 +165,12 @@ export default function MortgageCalculator() {
     if (propertyTaxMode === 'percentage') {
       taxBad = propertyTaxPercent < 0 || propertyTaxPercent > TAX_RATE_MAX;
       if (taxBad) taxMsg = "Enter a property tax rate between 0% and 10%. Rates beyond this are unusual.";
-    } else if (activePrice > 0 && propertyTaxAmount > RELATIVE_CAP * activePrice) {
+    } else if (
+      activePrice > 0 &&
+      propertyTaxAmount > RELATIVE_CAP * activePrice &&
+      focusedField !== "monthlyPayment" &&
+      focusedField !== "homePrice"
+    ) {
       taxBad = true;
       taxMsg = "Enter a property tax amount between 0% and 10% of the home price. Amounts beyond this are unusual.";
     }
@@ -176,7 +181,12 @@ export default function MortgageCalculator() {
     if (homeInsuranceMode === 'percentage') {
       insBad = homeInsurancePercent < 0 || homeInsurancePercent > INS_RATE_MAX;
       if (insBad) insMsg = "Enter a homeowners insurance rate between 0% and 10%. Rates beyond this are unusual.";
-    } else if (activePrice > 0 && homeInsuranceAmount > RELATIVE_CAP * activePrice) {
+    } else if (
+      activePrice > 0 &&
+      homeInsuranceAmount > RELATIVE_CAP * activePrice &&
+      focusedField !== "monthlyPayment" &&
+      focusedField !== "homePrice"
+    ) {
       insBad = true;
       insMsg = "Enter a homeowners insurance amount between 0% and 10% of the home price. Amounts beyond this are unusual.";
     }
@@ -205,17 +215,12 @@ export default function MortgageCalculator() {
     const affordWrongValue = paymentRangeBad || rateRangeBad || dpBad || taxBad || insBad || hoaBad;
     const paymentWrongValue = priceRangeBad || rateRangeBad || dpBad || taxBad || insBad || hoaBad;
 
-    // Defer errors until the user leaves the field: blank the focused field's
-    // message so it never shows while that field is being edited. (Blocking
-    // flags above are unaffected — an empty/invalid field still suppresses the
-    // result; only the *visible message* waits for blur.)
-    if (focusedField === "monthlyPayment") paymentMsg = "";
-    if (focusedField === "homePrice") priceMsg = "";
-    if (focusedField === "interestRate") rateMsg = "";
-    if (focusedField === "downPayment") dpMsg = "";
-    if (focusedField === "propertyTax") taxMsg = "";
-    if (focusedField === "homeInsurance") insMsg = "";
-    if (focusedField === "hoaDues") hoaMsg = "";
+    // Hide "please enter" messages while focused (avoid premature empty-field errors).
+    // But keep validation/range errors visible so users know why results stopped calculating.
+    if (focusedField === "monthlyPayment" && paymentEmpty) paymentMsg = "";
+    if (focusedField === "homePrice" && priceEmpty) priceMsg = "";
+    if (focusedField === "interestRate" && rateEmpty) rateMsg = "";
+    if (focusedField === "hoaDues" && hoaDues === "") hoaMsg = "";
 
     return {
       rateMsg, paymentMsg, priceMsg, dpMsg, taxMsg, insMsg, hoaMsg,
@@ -383,11 +388,11 @@ export default function MortgageCalculator() {
     monthlyMortgage: v.affordBlocking || v.paymentBad,
     monthlyTax: v.affordBlocking || limitReached || v.taxBad,
     monthlyInsurance: v.affordBlocking || limitReached || v.insBad,
-    hoa: v.affordBlocking || v.hoaBad || hoaDues === "",
+    hoa: v.affordBlocking || (v.hoaBad && hoaDues !== ""),
     total: false,
   };
-  // Total dashes iff any component (mortgage + tax + insurance + HOA) is dashed.
-  affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance || affordDash.hoa;
+  // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
+  affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance;
 
   const paymentDash = {
     monthlyMortgage: v.paymentBlocking || v.priceBad || v.rateBad || v.dpBad,
@@ -395,10 +400,11 @@ export default function MortgageCalculator() {
     loanAmount: v.paymentBlocking || v.priceBad || v.dpBad,
     monthlyTax: v.paymentBlocking || v.priceBad || v.taxBad,
     monthlyInsurance: v.paymentBlocking || v.priceBad || v.insBad,
-    hoa: v.paymentBlocking || v.hoaBad || hoaDues === "",
+    hoa: v.paymentBlocking || (v.hoaBad && hoaDues !== ""),
     total: false,
   };
-  paymentDash.total = paymentDash.monthlyMortgage || paymentDash.monthlyTax || paymentDash.monthlyInsurance || paymentDash.hoa;
+  // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
+  paymentDash.total = paymentDash.monthlyMortgage || paymentDash.monthlyTax || paymentDash.monthlyInsurance;
 
 
   const handleReset = () => {
