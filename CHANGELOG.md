@@ -5,12 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [2026-08-04]
+- Added a new Mortgage Refinancing Calculator (v3) at /interactives/mortgage-refinancing-calculator-v3/, a ported version of a standalone v0/shadcn prototype, with its own scoped color theme for light, dark, and system-preference modes. This is a new route alongside the existing v2 refinancing calculator; the diff does not show v2 being removed or deprecated (#166).
+- Extended the shared design tokens in app/ui/globals.css (navy-foreground, panel, panel-foreground) and added app/ui/theme.css to support the v3 calculator's palette without changing any other calculator's appearance (#166).
+- Mortgage Calculator (v2): 0% interest rate is now accepted as a valid input, with the payment calculation special-cased to avoid a divide-by-zero (#166).
+- Mortgage Calculator (v2): fixed the "how much home can I afford" estimate returning an unbounded or nonsensical value as the down payment percentage approached 100%; it now shows a "too high to calculate" message instead (#19).
+- Mortgage Calculator (v2): property tax and homeowners insurance inputs now stay in sync when switching between percentage and dollar-amount entry, instead of losing the previous value (#166).
+- Mortgage Calculator (v2): "Please enter…" validation messages now wait until a field has been visited and left before showing; out-of-range errors continue to show immediately (#166).
+- Added CLAUDE.md and four Claude Code skill files (calculator-qa, new-calculator, rigorous-mathematician, run-observe-propose-verify) documenting repo conventions, the manual QA checklist, and the math-verification process for calculator work. Internal engineering process only; no product-facing change (#166).
+- Corrected a placeholder issue reference in the [2026-07-15] changelog entry (#159).
+
 ## [2026-07-20]
 - TVM text change.
 
 ### [2026-07-15]
 
-- TVM interest-rate tab now reports that no meaningful rate could be calculated, instead of a misleading cash-flow-signs error, when the only root falls below the -100% floor (#___).
+- TVM interest-rate tab now reports that no meaningful rate could be calculated, instead of a misleading cash-flow-signs error, when the only root falls below the -100% floor (#159).
 
 ## [2026-07-10]
 

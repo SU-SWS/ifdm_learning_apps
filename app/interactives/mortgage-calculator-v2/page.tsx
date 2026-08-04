@@ -74,8 +74,20 @@ export default function MortgageCalculator() {
   const [propertyTaxAmount, setPropertyTaxAmount] = useState(0);
   const [homeInsuranceMode, setHomeInsuranceMode] = useState<Toggle>('percentage');
   const [homeInsuranceAmount, setHomeInsuranceAmount] = useState(0);
+  // Raw text backing the tax/insurance inputs. A number alone can't tell "0"
+  // from "" (empty), so typing 0 couldn't display and the field couldn't be
+  // cleared. The *Input strings are the display source of truth; the numbers
+  // above stay the calc source of truth (kept in sync in the handlers below).
+  const [propertyTaxPercentInput, setPropertyTaxPercentInput] = useState("1.25");
+  const [propertyTaxAmountInput, setPropertyTaxAmountInput] = useState("");
+  const [homeInsurancePercentInput, setHomeInsurancePercentInput] = useState("0.35");
+  const [homeInsuranceAmountInput, setHomeInsuranceAmountInput] = useState("");
   const [calculatedHomePrice, setCalculatedHomePrice] = useState(0);
   const [limitReached, setLimitReached] = useState(false);
+  // The field the user is currently editing. Its error is suppressed while
+  // focused so it doesn't pop up mid-edit (e.g. while backspacing to clear);
+  // the error reappears on blur if the value is still invalid.
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Required-field "please enter…" messages only surface after the field is
   // touched-then-left, per Rachel's note. Range errors surface immediately.
@@ -86,6 +98,11 @@ export default function MortgageCalculator() {
   });
 
   const [results, setResults] = useState<Results>(EMPTY_RESULTS);
+
+  // Reset HOA when switching tabs
+  useEffect(() => {
+    setHoaDues('');
+  }, [mode]);
 
   const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
   const clampNonNegativeNumber = (value: number) => Math.max(0, Number(value) || 0);
@@ -105,7 +122,7 @@ export default function MortgageCalculator() {
     const rateRangeBad = !rateEmpty && (rateNum < RATE_MIN || rateNum > RATE_MAX);
     let rateMsg = "";
     if (rateEmpty && touched.interestRate) rateMsg = "Please enter an interest rate.";
-    else if (rateRangeBad) rateMsg = "Please enter an interest rate between 0 and 20%.";
+    else if (rateRangeBad) rateMsg = "Please enter an interest rate between 0% and 20%.";
 
     // Monthly payment (Tab 1) — 1–1,000,000 inclusive, 0 below min
     const paymentEmpty = monthlyPayment === "";
@@ -126,7 +143,7 @@ export default function MortgageCalculator() {
     let dpBad = false;
     if (downPaymentMode === 'percentage') {
       dpBad = downPaymentPercent < DP_PERCENT_MIN || downPaymentPercent > DP_PERCENT_MAX;
-      if (dpBad) dpMsg = "Enter a percentage between 0 - 99.9%.";
+      if (dpBad) dpMsg = "Enter a percentage between 0% - 99.9%.";
     } else if (mode === 'afford') {
       // Tab 1: absolute ceiling (no home-price input to clamp against)
       dpBad = downPaymentAmount < 0 || downPaymentAmount > DP_DOLLAR_MAX_AFFORD;
@@ -147,10 +164,15 @@ export default function MortgageCalculator() {
     let taxBad = false;
     if (propertyTaxMode === 'percentage') {
       taxBad = propertyTaxPercent < 0 || propertyTaxPercent > TAX_RATE_MAX;
-      if (taxBad) taxMsg = "Enter a property tax rate between 0 and 10%. Rates beyond this are unusual.";
-    } else if (activePrice > 0 && propertyTaxAmount > RELATIVE_CAP * activePrice) {
+      if (taxBad) taxMsg = "Enter a property tax rate between 0% and 10%. Rates beyond this are unusual.";
+    } else if (
+      activePrice > 0 &&
+      propertyTaxAmount > RELATIVE_CAP * activePrice &&
+      focusedField !== "monthlyPayment" &&
+      focusedField !== "homePrice"
+    ) {
       taxBad = true;
-      taxMsg = "Enter a property tax amount between 0 and 10% of the home price. Amounts beyond this are unusual.";
+      taxMsg = "Enter a property tax amount between 0% and 10% of the home price. Amounts beyond this are unusual.";
     }
 
     // Homeowners insurance
@@ -158,20 +180,32 @@ export default function MortgageCalculator() {
     let insBad = false;
     if (homeInsuranceMode === 'percentage') {
       insBad = homeInsurancePercent < 0 || homeInsurancePercent > INS_RATE_MAX;
-      if (insBad) insMsg = "Enter a homeowners insurance rate between 0 and 10%. Rates beyond this are unusual.";
-    } else if (activePrice > 0 && homeInsuranceAmount > RELATIVE_CAP * activePrice) {
+      if (insBad) insMsg = "Enter a homeowners insurance rate between 0% and 10%. Rates beyond this are unusual.";
+    } else if (
+      activePrice > 0 &&
+      homeInsuranceAmount > RELATIVE_CAP * activePrice &&
+      focusedField !== "monthlyPayment" &&
+      focusedField !== "homePrice"
+    ) {
       insBad = true;
-      insMsg = "Enter a homeowners insurance amount between 0 and 10% of the home price. Amounts beyond this are unusual.";
+      insMsg = "Enter a homeowners insurance amount between 0% and 10% of the home price. Amounts beyond this are unusual.";
     }
 
     // HOA dues — 0–20,000 inclusive
     const hoaBad = hoaDues !== "" && (hoaNum < HOA_MIN || hoaNum > HOA_MAX);
-    const hoaMsg = hoaBad ? "Enter an amount between $0 and $20,000." : "";
+    let hoaMsg = hoaBad ? "Enter an amount between $0 and $20,000." : "";
 
     // Blocking = anything that must stop the calc (includes empties)
     const rateBlock = rateEmpty || rateRangeBad;
     const paymentBlock = paymentEmpty || paymentRangeBad;
     const priceBlock = priceEmpty || priceRangeBad;
+
+    // Only these drive the afford-mode home price; tax/insurance/HOA do NOT.
+    // Keeping this separate lets us compute a stable calculatedHomePrice even
+    // when tax/insurance is invalid — otherwise blanking the price to 0 flips
+    // the dollar-cap check off, which recomputes the price, which re-fails the
+    // cap: an infinite render loop (the "flicker").
+    const affordPriceBlock = paymentBlock || rateBlock || dpBad;
 
     const affordBlocking = paymentBlock || rateBlock || dpBad || taxBad || insBad || hoaBad;
     const paymentBlocking = priceBlock || rateBlock || dpBad || taxBad || insBad || hoaBad;
@@ -181,15 +215,28 @@ export default function MortgageCalculator() {
     const affordWrongValue = paymentRangeBad || rateRangeBad || dpBad || taxBad || insBad || hoaBad;
     const paymentWrongValue = priceRangeBad || rateRangeBad || dpBad || taxBad || insBad || hoaBad;
 
+    // Hide "please enter" messages while focused (avoid premature empty-field errors).
+    // But keep validation/range errors visible so users know why results stopped calculating.
+    if (focusedField === "monthlyPayment" && paymentEmpty) paymentMsg = "";
+    if (focusedField === "homePrice" && priceEmpty) priceMsg = "";
+    if (focusedField === "interestRate" && rateEmpty) rateMsg = "";
+    if (focusedField === "hoaDues" && hoaDues === "") hoaMsg = "";
+
     return {
       rateMsg, paymentMsg, priceMsg, dpMsg, taxMsg, insMsg, hoaMsg,
-      affordBlocking, paymentBlocking, affordWrongValue, paymentWrongValue,
+      affordPriceBlock, affordBlocking, paymentBlocking,
+      affordWrongValue, paymentWrongValue,
+      // Granular per-field "unusable" flags (empty or out of range). These drive
+      // per-line dashing in the results card: a line shows "—" when any input it
+      // depends on is unusable, while unaffected lines keep their value.
+      paymentBad: paymentBlock, rateBad: rateBlock, priceBad: priceBlock,
+      dpBad, taxBad, insBad, hoaBad,
     };
   }, [
     mode, monthlyPayment, homePrice, interestRate, downPaymentMode,
     downPaymentPercent, downPaymentAmount, propertyTaxMode, propertyTaxPercent,
     propertyTaxAmount, homeInsuranceMode, homeInsurancePercent,
-    homeInsuranceAmount, hoaDues, calculatedHomePrice, touched,
+    homeInsuranceAmount, hoaDues, calculatedHomePrice, touched, focusedField,
   ]);
 
   const calculateMortgage = useCallback(() => {
@@ -198,14 +245,12 @@ export default function MortgageCalculator() {
     const n = loanTerm * 12;
     const hoaDuesNum = Number(hoaDues) || 0;
 
-    const blank = () => {
-      setResults(EMPTY_RESULTS);
-      setCalculatedHomePrice(0);
-    };
+    // The card is now always shown; per-line dashing (see `dash` in render)
+    // hides values whose inputs are unusable. So we compute every line we can
+    // and never blank the whole result set — that avoids the disappear/reappear
+    // flicker as the user edits, and keeps unaffected lines steady.
 
     if (mode === 'afford') {
-      if (v.affordBlocking) { setLimitReached(false); blank(); return; }
-
       const paymentAmount = Number(monthlyPayment);
 
       // 0% interest is now valid (inclusive), so guard the divide-by-zero.
@@ -219,25 +264,31 @@ export default function MortgageCalculator() {
       if (downPaymentMode === 'dollar') {
         downPayment = downPaymentAmount;
         computedHomePrice = loanAmount + downPayment;
-        if (computedHomePrice > 0) {
-          const calculatedPercent = (downPayment / computedHomePrice) * 100;
-          setDownPaymentPercent(calculatedPercent);
-          setDownPaymentPercentInput(calculatedPercent.toFixed(2));
-        }
       } else {
         const safeDownPaymentPercent = clampPercent(downPaymentPercent);
         computedHomePrice = loanAmount / (1 - safeDownPaymentPercent / 100);
         downPayment = computedHomePrice * (safeDownPaymentPercent / 100);
       }
 
-      // #19 backstop: if the result runs away, show the limit message.
-      if (!isFinite(computedHomePrice) || computedHomePrice > HOME_PRICE_DISPLAY_CEILING) {
-        setLimitReached(true);
-        blank();
-        return;
+      // #19 backstop: if the result runs away, flag the limit (dashes the price
+      // and its dependents in render). Only meaningful once the price inputs are
+      // actually usable — otherwise a mid-edit empty could masquerade as a limit.
+      const overflow = !isFinite(computedHomePrice) || computedHomePrice > HOME_PRICE_DISPLAY_CEILING;
+
+      // Side effects only when the price is genuinely usable. calculatedHomePrice
+      // depends only on payment/rate/term/down-payment (never tax/insurance), so
+      // keeping it stable here is what broke the earlier dollar-cap flicker loop.
+      if (!v.affordPriceBlock && !overflow) {
+        setLimitReached(false);
+        setCalculatedHomePrice(computedHomePrice);
+        if (downPaymentMode === 'dollar' && computedHomePrice > 0) {
+          const calculatedPercent = (downPayment / computedHomePrice) * 100;
+          setDownPaymentPercent(calculatedPercent);
+          setDownPaymentPercentInput(calculatedPercent.toFixed(2));
+        }
+      } else {
+        setLimitReached(!v.affordPriceBlock && overflow);
       }
-      setLimitReached(false);
-      setCalculatedHomePrice(computedHomePrice);
 
       const monthlyTax = propertyTaxMode === 'percentage'
         ? (computedHomePrice * (propertyTaxPercent / 100)) / 12
@@ -247,22 +298,25 @@ export default function MortgageCalculator() {
         ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
 
-      const totalMonthly = paymentAmount + monthlyTax + monthlyInsurance + hoaDuesNum;
+      const roundedMortgage = Math.round(paymentAmount);
+      const roundedTax = Math.round(monthlyTax);
+      const roundedInsurance = Math.round(monthlyInsurance);
+      const roundedHOA = Math.round(hoaDuesNum);
+      const totalMonthlyHousingCost = roundedMortgage + roundedTax + roundedInsurance + roundedHOA;
 
       setResults({
         homePrice: Math.round(computedHomePrice),
         downPayment: Math.round(downPayment),
         loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(paymentAmount),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(totalMonthly),
-        hoaDues: Math.round(hoaDuesNum),
-        totalMonthlyHousingCost: Math.round(totalMonthly),
+        monthlyMortgage: roundedMortgage,
+        monthlyTax: roundedTax,
+        monthlyInsurance: roundedInsurance,
+        totalMonthly: totalMonthlyHousingCost,
+        hoaDues: roundedHOA,
+        totalMonthlyHousingCost: totalMonthlyHousingCost,
       });
     } else {
       setLimitReached(false);
-      if (v.paymentBlocking) { blank(); return; }
 
       const homePriceAmount = Number(homePrice);
       const downPayment = downPaymentMode === 'dollar'
@@ -274,8 +328,6 @@ export default function MortgageCalculator() {
         ? loanAmount / n
         : loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
-      if (!isFinite(monthlyMortgage)) { blank(); return; }
-
       const monthlyTax = propertyTaxMode === 'percentage'
         ? (homePriceAmount * (propertyTaxPercent / 100)) / 12
         : propertyTaxAmount / 12;
@@ -284,18 +336,22 @@ export default function MortgageCalculator() {
         ? (homePriceAmount * (homeInsurancePercent / 100)) / 12
         : homeInsuranceAmount / 12;
 
-      const totalMonthly = monthlyMortgage + monthlyTax + monthlyInsurance + hoaDuesNum;
+      const roundedMortgage = Math.round(monthlyMortgage);
+      const roundedTax = Math.round(monthlyTax);
+      const roundedInsurance = Math.round(monthlyInsurance);
+      const roundedHOA = Math.round(hoaDuesNum);
+      const totalMonthlyHousingCost = roundedMortgage + roundedTax + roundedInsurance + roundedHOA;
 
       setResults({
         homePrice: Math.round(homePriceAmount),
         downPayment: Math.round(downPayment),
         loanAmount: Math.round(loanAmount),
-        monthlyMortgage: Math.round(monthlyMortgage),
-        monthlyTax: Math.round(monthlyTax),
-        monthlyInsurance: Math.round(monthlyInsurance),
-        totalMonthly: Math.round(totalMonthly),
-        hoaDues: Math.round(hoaDuesNum),
-        totalMonthlyHousingCost: Math.round(totalMonthly),
+        monthlyMortgage: roundedMortgage,
+        monthlyTax: roundedTax,
+        monthlyInsurance: roundedInsurance,
+        totalMonthly: totalMonthlyHousingCost,
+        hoaDues: roundedHOA,
+        totalMonthlyHousingCost: totalMonthlyHousingCost,
       });
     }
   }, [
@@ -319,13 +375,37 @@ export default function MortgageCalculator() {
     }).format(value);
   };
 
-  const showAffordResults = mode === 'afford' && !v.affordBlocking && !limitReached;
-  const showPaymentResults = mode === 'payment' && !v.paymentBlocking;
-  const affordCoral = mode === 'afford' && (v.affordWrongValue || limitReached);
-  const paymentCoral = mode === 'payment' && v.paymentWrongValue;
-  const emptyResultsString = "Enter values to see your estimate.";
-  const fixFieldsString = "Please fix the highlighted fields to see your estimate.";
-  const limitString = "That payment is too high to calculate. Try a lower amount to see your estimate.";
+  const DASH = "-";
+
+  // Per-line dash flags: a result line shows "—" when any input it depends on
+  // is unusable. Unaffected lines keep their value. The dependency graph is
+  // transitive — e.g. property taxes depend on the (computed) home price, which
+  // in afford mode depends on payment/rate/down-payment.
+  const affordDash = {
+    homePrice: v.affordBlocking || limitReached,
+    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordBlocking || limitReached),
+    loanAmount: v.affordBlocking || v.paymentBad || v.rateBad,
+    monthlyMortgage: v.affordBlocking || v.paymentBad,
+    monthlyTax: v.affordBlocking || limitReached || v.taxBad,
+    monthlyInsurance: v.affordBlocking || limitReached || v.insBad,
+    hoa: v.affordBlocking || (v.hoaBad && hoaDues !== ""),
+    total: false,
+  };
+  // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
+  affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance;
+
+  const paymentDash = {
+    monthlyMortgage: v.paymentBlocking || v.priceBad || v.rateBad || v.dpBad,
+    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.paymentBlocking || v.priceBad || v.dpBad),
+    loanAmount: v.paymentBlocking || v.priceBad || v.dpBad,
+    monthlyTax: v.paymentBlocking || v.priceBad || v.taxBad,
+    monthlyInsurance: v.paymentBlocking || v.priceBad || v.insBad,
+    hoa: v.paymentBlocking || (v.hoaBad && hoaDues !== ""),
+    total: false,
+  };
+  // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
+  paymentDash.total = paymentDash.monthlyMortgage || paymentDash.monthlyTax || paymentDash.monthlyInsurance;
+
 
   const handleReset = () => {
     setMonthlyPayment('');
@@ -337,11 +417,15 @@ export default function MortgageCalculator() {
     setInterestRate('');
     setLoanTerm(30);
     setPropertyTaxPercent(1.25);
+    setPropertyTaxPercentInput('1.25');
     setPropertyTaxMode('percentage');
     setPropertyTaxAmount(0);
+    setPropertyTaxAmountInput('');
     setHomeInsurancePercent(0.35);
+    setHomeInsurancePercentInput('0.35');
     setHomeInsuranceMode('percentage');
     setHomeInsuranceAmount(0);
+    setHomeInsuranceAmountInput('');
     setHoaDues('');
     setDownPaymentMode('percentage');
     setCalculatedHomePrice(0);
@@ -350,22 +434,13 @@ export default function MortgageCalculator() {
     setResults(EMPTY_RESULTS);
   };
 
-  const CoralCard = ({ message }: { message: string }) => (
-    <div
-      role="alert"
-      className="min-h-[28rem] text-center text-[var(--color-inline-error)]"
-    >
-      <p className="text-lg font-semibold">{message}</p>
-    </div>
-  );
 
-  const EmptyPanel = () => (
-    <div className="min-h-[28rem] text-center">
-      <p className="text-lg font-bold">{emptyResultsString}</p>
-    </div>
-  );
+  type LineDash = {
+    downPayment: boolean; loanAmount: boolean; monthlyMortgage: boolean;
+    monthlyTax: boolean; monthlyInsurance: boolean; hoa: boolean; total: boolean;
+  };
 
-  const ResultsBody = ({ headline }: { headline: string }) => (
+  const ResultsBody = ({ headline, dash }: { headline: string; dash: LineDash }) => (
     <div className="rounded-lg">
       <div className="innerwrapper">
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -373,15 +448,15 @@ export default function MortgageCalculator() {
             Down payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {formatCurrency(results.downPayment || 0)}
+            {dash.downPayment ? DASH : formatCurrency(results.downPayment || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
           <div className="w-full sm:w-[50%] text-md p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
             Loan amount:
           </div>
-          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-palo-verde font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {formatCurrency(results.loanAmount || 0)}
+          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
+            {dash.loanAmount ? DASH : formatCurrency(results.loanAmount || 0)}
           </div>
         </div>
         <div className="flex flex-col my-3">
@@ -393,7 +468,7 @@ export default function MortgageCalculator() {
             Mortgage payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {formatCurrency(results.monthlyMortgage || 0)}
+            {dash.monthlyMortgage ? DASH : formatCurrency(results.monthlyMortgage || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -401,7 +476,7 @@ export default function MortgageCalculator() {
             Property taxes:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {formatCurrency(results.monthlyTax || 0)}
+            {dash.monthlyTax ? DASH : formatCurrency(results.monthlyTax || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -409,7 +484,7 @@ export default function MortgageCalculator() {
             Insurance:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {formatCurrency(results.monthlyInsurance || 0)}
+            {dash.monthlyInsurance ? DASH : formatCurrency(results.monthlyInsurance || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -417,15 +492,15 @@ export default function MortgageCalculator() {
             HOA:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {formatCurrency(results.hoaDues || 0)}
+            {dash.hoa ? DASH : formatCurrency(results.hoaDues || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
           <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
             Total monthly housing cost:
           </div>
-          <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-lagunita-lighter text-black overflow-hidden text-ellipsis flex items-center">
-            {formatCurrency(results.totalMonthlyHousingCost || 0)}
+          <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
+            {dash.total ? DASH : formatCurrency(results.totalMonthlyHousingCost || 0)}
           </div>
         </div>
         <div className="py-5">
@@ -497,7 +572,11 @@ export default function MortgageCalculator() {
                             setMonthlyPayment(raw);
                           }
                         }}
-                        onBlur={() => setTouched((t) => ({ ...t, monthlyPayment: true }))}
+                        onFocus={() => setFocusedField("monthlyPayment")}
+                        onBlur={() => {
+                          setFocusedField(null);
+                          setTouched((t) => ({ ...t, monthlyPayment: true }));
+                        }}
                         aria-describedby={v.paymentMsg ? "monthly-payment-error" : undefined}
                         aria-invalid={!!v.paymentMsg}
                         className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.paymentMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -642,7 +721,11 @@ export default function MortgageCalculator() {
                         max="20"
                         value={interestRate}
                         onChange={(e) => setInterestRate(e.target.value)}
-                        onBlur={() => setTouched((t) => ({ ...t, interestRate: true }))}
+                        onFocus={() => setFocusedField("interestRate")}
+                        onBlur={() => {
+                          setFocusedField(null);
+                          setTouched((t) => ({ ...t, interestRate: true }));
+                        }}
                         aria-describedby={v.rateMsg ? "interest-rate-afford-error" : undefined}
                         aria-invalid={!!v.rateMsg}
                         className={`w-full pr-8 pl-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -689,9 +772,12 @@ export default function MortgageCalculator() {
                                 onChange={() => {
                                   setPropertyTaxMode("percentage");
                                   if (propertyTaxAmount > 0 && calculatedHomePrice > 0) {
-                                    setPropertyTaxPercent((propertyTaxAmount / calculatedHomePrice) * 100);
+                                    const pct = (propertyTaxAmount / calculatedHomePrice) * 100;
+                                    setPropertyTaxPercent(pct);
+                                    setPropertyTaxPercentInput(String(pct));
                                   } else {
-                                    setPropertyTaxPercent(0);
+                                    setPropertyTaxPercent(1.25);
+                                    setPropertyTaxPercentInput("1.25");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -706,7 +792,9 @@ export default function MortgageCalculator() {
                                 checked={propertyTaxMode === "dollar"}
                                 onChange={() => {
                                   setPropertyTaxMode("dollar");
-                                  setPropertyTaxAmount(calculatedHomePrice * (propertyTaxPercent / 100));
+                                  const amount = calculatedHomePrice * (propertyTaxPercent / 100);
+                                  setPropertyTaxAmount(amount);
+                                  setPropertyTaxAmountInput(amount ? Math.round(amount).toString() : "");
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
                               />
@@ -721,11 +809,11 @@ export default function MortgageCalculator() {
                             id="property-tax-percent-afford"
                             type="number"
                             step="0.01"
-                            value={propertyTaxPercent || ""}
+                            value={propertyTaxPercentInput}
                             onChange={(e) => {
-                              const value = clampNonNegativeNumber(e.target.value === "" ? 0 : Number(e.target.value));
-                              setPropertyTaxPercent(value);
-                              setPropertyTaxAmount((value / 100) * (calculatedHomePrice || 0));
+                              const raw = e.target.value;
+                              setPropertyTaxPercentInput(raw);
+                              setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                             }}
                             aria-label="Property tax percentage"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
@@ -740,14 +828,12 @@ export default function MortgageCalculator() {
                             id="property-tax-amount-afford"
                             type="text"
                             inputMode="numeric"
-                            value={propertyTaxAmount ? Math.round(propertyTaxAmount).toLocaleString("en-US") : ""}
+                            value={propertyTaxAmountInput ? Number(propertyTaxAmountInput).toLocaleString("en-US") : ""}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
                               if (raw === "" || /^\d*$/.test(raw)) {
-                                const value = raw === "" ? 0 : clampNonNegativeNumber(Number(raw));
-                                setPropertyTaxAmount(value);
-                                const price = calculatedHomePrice || 0;
-                                if (price > 0) setPropertyTaxPercent((value / price) * 100);
+                                setPropertyTaxAmountInput(raw);
+                                setPropertyTaxAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
                               }
                             }}
                             aria-label="Property tax annual dollar amount"
@@ -777,9 +863,12 @@ export default function MortgageCalculator() {
                                 onChange={() => {
                                   setHomeInsuranceMode("percentage");
                                   if (homeInsuranceAmount > 0 && calculatedHomePrice > 0) {
-                                    setHomeInsurancePercent((homeInsuranceAmount / calculatedHomePrice) * 100);
+                                    const pct = (homeInsuranceAmount / calculatedHomePrice) * 100;
+                                    setHomeInsurancePercent(pct);
+                                    setHomeInsurancePercentInput(String(pct));
                                   } else {
                                     setHomeInsurancePercent(0);
+                                    setHomeInsurancePercentInput("0");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -794,7 +883,9 @@ export default function MortgageCalculator() {
                                 checked={homeInsuranceMode === "dollar"}
                                 onChange={() => {
                                   setHomeInsuranceMode("dollar");
-                                  setHomeInsuranceAmount(calculatedHomePrice * (homeInsurancePercent / 100));
+                                  const amount = calculatedHomePrice * (homeInsurancePercent / 100);
+                                  setHomeInsuranceAmount(amount);
+                                  setHomeInsuranceAmountInput(amount ? Math.round(amount).toString() : "");
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
                               />
@@ -809,11 +900,11 @@ export default function MortgageCalculator() {
                             id="home-insurance-percent-afford"
                             type="number"
                             step="0.01"
-                            value={homeInsurancePercent || ""}
+                            value={homeInsurancePercentInput}
                             onChange={(e) => {
-                              const value = clampNonNegativeNumber(e.target.value === "" ? 0 : Number(e.target.value));
-                              setHomeInsurancePercent(value);
-                              setHomeInsuranceAmount((value / 100) * (calculatedHomePrice || 0));
+                              const raw = e.target.value;
+                              setHomeInsurancePercentInput(raw);
+                              setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                             }}
                             aria-label="Home insurance percentage"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
@@ -828,14 +919,12 @@ export default function MortgageCalculator() {
                             id="home-insurance-amount-afford"
                             type="text"
                             inputMode="numeric"
-                            value={homeInsuranceAmount ? Math.round(homeInsuranceAmount).toLocaleString("en-US") : ""}
+                            value={homeInsuranceAmountInput ? Number(homeInsuranceAmountInput).toLocaleString("en-US") : ""}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
                               if (raw === "" || /^\d*$/.test(raw)) {
-                                const value = raw === "" ? 0 : clampNonNegativeNumber(Number(raw));
-                                setHomeInsuranceAmount(value);
-                                const price = calculatedHomePrice || 0;
-                                if (price > 0) setHomeInsurancePercent((value / price) * 100);
+                                setHomeInsuranceAmountInput(raw);
+                                setHomeInsuranceAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
                               }
                             }}
                             aria-label="Home insurance annual dollar amount"
@@ -858,11 +947,13 @@ export default function MortgageCalculator() {
                           id="hoa-dues-afford"
                           type="text"
                           inputMode="numeric"
-                          value={hoaDues ? Number(hoaDues).toLocaleString("en-US") : ""}
+                          value={hoaDues && !isNaN(Number(hoaDues)) ? Number(hoaDues).toLocaleString("en-US") : hoaDues}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/,/g, "");
-                            if (raw === "" || /^\d*$/.test(raw)) setHoaDues(raw);
+                            if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
+                          onFocus={() => setFocusedField("hoaDues")}
+                          onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-afford-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
                           className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -876,25 +967,17 @@ export default function MortgageCalculator() {
                 {/* Right Column - Results */}
                 <div className="pl-0">
                   <Card aria-live="polite" aria-atomic="true" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                    {showAffordResults ? (
-                      <>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md font-bold">Estimated home price</CardTitle>
-                        </CardHeader>
-                        <CardContent className="">
-                          <div className="mb-6">
-                            <p className="text-3xl font-bold text-[var(--color-teal)]">
-                              {formatCurrency(Number(results.homePrice))}
-                            </p>
-                          </div>
-                          <ResultsBody headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
-                        </CardContent>
-                      </>
-                    ) : affordCoral ? (
-                      <CoralCard message={limitReached ? limitString : fixFieldsString} />
-                    ) : (
-                      <EmptyPanel />
-                    )}
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-md font-bold">Estimated home price</CardTitle>
+                    </CardHeader>
+                    <CardContent className="">
+                      <div className="mb-6">
+                        <p className="text-3xl font-bold text-[var(--color-teal)]">
+                          {affordDash.homePrice ? DASH : formatCurrency(Number(results.homePrice))}
+                        </p>
+                      </div>
+                      <ResultsBody dash={affordDash} headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
+                    </CardContent>
                   </Card>
                 </div>
               </div>
@@ -933,7 +1016,11 @@ export default function MortgageCalculator() {
                             }
                           }
                         }}
-                        onBlur={() => setTouched((t) => ({ ...t, homePrice: true }))}
+                        onFocus={() => setFocusedField("homePrice")}
+                        onBlur={() => {
+                          setFocusedField(null);
+                          setTouched((t) => ({ ...t, homePrice: true }));
+                        }}
                         aria-describedby={v.priceMsg ? "home-price-error" : undefined}
                         aria-invalid={!!v.priceMsg}
                         className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.priceMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -1074,7 +1161,11 @@ export default function MortgageCalculator() {
                         max="20"
                         value={interestRate}
                         onChange={(e) => setInterestRate(e.target.value)}
-                        onBlur={() => setTouched((t) => ({ ...t, interestRate: true }))}
+                        onFocus={() => setFocusedField("interestRate")}
+                        onBlur={() => {
+                          setFocusedField(null);
+                          setTouched((t) => ({ ...t, interestRate: true }));
+                        }}
                         aria-describedby={v.rateMsg ? "interest-rate-payment-error" : undefined}
                         aria-invalid={!!v.rateMsg}
                         className={`w-full pr-8 pl-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -1120,9 +1211,12 @@ export default function MortgageCalculator() {
                                 onChange={() => {
                                   setPropertyTaxMode("percentage");
                                   if (propertyTaxAmount > 0 && Number(homePrice) > 0) {
-                                    setPropertyTaxPercent((propertyTaxAmount / Number(homePrice)) * 100);
+                                    const pct = (propertyTaxAmount / Number(homePrice)) * 100;
+                                    setPropertyTaxPercent(pct);
+                                    setPropertyTaxPercentInput(String(pct));
                                   } else {
-                                    setPropertyTaxPercent(0);
+                                    setPropertyTaxPercent(1.25);
+                                    setPropertyTaxPercentInput("1.25");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -1136,7 +1230,9 @@ export default function MortgageCalculator() {
                                 checked={propertyTaxMode === "dollar"}
                                 onChange={() => {
                                   setPropertyTaxMode("dollar");
-                                  setPropertyTaxAmount(Number(homePrice) * (propertyTaxPercent / 100));
+                                  const amount = Number(homePrice) * (propertyTaxPercent / 100);
+                                  setPropertyTaxAmount(amount);
+                                  setPropertyTaxAmountInput(amount ? Math.round(amount).toString() : "");
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
                               />
@@ -1152,11 +1248,11 @@ export default function MortgageCalculator() {
                               id="property-tax-percent-payment"
                               type="number"
                               step="0.01"
-                              value={propertyTaxPercent || ""}
+                              value={propertyTaxPercentInput}
                               onChange={(e) => {
-                                const value = clampNonNegativeNumber(e.target.value === "" ? 0 : Number(e.target.value));
-                                setPropertyTaxPercent(value);
-                                setPropertyTaxAmount((value / 100) * (Number(homePrice) || 0));
+                                const raw = e.target.value;
+                                setPropertyTaxPercentInput(raw);
+                                setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                               }}
                               aria-label="Property tax percentage"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
@@ -1171,14 +1267,12 @@ export default function MortgageCalculator() {
                               id="property-tax-amount-payment"
                               type="text"
                               inputMode="numeric"
-                              value={propertyTaxAmount ? Math.round(propertyTaxAmount).toLocaleString("en-US") : ""}
+                              value={propertyTaxAmountInput ? Number(propertyTaxAmountInput).toLocaleString("en-US") : ""}
                               onChange={(e) => {
                                 const raw = e.target.value.replace(/,/g, "");
                                 if (raw === "" || /^\d*$/.test(raw)) {
-                                  const value = raw === "" ? 0 : clampNonNegativeNumber(Number(raw));
-                                  setPropertyTaxAmount(value);
-                                  const price = Number(homePrice) || 0;
-                                  if (price > 0) setPropertyTaxPercent((value / price) * 100);
+                                  setPropertyTaxAmountInput(raw);
+                                  setPropertyTaxAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
                                 }
                               }}
                               aria-label="Property tax annual dollar amount"
@@ -1208,9 +1302,12 @@ export default function MortgageCalculator() {
                                 onChange={() => {
                                   setHomeInsuranceMode("percentage");
                                   if (homeInsuranceAmount > 0 && Number(homePrice) > 0) {
-                                    setHomeInsurancePercent((homeInsuranceAmount / Number(homePrice)) * 100);
+                                    const pct = (homeInsuranceAmount / Number(homePrice)) * 100;
+                                    setHomeInsurancePercent(pct);
+                                    setHomeInsurancePercentInput(String(pct));
                                   } else {
                                     setHomeInsurancePercent(0);
+                                    setHomeInsurancePercentInput("0");
                                   }
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
@@ -1224,7 +1321,9 @@ export default function MortgageCalculator() {
                                 checked={homeInsuranceMode === "dollar"}
                                 onChange={() => {
                                   setHomeInsuranceMode("dollar");
-                                  setHomeInsuranceAmount(Number(homePrice) * (homeInsurancePercent / 100));
+                                  const amount = Number(homePrice) * (homeInsurancePercent / 100);
+                                  setHomeInsuranceAmount(amount);
+                                  setHomeInsuranceAmountInput(amount ? Math.round(amount).toString() : "");
                                 }}
                                 className="w-4 h-4 accent-lagunita cursor-pointer"
                               />
@@ -1240,11 +1339,11 @@ export default function MortgageCalculator() {
                               id="home-insurance-percent-payment"
                               type="number"
                               step="0.01"
-                              value={homeInsurancePercent || ""}
+                              value={homeInsurancePercentInput}
                               onChange={(e) => {
-                                const value = clampNonNegativeNumber(e.target.value === "" ? 0 : Number(e.target.value));
-                                setHomeInsurancePercent(value);
-                                setHomeInsuranceAmount((value / 100) * (Number(homePrice) || 0));
+                                const raw = e.target.value;
+                                setHomeInsurancePercentInput(raw);
+                                setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                               }}
                               aria-label="Home insurance percentage"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
@@ -1259,14 +1358,12 @@ export default function MortgageCalculator() {
                               id="home-insurance-amount-payment"
                               type="text"
                               inputMode="numeric"
-                              value={homeInsuranceAmount ? Math.round(homeInsuranceAmount).toLocaleString("en-US") : ""}
+                              value={homeInsuranceAmountInput ? Number(homeInsuranceAmountInput).toLocaleString("en-US") : ""}
                               onChange={(e) => {
                                 const raw = e.target.value.replace(/,/g, "");
                                 if (raw === "" || /^\d*$/.test(raw)) {
-                                  const value = raw === "" ? 0 : clampNonNegativeNumber(Number(raw));
-                                  setHomeInsuranceAmount(value);
-                                  const price = Number(homePrice) || 0;
-                                  if (price > 0) setHomeInsurancePercent((value / price) * 100);
+                                  setHomeInsuranceAmountInput(raw);
+                                  setHomeInsuranceAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
                                 }
                               }}
                               aria-label="Home insurance annual dollar amount"
@@ -1290,11 +1387,13 @@ export default function MortgageCalculator() {
                           id="hoa-dues-payment"
                           type="text"
                           inputMode="numeric"
-                          value={hoaDues ? Number(hoaDues).toLocaleString("en-US") : ""}
+                          value={hoaDues && !isNaN(Number(hoaDues)) ? Number(hoaDues).toLocaleString("en-US") : hoaDues}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/,/g, "");
-                            if (raw === "" || /^\d*$/.test(raw)) setHoaDues(raw);
+                            if (raw === "" || /^-?\d*$/.test(raw)) setHoaDues(raw);
                           }}
+                          onFocus={() => setFocusedField("hoaDues")}
+                          onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-payment-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
                           className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
@@ -1308,25 +1407,17 @@ export default function MortgageCalculator() {
                 {/* Right Column - Results */}
                 <div className="pl-0">
                   <Card aria-live="polite" aria-atomic="true" className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-                    {showPaymentResults ? (
-                      <>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md font-bold">Estimated monthly mortgage payment</CardTitle>
-                        </CardHeader>
-                        <CardContent className="">
-                          <div className="mb-6">
-                            <p className="text-3xl font-bold text-[var(--color-teal)]">
-                              {formatCurrency(Number(results.monthlyMortgage))}
-                            </p>
-                          </div>
-                          <ResultsBody headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />
-                        </CardContent>
-                      </>
-                    ) : paymentCoral ? (
-                      <CoralCard message={fixFieldsString} />
-                    ) : (
-                      <EmptyPanel />
-                    )}
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-md font-bold">Estimated monthly mortgage payment</CardTitle>
+                    </CardHeader>
+                    <CardContent className="">
+                      <div className="mb-6">
+                        <p className="text-3xl font-bold text-[var(--color-teal)]">
+                          {paymentDash.monthlyMortgage ? DASH : formatCurrency(Number(results.monthlyMortgage))}
+                        </p>
+                      </div>
+                      <ResultsBody dash={paymentDash} headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />
+                    </CardContent>
                   </Card>
                 </div>
               </div>
