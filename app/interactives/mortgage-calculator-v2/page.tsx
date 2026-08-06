@@ -105,7 +105,6 @@ export default function MortgageCalculator() {
   }, [mode]);
 
   const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
-  const clampNonNegativeNumber = (value: number) => Math.max(0, Number(value) || 0);
 
   /* ── Validation ────────────────────────────────────────────────────────
      One source of truth for messages + blocking flags, used by both the calc
@@ -165,12 +164,12 @@ export default function MortgageCalculator() {
     if (propertyTaxMode === 'percentage') {
       taxBad = propertyTaxPercent < 0 || propertyTaxPercent > TAX_RATE_MAX;
       if (taxBad) taxMsg = "Enter a property tax rate between 0% and 10%. Rates beyond this are unusual.";
-    } else if (
+    } else if (propertyTaxAmount < 0 || (
       activePrice > 0 &&
       propertyTaxAmount > RELATIVE_CAP * activePrice &&
       focusedField !== "monthlyPayment" &&
       focusedField !== "homePrice"
-    ) {
+    )) {
       taxBad = true;
       taxMsg = "Enter a property tax amount between 0% and 10% of the home price. Amounts beyond this are unusual.";
     }
@@ -181,12 +180,12 @@ export default function MortgageCalculator() {
     if (homeInsuranceMode === 'percentage') {
       insBad = homeInsurancePercent < 0 || homeInsurancePercent > INS_RATE_MAX;
       if (insBad) insMsg = "Enter a homeowners insurance rate between 0% and 10%. Rates beyond this are unusual.";
-    } else if (
+    } else if (homeInsuranceAmount < 0 || (
       activePrice > 0 &&
       homeInsuranceAmount > RELATIVE_CAP * activePrice &&
       focusedField !== "monthlyPayment" &&
       focusedField !== "homePrice"
-    ) {
+    )) {
       insBad = true;
       insMsg = "Enter a homeowners insurance amount between 0% and 10% of the home price. Amounts beyond this are unusual.";
     }
@@ -292,11 +291,11 @@ export default function MortgageCalculator() {
 
       const monthlyTax = propertyTaxMode === 'percentage'
         ? (computedHomePrice * (propertyTaxPercent / 100)) / 12
-        : propertyTaxAmount / 12;
+        : Math.max(0, propertyTaxAmount) / 12;
 
       const monthlyInsurance = homeInsuranceMode === 'percentage'
         ? (computedHomePrice * (homeInsurancePercent / 100)) / 12
-        : homeInsuranceAmount / 12;
+        : Math.max(0, homeInsuranceAmount) / 12;
 
       const roundedMortgage = Math.round(paymentAmount);
       const roundedTax = Math.round(monthlyTax);
@@ -330,11 +329,11 @@ export default function MortgageCalculator() {
 
       const monthlyTax = propertyTaxMode === 'percentage'
         ? (homePriceAmount * (propertyTaxPercent / 100)) / 12
-        : propertyTaxAmount / 12;
+        : Math.max(0, propertyTaxAmount) / 12;
 
       const monthlyInsurance = homeInsuranceMode === 'percentage'
         ? (homePriceAmount * (homeInsurancePercent / 100)) / 12
-        : homeInsuranceAmount / 12;
+        : Math.max(0, homeInsuranceAmount) / 12;
 
       const roundedMortgage = Math.round(monthlyMortgage);
       const roundedTax = Math.round(monthlyTax);
@@ -828,12 +827,12 @@ export default function MortgageCalculator() {
                             id="property-tax-amount-afford"
                             type="text"
                             inputMode="numeric"
-                            value={propertyTaxAmountInput ? Number(propertyTaxAmountInput).toLocaleString("en-US") : ""}
+                            value={propertyTaxAmountInput && !isNaN(Number(propertyTaxAmountInput)) ? Number(propertyTaxAmountInput).toLocaleString("en-US") : propertyTaxAmountInput}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
-                              if (raw === "" || /^\d*$/.test(raw)) {
+                              if (raw === "" || /^-?\d*$/.test(raw)) {
                                 setPropertyTaxAmountInput(raw);
-                                setPropertyTaxAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
+                                setPropertyTaxAmount(raw === "" ? 0 : Number(raw));
                               }
                             }}
                             aria-label="Property tax annual dollar amount"
@@ -919,12 +918,12 @@ export default function MortgageCalculator() {
                             id="home-insurance-amount-afford"
                             type="text"
                             inputMode="numeric"
-                            value={homeInsuranceAmountInput ? Number(homeInsuranceAmountInput).toLocaleString("en-US") : ""}
+                            value={homeInsuranceAmountInput && !isNaN(Number(homeInsuranceAmountInput)) ? Number(homeInsuranceAmountInput).toLocaleString("en-US") : homeInsuranceAmountInput}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
-                              if (raw === "" || /^\d*$/.test(raw)) {
+                              if (raw === "" || /^-?\d*$/.test(raw)) {
                                 setHomeInsuranceAmountInput(raw);
-                                setHomeInsuranceAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
+                                setHomeInsuranceAmount(raw === "" ? 0 : Number(raw));
                               }
                             }}
                             aria-label="Home insurance annual dollar amount"
@@ -1267,12 +1266,12 @@ export default function MortgageCalculator() {
                               id="property-tax-amount-payment"
                               type="text"
                               inputMode="numeric"
-                              value={propertyTaxAmountInput ? Number(propertyTaxAmountInput).toLocaleString("en-US") : ""}
+                              value={propertyTaxAmountInput && !isNaN(Number(propertyTaxAmountInput)) ? Number(propertyTaxAmountInput).toLocaleString("en-US") : propertyTaxAmountInput}
                               onChange={(e) => {
                                 const raw = e.target.value.replace(/,/g, "");
-                                if (raw === "" || /^\d*$/.test(raw)) {
+                                if (raw === "" || /^-?\d*$/.test(raw)) {
                                   setPropertyTaxAmountInput(raw);
-                                  setPropertyTaxAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
+                                  setPropertyTaxAmount(raw === "" ? 0 : Number(raw));
                                 }
                               }}
                               aria-label="Property tax annual dollar amount"
@@ -1358,12 +1357,12 @@ export default function MortgageCalculator() {
                               id="home-insurance-amount-payment"
                               type="text"
                               inputMode="numeric"
-                              value={homeInsuranceAmountInput ? Number(homeInsuranceAmountInput).toLocaleString("en-US") : ""}
+                              value={homeInsuranceAmountInput && !isNaN(Number(homeInsuranceAmountInput)) ? Number(homeInsuranceAmountInput).toLocaleString("en-US") : homeInsuranceAmountInput}
                               onChange={(e) => {
                                 const raw = e.target.value.replace(/,/g, "");
-                                if (raw === "" || /^\d*$/.test(raw)) {
+                                if (raw === "" || /^-?\d*$/.test(raw)) {
                                   setHomeInsuranceAmountInput(raw);
-                                  setHomeInsuranceAmount(raw === "" ? 0 : clampNonNegativeNumber(Number(raw)));
+                                  setHomeInsuranceAmount(raw === "" ? 0 : Number(raw));
                                 }
                               }}
                               aria-label="Home insurance annual dollar amount"
