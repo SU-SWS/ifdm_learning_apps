@@ -38,6 +38,8 @@ export default function RetirementCalculator() {
   const [isRetirementLengthFocused, setIsRetirementLengthFocused] = useState(false)
   const [isYearsToRetirementFocused, setIsYearsToRetirementFocused] = useState(false)
   const [isExpectedReturnBeforeRetirementFocused, setIsExpectedReturnBeforeRetirementFocused] = useState(false)
+  const [expectedReturnBeforeRetirementInput, setExpectedReturnBeforeRetirementInput] = useState("")
+  const [expectedReturnDuringRetirementInput, setExpectedReturnDuringRetirementInput] = useState("")
 
   const calculatedRequiredBalance = useMemo(() => {
     return calculateRequiredBalance(
@@ -57,7 +59,6 @@ export default function RetirementCalculator() {
   const showSavingsResults =
     frozenRequiredBalance > 0 &&
     inputs.yearsToRetirement > 0 &&
-    inputs.expectedReturnBeforeRetirement !== 0 &&
     !errors.currentSavings &&
     !errors.yearsToRetirement &&
     !errors.expectedReturnBeforeRetirement
@@ -89,6 +90,7 @@ export default function RetirementCalculator() {
       const validation = validateReturnBeforeRetirement(numValue)
       setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: validation.error }))
       setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: validation.warning }))
+      setExpectedReturnBeforeRetirementInput(value)
     }
 
     if (key === "yearsToRetirement") {
@@ -102,6 +104,7 @@ export default function RetirementCalculator() {
       const validation = validateReturnDuringRetirement(numValue)
       setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: validation.error }))
       setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: validation.warning }))
+      setExpectedReturnDuringRetirementInput(value)
     }
 
     if (key === "retirementLength") {
@@ -134,6 +137,8 @@ export default function RetirementCalculator() {
     setIsRetirementLengthFocused(false)
     setIsYearsToRetirementFocused(false)
     setIsExpectedReturnBeforeRetirementFocused(false)
+    setExpectedReturnBeforeRetirementInput("")
+    setExpectedReturnDuringRetirementInput("")
     setActiveTab("balance")
     setFrozenRequiredBalance(0)
   }
@@ -282,7 +287,7 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!!errors.expectedReturnDuringRetirement}
-                      value={inputs.expectedReturnDuringRetirement || ""}
+                      value={expectedReturnDuringRetirementInput}
                       onChange={(e) => updateInput("expectedReturnDuringRetirement", e.target.value)}
                       className={`${baseInputClass} pl-4 pr-16 ${inputStateClass(errors.expectedReturnDuringRetirement, warnings.expectedReturnDuringRetirement)}`}
                     />
@@ -413,7 +418,7 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!isExpectedReturnBeforeRetirementFocused && !!errors.expectedReturnBeforeRetirement}
-                      value={inputs.expectedReturnBeforeRetirement || ""}
+                      value={expectedReturnBeforeRetirementInput}
                       onChange={(e) => updateInput("expectedReturnBeforeRetirement", e.target.value)}
                       onFocus={() => setIsExpectedReturnBeforeRetirementFocused(true)}
                       onBlur={(e) => {
