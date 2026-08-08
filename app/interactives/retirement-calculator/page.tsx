@@ -4,38 +4,22 @@ import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
 import InfoPopover from "@/app/ui/components/popover";
-
-interface CalculatorInputs {
-  annualSpending: number
-  retirementLength: number
-  expectedReturnDuringRetirement: number
-  expectedReturnBeforeRetirement: number
-  currentSavings: number
-  yearsToRetirement: number
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function formatNumberWithCommas(value: string): string {
-  const num = value.replace(/,/g, "")
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-}
-
-const defaultInputs: CalculatorInputs = {
-  annualSpending: 0,
-  retirementLength: 0,
-  expectedReturnDuringRetirement: 0,
-  expectedReturnBeforeRetirement: 0,
-  currentSavings: 0,
-  yearsToRetirement: 0,
-}
+import {
+  CalculatorInputs,
+  defaultInputs,
+  calculateRequiredBalance,
+  calculateSavingsResults,
+  formatCurrency,
+  formatNumberWithCommas,
+} from "./lib/retirement";
+import {
+  validateAnnualSpending,
+  validateCurrentSavings,
+  validateReturnBeforeRetirement,
+  validateReturnDuringRetirement,
+  validateRetirementLength,
+  validateYearsToRetirement,
+} from "./lib/validation";
 
 const baseInputClass = "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 const inputStateClass = (error?: string, warning?: string) =>
@@ -54,13 +38,10 @@ export default function RetirementCalculator() {
   const [touched, setTouched] = useState<Partial<Record<keyof CalculatorInputs, boolean>>>({})
 
   const calculatedRequiredBalance = useMemo(() => {
-    const rate = inputs.expectedReturnDuringRetirement / 100
-    if (rate === 0) {
-      return inputs.annualSpending * inputs.retirementLength
-    }
-    return (
-      inputs.annualSpending *
-      ((1 - Math.pow(1 + rate, -inputs.retirementLength)) / rate)
+    return calculateRequiredBalance(
+      inputs.annualSpending,
+      inputs.retirementLength,
+      inputs.expectedReturnDuringRetirement / 100
     )
   }, [inputs.annualSpending, inputs.retirementLength, inputs.expectedReturnDuringRetirement])
 
@@ -80,112 +61,51 @@ export default function RetirementCalculator() {
     !errors.expectedReturnBeforeRetirement
 
   const results = useMemo(() => {
-    const realReturnBeforeRetirement = inputs.expectedReturnBeforeRetirement / 100
-
     const requiredBalance = activeTab === "savings" ? frozenRequiredBalance : calculatedRequiredBalance
-
-    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturnBeforeRetirement, inputs.yearsToRetirement)
-    const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
-
-    let annualSavings: number
-    if (realReturnBeforeRetirement === 0 || inputs.yearsToRetirement <= 0) {
-      annualSavings = inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0
-    } else {
-      annualSavings =
-        targetBalance *
-        (realReturnBeforeRetirement / (Math.pow(1 + realReturnBeforeRetirement, inputs.yearsToRetirement) - 1))
-    }
-
-    const calculateFrequencySavings = (frequency: number) => {
-      if (realReturnBeforeRetirement === 0 || inputs.yearsToRetirement <= 0) {
-        return inputs.yearsToRetirement > 0 ? targetBalance / (inputs.yearsToRetirement * frequency) : 0
-      }
-      const periodRate = Math.pow(1 + realReturnBeforeRetirement, 1 / frequency) - 1
-      const totalPeriods = inputs.yearsToRetirement * frequency
-      return targetBalance * (periodRate / (Math.pow(1 + periodRate, totalPeriods) - 1))
-    }
-
-    const monthlySavings = calculateFrequencySavings(12)
-    const biWeeklySavings = calculateFrequencySavings(26)
-    const weeklySavings = calculateFrequencySavings(52)
-
-    return {
-      requiredBalance: Math.round(requiredBalance),
-      targetBalance: Math.round(targetBalance),
-      annualSavings: Math.round(annualSavings),
-      monthlySavings: Math.round(monthlySavings),
-      biWeeklySavings: Math.round(biWeeklySavings),
-      weeklySavings: Math.round(weeklySavings),
-      fvCurrentSavings: Math.round(FV_currentSavings),
-    }
+    return calculateSavingsResults(
+      requiredBalance,
+      inputs.currentSavings,
+      inputs.yearsToRetirement,
+      inputs.expectedReturnBeforeRetirement / 100
+    )
   }, [inputs, activeTab, frozenRequiredBalance, calculatedRequiredBalance])
 
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
 
     if (key === "annualSpending") {
-      if (numValue !== 0 && (numValue < 1 || numValue > 10_000_000)) {
-        setErrors((prev) => ({ ...prev, annualSpending: "Enter an amount between $1 and $10,000,000." }))
-      } else {
-        setErrors((prev) => ({ ...prev, annualSpending: undefined }))
-      }
+      const validation = validateAnnualSpending(numValue)
+      setErrors((prev) => ({ ...prev, annualSpending: validation.error }))
     }
 
     if (key === "currentSavings") {
-      if (numValue < 0 || numValue > 100_000_000) {
-        setErrors((prev) => ({ ...prev, currentSavings: "Enter an amount between $0 and $100,000,000." }))
-      } else {
-        setErrors((prev) => ({ ...prev, currentSavings: undefined }))
-      }
+      const validation = validateCurrentSavings(numValue)
+      setErrors((prev) => ({ ...prev, currentSavings: validation.error }))
     }
 
     if (key === "expectedReturnBeforeRetirement") {
-      if (numValue < -5 || numValue > 30) {
-        setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: "Enter a rate between −5% and 30%." }))
-        setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-      } else if (numValue >= -5 && numValue < 0) {
-        setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-        setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: "A negative return means your savings are expected to lose value over time. Double-check your entry." }))
-      } else {
-        setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-        setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-      }
+      const validation = validateReturnBeforeRetirement(numValue)
+      setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: validation.error }))
+      setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: validation.warning }))
     }
 
     if (key === "yearsToRetirement") {
-      if (numValue < 0 || numValue > 75) {
-        setErrors((prev) => ({ ...prev, yearsToRetirement: "Enter an amount of years between 0 and 75." }))
-      } else if (numValue === 0 && value !== "") {
-        setErrors((prev) => ({ ...prev, yearsToRetirement: "With no time left to save, you'd need your full target balance today." }))
-      } else if (numValue > 0) {
-        setErrors((prev) => ({ ...prev, yearsToRetirement: undefined }))
+      const validation = validateYearsToRetirement(numValue, value)
+      if (validation) {
+        setErrors((prev) => ({ ...prev, yearsToRetirement: validation.error }))
       }
     }
 
     if (key === "expectedReturnDuringRetirement") {
-      if (numValue !== 0 && (numValue < -5 || numValue > 30)) {
-        setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: "Enter a rate between −5% and 30%." }))
-      } else {
-        setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: undefined }))
-      }
-      if (numValue >= -5 && numValue < 0) {
-        setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: "A negative return means your savings are expected to lose value over time. Double-check your entry." }))
-      } else {
-        setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: undefined }))
-      }
+      const validation = validateReturnDuringRetirement(numValue)
+      setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: validation.error }))
+      setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: validation.warning }))
     }
 
     if (key === "retirementLength") {
-      if (numValue !== 0 && (numValue < 1 || numValue > 75)) {
-        setErrors((prev) => ({ ...prev, retirementLength: "Enter an amount of years between 1 and 75." }))
-      } else {
-        setErrors((prev) => ({ ...prev, retirementLength: undefined }))
-      }
-      if (numValue >= 1 && numValue <= 3) {
-        setWarnings((prev) => ({ ...prev, retirementLength: "This is a very short retirement. Double-check your entry." }))
-      } else {
-        setWarnings((prev) => ({ ...prev, retirementLength: undefined }))
-      }
+      const validation = validateRetirementLength(numValue)
+      setErrors((prev) => ({ ...prev, retirementLength: validation.error }))
+      setWarnings((prev) => ({ ...prev, retirementLength: validation.warning }))
     }
 
     setInputs((prev) => ({ ...prev, [key]: numValue }))
@@ -201,16 +121,7 @@ export default function RetirementCalculator() {
       const lengthVal = key === "retirementLength" ? numValue : inputs.retirementLength
       const rateVal = key === "expectedReturnDuringRetirement" ? numValue / 100 : inputs.expectedReturnDuringRetirement / 100
 
-      let calculatedFrozen: number
-      if (rateVal === 0) {
-        calculatedFrozen = spendingVal * lengthVal
-      } else {
-        calculatedFrozen =
-          spendingVal *
-          ((1 - Math.pow(1 + rateVal, -lengthVal)) / rateVal)
-      }
-
-      setFrozenRequiredBalance(Math.round(calculatedFrozen))
+      setFrozenRequiredBalance(Math.round(calculateRequiredBalance(spendingVal, lengthVal, rateVal)))
     }
   }
 
