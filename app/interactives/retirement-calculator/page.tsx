@@ -35,7 +35,9 @@ export default function RetirementCalculator() {
   const [frozenRequiredBalance, setFrozenRequiredBalance] = useState<number>(0)
   const [errors, setErrors] = useState<Partial<Record<keyof CalculatorInputs, string>>>({})
   const [warnings, setWarnings] = useState<Partial<Record<keyof CalculatorInputs, string>>>({})
-  const [touched, setTouched] = useState<Partial<Record<keyof CalculatorInputs, boolean>>>({})
+  const [isRetirementLengthFocused, setIsRetirementLengthFocused] = useState(false)
+  const [isYearsToRetirementFocused, setIsYearsToRetirementFocused] = useState(false)
+  const [isExpectedReturnBeforeRetirementFocused, setIsExpectedReturnBeforeRetirementFocused] = useState(false)
 
   const calculatedRequiredBalance = useMemo(() => {
     return calculateRequiredBalance(
@@ -129,7 +131,9 @@ export default function RetirementCalculator() {
     setInputs(defaultInputs)
     setErrors({})
     setWarnings({})
-    setTouched({})
+    setIsRetirementLengthFocused(false)
+    setIsYearsToRetirementFocused(false)
+    setIsExpectedReturnBeforeRetirementFocused(false)
     setActiveTab("balance")
     setFrozenRequiredBalance(0)
   }
@@ -220,26 +224,28 @@ export default function RetirementCalculator() {
                       min="1"
                       max="75"
                       aria-describedby={
-                        errors.retirementLength
+                        !isRetirementLengthFocused && errors.retirementLength
                           ? "retirement-length-error"
-                          : warnings.retirementLength
+                          : !isRetirementLengthFocused && warnings.retirementLength
                           ? "retirement-length-warning"
                           : undefined
                       }
-                      aria-invalid={!!errors.retirementLength}
+                      aria-invalid={!isRetirementLengthFocused && !!errors.retirementLength}
                       value={inputs.retirementLength || ""}
                       onChange={(e) => updateInput("retirementLength", e.target.value)}
-                      className={`${baseInputClass} pl-4 pr-16 ${inputStateClass(errors.retirementLength, warnings.retirementLength)}`}
+                      onFocus={() => setIsRetirementLengthFocused(true)}
+                      onBlur={() => setIsRetirementLengthFocused(false)}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isRetirementLengthFocused ? inputStateClass(errors.retirementLength, warnings.retirementLength) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                       years
                     </span>
                   </div>
-                  {errors.retirementLength ? (
+                  {!isRetirementLengthFocused && errors.retirementLength ? (
                     <p id="retirement-length-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.retirementLength}
                     </p>
-                  ) : warnings.retirementLength ? (
+                  ) : !isRetirementLengthFocused && warnings.retirementLength ? (
                     <p id="retirement-length-warning" role="status" className="text-sm text-[var(--color-inline-warning)]">
                       {warnings.retirementLength}
                     </p>
@@ -351,28 +357,26 @@ export default function RetirementCalculator() {
                       type="number"
                       min="0"
                       max="75"
-                      aria-describedby={touched.yearsToRetirement && errors.yearsToRetirement ? "years-to-retirement-error" : undefined}
-                      aria-invalid={touched.yearsToRetirement && !!errors.yearsToRetirement}
+                      aria-describedby={!isYearsToRetirementFocused && errors.yearsToRetirement ? "years-to-retirement-error" : undefined}
+                      aria-invalid={!isYearsToRetirementFocused && !!errors.yearsToRetirement}
                       value={inputs.yearsToRetirement || ""}
-                      onChange={(e) => {
-                        setTouched((prev) => ({ ...prev, yearsToRetirement: true }))
-                        updateInput("yearsToRetirement", e.target.value)
-                      }}
+                      onChange={(e) => updateInput("yearsToRetirement", e.target.value)}
+                      onFocus={() => setIsYearsToRetirementFocused(true)}
                       onBlur={(e) => {
-                        setTouched((prev) => ({ ...prev, yearsToRetirement: true }))
+                        setIsYearsToRetirementFocused(false)
                         if (e.target.value === "") {
                           setErrors((prev) => ({ ...prev, yearsToRetirement: "Please enter how many years until you plan to retire." }))
                         } else if (inputs.yearsToRetirement === 0) {
                           setErrors((prev) => ({ ...prev, yearsToRetirement: "With no time left to save, you'd need your full target balance today." }))
                         }
                       }}
-                      className={`${baseInputClass} pl-4 pr-16 ${touched.yearsToRetirement ? inputStateClass(errors.yearsToRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isYearsToRetirementFocused ? inputStateClass(errors.yearsToRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                       years
                     </span>
                   </div>
-                  {touched.yearsToRetirement && errors.yearsToRetirement ? (
+                  {!isYearsToRetirementFocused && errors.yearsToRetirement ? (
                     <p id="years-to-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.yearsToRetirement}
                     </p>
@@ -402,29 +406,27 @@ export default function RetirementCalculator() {
                       max="30"
                       step="0.1"
                       aria-describedby={
-                        touched.expectedReturnBeforeRetirement && errors.expectedReturnBeforeRetirement
+                        !isExpectedReturnBeforeRetirementFocused && errors.expectedReturnBeforeRetirement
                           ? "return-before-retirement-error"
                           : warnings.expectedReturnBeforeRetirement
                           ? "return-before-retirement-warning"
                           : undefined
                       }
-                      aria-invalid={touched.expectedReturnBeforeRetirement && !!errors.expectedReturnBeforeRetirement}
+                      aria-invalid={!isExpectedReturnBeforeRetirementFocused && !!errors.expectedReturnBeforeRetirement}
                       value={inputs.expectedReturnBeforeRetirement || ""}
-                      onChange={(e) => {
-                        setTouched((prev) => ({ ...prev, expectedReturnBeforeRetirement: true }))
-                        updateInput("expectedReturnBeforeRetirement", e.target.value)
-                      }}
+                      onChange={(e) => updateInput("expectedReturnBeforeRetirement", e.target.value)}
+                      onFocus={() => setIsExpectedReturnBeforeRetirementFocused(true)}
                       onBlur={(e) => {
-                        setTouched((prev) => ({ ...prev, expectedReturnBeforeRetirement: true }))
+                        setIsExpectedReturnBeforeRetirementFocused(false)
                         if (e.target.value === "") {
                           setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: "Please enter an expected annual return rate before retirement." }))
                         }
                       }}
-                      className={`${baseInputClass} pl-4 pr-16 ${touched.expectedReturnBeforeRetirement ? inputStateClass(errors.expectedReturnBeforeRetirement, warnings.expectedReturnBeforeRetirement) : warnings.expectedReturnBeforeRetirement ? inputStateClass(undefined, warnings.expectedReturnBeforeRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isExpectedReturnBeforeRetirementFocused ? inputStateClass(errors.expectedReturnBeforeRetirement, warnings.expectedReturnBeforeRetirement) : warnings.expectedReturnBeforeRetirement ? inputStateClass(undefined, warnings.expectedReturnBeforeRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                   </div>
-                  {touched.expectedReturnBeforeRetirement && errors.expectedReturnBeforeRetirement ? (
+                  {!isExpectedReturnBeforeRetirementFocused && errors.expectedReturnBeforeRetirement ? (
                     <p id="return-before-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.expectedReturnBeforeRetirement}
                     </p>
