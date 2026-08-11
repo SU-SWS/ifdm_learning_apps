@@ -21,6 +21,18 @@ import {
   validateYearsToRetirement,
 } from "./lib/validation";
 
+// Strips anything but digits and a single "." from a currency input, and
+// truncates to at most 2 decimal places, so the raw string can be kept
+// around for display without losing a trailing "." or trailing zeros.
+const sanitizeDecimalInput = (value: string): string => {
+  const cleaned = value.replace(/,/g, "").replace(/[^0-9.]/g, "")
+  const firstDot = cleaned.indexOf(".")
+  if (firstDot === -1) return cleaned
+  const intPart = cleaned.slice(0, firstDot)
+  const decPart = cleaned.slice(firstDot + 1).replace(/\./g, "").slice(0, 2)
+  return `${intPart}.${decPart}`
+}
+
 const baseInputClass = "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 const inputStateClass = (error?: string, warning?: string) =>
   error
@@ -40,6 +52,10 @@ export default function RetirementCalculator() {
   const [isExpectedReturnBeforeRetirementFocused, setIsExpectedReturnBeforeRetirementFocused] = useState(false)
   const [expectedReturnBeforeRetirementInput, setExpectedReturnBeforeRetirementInput] = useState("")
   const [expectedReturnDuringRetirementInput, setExpectedReturnDuringRetirementInput] = useState("")
+  const [annualSpendingInput, setAnnualSpendingInput] = useState("")
+  const [currentSavingsInput, setCurrentSavingsInput] = useState("")
+  const [isAnnualSpendingFocused, setIsAnnualSpendingFocused] = useState(false)
+  const [isCurrentSavingsFocused, setIsCurrentSavingsFocused] = useState(false)
 
   const calculatedRequiredBalance = useMemo(() => {
     return calculateRequiredBalance(
@@ -79,11 +95,13 @@ export default function RetirementCalculator() {
     if (key === "annualSpending") {
       const validation = validateAnnualSpending(numValue)
       setErrors((prev) => ({ ...prev, annualSpending: validation.error }))
+      setAnnualSpendingInput(value)
     }
 
     if (key === "currentSavings") {
       const validation = validateCurrentSavings(numValue)
       setErrors((prev) => ({ ...prev, currentSavings: validation.error }))
+      setCurrentSavingsInput(value)
     }
 
     if (key === "expectedReturnBeforeRetirement") {
@@ -139,6 +157,8 @@ export default function RetirementCalculator() {
     setIsExpectedReturnBeforeRetirementFocused(false)
     setExpectedReturnBeforeRetirementInput("")
     setExpectedReturnDuringRetirementInput("")
+    setAnnualSpendingInput("")
+    setCurrentSavingsInput("")
     setActiveTab("balance")
     setFrozenRequiredBalance(0)
   }
@@ -199,12 +219,14 @@ export default function RetirementCalculator() {
                     <input
                       id="annual-spending"
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       min="1"
                       aria-describedby={errors.annualSpending ? "annual-spending-error" : undefined}
                       aria-invalid={!!errors.annualSpending}
-                      value={inputs.annualSpending ? formatNumberWithCommas(inputs.annualSpending.toString()) : ""}
-                      onChange={(e) => updateInput("annualSpending", e.target.value.replace(/,/g, ""))}
+                      value={isAnnualSpendingFocused ? annualSpendingInput : formatNumberWithCommas(annualSpendingInput)}
+                      onChange={(e) => updateInput("annualSpending", sanitizeDecimalInput(e.target.value))}
+                      onFocus={() => setIsAnnualSpendingFocused(true)}
+                      onBlur={() => setIsAnnualSpendingFocused(false)}
                       className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.annualSpending)}`}
                     />
                   </div>
@@ -332,13 +354,15 @@ export default function RetirementCalculator() {
                     <input
                       id="current-savings"
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       min="0"
                       placeholder=""
                       aria-describedby={errors.currentSavings ? "current-savings-error" : undefined}
                       aria-invalid={!!errors.currentSavings}
-                      value={inputs.currentSavings ? formatNumberWithCommas(inputs.currentSavings.toString()) : ""}
-                      onChange={(e) => updateInput("currentSavings", e.target.value.replace(/,/g, ""))}
+                      value={isCurrentSavingsFocused ? currentSavingsInput : formatNumberWithCommas(currentSavingsInput)}
+                      onChange={(e) => updateInput("currentSavings", sanitizeDecimalInput(e.target.value))}
+                      onFocus={() => setIsCurrentSavingsFocused(true)}
+                      onBlur={() => setIsCurrentSavingsFocused(false)}
                       className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.currentSavings)}`}
                     />
                   </div>
