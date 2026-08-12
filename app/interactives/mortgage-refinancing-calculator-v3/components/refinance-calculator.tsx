@@ -115,8 +115,8 @@ export function RefinanceCalculator() {
       // the expected length of stay is longer than a loan term, savings are
       // capped at the shorter of the two loan terms.
       const savingsMonths = Math.min(h, oldMonths, nNew)
-      const oldRemaining = presentValueOfPayments(oldPmt, rOld, oldMonths - h)
-      const newRemaining = presentValueOfPayments(newPayment, rNew, nNew - h)
+      const oldRemaining = oldMonths > h ? presentValueOfPayments(oldPmt, rOld, oldMonths - h) : 0
+      const newRemaining = nNew > h ? presentValueOfPayments(newPayment, rNew, nNew - h) : 0
       const pvSav = presentValueOfPayments(monthlySavings, rNew, savingsMonths)
       const pvDiff = (oldRemaining - newRemaining) * discountFactor(rNew, h)
       return { pvSavings: pvSav, pvDiffBalance: pvDiff, overall: pvSav + pvDiff - closing }
