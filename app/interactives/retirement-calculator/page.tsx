@@ -329,7 +329,7 @@ export default function RetirementCalculator() {
                       aria-describedby={
                         !isExpectedReturnDuringRetirementFocused && errors.expectedReturnDuringRetirement
                           ? "return-during-retirement-error"
-                          : warnings.expectedReturnDuringRetirement
+                          : !isExpectedReturnDuringRetirementFocused && warnings.expectedReturnDuringRetirement
                           ? "return-during-retirement-warning"
                           : undefined
                       }
@@ -351,7 +351,7 @@ export default function RetirementCalculator() {
                     <p id="return-during-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.expectedReturnDuringRetirement}
                     </p>
-                  ) : warnings.expectedReturnDuringRetirement ? (
+                  ) : !isExpectedReturnDuringRetirementFocused && warnings.expectedReturnDuringRetirement ? (
                     <p id="return-during-retirement-warning" role="status" className="text-sm text-[var(--color-inline-warning)]">
                       {warnings.expectedReturnDuringRetirement}
                     </p>
@@ -469,7 +469,7 @@ export default function RetirementCalculator() {
                       aria-describedby={
                         !isExpectedReturnBeforeRetirementFocused && errors.expectedReturnBeforeRetirement
                           ? "return-before-retirement-error"
-                          : warnings.expectedReturnBeforeRetirement
+                          : !isExpectedReturnBeforeRetirementFocused && warnings.expectedReturnBeforeRetirement
                           ? "return-before-retirement-warning"
                           : undefined
                       }
@@ -483,7 +483,7 @@ export default function RetirementCalculator() {
                           setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: "Please enter an expected annual return rate before retirement." }))
                         }
                       }}
-                      className={`${baseInputClass} pl-4 pr-16 ${!isExpectedReturnBeforeRetirementFocused ? inputStateClass(errors.expectedReturnBeforeRetirement, warnings.expectedReturnBeforeRetirement) : warnings.expectedReturnBeforeRetirement ? inputStateClass(undefined, warnings.expectedReturnBeforeRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isExpectedReturnBeforeRetirementFocused ? inputStateClass(errors.expectedReturnBeforeRetirement, warnings.expectedReturnBeforeRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                   </div>
@@ -491,7 +491,7 @@ export default function RetirementCalculator() {
                     <p id="return-before-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.expectedReturnBeforeRetirement}
                     </p>
-                  ) : warnings.expectedReturnBeforeRetirement ? (
+                  ) : !isExpectedReturnBeforeRetirementFocused && warnings.expectedReturnBeforeRetirement ? (
                     <p id="return-before-retirement-warning" role="status" className="text-sm text-[var(--color-inline-warning)]">
                       {warnings.expectedReturnBeforeRetirement}
                     </p>
