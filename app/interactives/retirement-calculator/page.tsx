@@ -33,6 +33,12 @@ const sanitizeDecimalInput = (value: string): string => {
   return `${intPart}.${decPart}`
 }
 
+const capDecimalPlaces = (value: string): string => {
+  const dotIndex = value.indexOf(".")
+  if (dotIndex === -1) return value
+  return value.slice(0, dotIndex + 3)
+}
+
 const baseInputClass = "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 const inputStateClass = (error?: string, warning?: string) =>
   error
@@ -54,6 +60,8 @@ export default function RetirementCalculator() {
   const [expectedReturnDuringRetirementInput, setExpectedReturnDuringRetirementInput] = useState("")
   const [annualSpendingInput, setAnnualSpendingInput] = useState("")
   const [currentSavingsInput, setCurrentSavingsInput] = useState("")
+  const [retirementLengthInput, setRetirementLengthInput] = useState("")
+  const [yearsToRetirementInput, setYearsToRetirementInput] = useState("")
   const [isAnnualSpendingFocused, setIsAnnualSpendingFocused] = useState(false)
   const [isCurrentSavingsFocused, setIsCurrentSavingsFocused] = useState(false)
 
@@ -116,6 +124,7 @@ export default function RetirementCalculator() {
       if (validation) {
         setErrors((prev) => ({ ...prev, yearsToRetirement: validation.error }))
       }
+      setYearsToRetirementInput(value)
     }
 
     if (key === "expectedReturnDuringRetirement") {
@@ -129,6 +138,7 @@ export default function RetirementCalculator() {
       const validation = validateRetirementLength(numValue)
       setErrors((prev) => ({ ...prev, retirementLength: validation.error }))
       setWarnings((prev) => ({ ...prev, retirementLength: validation.warning }))
+      setRetirementLengthInput(value)
     }
 
     setInputs((prev) => ({ ...prev, [key]: numValue }))
@@ -159,6 +169,8 @@ export default function RetirementCalculator() {
     setExpectedReturnDuringRetirementInput("")
     setAnnualSpendingInput("")
     setCurrentSavingsInput("")
+    setRetirementLengthInput("")
+    setYearsToRetirementInput("")
     setActiveTab("balance")
     setFrozenRequiredBalance(0)
   }
@@ -258,8 +270,8 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!isRetirementLengthFocused && !!errors.retirementLength}
-                      value={inputs.retirementLength || ""}
-                      onChange={(e) => updateInput("retirementLength", e.target.value)}
+                      value={retirementLengthInput}
+                      onChange={(e) => updateInput("retirementLength", capDecimalPlaces(e.target.value))}
                       onFocus={() => setIsRetirementLengthFocused(true)}
                       onBlur={() => setIsRetirementLengthFocused(false)}
                       className={`${baseInputClass} pl-4 pr-16 ${!isRetirementLengthFocused ? inputStateClass(errors.retirementLength, warnings.retirementLength) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
@@ -310,7 +322,7 @@ export default function RetirementCalculator() {
                       }
                       aria-invalid={!!errors.expectedReturnDuringRetirement}
                       value={expectedReturnDuringRetirementInput}
-                      onChange={(e) => updateInput("expectedReturnDuringRetirement", e.target.value)}
+                      onChange={(e) => updateInput("expectedReturnDuringRetirement", capDecimalPlaces(e.target.value))}
                       className={`${baseInputClass} pl-4 pr-16 ${inputStateClass(errors.expectedReturnDuringRetirement, warnings.expectedReturnDuringRetirement)}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
@@ -388,8 +400,8 @@ export default function RetirementCalculator() {
                       max="75"
                       aria-describedby={!isYearsToRetirementFocused && errors.yearsToRetirement ? "years-to-retirement-error" : undefined}
                       aria-invalid={!isYearsToRetirementFocused && !!errors.yearsToRetirement}
-                      value={inputs.yearsToRetirement || ""}
-                      onChange={(e) => updateInput("yearsToRetirement", e.target.value)}
+                      value={yearsToRetirementInput}
+                      onChange={(e) => updateInput("yearsToRetirement", capDecimalPlaces(e.target.value))}
                       onFocus={() => setIsYearsToRetirementFocused(true)}
                       onBlur={(e) => {
                         setIsYearsToRetirementFocused(false)
@@ -443,7 +455,7 @@ export default function RetirementCalculator() {
                       }
                       aria-invalid={!isExpectedReturnBeforeRetirementFocused && !!errors.expectedReturnBeforeRetirement}
                       value={expectedReturnBeforeRetirementInput}
-                      onChange={(e) => updateInput("expectedReturnBeforeRetirement", e.target.value)}
+                      onChange={(e) => updateInput("expectedReturnBeforeRetirement", capDecimalPlaces(e.target.value))}
                       onFocus={() => setIsExpectedReturnBeforeRetirementFocused(true)}
                       onBlur={(e) => {
                         setIsExpectedReturnBeforeRetirementFocused(false)
