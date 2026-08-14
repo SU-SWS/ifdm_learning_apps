@@ -4,37 +4,39 @@ import { useState, useMemo } from "react"
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/app/ui/components/tabs";
 import InfoPopover from "@/app/ui/components/popover";
+import {
+  CalculatorInputs,
+  defaultInputs,
+  calculateRequiredBalance,
+  calculateSavingsResults,
+  formatCurrency,
+  formatNumberWithCommas,
+} from "./lib/retirement";
+import {
+  validateAnnualSpending,
+  validateCurrentSavings,
+  validateReturnBeforeRetirement,
+  validateReturnDuringRetirement,
+  validateRetirementLength,
+  validateYearsToRetirement,
+} from "./lib/validation";
 
-interface CalculatorInputs {
-  annualSpending: number
-  retirementLength: number
-  expectedReturnDuringRetirement: number
-  expectedReturnBeforeRetirement: number
-  currentSavings: number
-  yearsToRetirement: number
+// Strips anything but digits and a single "." from a currency input, and
+// truncates to at most 2 decimal places, so the raw string can be kept
+// around for display without losing a trailing "." or trailing zeros.
+const sanitizeDecimalInput = (value: string): string => {
+  const cleaned = value.replace(/,/g, "").replace(/[^0-9.]/g, "")
+  const firstDot = cleaned.indexOf(".")
+  if (firstDot === -1) return cleaned
+  const intPart = cleaned.slice(0, firstDot)
+  const decPart = cleaned.slice(firstDot + 1).replace(/\./g, "").slice(0, 2)
+  return `${intPart}.${decPart}`
 }
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function formatNumberWithCommas(value: string): string {
-  const num = value.replace(/,/g, "")
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-}
-
-const defaultInputs: CalculatorInputs = {
-  annualSpending: 0,
-  retirementLength: 0,
-  expectedReturnDuringRetirement: 0,
-  expectedReturnBeforeRetirement: 0,
-  currentSavings: 0,
-  yearsToRetirement: 0,
+const capDecimalPlaces = (value: string): string => {
+  const dotIndex = value.indexOf(".")
+  if (dotIndex === -1) return value
+  return value.slice(0, dotIndex + 3)
 }
 
 const baseInputClass = "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -51,16 +53,24 @@ export default function RetirementCalculator() {
   const [frozenRequiredBalance, setFrozenRequiredBalance] = useState<number>(0)
   const [errors, setErrors] = useState<Partial<Record<keyof CalculatorInputs, string>>>({})
   const [warnings, setWarnings] = useState<Partial<Record<keyof CalculatorInputs, string>>>({})
-  const [touched, setTouched] = useState<Partial<Record<keyof CalculatorInputs, boolean>>>({})
+  const [isRetirementLengthFocused, setIsRetirementLengthFocused] = useState(false)
+  const [isYearsToRetirementFocused, setIsYearsToRetirementFocused] = useState(false)
+  const [isExpectedReturnBeforeRetirementFocused, setIsExpectedReturnBeforeRetirementFocused] = useState(false)
+  const [isExpectedReturnDuringRetirementFocused, setIsExpectedReturnDuringRetirementFocused] = useState(false)
+  const [expectedReturnBeforeRetirementInput, setExpectedReturnBeforeRetirementInput] = useState("")
+  const [expectedReturnDuringRetirementInput, setExpectedReturnDuringRetirementInput] = useState("")
+  const [annualSpendingInput, setAnnualSpendingInput] = useState("")
+  const [currentSavingsInput, setCurrentSavingsInput] = useState("")
+  const [retirementLengthInput, setRetirementLengthInput] = useState("")
+  const [yearsToRetirementInput, setYearsToRetirementInput] = useState("")
+  const [isAnnualSpendingFocused, setIsAnnualSpendingFocused] = useState(false)
+  const [isCurrentSavingsFocused, setIsCurrentSavingsFocused] = useState(false)
 
   const calculatedRequiredBalance = useMemo(() => {
-    const rate = inputs.expectedReturnDuringRetirement / 100
-    if (rate === 0) {
-      return inputs.annualSpending * inputs.retirementLength
-    }
-    return (
-      inputs.annualSpending *
-      ((1 - Math.pow(1 + rate, -inputs.retirementLength)) / rate)
+    return calculateRequiredBalance(
+      inputs.annualSpending,
+      inputs.retirementLength,
+      inputs.expectedReturnDuringRetirement / 100
     )
   }, [inputs.annualSpending, inputs.retirementLength, inputs.expectedReturnDuringRetirement])
 
@@ -74,118 +84,62 @@ export default function RetirementCalculator() {
   const showSavingsResults =
     frozenRequiredBalance > 0 &&
     inputs.yearsToRetirement > 0 &&
-    inputs.expectedReturnBeforeRetirement !== 0 &&
     !errors.currentSavings &&
     !errors.yearsToRetirement &&
     !errors.expectedReturnBeforeRetirement
 
   const results = useMemo(() => {
-    const realReturnBeforeRetirement = inputs.expectedReturnBeforeRetirement / 100
-
     const requiredBalance = activeTab === "savings" ? frozenRequiredBalance : calculatedRequiredBalance
-
-    const FV_currentSavings = inputs.currentSavings * Math.pow(1 + realReturnBeforeRetirement, inputs.yearsToRetirement)
-    const targetBalance = Math.max(0, requiredBalance - FV_currentSavings)
-
-    let annualSavings: number
-    if (realReturnBeforeRetirement === 0 || inputs.yearsToRetirement <= 0) {
-      annualSavings = inputs.yearsToRetirement > 0 ? targetBalance / inputs.yearsToRetirement : 0
-    } else {
-      annualSavings =
-        targetBalance *
-        (realReturnBeforeRetirement / (Math.pow(1 + realReturnBeforeRetirement, inputs.yearsToRetirement) - 1))
-    }
-
-    const calculateFrequencySavings = (frequency: number) => {
-      if (realReturnBeforeRetirement === 0 || inputs.yearsToRetirement <= 0) {
-        return inputs.yearsToRetirement > 0 ? targetBalance / (inputs.yearsToRetirement * frequency) : 0
-      }
-      const periodRate = Math.pow(1 + realReturnBeforeRetirement, 1 / frequency) - 1
-      const totalPeriods = inputs.yearsToRetirement * frequency
-      return targetBalance * (periodRate / (Math.pow(1 + periodRate, totalPeriods) - 1))
-    }
-
-    const monthlySavings = calculateFrequencySavings(12)
-    const biWeeklySavings = calculateFrequencySavings(26)
-    const weeklySavings = calculateFrequencySavings(52)
-
-    return {
-      requiredBalance: Math.round(requiredBalance),
-      targetBalance: Math.round(targetBalance),
-      annualSavings: Math.round(annualSavings),
-      monthlySavings: Math.round(monthlySavings),
-      biWeeklySavings: Math.round(biWeeklySavings),
-      weeklySavings: Math.round(weeklySavings),
-      fvCurrentSavings: Math.round(FV_currentSavings),
-    }
+    return calculateSavingsResults(
+      requiredBalance,
+      inputs.currentSavings,
+      inputs.yearsToRetirement,
+      inputs.expectedReturnBeforeRetirement / 100
+    )
   }, [inputs, activeTab, frozenRequiredBalance, calculatedRequiredBalance])
 
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0
 
     if (key === "annualSpending") {
-      if (numValue !== 0 && (numValue < 1 || numValue > 10_000_000)) {
-        setErrors((prev) => ({ ...prev, annualSpending: "Enter an amount between $1 and $10,000,000." }))
-      } else {
-        setErrors((prev) => ({ ...prev, annualSpending: undefined }))
-      }
+      const validation = validateAnnualSpending(numValue)
+      setErrors((prev) => ({ ...prev, annualSpending: validation.error }))
+      setAnnualSpendingInput(value)
     }
 
     if (key === "currentSavings") {
-      if (numValue < 0 || numValue > 100_000_000) {
-        setErrors((prev) => ({ ...prev, currentSavings: "Enter an amount between $0 and $100,000,000." }))
-      } else {
-        setErrors((prev) => ({ ...prev, currentSavings: undefined }))
-      }
+      const validation = validateCurrentSavings(numValue)
+      setErrors((prev) => ({ ...prev, currentSavings: validation.error }))
+      setCurrentSavingsInput(value)
     }
 
     if (key === "expectedReturnBeforeRetirement") {
-      if (numValue < -5 || numValue > 30) {
-        setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: "Enter a rate between −5% and 30%." }))
-        setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-      } else if (numValue >= -5 && numValue < 0) {
-        setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-        setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: "A negative return means your savings are expected to lose value over time. Double-check your entry." }))
-      } else {
-        setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-        setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: undefined }))
-      }
+      const validation = validateReturnBeforeRetirement(numValue)
+      setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: validation.error }))
+      setWarnings((prev) => ({ ...prev, expectedReturnBeforeRetirement: validation.warning }))
+      setExpectedReturnBeforeRetirementInput(value)
     }
 
     if (key === "yearsToRetirement") {
-      if (numValue < 0 || numValue > 75) {
-        setErrors((prev) => ({ ...prev, yearsToRetirement: "Enter an amount of years between 0 and 75." }))
-      } else if (numValue === 0 && value !== "") {
-        setErrors((prev) => ({ ...prev, yearsToRetirement: "With no time left to save, you'd need your full target balance today." }))
-      } else if (numValue > 0) {
-        setErrors((prev) => ({ ...prev, yearsToRetirement: undefined }))
+      const validation = validateYearsToRetirement(numValue, value)
+      if (validation) {
+        setErrors((prev) => ({ ...prev, yearsToRetirement: validation.error }))
       }
+      setYearsToRetirementInput(value)
     }
 
     if (key === "expectedReturnDuringRetirement") {
-      if (numValue !== 0 && (numValue < -5 || numValue > 30)) {
-        setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: "Enter a rate between −5% and 30%." }))
-      } else {
-        setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: undefined }))
-      }
-      if (numValue >= -5 && numValue < 0) {
-        setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: "A negative return means your savings are expected to lose value over time. Double-check your entry." }))
-      } else {
-        setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: undefined }))
-      }
+      const validation = validateReturnDuringRetirement(numValue)
+      setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: validation.error }))
+      setWarnings((prev) => ({ ...prev, expectedReturnDuringRetirement: validation.warning }))
+      setExpectedReturnDuringRetirementInput(value)
     }
 
     if (key === "retirementLength") {
-      if (numValue !== 0 && (numValue < 1 || numValue > 75)) {
-        setErrors((prev) => ({ ...prev, retirementLength: "Enter an amount of years between 1 and 75." }))
-      } else {
-        setErrors((prev) => ({ ...prev, retirementLength: undefined }))
-      }
-      if (numValue >= 1 && numValue <= 3) {
-        setWarnings((prev) => ({ ...prev, retirementLength: "This is a very short retirement. Double-check your entry." }))
-      } else {
-        setWarnings((prev) => ({ ...prev, retirementLength: undefined }))
-      }
+      const validation = validateRetirementLength(numValue)
+      setErrors((prev) => ({ ...prev, retirementLength: validation.error }))
+      setWarnings((prev) => ({ ...prev, retirementLength: validation.warning }))
+      setRetirementLengthInput(value)
     }
 
     setInputs((prev) => ({ ...prev, [key]: numValue }))
@@ -201,16 +155,7 @@ export default function RetirementCalculator() {
       const lengthVal = key === "retirementLength" ? numValue : inputs.retirementLength
       const rateVal = key === "expectedReturnDuringRetirement" ? numValue / 100 : inputs.expectedReturnDuringRetirement / 100
 
-      let calculatedFrozen: number
-      if (rateVal === 0) {
-        calculatedFrozen = spendingVal * lengthVal
-      } else {
-        calculatedFrozen =
-          spendingVal *
-          ((1 - Math.pow(1 + rateVal, -lengthVal)) / rateVal)
-      }
-
-      setFrozenRequiredBalance(Math.round(calculatedFrozen))
+      setFrozenRequiredBalance(Math.round(calculateRequiredBalance(spendingVal, lengthVal, rateVal)))
     }
   }
 
@@ -218,7 +163,17 @@ export default function RetirementCalculator() {
     setInputs(defaultInputs)
     setErrors({})
     setWarnings({})
-    setTouched({})
+    setIsRetirementLengthFocused(false)
+    setIsYearsToRetirementFocused(false)
+    setIsExpectedReturnBeforeRetirementFocused(false)
+    setIsExpectedReturnDuringRetirementFocused(false)
+    setIsAnnualSpendingFocused(false)
+    setExpectedReturnBeforeRetirementInput("")
+    setExpectedReturnDuringRetirementInput("")
+    setAnnualSpendingInput("")
+    setCurrentSavingsInput("")
+    setRetirementLengthInput("")
+    setYearsToRetirementInput("")
     setActiveTab("balance")
     setFrozenRequiredBalance(0)
   }
@@ -279,16 +234,23 @@ export default function RetirementCalculator() {
                     <input
                       id="annual-spending"
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       min="1"
-                      aria-describedby={errors.annualSpending ? "annual-spending-error" : undefined}
-                      aria-invalid={!!errors.annualSpending}
-                      value={inputs.annualSpending ? formatNumberWithCommas(inputs.annualSpending.toString()) : ""}
-                      onChange={(e) => updateInput("annualSpending", e.target.value.replace(/,/g, ""))}
-                      className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.annualSpending)}`}
+                      aria-describedby={!isAnnualSpendingFocused && errors.annualSpending ? "annual-spending-error" : undefined}
+                      aria-invalid={!isAnnualSpendingFocused && !!errors.annualSpending}
+                      value={isAnnualSpendingFocused ? annualSpendingInput : formatNumberWithCommas(annualSpendingInput)}
+                      onChange={(e) => updateInput("annualSpending", sanitizeDecimalInput(e.target.value))}
+                      onFocus={() => setIsAnnualSpendingFocused(true)}
+                      onBlur={(e) => {
+                        setIsAnnualSpendingFocused(false)
+                        if (e.target.value === "") {
+                          setErrors((prev) => ({ ...prev, annualSpending: "Please enter how much you plan to spend each year in retirement." }))
+                        }
+                      }}
+                      className={`${baseInputClass} pl-8 pr-16 ${!isAnnualSpendingFocused ? inputStateClass(errors.annualSpending) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                   </div>
-                  {errors.annualSpending ? (
+                  {!isAnnualSpendingFocused && errors.annualSpending ? (
                     <p id="annual-spending-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.annualSpending}
                     </p>
@@ -309,26 +271,33 @@ export default function RetirementCalculator() {
                       min="1"
                       max="75"
                       aria-describedby={
-                        errors.retirementLength
+                        !isRetirementLengthFocused && errors.retirementLength
                           ? "retirement-length-error"
-                          : warnings.retirementLength
+                          : !isRetirementLengthFocused && warnings.retirementLength
                           ? "retirement-length-warning"
                           : undefined
                       }
-                      aria-invalid={!!errors.retirementLength}
-                      value={inputs.retirementLength || ""}
-                      onChange={(e) => updateInput("retirementLength", e.target.value)}
-                      className={`${baseInputClass} pl-4 pr-16 ${inputStateClass(errors.retirementLength, warnings.retirementLength)}`}
+                      aria-invalid={!isRetirementLengthFocused && !!errors.retirementLength}
+                      value={retirementLengthInput}
+                      onChange={(e) => updateInput("retirementLength", capDecimalPlaces(e.target.value))}
+                      onFocus={() => setIsRetirementLengthFocused(true)}
+                      onBlur={(e) => {
+                        setIsRetirementLengthFocused(false)
+                        if (e.target.value === "") {
+                          setErrors((prev) => ({ ...prev, retirementLength: "Please enter how many years your retirement will last." }))
+                        }
+                      }}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isRetirementLengthFocused ? inputStateClass(errors.retirementLength, warnings.retirementLength) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                       years
                     </span>
                   </div>
-                  {errors.retirementLength ? (
+                  {!isRetirementLengthFocused && errors.retirementLength ? (
                     <p id="retirement-length-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.retirementLength}
                     </p>
-                  ) : warnings.retirementLength ? (
+                  ) : !isRetirementLengthFocused && warnings.retirementLength ? (
                     <p id="retirement-length-warning" role="status" className="text-sm text-[var(--color-inline-warning)]">
                       {warnings.retirementLength}
                     </p>
@@ -358,24 +327,31 @@ export default function RetirementCalculator() {
                       max="30"
                       step="0.1"
                       aria-describedby={
-                        errors.expectedReturnDuringRetirement
+                        !isExpectedReturnDuringRetirementFocused && errors.expectedReturnDuringRetirement
                           ? "return-during-retirement-error"
-                          : warnings.expectedReturnDuringRetirement
+                          : !isExpectedReturnDuringRetirementFocused && warnings.expectedReturnDuringRetirement
                           ? "return-during-retirement-warning"
                           : undefined
                       }
-                      aria-invalid={!!errors.expectedReturnDuringRetirement}
-                      value={inputs.expectedReturnDuringRetirement || ""}
-                      onChange={(e) => updateInput("expectedReturnDuringRetirement", e.target.value)}
-                      className={`${baseInputClass} pl-4 pr-16 ${inputStateClass(errors.expectedReturnDuringRetirement, warnings.expectedReturnDuringRetirement)}`}
+                      aria-invalid={!isExpectedReturnDuringRetirementFocused && !!errors.expectedReturnDuringRetirement}
+                      value={expectedReturnDuringRetirementInput}
+                      onChange={(e) => updateInput("expectedReturnDuringRetirement", capDecimalPlaces(e.target.value))}
+                      onFocus={() => setIsExpectedReturnDuringRetirementFocused(true)}
+                      onBlur={(e) => {
+                        setIsExpectedReturnDuringRetirementFocused(false)
+                        if (e.target.value === "") {
+                          setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: "Please enter an expected annual return rate." }))
+                        }
+                      }}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isExpectedReturnDuringRetirementFocused ? inputStateClass(errors.expectedReturnDuringRetirement, warnings.expectedReturnDuringRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                   </div>
-                  {errors.expectedReturnDuringRetirement ? (
+                  {!isExpectedReturnDuringRetirementFocused && errors.expectedReturnDuringRetirement ? (
                     <p id="return-during-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.expectedReturnDuringRetirement}
                     </p>
-                  ) : warnings.expectedReturnDuringRetirement ? (
+                  ) : !isExpectedReturnDuringRetirementFocused && warnings.expectedReturnDuringRetirement ? (
                     <p id="return-during-retirement-warning" role="status" className="text-sm text-[var(--color-inline-warning)]">
                       {warnings.expectedReturnDuringRetirement}
                     </p>
@@ -410,13 +386,15 @@ export default function RetirementCalculator() {
                     <input
                       id="current-savings"
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       min="0"
                       placeholder=""
                       aria-describedby={errors.currentSavings ? "current-savings-error" : undefined}
                       aria-invalid={!!errors.currentSavings}
-                      value={inputs.currentSavings ? formatNumberWithCommas(inputs.currentSavings.toString()) : ""}
-                      onChange={(e) => updateInput("currentSavings", e.target.value.replace(/,/g, ""))}
+                      value={isCurrentSavingsFocused ? currentSavingsInput : formatNumberWithCommas(currentSavingsInput)}
+                      onChange={(e) => updateInput("currentSavings", sanitizeDecimalInput(e.target.value))}
+                      onFocus={() => setIsCurrentSavingsFocused(true)}
+                      onBlur={() => setIsCurrentSavingsFocused(false)}
                       className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.currentSavings)}`}
                     />
                   </div>
@@ -440,28 +418,26 @@ export default function RetirementCalculator() {
                       type="number"
                       min="0"
                       max="75"
-                      aria-describedby={touched.yearsToRetirement && errors.yearsToRetirement ? "years-to-retirement-error" : undefined}
-                      aria-invalid={touched.yearsToRetirement && !!errors.yearsToRetirement}
-                      value={inputs.yearsToRetirement || ""}
-                      onChange={(e) => {
-                        setTouched((prev) => ({ ...prev, yearsToRetirement: true }))
-                        updateInput("yearsToRetirement", e.target.value)
-                      }}
+                      aria-describedby={!isYearsToRetirementFocused && errors.yearsToRetirement ? "years-to-retirement-error" : undefined}
+                      aria-invalid={!isYearsToRetirementFocused && !!errors.yearsToRetirement}
+                      value={yearsToRetirementInput}
+                      onChange={(e) => updateInput("yearsToRetirement", capDecimalPlaces(e.target.value))}
+                      onFocus={() => setIsYearsToRetirementFocused(true)}
                       onBlur={(e) => {
-                        setTouched((prev) => ({ ...prev, yearsToRetirement: true }))
+                        setIsYearsToRetirementFocused(false)
                         if (e.target.value === "") {
                           setErrors((prev) => ({ ...prev, yearsToRetirement: "Please enter how many years until you plan to retire." }))
                         } else if (inputs.yearsToRetirement === 0) {
                           setErrors((prev) => ({ ...prev, yearsToRetirement: "With no time left to save, you'd need your full target balance today." }))
                         }
                       }}
-                      className={`${baseInputClass} pl-4 pr-16 ${touched.yearsToRetirement ? inputStateClass(errors.yearsToRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isYearsToRetirementFocused ? inputStateClass(errors.yearsToRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                       years
                     </span>
                   </div>
-                  {touched.yearsToRetirement && errors.yearsToRetirement ? (
+                  {!isYearsToRetirementFocused && errors.yearsToRetirement ? (
                     <p id="years-to-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.yearsToRetirement}
                     </p>
@@ -491,33 +467,31 @@ export default function RetirementCalculator() {
                       max="30"
                       step="0.1"
                       aria-describedby={
-                        touched.expectedReturnBeforeRetirement && errors.expectedReturnBeforeRetirement
+                        !isExpectedReturnBeforeRetirementFocused && errors.expectedReturnBeforeRetirement
                           ? "return-before-retirement-error"
-                          : warnings.expectedReturnBeforeRetirement
+                          : !isExpectedReturnBeforeRetirementFocused && warnings.expectedReturnBeforeRetirement
                           ? "return-before-retirement-warning"
                           : undefined
                       }
-                      aria-invalid={touched.expectedReturnBeforeRetirement && !!errors.expectedReturnBeforeRetirement}
-                      value={inputs.expectedReturnBeforeRetirement || ""}
-                      onChange={(e) => {
-                        setTouched((prev) => ({ ...prev, expectedReturnBeforeRetirement: true }))
-                        updateInput("expectedReturnBeforeRetirement", e.target.value)
-                      }}
+                      aria-invalid={!isExpectedReturnBeforeRetirementFocused && !!errors.expectedReturnBeforeRetirement}
+                      value={expectedReturnBeforeRetirementInput}
+                      onChange={(e) => updateInput("expectedReturnBeforeRetirement", capDecimalPlaces(e.target.value))}
+                      onFocus={() => setIsExpectedReturnBeforeRetirementFocused(true)}
                       onBlur={(e) => {
-                        setTouched((prev) => ({ ...prev, expectedReturnBeforeRetirement: true }))
+                        setIsExpectedReturnBeforeRetirementFocused(false)
                         if (e.target.value === "") {
                           setErrors((prev) => ({ ...prev, expectedReturnBeforeRetirement: "Please enter an expected annual return rate before retirement." }))
                         }
                       }}
-                      className={`${baseInputClass} pl-4 pr-16 ${touched.expectedReturnBeforeRetirement ? inputStateClass(errors.expectedReturnBeforeRetirement, warnings.expectedReturnBeforeRetirement) : warnings.expectedReturnBeforeRetirement ? inputStateClass(undefined, warnings.expectedReturnBeforeRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isExpectedReturnBeforeRetirementFocused ? inputStateClass(errors.expectedReturnBeforeRetirement, warnings.expectedReturnBeforeRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                   </div>
-                  {touched.expectedReturnBeforeRetirement && errors.expectedReturnBeforeRetirement ? (
+                  {!isExpectedReturnBeforeRetirementFocused && errors.expectedReturnBeforeRetirement ? (
                     <p id="return-before-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.expectedReturnBeforeRetirement}
                     </p>
-                  ) : warnings.expectedReturnBeforeRetirement ? (
+                  ) : !isExpectedReturnBeforeRetirementFocused && warnings.expectedReturnBeforeRetirement ? (
                     <p id="return-before-retirement-warning" role="status" className="text-sm text-[var(--color-inline-warning)]">
                       {warnings.expectedReturnBeforeRetirement}
                     </p>
