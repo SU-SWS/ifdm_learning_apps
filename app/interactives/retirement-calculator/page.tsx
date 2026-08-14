@@ -56,6 +56,7 @@ export default function RetirementCalculator() {
   const [isRetirementLengthFocused, setIsRetirementLengthFocused] = useState(false)
   const [isYearsToRetirementFocused, setIsYearsToRetirementFocused] = useState(false)
   const [isExpectedReturnBeforeRetirementFocused, setIsExpectedReturnBeforeRetirementFocused] = useState(false)
+  const [isExpectedReturnDuringRetirementFocused, setIsExpectedReturnDuringRetirementFocused] = useState(false)
   const [expectedReturnBeforeRetirementInput, setExpectedReturnBeforeRetirementInput] = useState("")
   const [expectedReturnDuringRetirementInput, setExpectedReturnDuringRetirementInput] = useState("")
   const [annualSpendingInput, setAnnualSpendingInput] = useState("")
@@ -165,6 +166,8 @@ export default function RetirementCalculator() {
     setIsRetirementLengthFocused(false)
     setIsYearsToRetirementFocused(false)
     setIsExpectedReturnBeforeRetirementFocused(false)
+    setIsExpectedReturnDuringRetirementFocused(false)
+    setIsAnnualSpendingFocused(false)
     setExpectedReturnBeforeRetirementInput("")
     setExpectedReturnDuringRetirementInput("")
     setAnnualSpendingInput("")
@@ -233,16 +236,21 @@ export default function RetirementCalculator() {
                       type="text"
                       inputMode="decimal"
                       min="1"
-                      aria-describedby={errors.annualSpending ? "annual-spending-error" : undefined}
-                      aria-invalid={!!errors.annualSpending}
+                      aria-describedby={!isAnnualSpendingFocused && errors.annualSpending ? "annual-spending-error" : undefined}
+                      aria-invalid={!isAnnualSpendingFocused && !!errors.annualSpending}
                       value={isAnnualSpendingFocused ? annualSpendingInput : formatNumberWithCommas(annualSpendingInput)}
                       onChange={(e) => updateInput("annualSpending", sanitizeDecimalInput(e.target.value))}
                       onFocus={() => setIsAnnualSpendingFocused(true)}
-                      onBlur={() => setIsAnnualSpendingFocused(false)}
-                      className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.annualSpending)}`}
+                      onBlur={(e) => {
+                        setIsAnnualSpendingFocused(false)
+                        if (e.target.value === "") {
+                          setErrors((prev) => ({ ...prev, annualSpending: "Please enter how much you plan to spend each year in retirement." }))
+                        }
+                      }}
+                      className={`${baseInputClass} pl-8 pr-16 ${!isAnnualSpendingFocused ? inputStateClass(errors.annualSpending) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                   </div>
-                  {errors.annualSpending ? (
+                  {!isAnnualSpendingFocused && errors.annualSpending ? (
                     <p id="annual-spending-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.annualSpending}
                     </p>
@@ -273,7 +281,12 @@ export default function RetirementCalculator() {
                       value={retirementLengthInput}
                       onChange={(e) => updateInput("retirementLength", capDecimalPlaces(e.target.value))}
                       onFocus={() => setIsRetirementLengthFocused(true)}
-                      onBlur={() => setIsRetirementLengthFocused(false)}
+                      onBlur={(e) => {
+                        setIsRetirementLengthFocused(false)
+                        if (e.target.value === "") {
+                          setErrors((prev) => ({ ...prev, retirementLength: "Please enter how many years your retirement will last." }))
+                        }
+                      }}
                       className={`${baseInputClass} pl-4 pr-16 ${!isRetirementLengthFocused ? inputStateClass(errors.retirementLength, warnings.retirementLength) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
@@ -314,20 +327,27 @@ export default function RetirementCalculator() {
                       max="30"
                       step="0.1"
                       aria-describedby={
-                        errors.expectedReturnDuringRetirement
+                        !isExpectedReturnDuringRetirementFocused && errors.expectedReturnDuringRetirement
                           ? "return-during-retirement-error"
                           : warnings.expectedReturnDuringRetirement
                           ? "return-during-retirement-warning"
                           : undefined
                       }
-                      aria-invalid={!!errors.expectedReturnDuringRetirement}
+                      aria-invalid={!isExpectedReturnDuringRetirementFocused && !!errors.expectedReturnDuringRetirement}
                       value={expectedReturnDuringRetirementInput}
                       onChange={(e) => updateInput("expectedReturnDuringRetirement", capDecimalPlaces(e.target.value))}
-                      className={`${baseInputClass} pl-4 pr-16 ${inputStateClass(errors.expectedReturnDuringRetirement, warnings.expectedReturnDuringRetirement)}`}
+                      onFocus={() => setIsExpectedReturnDuringRetirementFocused(true)}
+                      onBlur={(e) => {
+                        setIsExpectedReturnDuringRetirementFocused(false)
+                        if (e.target.value === "") {
+                          setErrors((prev) => ({ ...prev, expectedReturnDuringRetirement: "Please enter an expected annual return rate." }))
+                        }
+                      }}
+                      className={`${baseInputClass} pl-4 pr-16 ${!isExpectedReturnDuringRetirementFocused ? inputStateClass(errors.expectedReturnDuringRetirement, warnings.expectedReturnDuringRetirement) : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}`}
                     />
                     <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                   </div>
-                  {errors.expectedReturnDuringRetirement ? (
+                  {!isExpectedReturnDuringRetirementFocused && errors.expectedReturnDuringRetirement ? (
                     <p id="return-during-retirement-error" role="alert" className="text-sm text-[var(--color-inline-error)]">
                       {errors.expectedReturnDuringRetirement}
                     </p>
