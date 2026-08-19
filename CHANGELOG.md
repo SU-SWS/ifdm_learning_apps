@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.1.0] - 2026-08-19
+- Retirement Calculator refactored into modular components: new `lib/retirement.ts` for core calculations and formatting, `lib/validation.ts` for per-field validators, consolidating duplicate formulas and unifying periodic savings logic (#197).
+- Retirement Calculator: Annual spending and retirement savings fields now accept decimal inputs (up to 2 decimal places) with comma formatting (#231).
+- Mortgage Calculator v2: Fixed negative value handling to ensure consistent behavior (#256).
+- Mortgage Calculator v2: Error messages no longer persist when fields regain focus (#171).
+- Deleted deprecated old mortgage calculator (`app/interactives/mortgage-calculator/page.tsx`) and related legacy theme files to reduce codebase complexity.
+
 ## [2026-08-04]
 - Added a new Mortgage Refinancing Calculator (v3) at /interactives/mortgage-refinancing-calculator-v3/, a ported version of a standalone v0/shadcn prototype, with its own scoped color theme for light, dark, and system-preference modes. This is a new route alongside the existing v2 refinancing calculator; the diff does not show v2 being removed or deprecated (#166).
 - Extended the shared design tokens in app/ui/globals.css (navy-foreground, panel, panel-foreground) and added app/ui/theme.css to support the v3 calculator's palette without changing any other calculator's appearance (#166).
