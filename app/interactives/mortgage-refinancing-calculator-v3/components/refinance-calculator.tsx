@@ -206,8 +206,8 @@ export function RefinanceCalculator() {
         {/* Right column: result panel */}
         <div>
           {tab === "current" ? (
-            <div className="rounded-xl bg-panel p-6">
-              <p className="text-sm font-medium text-panel-foreground/70">Estimated current balance</p>
+            <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+              <p className="text-panel-foreground/70">Estimated current balance</p>
               <p className="mt-1 text-4xl font-bold text-primary">{formatCurrency(currentBalance)}</p>
               <Button
                 type="button"
@@ -258,7 +258,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={[
-        "rounded-xl border px-4 py-4 text-center text-sm font-semibold transition-colors",
+        "rounded-xl border px-4 py-4 text-center  font-semibold transition-colors",
         active
           ? "border-primary bg-primary text-primary-foreground"
           : "border-primary/40 bg-card text-primary hover:bg-primary/5",
@@ -284,12 +284,12 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+      <label className="flex items-center gap-1.5  font-semibold text-foreground">
         {label}
         {info ? <Info className="h-4 w-4 text-primary" aria-hidden="true" /> : null}
       </label>
       {children}
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="text-xs ">{hint}</p> : null}
     </div>
   )
 }
@@ -309,15 +309,15 @@ function TextInput({
 }) {
   return (
     <div className="flex items-center rounded-md border border-input bg-card px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30">
-      {prefix ? <span className="mr-2 text-sm text-muted-foreground">{prefix}</span> : null}
+      {prefix ? <span className="mr-2  ">{prefix}</span> : null}
       <input
         inputMode="decimal"
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(formatThousands(e.target.value))}
-        className="w-full bg-transparent py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
+        className="w-full bg-transparent py-3  text-foreground outline-none placeholder:/60"
       />
-      {suffix ? <span className="ml-2 text-sm text-muted-foreground">{suffix}</span> : null}
+      {suffix ? <span className="ml-2  ">{suffix}</span> : null}
     </div>
   )
 }
@@ -341,7 +341,7 @@ function CurrentBalanceForm(props: {
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm leading-relaxed text-muted-foreground">
+      <p className=" leading-relaxed ">
         Calculate your remaining mortgage balance (the present value of your remaining monthly mortgage payments).
       </p>
 
@@ -349,7 +349,7 @@ function CurrentBalanceForm(props: {
         <TextInput value={props.months} onChange={props.setMonths} suffix="months" />
       </Field>
 
-      <Field label="Current interest rate" info>
+      <Field label="Current interest rate">
         <TextInput value={props.currentRate} onChange={props.setCurrentRate} suffix="%" />
       </Field>
 
@@ -395,7 +395,7 @@ function RefinanceForm(props: {
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm leading-relaxed text-muted-foreground">
+      <p className=" leading-relaxed ">
         Analyze if refinancing makes financial sense for your situation.
       </p>
 
@@ -406,10 +406,10 @@ function RefinanceForm(props: {
           <Button
             type="button"
             onClick={props.onEditBalance}
-            variant="lagunita"
-            className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+            variant="ghost"
+            className="mt-2 flex items-center gap-2  text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Edit current loan
+            <ArrowLeft size={12} aria-hidden="true" />{" "} Edit current loan
           </Button>
         </div>
 
@@ -513,10 +513,10 @@ function ResultPanel({
   const verdictColor = verdict === "positive" ? "text-primary" : "text-[var(--color-inline-error)]"
 
   return (
-    <div className="rounded-xl bg-panel p-6">
+    <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
       {!showAnalysis ? (
         <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
-          <p className="text-sm font-medium text-panel-foreground/70">
+          <p className=" font-medium text-panel-foreground/70">
             {hasNewLoan
               ? "Press \u201cRefinance analysis\u201d to see the results."
               : "Enter your new loan terms to see the analysis."}
@@ -526,13 +526,13 @@ function ResultPanel({
         <>
       {/* Hero: net value today */}
       <div>
-        <p className="text-sm font-medium text-panel-foreground/70">Net value today</p>
+        <p className=" font-medium text-panel-foreground/70">Net value today</p>
         <p className={["text-4xl font-bold tracking-tight", verdictColor].join(" ")}>
           {analysis.overallBenefit < 0
             ? `−${formatCurrency(Math.abs(analysis.overallBenefit))}`
             : formatCurrency(analysis.overallBenefit)}
         </p>
-        <p className={["mt-2 flex items-center gap-1.5 text-sm font-semibold", verdictColor].join(" ")}>
+        <p className={["mt-2 flex items-center gap-1.5  font-semibold", verdictColor].join(" ")}>
           {verdict === "positive" ? (
             <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
           ) : (
@@ -540,7 +540,7 @@ function ResultPanel({
           )}
           {headline}
         </p>
-        <p className="mt-1 text-sm text-panel-foreground/70">
+        <p className="mt-1  text-panel-foreground/70">
           {verdict === "positive"
             ? "Adjusted to today's dollars, refinancing comes out ahead."
             : "Adjusted to today's dollars, refinancing costs more than it saves."}
@@ -611,8 +611,8 @@ function LoanComparison({ current, next }: { current: LoanTerms; next: LoanTerms
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
-        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Terms</div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide ">Terms</div>
+        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide ">
           Current loan terms
         </div>
         <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-primary">
@@ -627,10 +627,10 @@ function LoanComparison({ current, next }: { current: LoanTerms; next: LoanTerms
             i % 2 === 1 ? "bg-muted/20" : "",
           ].join(" ")}
         >
-          <div className="px-4 py-3 text-sm text-muted-foreground">{row.label}</div>
-          <div className="px-4 py-3 text-right text-sm font-medium text-foreground tabular-nums">{row.cur}</div>
+          <div className="px-4 py-3  ">{row.label}</div>
+          <div className="px-4 py-3 text-right  font-medium text-foreground tabular-nums">{row.cur}</div>
           <div className="px-4 py-3 text-right tabular-nums">
-            <div className="text-sm font-bold text-foreground">{row.nxt}</div>
+            <div className=" font-bold text-foreground">{row.nxt}</div>
             {row.delta ? (
               <div className={["text-xs font-medium", row.deltaGood ? "text-primary" : "text-[var(--color-inline-error)]"].join(" ")}>
                 {row.delta}
@@ -678,7 +678,7 @@ function CalculationBreakdown({
   const rows: { label: string; value: number }[] = [{ label: "PV of payment difference", value: pvSavings }]
   // Only show the equity line when the terms differ (it's exactly 0 otherwise).
   if (Math.abs(pvDiffBalance) >= 0.005) {
-    rows.push({ label: "PV of equity difference", value: pvDiffBalance })
+    rows.push({ label: "PV of loan balance difference", value: pvDiffBalance })
   }
   if (closing > 0) {
     rows.push({ label: "Closing costs", value: -closing })
@@ -692,11 +692,11 @@ function CalculationBreakdown({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/40"
+        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left  font-semibold text-foreground transition-colors hover:bg-muted/40"
       >
         How this was calculated
         <ChevronDown
-          className={["h-4 w-4 text-muted-foreground transition-transform", open ? "rotate-180" : ""].join(" ")}
+          className={["h-4 w-4  transition-transform", open ? "rotate-180" : ""].join(" ")}
           aria-hidden="true"
         />
       </button>
@@ -705,8 +705,8 @@ function CalculationBreakdown({
         <div className="border-t border-border px-4 py-4">
           <div className="flex flex-col">
             {rows.map((row) => (
-              <div key={row.label} className="flex items-center justify-between py-1.5 text-sm">
-                <span className="text-muted-foreground">{row.label}</span>
+              <div key={row.label} className="flex items-center justify-between py-1.5 ">
+                <span className="">{row.label}</span>
                 <span
                   className={["tabular-nums font-medium", row.value < 0 ? "text-[var(--color-inline-error)]" : "text-foreground"].join(
                     " ",
@@ -716,7 +716,7 @@ function CalculationBreakdown({
                 </span>
               </div>
             ))}
-            <div className="mt-1 flex items-center justify-between border-t border-border pt-2.5 text-sm">
+            <div className="mt-1 flex items-center justify-between border-t border-border pt-2.5 ">
               <span className="font-semibold text-foreground">Net value today</span>
               <span
                 className={["tabular-nums text-base font-bold", net < 0 ? "text-[var(--color-inline-error)]" : "text-primary"].join(" ")}
@@ -725,7 +725,7 @@ function CalculationBreakdown({
               </span>
             </div>
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{explanation}</p>
+          <p className="mt-4 text-xs leading-relaxed ">{explanation}</p>
         </div>
       ) : null}
     </div>
