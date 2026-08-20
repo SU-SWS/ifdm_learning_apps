@@ -188,9 +188,6 @@ export default function RetirementCalculator() {
           value={activeTab}
           onValueChange={(v) => {
             setActiveTab(v as "balance" | "savings");
-            if (v === "balance") {
-              setFrozenRequiredBalance(0);
-            }
           }}
           className="mb-10"
         >
