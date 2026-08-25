@@ -152,7 +152,7 @@ export default function MortgageCalculator() {
       if (downPaymentAmount < 0) {
         dpBad = true;
         dpMsg = "Down payment cannot be negative. Enter 0 if no down payment is planned.";
-      } else if (!priceEmpty && priceNum > 0 && downPaymentAmount >= priceNum) {
+      } else if (!priceEmpty && priceNum > 0 && downPaymentAmount >= priceNum && focusedField !== "homePrice") {
         dpBad = true;
         dpMsg = "Your down payment can't exceed the home price. Try lowering it.";
       }
