@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/ta
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card";
 import InfoPopover from "@/app/ui/components/popover";
 
-/* ── Limits & ranges (see feedback doc, June 2026) ───────────────────────── */
+/* ── Limits & ranges  ───────────────────────── */
 const MONTHLY_PAYMENT_MIN = 1;
 const MONTHLY_PAYMENT_MAX = 1_000_000;
 const HOME_PRICE_MIN = 1;
@@ -376,30 +376,32 @@ export default function MortgageCalculator() {
 
   const DASH = "-";
 
-  // Per-line dash flags: a result line shows "—" when any input it depends on
-  // is unusable. Unaffected lines keep their value. The dependency graph is
-  // transitive — e.g. property taxes depend on the (computed) home price, which
-  // in afford mode depends on payment/rate/down-payment.
+  // Per-line dash flags: a result line shows "—" when any calculator error exists.
+  // When any validation error is active (required field, range, or optional field),
+  // all result rows display dashes to indicate unreliable calculations.
+
   const affordDash = {
+    // All results dash whenever any calculator error exists (core or optional)
     homePrice: v.affordBlocking || limitReached,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordBlocking || limitReached),
-    loanAmount: v.affordBlocking || v.paymentBad || v.rateBad,
-    monthlyMortgage: v.affordBlocking || v.paymentBad,
-    monthlyTax: v.affordBlocking || limitReached || v.taxBad,
-    monthlyInsurance: v.affordBlocking || limitReached || v.insBad,
-    hoa: v.affordBlocking || (v.hoaBad && hoaDues !== ""),
+    downPayment: v.affordBlocking || limitReached,
+    loanAmount: v.affordBlocking || limitReached,
+    monthlyMortgage: v.affordBlocking || limitReached,
+    monthlyTax: v.affordBlocking || limitReached,
+    monthlyInsurance: v.affordBlocking || limitReached,
+    hoa: v.affordBlocking || limitReached,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
   affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance;
 
   const paymentDash = {
-    monthlyMortgage: v.paymentBlocking || v.priceBad || v.rateBad || v.dpBad,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.paymentBlocking || v.priceBad || v.dpBad),
-    loanAmount: v.paymentBlocking || v.priceBad || v.dpBad,
-    monthlyTax: v.paymentBlocking || v.priceBad || v.taxBad,
-    monthlyInsurance: v.paymentBlocking || v.priceBad || v.insBad,
-    hoa: v.paymentBlocking || (v.hoaBad && hoaDues !== ""),
+    // All results dash whenever any calculator error exists (core or optional)
+    monthlyMortgage: v.paymentBlocking,
+    downPayment: v.paymentBlocking,
+    loanAmount: v.paymentBlocking,
+    monthlyTax: v.paymentBlocking,
+    monthlyInsurance: v.paymentBlocking,
+    hoa: v.paymentBlocking,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
