@@ -57,7 +57,7 @@ export function calculatePeriodicSavings(targetBalance: number, rate: number, ye
   if (rate === 0) {
     return targetBalance / (years * frequency)
   }
-  const periodRate = Math.pow(1 + rate, 1 / frequency) - 1
+  const periodRate = rate / frequency
   const totalPeriods = years * frequency
   return targetBalance * (periodRate / (Math.pow(1 + periodRate, totalPeriods) - 1))
 }
