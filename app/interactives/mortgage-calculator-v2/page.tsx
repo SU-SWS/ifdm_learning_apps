@@ -146,7 +146,11 @@ export default function MortgageCalculator() {
     } else if (mode === 'afford') {
       // Tab 1: absolute ceiling (no home-price input to clamp against)
       dpBad = downPaymentAmount < 0 || downPaymentAmount > DP_DOLLAR_MAX_AFFORD;
-      if (dpBad) dpMsg = "Enter an amount between 0 - 1,000,000,000.";
+      if (downPaymentAmount < 0) {
+        dpMsg = "Down payment cannot be negative. Enter 0 if no down payment is planned.";
+      } else if (dpBad) {
+        dpMsg = "Enter an amount between 0 - 1,000,000,000.";
+      }
     } else {
       // Tab 2: relational against home price
       if (downPaymentAmount < 0) {
@@ -678,10 +682,10 @@ export default function MortgageCalculator() {
                             id="down-payment-amount-afford"
                             type="text"
                             inputMode="numeric"
-                            value={downPaymentAmountInput ? Number(downPaymentAmountInput).toLocaleString("en-US") : ""}
+                            value={downPaymentAmountInput && !isNaN(Number(downPaymentAmountInput)) ? Number(downPaymentAmountInput).toLocaleString("en-US") : downPaymentAmountInput}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
-                              if (raw === "" || /^\d*$/.test(raw)) {
+                              if (raw === "" || /^-?\d*$/.test(raw)) {
                                 setDownPaymentAmountInput(raw);
                                 if (raw === "") {
                                   setDownPaymentAmount(0);
@@ -1114,10 +1118,10 @@ export default function MortgageCalculator() {
                             id="down-payment-amount-payment"
                             type="text"
                             inputMode="numeric"
-                            value={downPaymentAmountInput ? Number(downPaymentAmountInput).toLocaleString("en-US") : ""}
+                            value={downPaymentAmountInput && !isNaN(Number(downPaymentAmountInput)) ? Number(downPaymentAmountInput).toLocaleString("en-US") : downPaymentAmountInput}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
-                              if (raw === "" || /^\d*$/.test(raw)) {
+                              if (raw === "" || /^-?\d*$/.test(raw)) {
                                 setDownPaymentAmountInput(raw);
                                 if (raw === "") {
                                   setDownPaymentAmount(0);
