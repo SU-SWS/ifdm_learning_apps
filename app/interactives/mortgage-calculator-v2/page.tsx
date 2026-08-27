@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/ta
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card";
 import InfoPopover from "@/app/ui/components/popover";
 
-/* ── Limits & ranges (see feedback doc, June 2026) ───────────────────────── */
+/* ── Limits & ranges  ───────────────────────── */
 const MONTHLY_PAYMENT_MIN = 1;
 const MONTHLY_PAYMENT_MAX = 1_000_000;
 const HOME_PRICE_MIN = 1;
@@ -146,13 +146,17 @@ export default function MortgageCalculator() {
     } else if (mode === 'afford') {
       // Tab 1: absolute ceiling (no home-price input to clamp against)
       dpBad = downPaymentAmount < 0 || downPaymentAmount > DP_DOLLAR_MAX_AFFORD;
-      if (dpBad) dpMsg = "Enter an amount between 0 - 1,000,000,000.";
+      if (downPaymentAmount < 0) {
+        dpMsg = "Down payment cannot be negative. Enter 0 if no down payment is planned.";
+      } else if (dpBad) {
+        dpMsg = "Enter an amount between 0 - 1,000,000,000.";
+      }
     } else {
       // Tab 2: relational against home price
       if (downPaymentAmount < 0) {
         dpBad = true;
         dpMsg = "Down payment cannot be negative. Enter 0 if no down payment is planned.";
-      } else if (!priceEmpty && priceNum > 0 && downPaymentAmount >= priceNum) {
+      } else if (!priceEmpty && priceNum > 0 && downPaymentAmount >= priceNum && focusedField !== "homePrice") {
         dpBad = true;
         dpMsg = "Your down payment can't exceed the home price. Try lowering it.";
       }
@@ -376,30 +380,32 @@ export default function MortgageCalculator() {
 
   const DASH = "-";
 
-  // Per-line dash flags: a result line shows "—" when any input it depends on
-  // is unusable. Unaffected lines keep their value. The dependency graph is
-  // transitive — e.g. property taxes depend on the (computed) home price, which
-  // in afford mode depends on payment/rate/down-payment.
+  // Per-line dash flags: a result line shows "—" when any calculator error exists.
+  // When any validation error is active (required field, range, or optional field),
+  // all result rows display dashes to indicate unreliable calculations.
+
   const affordDash = {
+    // All results dash whenever any calculator error exists (core or optional)
     homePrice: v.affordBlocking || limitReached,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.affordBlocking || limitReached),
-    loanAmount: v.affordBlocking || v.paymentBad || v.rateBad,
-    monthlyMortgage: v.affordBlocking || v.paymentBad,
-    monthlyTax: v.affordBlocking || limitReached || v.taxBad,
-    monthlyInsurance: v.affordBlocking || limitReached || v.insBad,
-    hoa: v.affordBlocking || (v.hoaBad && hoaDues !== ""),
+    downPayment: v.affordBlocking || limitReached,
+    loanAmount: v.affordBlocking || limitReached,
+    monthlyMortgage: v.affordBlocking || limitReached,
+    monthlyTax: v.affordBlocking || limitReached,
+    monthlyInsurance: v.affordBlocking || limitReached,
+    hoa: v.affordBlocking || limitReached,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
   affordDash.total = affordDash.monthlyMortgage || affordDash.monthlyTax || affordDash.monthlyInsurance;
 
   const paymentDash = {
-    monthlyMortgage: v.paymentBlocking || v.priceBad || v.rateBad || v.dpBad,
-    downPayment: downPaymentMode === 'dollar' ? v.dpBad : (v.paymentBlocking || v.priceBad || v.dpBad),
-    loanAmount: v.paymentBlocking || v.priceBad || v.dpBad,
-    monthlyTax: v.paymentBlocking || v.priceBad || v.taxBad,
-    monthlyInsurance: v.paymentBlocking || v.priceBad || v.insBad,
-    hoa: v.paymentBlocking || (v.hoaBad && hoaDues !== ""),
+    // All results dash whenever any calculator error exists (core or optional)
+    monthlyMortgage: v.paymentBlocking,
+    downPayment: v.paymentBlocking,
+    loanAmount: v.paymentBlocking,
+    monthlyTax: v.paymentBlocking,
+    monthlyInsurance: v.paymentBlocking,
+    hoa: v.paymentBlocking,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
@@ -676,10 +682,10 @@ export default function MortgageCalculator() {
                             id="down-payment-amount-afford"
                             type="text"
                             inputMode="numeric"
-                            value={downPaymentAmountInput ? Number(downPaymentAmountInput).toLocaleString("en-US") : ""}
+                            value={downPaymentAmountInput && !isNaN(Number(downPaymentAmountInput)) ? Number(downPaymentAmountInput).toLocaleString("en-US") : downPaymentAmountInput}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
-                              if (raw === "" || /^\d*$/.test(raw)) {
+                              if (raw === "" || /^-?\d*$/.test(raw)) {
                                 setDownPaymentAmountInput(raw);
                                 if (raw === "") {
                                   setDownPaymentAmount(0);
@@ -1112,10 +1118,10 @@ export default function MortgageCalculator() {
                             id="down-payment-amount-payment"
                             type="text"
                             inputMode="numeric"
-                            value={downPaymentAmountInput ? Number(downPaymentAmountInput).toLocaleString("en-US") : ""}
+                            value={downPaymentAmountInput && !isNaN(Number(downPaymentAmountInput)) ? Number(downPaymentAmountInput).toLocaleString("en-US") : downPaymentAmountInput}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/,/g, "");
-                              if (raw === "" || /^\d*$/.test(raw)) {
+                              if (raw === "" || /^-?\d*$/.test(raw)) {
                                 setDownPaymentAmountInput(raw);
                                 if (raw === "") {
                                   setDownPaymentAmount(0);
