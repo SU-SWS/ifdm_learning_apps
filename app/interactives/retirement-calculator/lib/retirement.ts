@@ -49,16 +49,25 @@ export function futureValue(presentValue: number, rate: number, years: number): 
 
 /**
  * Level savings contribution, made `frequency` times per year over `years`,
- * that grows to `targetBalance` at `rate`. `frequency: 1` gives the annual
+ * that — together with `currentSavings` growing at the same period rate —
+ * closes the gap to `requiredBalance`. `frequency: 1` gives the annual
  * savings amount; 12/26/52 give monthly/bi-weekly/weekly equivalents.
+ *
+ * Current savings must be compounded at the *same* period rate
+ * (rate / frequency) used for the new contributions, not at the annual
+ * rate, otherwise the monthly/bi-weekly/weekly amounts are solved against
+ * an inconsistent target balance and come out too high.
  */
-export function calculatePeriodicSavings(targetBalance: number, rate: number, years: number, frequency: number): number {
+export function calculatePeriodicSavings(requiredBalance: number, currentSavings: number, rate: number, years: number, frequency: number): number {
   if (years <= 0) return 0
+  const totalPeriods = years * frequency
   if (rate === 0) {
-    return targetBalance / (years * frequency)
+    const targetBalance = Math.max(0, requiredBalance - currentSavings)
+    return targetBalance / totalPeriods
   }
   const periodRate = rate / frequency
-  const totalPeriods = years * frequency
+  const fvCurrentSavings = currentSavings * Math.pow(1 + periodRate, totalPeriods)
+  const targetBalance = Math.max(0, requiredBalance - fvCurrentSavings)
   return targetBalance * (periodRate / (Math.pow(1 + periodRate, totalPeriods) - 1))
 }
 
@@ -75,10 +84,10 @@ export function calculateSavingsResults(
   return {
     requiredBalance: Math.round(requiredBalance),
     targetBalance: Math.round(targetBalance),
-    annualSavings: Math.round(calculatePeriodicSavings(targetBalance, returnBeforeRetirement, yearsToRetirement, 1)),
-    monthlySavings: Math.round(calculatePeriodicSavings(targetBalance, returnBeforeRetirement, yearsToRetirement, 12)),
-    biWeeklySavings: Math.round(calculatePeriodicSavings(targetBalance, returnBeforeRetirement, yearsToRetirement, 26)),
-    weeklySavings: Math.round(calculatePeriodicSavings(targetBalance, returnBeforeRetirement, yearsToRetirement, 52)),
+    annualSavings: Math.round(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 1)),
+    monthlySavings: Math.round(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 12)),
+    biWeeklySavings: Math.round(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 26)),
+    weeklySavings: Math.round(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 52)),
     fvCurrentSavings: Math.round(fvCurrentSavings),
   }
 }
