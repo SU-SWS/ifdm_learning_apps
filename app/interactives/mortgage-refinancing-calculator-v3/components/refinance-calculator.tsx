@@ -110,14 +110,23 @@ export function RefinanceCalculator() {
 
     const npvAtMonths = (sm: number) => {
       const h = Math.max(0, sm)
-      // Monthly savings only exist while both loans are still being paid, so we
-      // stop accruing the present value of savings once the loan term ends. If
-      // the expected length of stay is longer than a loan term, savings are
-      // capped at the shorter of the two loan terms.
-      const savingsMonths = Math.min(h, oldMonths, nNew)
+      // The payment difference is (old payment − new payment) only while BOTH
+      // loans are still being paid. Once the shorter-term loan ends, its
+      // payment drops to $0 while the other loan's payment keeps going, so we
+      // walk the horizon in two segments instead of truncating at the shorter
+      // loan's term: an "overlap" segment where both payments apply, then a
+      // "tail" segment (a deferred annuity) where only the longer-term loan's
+      // payment continues, up through the horizon or that loan's own term end.
+      const overlapMonths = Math.min(h, oldMonths, nNew)
+      const tailEnd = Math.min(h, Math.max(oldMonths, nNew))
+      const tailMonths = Math.max(0, tailEnd - overlapMonths)
+      const tailPmt = oldMonths > nNew ? oldPmt : -newPayment
+      const pvOverlap = presentValueOfPayments(monthlySavings, rNew, overlapMonths)
+      const pvTail = presentValueOfPayments(tailPmt, rNew, tailMonths) * discountFactor(rNew, overlapMonths)
+      const pvSav = pvOverlap + pvTail
+
       const oldRemaining = presentValueOfPayments(oldPmt, rOld, oldMonths - h)
       const newRemaining = presentValueOfPayments(newPayment, rNew, nNew - h)
-      const pvSav = presentValueOfPayments(monthlySavings, rNew, savingsMonths)
       const pvDiff = (oldRemaining - newRemaining) * discountFactor(rNew, h)
       return { pvSavings: pvSav, pvDiffBalance: pvDiff, overall: pvSav + pvDiff - closing }
     }
