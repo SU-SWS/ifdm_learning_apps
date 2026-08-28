@@ -16,9 +16,25 @@ import {
   discountFactor,
   formatCurrency,
 } from "../lib/mortgage";
+import { validate, type FieldName, type Validation } from "../lib/validation";
 import { Button } from "@/app/ui/components/button";
 
 type Tab = "current" | "refinance";
+
+/** No field has been entered and left yet on first render. */
+const NO_FIELDS_TOUCHED: Record<FieldName, boolean> = {
+  months: false,
+  currentRate: false,
+  monthlyPayment: false,
+  newAmount: false,
+  newTerm: false,
+  newRate: false,
+  closingCosts: false,
+  years: false,
+};
+
+/** Shown in place of a number whenever an input it depends on is unusable. */
+const DASH = "—";
 
 // All fields start blank so the user enters their own loan details. Optional
 // fields (closing costs, expected years) being blank also drives the simpler
@@ -79,6 +95,17 @@ export function RefinanceCalculator() {
   // Whether the user has run the analysis. Results stay hidden until pressed.
   const [analyzed, setAnalyzed] = useState(false);
 
+  // Validation UI state. `touched` defers required-field messages until the
+  // user has entered and left a field; `focusedField` hides them again while
+  // that field is being edited.
+  const [touched, setTouched] =
+    useState<Record<FieldName, boolean>>(NO_FIELDS_TOUCHED);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  function markTouched(field: FieldName) {
+    setTouched((t) => (t[field] ? t : { ...t, [field]: true }));
+  }
+
   // Debounced snapshot of the calculation inputs, updated 300ms after typing
   // pauses. handleAnalyze/resetCurrent/resetNewLoan flush it immediately.
   const [debounced, setDebounced] = useState({
@@ -134,11 +161,41 @@ export function RefinanceCalculator() {
 
   const hasYears = hasValue(debounced.years);
   const hasClosing = hasValue(debounced.closingCosts);
-  // Whether the user has entered enough new loan terms to run an analysis.
-  const hasNewLoan =
-    debouncedNewAmount > 0 &&
-    num(debounced.newTerm) > 0 &&
-    num(debounced.newRate) > 0;
+
+  // One source of truth for every error message and blocking flag, read by both
+  // the result panel and the comparison table so the output can never show a
+  // number next to an error. Deliberately validates the raw input strings
+  // rather than the debounced snapshot, so errors track the current keystroke
+  // instead of lagging 300ms behind it.
+  const v = useMemo(
+    () =>
+      validate(
+        {
+          months,
+          currentRate,
+          monthlyPayment,
+          newAmount,
+          newTerm,
+          newRate,
+          closingCosts,
+          years,
+        },
+        { touched, focusedField, analyzed },
+      ),
+    [
+      months,
+      currentRate,
+      monthlyPayment,
+      newAmount,
+      newTerm,
+      newRate,
+      closingCosts,
+      years,
+      touched,
+      focusedField,
+      analyzed,
+    ],
+  );
 
   // --- Refinance analysis ---
   // Single net-present-value formula for every case:
@@ -214,6 +271,8 @@ export function RefinanceCalculator() {
     };
   }, [debounced, debouncedNewAmount, hasClosing, hasYears]);
 
+  // Reset clears values, error state and results together — a reset field must
+  // not keep showing the message it had before it was cleared.
   function resetCurrent() {
     setMonths(DEFAULT_MONTHS);
     setCurrentRate(DEFAULT_CURRENT_RATE);
@@ -224,6 +283,13 @@ export function RefinanceCalculator() {
       currentRate: DEFAULT_CURRENT_RATE,
       monthlyPayment: DEFAULT_MONTHLY_PAYMENT,
     }));
+    setTouched((t) => ({
+      ...t,
+      months: false,
+      currentRate: false,
+      monthlyPayment: false,
+    }));
+    setAnalyzed(false);
   }
 
   function resetNewLoan() {
@@ -240,6 +306,15 @@ export function RefinanceCalculator() {
       closingCosts: DEFAULT_CLOSING,
       years: DEFAULT_YEARS,
     }));
+    setTouched((t) => ({
+      ...t,
+      newAmount: false,
+      newTerm: false,
+      newRate: false,
+      closingCosts: false,
+      years: false,
+    }));
+    setAnalyzed(false);
   }
 
   function handleAnalyze() {
@@ -282,14 +357,16 @@ export function RefinanceCalculator() {
               setCurrentRate={setCurrentRate}
               monthlyPayment={monthlyPayment}
               setMonthlyPayment={setMonthlyPayment}
+              validation={v}
+              onFocusField={setFocusedField}
+              onBlurField={(field) => {
+                markTouched(field);
+                setFocusedField(null);
+              }}
               onReset={resetCurrent}
             />
           ) : (
             <RefinanceForm
-              currentBalance={currentBalance}
-              months={months}
-              currentRate={currentRate}
-              monthlyPayment={monthlyPayment}
               onEditBalance={() => setTab("current")}
               newAmount={newAmount}
               setNewAmount={setNewAmount}
@@ -301,6 +378,12 @@ export function RefinanceCalculator() {
               setClosingCosts={setClosingCosts}
               years={years}
               setYears={setYears}
+              validation={v}
+              onFocusField={setFocusedField}
+              onBlurField={(field) => {
+                markTouched(field);
+                setFocusedField(null);
+              }}
               onReset={resetNewLoan}
             />
           )}
@@ -313,8 +396,9 @@ export function RefinanceCalculator() {
               <p className="text-panel-foreground/70">
                 Estimated current balance
               </p>
+              {/* Suppressed rather than computed from zero-coerced blanks. */}
               <p className="mt-1 text-4xl font-bold text-primary">
-                {formatCurrency(currentBalance)}
+                {v.currentBlocking ? DASH : formatCurrency(currentBalance)}
               </p>
               <Button
                 type="button"
@@ -328,10 +412,11 @@ export function RefinanceCalculator() {
           ) : (
             <ResultPanel
               analysis={analysis}
-              showAnalysis={analyzed && hasNewLoan}
-              hasNewLoan={hasNewLoan}
+              showAnalysis={analyzed && !v.refiBlocking}
+              validation={v}
               hasClosing={hasClosing}
               onAnalyze={handleAnalyze}
+              onEditBalance={() => setTab("current")}
               current={{
                 balance: currentBalance,
                 months: num(months),
@@ -342,7 +427,7 @@ export function RefinanceCalculator() {
                 balance: effectiveNewAmount,
                 months: num(newTerm),
                 rate: num(newRate),
-                payment: hasNewLoan ? analysis.newPayment : 0,
+                payment: analysis.newPayment,
               }}
             />
           )}
@@ -379,55 +464,103 @@ function TabButton({
 
 /* ----------------------------- Field primitives ---------------------------- */
 
-function Field({
+/** Focus/blur reporting shared by every field, used to drive `touched`. */
+type FieldFocusProps = {
+  validation: Validation;
+  onFocusField: (field: FieldName) => void;
+  onBlurField: (field: FieldName) => void;
+};
+
+/**
+ * Label + input + hint + inline error for one numeric field. The `id` ties the
+ * label, hint and error text to the input so screen readers announce all three,
+ * and the error message and border are both driven off the shared validation
+ * result — there is no per-field error state to fall out of sync.
+ */
+function NumberField({
+  field,
   label,
+  value,
+  onChange,
   hint,
+  prefix,
+  suffix,
+  placeholder,
   info,
-  children,
-}: {
+  validation,
+  onFocusField,
+  onBlurField,
+}: FieldFocusProps & {
+  field: FieldName;
   label: string;
+  value: string;
+  onChange: (v: string) => void;
   hint?: string;
+  prefix?: string;
+  suffix?: string;
+  placeholder?: string;
   info?: boolean;
-  children: React.ReactNode;
 }) {
+  const id = `refi-${field}`;
+  const error = validation.messages[field];
+  const describedBy =
+    [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-1.5  font-semibold text-foreground">
+      <label
+        htmlFor={id}
+        className="flex items-center gap-1.5 font-semibold text-foreground"
+      >
         {label}
         {info ? (
           <Info className="h-4 w-4 text-primary" aria-hidden="true" />
         ) : null}
       </label>
-      {children}
-      {hint ? <p className="text-xs ">{hint}</p> : null}
-    </div>
-  );
-}
 
-function TextInput({
-  value,
-  onChange,
-  prefix,
-  suffix,
-  placeholder,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  prefix?: string;
-  suffix?: string;
-  placeholder?: string;
-}) {
-  return (
-    <div className="flex items-center rounded-md border border-input bg-card px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30">
-      {prefix ? <span className="mr-2  ">{prefix}</span> : null}
-      <input
-        inputMode="decimal"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(formatThousands(e.target.value))}
-        className="w-full bg-transparent py-3  text-foreground outline-none placeholder:/60"
-      />
-      {suffix ? <span className="ml-2  ">{suffix}</span> : null}
+      <div
+        className={[
+          "flex items-center rounded-md bg-card px-3 focus-within:ring-2 focus-within:ring-primary/30",
+          error
+            ? "border-2 border-[var(--color-inline-error)]"
+            : "border border-input focus-within:border-primary",
+        ].join(" ")}
+      >
+        {prefix ? <span className="mr-2">{prefix}</span> : null}
+        <input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          value={value}
+          placeholder={placeholder}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          // The setter is unconditional: an out-of-range value stays visible in
+          // the field so the user keeps the context of what they typed.
+          onChange={(e) => onChange(formatThousands(e.target.value))}
+          onFocus={() => onFocusField(field)}
+          onBlur={() => onBlurField(field)}
+          className="w-full bg-transparent py-3 text-foreground outline-none"
+        />
+        {suffix ? <span className="ml-2">{suffix}</span> : null}
+      </div>
+
+      {hint ? (
+        <p id={`${id}-hint`} className="text-xs">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="text-sm font-semibold text-[var(--color-inline-error)]"
+        >
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -440,15 +573,23 @@ function monthsHint(months: string): string | undefined {
 
 /* ----------------------------- Current balance ----------------------------- */
 
-function CurrentBalanceForm(props: {
-  months: string;
-  setMonths: (v: string) => void;
-  currentRate: string;
-  setCurrentRate: (v: string) => void;
-  monthlyPayment: string;
-  setMonthlyPayment: (v: string) => void;
-  onReset: () => void;
-}) {
+function CurrentBalanceForm(
+  props: FieldFocusProps & {
+    months: string;
+    setMonths: (v: string) => void;
+    currentRate: string;
+    setCurrentRate: (v: string) => void;
+    monthlyPayment: string;
+    setMonthlyPayment: (v: string) => void;
+    onReset: () => void;
+  },
+) {
+  const a11y = {
+    validation: props.validation,
+    onFocusField: props.onFocusField,
+    onBlurField: props.onBlurField,
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <p className=" leading-relaxed ">
@@ -456,29 +597,33 @@ function CurrentBalanceForm(props: {
         remaining monthly mortgage payments).
       </p>
 
-      <Field label="Months remaining on loan" hint={monthsHint(props.months)}>
-        <TextInput
-          value={props.months}
-          onChange={props.setMonths}
-          suffix="months"
-        />
-      </Field>
+      <NumberField
+        {...a11y}
+        field="months"
+        label="Months remaining on loan"
+        value={props.months}
+        onChange={props.setMonths}
+        hint={monthsHint(props.months)}
+        suffix="months"
+      />
 
-      <Field label="Current interest rate">
-        <TextInput
-          value={props.currentRate}
-          onChange={props.setCurrentRate}
-          suffix="%"
-        />
-      </Field>
+      <NumberField
+        {...a11y}
+        field="currentRate"
+        label="Current interest rate"
+        value={props.currentRate}
+        onChange={props.setCurrentRate}
+        suffix="%"
+      />
 
-      <Field label="Monthly payment amount">
-        <TextInput
-          value={props.monthlyPayment}
-          onChange={props.setMonthlyPayment}
-          prefix="$"
-        />
-      </Field>
+      <NumberField
+        {...a11y}
+        field="monthlyPayment"
+        label="Monthly payment amount"
+        value={props.monthlyPayment}
+        onChange={props.setMonthlyPayment}
+        prefix="$"
+      />
 
       <div>
         <Button
@@ -496,24 +641,28 @@ function CurrentBalanceForm(props: {
 
 /* ------------------------------- Refinance --------------------------------- */
 
-function RefinanceForm(props: {
-  currentBalance: number;
-  months: string;
-  currentRate: string;
-  monthlyPayment: string;
-  onEditBalance: () => void;
-  newAmount: string;
-  setNewAmount: (v: string) => void;
-  newTerm: string;
-  setNewTerm: (v: string) => void;
-  newRate: string;
-  setNewRate: (v: string) => void;
-  closingCosts: string;
-  setClosingCosts: (v: string) => void;
-  years: string;
-  setYears: (v: string) => void;
-  onReset: () => void;
-}) {
+function RefinanceForm(
+  props: FieldFocusProps & {
+    onEditBalance: () => void;
+    newAmount: string;
+    setNewAmount: (v: string) => void;
+    newTerm: string;
+    setNewTerm: (v: string) => void;
+    newRate: string;
+    setNewRate: (v: string) => void;
+    closingCosts: string;
+    setClosingCosts: (v: string) => void;
+    years: string;
+    setYears: (v: string) => void;
+    onReset: () => void;
+  },
+) {
+  const a11y = {
+    validation: props.validation,
+    onFocusField: props.onFocusField,
+    onBlurField: props.onBlurField,
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <p className=" leading-relaxed ">
@@ -536,29 +685,33 @@ function RefinanceForm(props: {
           </Button>
         </div>
 
-        <Field label="New loan amount">
-          <TextInput
-            value={props.newAmount}
-            onChange={props.setNewAmount}
-            prefix="$"
-          />
-        </Field>
+        <NumberField
+          {...a11y}
+          field="newAmount"
+          label="New loan amount"
+          value={props.newAmount}
+          onChange={props.setNewAmount}
+          prefix="$"
+        />
 
-        <Field label="New loan term (months)" hint={monthsHint(props.newTerm)}>
-          <TextInput
-            value={props.newTerm}
-            onChange={props.setNewTerm}
-            suffix="months"
-          />
-        </Field>
+        <NumberField
+          {...a11y}
+          field="newTerm"
+          label="New loan term (months)"
+          value={props.newTerm}
+          onChange={props.setNewTerm}
+          hint={monthsHint(props.newTerm)}
+          suffix="months"
+        />
 
-        <Field label="New interest rate">
-          <TextInput
-            value={props.newRate}
-            onChange={props.setNewRate}
-            suffix="%"
-          />
-        </Field>
+        <NumberField
+          {...a11y}
+          field="newRate"
+          label="New interest rate"
+          value={props.newRate}
+          onChange={props.setNewRate}
+          suffix="%"
+        />
       </div>
 
       {/* Optional */}
@@ -567,23 +720,25 @@ function RefinanceForm(props: {
           Optional
         </h2>
 
-        <Field label="Closing costs & fees">
-          <TextInput
-            value={props.closingCosts}
-            onChange={props.setClosingCosts}
-            prefix="$"
-            placeholder="Optional"
-          />
-        </Field>
+        <NumberField
+          {...a11y}
+          field="closingCosts"
+          label="Closing costs & fees"
+          value={props.closingCosts}
+          onChange={props.setClosingCosts}
+          prefix="$"
+          placeholder="Optional"
+        />
 
-        <Field label="Expected years living in house">
-          <TextInput
-            value={props.years}
-            onChange={props.setYears}
-            suffix="years"
-            placeholder="Optional"
-          />
-        </Field>
+        <NumberField
+          {...a11y}
+          field="years"
+          label="Expected years living in house"
+          value={props.years}
+          onChange={props.setYears}
+          suffix="years"
+          placeholder="Optional"
+        />
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -613,9 +768,10 @@ type LoanTerms = {
 function ResultPanel({
   analysis,
   showAnalysis,
-  hasNewLoan,
+  validation,
   hasClosing,
   onAnalyze,
+  onEditBalance,
   current,
   next,
 }: {
@@ -631,9 +787,10 @@ function ResultPanel({
     closing: number;
   };
   showAnalysis: boolean;
-  hasNewLoan: boolean;
+  validation: Validation;
   hasClosing: boolean;
   onAnalyze: () => void;
+  onEditBalance: () => void;
   current: LoanTerms;
   next: LoanTerms;
 }) {
@@ -653,12 +810,36 @@ function ResultPanel({
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+      {/* The refinance math depends on all three Current Balance inputs, so a
+          problem over there has to be surfaced here — otherwise the analysis
+          just silently disappears with the fix one tab away. */}
+      {validation.currentBlocking ? (
+        <div className="mb-6">
+          <p
+            role="alert"
+            className="text-sm font-semibold text-[var(--color-inline-error)]"
+          >
+            Your current loan details are incomplete or out of range. Fix them to
+            see your refinance analysis.
+          </p>
+          <Button
+            type="button"
+            onClick={onEditBalance}
+            variant="ghost"
+            className="mt-1 flex items-center gap-2 text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
+          >
+            <ArrowLeft size={12} aria-hidden="true" /> Edit current loan
+          </Button>
+        </div>
+      ) : null}
+
       {!showAnalysis ? (
         <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
+          {/* Deliberately not disabled: pressing it is what reveals the
+              "Please enter…" messages on the empty required fields. */}
           <Button
             type="button"
             onClick={onAnalyze}
-            disabled={!hasNewLoan}
             variant="lagunita"
             className="w-full md:w-full flex flex-row items-center justify-center gap-2 whitespace-normal font-medium cursor-pointer"
           >
@@ -710,7 +891,11 @@ function ResultPanel({
 
       {/* Current vs New side-by-side comparison */}
       <div className="mt-6">
-        <LoanComparison current={current} next={next} />
+        <LoanComparison
+          current={current}
+          next={next}
+          validation={validation}
+        />
       </div>
 
       {/* How this was calculated (equation-style breakdown) — after the terms table */}
@@ -731,18 +916,27 @@ function ResultPanel({
 /**
  * Side-by-side comparison of the current loan terms (carried over from the
  * Current Balance tab) against the proposed new loan terms.
+ *
+ * Each cell dashes independently, driven by whether the input it reads is
+ * unusable (blank or out of range) rather than by whether it happens to be
+ * zero. That keeps a valid 0% rate visible while still blanking a rate of 25%.
  */
 function LoanComparison({
   current,
   next,
+  validation,
 }: {
   current: LoanTerms;
   next: LoanTerms;
+  validation: Validation;
 }) {
   const paymentDelta = next.payment - current.payment;
+  const { bad, currentBlocking, refiBlocking } = validation;
 
-  // Show a dash instead of a zero value before the user has entered a figure.
-  const DASH = "—";
+  // The current balance is derived from all three Current Balance fields, and
+  // the new payment from all of the refinance inputs, so those two cells use
+  // the aggregate flags instead of a single field's.
+  const dash = (unusable: boolean, text: string) => (unusable ? DASH : text);
 
   const rows: {
     label: string;
@@ -753,25 +947,25 @@ function LoanComparison({
   }[] = [
     {
       label: "Current balance",
-      cur: current.balance > 0 ? formatCurrency(current.balance) : DASH,
-      nxt: next.balance > 0 ? formatCurrency(next.balance) : DASH,
+      cur: dash(currentBlocking, formatCurrency(current.balance)),
+      nxt: dash(bad.newAmount, formatCurrency(next.balance)),
     },
     {
       label: "Months remaining",
-      cur: current.months > 0 ? `${current.months} mo` : DASH,
-      nxt: next.months > 0 ? `${next.months} mo` : DASH,
+      cur: dash(bad.months, `${current.months} mo`),
+      nxt: dash(bad.newTerm, `${next.months} mo`),
     },
     {
       label: "Interest rate",
-      cur: current.rate > 0 ? `${current.rate}%` : DASH,
-      nxt: next.rate > 0 ? `${next.rate}%` : DASH,
+      cur: dash(bad.currentRate, `${current.rate}%`),
+      nxt: dash(bad.newRate, `${next.rate}%`),
     },
     {
       label: "Monthly payment",
-      cur: current.payment > 0 ? formatCurrency(current.payment) : DASH,
-      nxt: next.payment > 0 ? formatCurrency(next.payment) : DASH,
+      cur: dash(bad.monthlyPayment, formatCurrency(current.payment)),
+      nxt: dash(refiBlocking, formatCurrency(next.payment)),
       delta:
-        next.payment > 0 && current.payment > 0 && paymentDelta !== 0
+        !refiBlocking && !bad.monthlyPayment && paymentDelta !== 0
           ? `${paymentDelta < 0 ? "−" : "+"}${formatCurrency(Math.abs(paymentDelta))}/mo`
           : undefined,
       deltaGood: paymentDelta < 0,
