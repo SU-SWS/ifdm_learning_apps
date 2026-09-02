@@ -172,7 +172,7 @@ export default function InterestRateVisual() {
       interestAmount: calculatedInterest,
       totalAmount: calculatedTotal,
     };
-  }, [debounced, hasError, mode]);
+  }, [debounced, hasError]);
 
   // A finite, valid calculation whose magnitude is beyond what we can render.
   const resultTooLarge =

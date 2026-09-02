@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.2.0] - 2026-09-02
+
+### Added
+
+- Mortgage Refinancing Calculator v3: New dedicated validation module (`lib/validation.ts`) for improved code organization, maintainability, and reusability of validation logic across the refinancing calculator.
+
+### Changed
+
+- Mortgage Refinancing Calculator v3: Significant refactoring and expansion of calculation logic across multiple edge cases (IFDM-326-327, IFDM-322, IFDM-235, IFDM-261, IFDM-171).
+- TypeScript: Added global type definitions in `types/global.d.ts` for improved type consistency.
+
+### Fixed
+
+- Mortgage Calculator v2: Standardized result field dashing behavior so that all result fields display a dash (—) to indicate unreliable calculations when any validation error exists in the calculator, providing clearer visual feedback (#318).
+- Mortgage Calculator v2: Down payment validation errors are now suppressed while editing the home price, reducing unnecessary error state churn during input (#321).
+- Retirement Calculator: Corrected `calculatePeriodicSavings` bug where current savings were compounded annually instead of at the same period rate as new contributions. Monthly/bi-weekly/weekly payment amounts are now internally consistent with their contribution frequencies. Example: 6.6% annual return, $20k current savings, 35-year horizon now correctly shows monthly $903 (was $911), bi-weekly $415 (was $419), weekly $207 (was $209) (#211, #333).
+- ESLint: Resolved code quality issues to maintain standards (#332).
+- CSS: Fixed module path resolution issues in `*.module.css` files for `layout.sx`.
+
 ## [1.1.0] - 2026-08-19
 - Retirement Calculator refactored into modular components: new `lib/retirement.ts` for core calculations and formatting, `lib/validation.ts` for per-field validators, consolidating duplicate formulas and unifying periodic savings logic (#197).
 - Retirement Calculator: Annual spending and retirement savings fields now accept decimal inputs (up to 2 decimal places) with comma formatting (#231).
