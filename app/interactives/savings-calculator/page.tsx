@@ -10,7 +10,6 @@ import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { validateAllFields } from "./lib/validation";
 import {
-  getCompoundingParams,
   getPeriodLabel,
   calculateMonthySavings,
   calculateFutureBalance,
@@ -46,7 +45,6 @@ export default function SavingsCalculator() {
   const [compounding, setCompounding] = useState<CompoundingFrequency>("monthly")
   const [contributionPerPeriod, setcontributionPerPeriod] = useState(0)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  const MAX_MONTHS = 11;
 
   const [results, setResults] = useState<CalculationResults>({
     contributionPerPeriod: NaN,
@@ -86,171 +84,41 @@ export default function SavingsCalculator() {
     });
   }, [mode]);
 
-  // Updated breakdown to use compounding frequency
-  const calculateYearlyBreakdown = useCallback(
-    (contribution: number, totalPeriods: number) => {
-      const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
-      const breakdown: YearlyBreakdown[] = [];
-      let balance = currentBalance;
-      const totalYears = Math.ceil(totalPeriods / periodsPerYear);
-
-      for (let year = 1; year <= totalYears; year++) {
-        const startingBalance = balance;
-        const periodsInThisYear = Math.min(periodsPerYear, totalPeriods - (year - 1) * periodsPerYear);
-        let yearlyContributions = 0;
-        let yearlyInterest = 0;
-
-        const futureValueOfInitial = startingBalance * Math.pow(1 + ratePerPeriod, periodsInThisYear);
-        const futureValueOfAnnuity =
-          contribution * ((Math.pow(1 + ratePerPeriod, periodsInThisYear) - 1) / ratePerPeriod);
-        balance = futureValueOfInitial + futureValueOfAnnuity;
-        yearlyContributions = contribution * periodsInThisYear;
-        yearlyInterest = balance - (startingBalance + yearlyContributions);
-
-        breakdown.push({
-          year,
-          startingBalance,
-          contributions: yearlyContributions,
-          interestEarned: yearlyInterest,
-          endingBalance: balance,
-        });
-      }
-
-      return breakdown;
-    },
-    [compounding, interestRate, currentBalance]
-  );
-
-  // Updated calculation logic to use compounding frequency
+  // Calculate results based on mode using library functions
   const calculateResults = useCallback(() => {
-    const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
-    const totalTimeInMonths = timeYears * 12 + timeMonths;
-    const totalPeriods = timeYears * periodsPerYear + timeMonths * (periodsPerYear / 12);
-
     if (mode === "monthly-savings") {
-      // Calculate required monthly contribution to reach goal
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
-      const remainingAmount = savingsGoal - futureValueOfInitial;
-
-        if (remainingAmount <= 0) {
-          const contributionNeeded = 0;
-          setResults({
-            contributionPerPeriod: contributionNeeded,
-            totalDeposited: currentBalance,
-            interestEarned: savingsGoal - currentBalance,
-            finalBalance: savingsGoal,
-            timeInMonths: totalTimeInMonths,
-          });
-          setYearlyBreakdown(calculateYearlyBreakdown(contributionNeeded, totalPeriods));
-        } else if (totalPeriods < 1) {
-          // If time to goal is less than one compounding period, ignore interest
-          const requiredContributionPerPeriod = savingsGoal - currentBalance;
-          const totalDeposited = currentBalance + requiredContributionPerPeriod;
-          setResults({
-            contributionPerPeriod: requiredContributionPerPeriod,
-            totalDeposited: totalDeposited,
-            interestEarned: 0,
-            finalBalance: savingsGoal,
-            timeInMonths: totalTimeInMonths,
-          });
-          setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
-        } else {
-          const requiredContributionPerPeriod =
-            remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-          const totalDeposited = currentBalance + requiredContributionPerPeriod * totalPeriods;
-
-          setResults({
-            contributionPerPeriod: requiredContributionPerPeriod,
-            totalDeposited: totalDeposited,
-            interestEarned: savingsGoal - totalDeposited,
-            finalBalance: savingsGoal,
-            timeInMonths: totalTimeInMonths,
-          });
-          setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
-        }
+      const { results, breakdown } = calculateMonthySavings(
+        savingsGoal,
+        currentBalance,
+        timeYears,
+        timeMonths,
+        interestRate,
+        compounding
+      );
+      setResults(results);
+      setYearlyBreakdown(breakdown);
     } else if (mode === "future-balance") {
-      // Calculate future balance with current contribution
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
-      const futureValueOfAnnuity =
-        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
-
-      setResults({
-        contributionPerPeriod: contributionPerPeriod,
-        totalDeposited: totalDeposited,
-        interestEarned: finalBalance - totalDeposited,
-        finalBalance: finalBalance,
-        timeInMonths: totalTimeInMonths,
-      });
-      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, totalPeriods));
+      const { results, breakdown } = calculateFutureBalance(
+        currentBalance,
+        contributionPerPeriod,
+        timeYears,
+        timeMonths,
+        interestRate,
+        compounding
+      );
+      setResults(results);
+      setYearlyBreakdown(breakdown);
     } else {
-      // Calculate time to reach goal with current contribution
-
-      if (contributionPerPeriod === 0) {
-        // Interest-only growth (no contributions)
-        // Blocked if currentBalance is 0 (can't grow)
-        if (currentBalance <= 0 || savingsGoal <= currentBalance) {
-          setResults({
-            contributionPerPeriod: 0,
-            totalDeposited: currentBalance,
-            interestEarned: savingsGoal - currentBalance,
-            finalBalance: savingsGoal,
-            timeInMonths: 0,
-          });
-          setYearlyBreakdown([]);
-          return;
-        }
-
-        // Use compound interest formula: n = log(FV/PV) / log(1 + r)
-        const ratio = savingsGoal / currentBalance;
-        const periodsToGoal = Math.log(ratio) / Math.log(1 + ratePerPeriod);
-        const months = Math.round(periodsToGoal * (12 / periodsPerYear));
-
-        // Calculate interest earned
-        const interestEarned = savingsGoal - currentBalance;
-
-        setResults({
-          contributionPerPeriod: 0,
-          totalDeposited: currentBalance,
-          interestEarned: interestEarned,
-          finalBalance: savingsGoal,
-          timeInMonths: months,
-        });
-        setYearlyBreakdown(calculateYearlyBreakdown(0, periodsToGoal));
-      } else if (contributionPerPeriod > 0) {
-        // With contributions
-        const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
-        const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
-        const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
-        const months = Math.round(periodsToGoal * (12 / periodsPerYear))
-
-        // Calculate final balance now with calculated period data.
-        const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
-        const futureValueOfAnnuity =
-          contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
-        const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-        const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
-
-        setResults({
-          contributionPerPeriod: contributionPerPeriod,
-          totalDeposited: totalDeposited,
-          interestEarned: finalBalance - totalDeposited,
-          finalBalance: finalBalance,
-          timeInMonths: months,
-        });
-        setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, periodsToGoal));
-      } else {
-        // contributionPerPeriod < 0, blocked by validation
-        setResults({
-          contributionPerPeriod: contributionPerPeriod,
-          totalDeposited: currentBalance,
-          interestEarned: 0,
-          finalBalance: currentBalance,
-          timeInMonths: 0,
-        });
-        setYearlyBreakdown([]);
-      }
+      // time-to-goal
+      const { results, breakdown } = calculateTimeToGoal(
+        savingsGoal,
+        currentBalance,
+        contributionPerPeriod,
+        interestRate,
+        compounding
+      );
+      setResults(results);
+      setYearlyBreakdown(breakdown);
     }
   }, [
     mode,
@@ -261,7 +129,6 @@ export default function SavingsCalculator() {
     interestRate,
     compounding,
     contributionPerPeriod,
-    calculateYearlyBreakdown,
   ]);
 
   // Check for invalid inputs
@@ -399,7 +266,7 @@ export default function SavingsCalculator() {
                     placeholder=""
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
                     onBlur={() => handleFieldBlur("savingsGoal")}
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.savingsGoal ? "border-[var(--color-inline-error)]" : "border-input"
                     }`}
 
@@ -432,7 +299,7 @@ export default function SavingsCalculator() {
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
                     onBlur={() => handleFieldBlur("currentBalance")}
 
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.currentBalance ? "border-[var(--color-inline-error)]" : "border-input"
                     }`}
                   />
@@ -458,7 +325,7 @@ export default function SavingsCalculator() {
                       placeholder=""
                       onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
                       onBlur={() => handleFieldBlur("contributionPerPeriod")}
-                      className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
                       }`}
                     />
