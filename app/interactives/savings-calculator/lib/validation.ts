@@ -231,6 +231,17 @@ export function validateAllFields(
   );
   if (contributionValidation.error) errors.contributionPerPeriod = contributionValidation.error;
 
+  // Special case: Time to Goal tab - block if both currentBalance and contributionPerPeriod are 0
+  // Only show error after user has touched one of these fields
+  if (
+    mode === "time-to-goal" &&
+    state.currentBalance === 0 &&
+    state.contributionPerPeriod === 0 &&
+    (touched.currentBalance || touched.contributionPerPeriod)
+  ) {
+    errors.contributionPerPeriod = "Enter a savings amount or contribution to calculate time to goal.";
+  }
+
   // Validate interest rate
   const interestRateValidation = validateInterestRate(
     state.interestRate,

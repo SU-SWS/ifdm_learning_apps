@@ -5,11 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/ca
 import { Button } from "@/app/ui/components/button"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
-import { ChevronDown } from "lucide-react"
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+import { ChevronDown, RotateCcw } from "lucide-react"
 import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { validateAllFields } from "./lib/validation";
+import {
+  getCompoundingParams,
+  getPeriodLabel,
+  calculateMonthySavings,
+  calculateFutureBalance,
+  calculateTimeToGoal,
+} from "./lib/calculations";
 
 type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
 type CompoundingFrequency = "daily" | "weekly" | "bi-weekly" | "monthly" | "quarterly" | "semi-annually" | "annually"
@@ -28,19 +34,6 @@ interface YearlyBreakdown {
   contributions: number
   interestEarned: number
   endingBalance: number
-}
-
-// Helper to get periods per year and rate per period
-function getCompoundingParams(frequency: CompoundingFrequency, annualRate: number) {
-  let periodsPerYear = 12;
-  if (frequency === "daily") periodsPerYear = 365;
-  else if (frequency === "weekly") periodsPerYear = 52;
-  else if (frequency === "bi-weekly") periodsPerYear = 26;
-  else if (frequency === "quarterly") periodsPerYear = 4;
-  else if (frequency === "annually") periodsPerYear = 1;
-  else if (frequency === "semi-annually") periodsPerYear = 2;
-  const ratePerPeriod = annualRate / 100 / periodsPerYear;
-  return { periodsPerYear, ratePerPeriod };
 }
 
 export default function SavingsCalculator() {
@@ -74,6 +67,24 @@ export default function SavingsCalculator() {
     interestRate: false,
     contributionPerPeriod: false,
   })
+
+  // Clear all input fields when switching tabs
+  useEffect(() => {
+    setSavingsGoal(0);
+    setCurrentBalance(0);
+    setTimeYears(0);
+    setTimeMonths(0);
+    setInterestRate(-1);
+    setcontributionPerPeriod(0);
+    setTouched({
+      savingsGoal: false,
+      currentBalance: false,
+      timeYears: false,
+      timeMonths: false,
+      interestRate: false,
+      contributionPerPeriod: false,
+    });
+  }, [mode]);
 
   // Updated breakdown to use compounding frequency
   const calculateYearlyBreakdown = useCallback(
@@ -175,7 +186,62 @@ export default function SavingsCalculator() {
       setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, totalPeriods));
     } else {
       // Calculate time to reach goal with current contribution
-      if (contributionPerPeriod <= 0) {
+
+      if (contributionPerPeriod === 0) {
+        // Interest-only growth (no contributions)
+        // Blocked if currentBalance is 0 (can't grow)
+        if (currentBalance <= 0 || savingsGoal <= currentBalance) {
+          setResults({
+            contributionPerPeriod: 0,
+            totalDeposited: currentBalance,
+            interestEarned: savingsGoal - currentBalance,
+            finalBalance: savingsGoal,
+            timeInMonths: 0,
+          });
+          setYearlyBreakdown([]);
+          return;
+        }
+
+        // Use compound interest formula: n = log(FV/PV) / log(1 + r)
+        const ratio = savingsGoal / currentBalance;
+        const periodsToGoal = Math.log(ratio) / Math.log(1 + ratePerPeriod);
+        const months = Math.round(periodsToGoal * (12 / periodsPerYear));
+
+        // Calculate interest earned
+        const interestEarned = savingsGoal - currentBalance;
+
+        setResults({
+          contributionPerPeriod: 0,
+          totalDeposited: currentBalance,
+          interestEarned: interestEarned,
+          finalBalance: savingsGoal,
+          timeInMonths: months,
+        });
+        setYearlyBreakdown(calculateYearlyBreakdown(0, periodsToGoal));
+      } else if (contributionPerPeriod > 0) {
+        // With contributions
+        const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
+        const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
+        const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
+        const months = Math.round(periodsToGoal * (12 / periodsPerYear))
+
+        // Calculate final balance now with calculated period data.
+        const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
+        const futureValueOfAnnuity =
+          contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
+        const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
+        const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
+
+        setResults({
+          contributionPerPeriod: contributionPerPeriod,
+          totalDeposited: totalDeposited,
+          interestEarned: finalBalance - totalDeposited,
+          finalBalance: finalBalance,
+          timeInMonths: months,
+        });
+        setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, periodsToGoal));
+      } else {
+        // contributionPerPeriod < 0, blocked by validation
         setResults({
           contributionPerPeriod: contributionPerPeriod,
           totalDeposited: currentBalance,
@@ -184,29 +250,7 @@ export default function SavingsCalculator() {
           timeInMonths: 0,
         });
         setYearlyBreakdown([]);
-        return;
       }
-
-      const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
-      const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
-      const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
-      const months = Math.round(periodsToGoal * (12 / periodsPerYear))
-
-      // Calculate final balance now with calculated period data.
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
-      const futureValueOfAnnuity =
-        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
-      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
-
-      setResults({
-        contributionPerPeriod: contributionPerPeriod,
-        totalDeposited: totalDeposited,
-        interestEarned: finalBalance - totalDeposited,
-        finalBalance: finalBalance,
-        timeInMonths: months,
-      });
-      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, periodsToGoal));
     }
   }, [
     mode,
@@ -243,6 +287,32 @@ export default function SavingsCalculator() {
       ...prev,
       [fieldName]: true,
     }));
+  };
+
+  // Reset all fields to initial state
+  const handleReset = () => {
+    setSavingsGoal(0);
+    setCurrentBalance(0);
+    setTimeYears(0);
+    setTimeMonths(0);
+    setInterestRate(-1);
+    setcontributionPerPeriod(0);
+    setTouched({
+      savingsGoal: false,
+      currentBalance: false,
+      timeYears: false,
+      timeMonths: false,
+      interestRate: false,
+      contributionPerPeriod: false,
+    });
+    setResults({
+      contributionPerPeriod: NaN,
+      totalDeposited: NaN,
+      interestEarned: NaN,
+      finalBalance: NaN,
+      timeInMonths: NaN,
+    });
+    setYearlyBreakdown([]);
   };
 
   useEffect(() => {
@@ -329,11 +399,12 @@ export default function SavingsCalculator() {
                     placeholder=""
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
                     onBlur={() => handleFieldBlur("savingsGoal")}
-                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.savingsGoal ? "border-[var(--color-inline-error)]" : "border-input"
                     }`}
 
                   />
+                  <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                 </div>
                 {validation.errors.savingsGoal && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -361,10 +432,13 @@ export default function SavingsCalculator() {
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
                     onBlur={() => handleFieldBlur("currentBalance")}
 
-                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.currentBalance ? "border-[var(--color-inline-error)]" : "border-input"
                     }`}
                   />
+                  <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                    $
+                  </span>
                 </div>
                 {validation.errors.currentBalance && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -375,18 +449,20 @@ export default function SavingsCalculator() {
 
               {mode !== "monthly-savings" && (
                 <div>
-                  <Label className="font-medium">Saving per compounding period:</Label>
+                  <Label htmlFor="contribution-period" className="font-medium">Saving per compounding period:</Label>
                   <div className="relative mt-1">
                     <Input
+                      id="contribution-period"
                       type="number"
                       value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
                       placeholder=""
                       onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
                       onBlur={() => handleFieldBlur("contributionPerPeriod")}
-                      className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
                       }`}
                     />
+                    <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                   </div>
                   {validation.errors.contributionPerPeriod && (
                     <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -398,7 +474,7 @@ export default function SavingsCalculator() {
 
               {mode !== "time-to-goal" && (
                 <div>
-                  <Label className="font-medium">
+                  <Label htmlFor="time-years" className="font-medium">
                     {mode === "future-balance" ? "Time period" : "Time to goal"}:
                   </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
@@ -406,17 +482,18 @@ export default function SavingsCalculator() {
                       <div className="flex flex-row gap-2 items-center">
                         <div className="relative flex-1">
                           <Input
+                            id="time-years"
                             type="number"
                             value={timeYears === 0 ? "" : timeYears}
                             placeholder=""
                             onChange={(e) => setTimeYears(Number(e.target.value))}
                             onBlur={() => handleFieldBlur("timeYears")}
-                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
                         </div>
-                        <Label className="font-medium">Years</Label>
+                        <Label htmlFor="time-years" className="font-medium">Years</Label>
                       </div>
                       {validation.errors.timeYears && (
                         <p className="text-sm font-semibold text-[var(--color-inline-error)]">
@@ -428,17 +505,18 @@ export default function SavingsCalculator() {
                       <div className="flex flex-row gap-2 items-center">
                         <div className="relative flex-1">
                           <Input
+                            id="time-months"
                             type="number"
                             value={timeMonths === 0 ? "" : timeMonths}
                             placeholder=""
                             onChange={(e) => setTimeMonths(parseInt(e.target.value) || 0)}
                             onBlur={() => handleFieldBlur("timeMonths")}
-                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
                         </div>
-                        <Label className="font-medium">Months</Label>
+                        <Label htmlFor="time-months" className="font-medium">Months</Label>
                       </div>
                       {validation.errors.timeMonths && (
                         <p className="text-sm font-semibold text-[var(--color-inline-error)]">
@@ -452,7 +530,7 @@ export default function SavingsCalculator() {
 
               <div className="relative">
                 <Label htmlFor="interest-rate" className="font-medium">
-                  Annual interest rate (%)
+                  Annual interest rate
                 </Label>
                 <div className="relative mt-1">
                   <Input
@@ -468,12 +546,9 @@ export default function SavingsCalculator() {
                       setInterestRate(val === "" ? -1 : Number(val));
                     }}
                     onBlur={() => handleFieldBlur("interestRate")}
-                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita ${
-                      validation.errors.interestRate ? "border-[var(--color-inline-error)]" : interestRate === 0
-                        ? "placeholder:text-berry bg-berry-light"
-                        : "placeholder:text-lagunita border-input"
-                    }`}
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                   />
+                  <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                 </div>
                 {validation.errors.interestRate && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -487,9 +562,10 @@ export default function SavingsCalculator() {
                 )}
               </div>
               <div>
-                <label className="block text-md font-medium text-[var(--foreground)] mb-1">Compounding</label>
+                <label htmlFor="compounding-select" className="block text-md font-medium text-[var(--foreground)] mb-1">Compounding</label>
                   <div className="relative">
                   <select
+                  id="compounding-select"
                   value={compounding}
                   onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
@@ -507,6 +583,16 @@ export default function SavingsCalculator() {
                   </div>
                 </div>
               </div>
+              <div>
+                <Button
+                  type="button"
+                  onClick={handleReset}
+                  variant="lagunita"
+                  className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                >
+                  Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -515,7 +601,7 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Saving per compounding period:</CardTitle>
+                  <CardTitle className="text-center text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited)
                         ? "text-foreground"
