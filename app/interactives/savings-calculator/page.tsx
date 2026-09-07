@@ -9,6 +9,7 @@ import { ChevronDown } from "lucide-react"
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
+import { validateAllFields } from "./lib/validation";
 
 type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
 type CompoundingFrequency = "daily" | "weekly" | "bi-weekly" | "monthly" | "quarterly" | "semi-annually" | "annually"
@@ -63,6 +64,16 @@ export default function SavingsCalculator() {
   })
 
   const [yearlyBreakdown, setYearlyBreakdown] = useState<YearlyBreakdown[]>([])
+
+  // Track which fields have been touched (blurred without value or skipped)
+  const [touched, setTouched] = useState<Record<string, boolean>>({
+    savingsGoal: false,
+    currentBalance: false,
+    timeYears: false,
+    timeMonths: false,
+    interestRate: false,
+    contributionPerPeriod: false,
+  })
 
   // Updated breakdown to use compounding frequency
   const calculateYearlyBreakdown = useCallback(
@@ -212,9 +223,44 @@ export default function SavingsCalculator() {
   // Check for invalid inputs
   const isInvalid = (value: number) => isNaN(value) || !isFinite(value);
 
+  // Get validation results
+  const validation = validateAllFields(
+    {
+      savingsGoal,
+      currentBalance,
+      timeYears,
+      timeMonths,
+      interestRate,
+      contributionPerPeriod,
+    },
+    touched,
+    mode
+  );
+
+  // Handle field blur - mark field as touched
+  const handleFieldBlur = (fieldName: string) => {
+    setTouched((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+  };
+
   useEffect(() => {
+    // Block calculation if there are blocking errors
+    if (validation.hasBlockingErrors) {
+      setResults({
+        contributionPerPeriod: NaN,
+        totalDeposited: NaN,
+        interestEarned: NaN,
+        finalBalance: NaN,
+        timeInMonths: NaN,
+      });
+      setYearlyBreakdown([]);
+      return;
+    }
+
     calculateResults();
-  }, [calculateResults]);
+  }, [calculateResults, validation.hasBlockingErrors]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -282,7 +328,10 @@ export default function SavingsCalculator() {
                     value={savingsGoal === 0 ? "" : savingsGoal}
                     placeholder="Savings goal amount"
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
-                    className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    onBlur={() => handleFieldBlur("savingsGoal")}
+                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      validation.errors.savingsGoal ? "border-[var(--color-inline-error)]" : "border-input"
+                    }`}
 
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -306,6 +355,16 @@ export default function SavingsCalculator() {
                     </button>
                   </div>
                 </div>
+                {validation.errors.savingsGoal && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                    {validation.errors.savingsGoal}
+                  </p>
+                )}
+                {validation.info.savingsGoal && !validation.errors.savingsGoal && (
+                  <p className="text-xs text-[var(--foreground)]/60 mt-1">
+                    {validation.info.savingsGoal}
+                  </p>
+                )}
               </div>
               )}
 
@@ -320,8 +379,11 @@ export default function SavingsCalculator() {
                     value={currentBalance === 0 ? "" : currentBalance}
                     placeholder="Current savings balance (leave blank for 0)"
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
+                    onBlur={() => handleFieldBlur("currentBalance")}
 
-                    className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      validation.errors.currentBalance ? "border-[var(--color-inline-error)]" : "border-input"
+                    }`}
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                     <button
@@ -344,6 +406,11 @@ export default function SavingsCalculator() {
                     </button>
                   </div>
                 </div>
+                {validation.errors.currentBalance && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                    {validation.errors.currentBalance}
+                  </p>
+                )}
               </div>
 
               {mode !== "monthly-savings" && (
@@ -355,7 +422,10 @@ export default function SavingsCalculator() {
                       value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
                       placeholder="0"
                       onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
-                      className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onBlur={() => handleFieldBlur("contributionPerPeriod")}
+                      className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
+                      }`}
                     />
                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                       <button
@@ -378,6 +448,11 @@ export default function SavingsCalculator() {
                       </button>
                     </div>
                   </div>
+                  {validation.errors.contributionPerPeriod && (
+                    <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                      {validation.errors.contributionPerPeriod}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -387,80 +462,95 @@ export default function SavingsCalculator() {
                     {mode === "future-balance" ? "Time period" : "Time to goal"}:
                   </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
-                    <div className="flex flex-row gap-2 items-center">
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          value={timeYears === 0 ? "" : timeYears}
-                          placeholder="Years"
-                          onChange={(e) => setTimeYears(Number(e.target.value))}
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Increase amount"
-                            onClick={() => setTimeYears((prev) => Math.max(0, prev + 1))}
-                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                          >
-                            <BiSolidUpArrow size={24} />
-                          </button>
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Decrease amount"
-                            onClick={() => setTimeYears((prev) => Math.max(0, prev - 1))}
-                            className="hover:text-grey-med-dark focus:outline-none"
-                          >
-                            <BiSolidDownArrow size={24} />
-                          </button>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row gap-2 items-center">
+                        <div className="relative flex-1">
+                          <Input
+                            type="number"
+                            value={timeYears === 0 ? "" : timeYears}
+                            placeholder="Years"
+                            onChange={(e) => setTimeYears(Number(e.target.value))}
+                            onBlur={() => handleFieldBlur("timeYears")}
+                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
+                            }`}
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                            <button
+                              type="button"
+                              tabIndex={-1}
+                              aria-label="Increase amount"
+                              onClick={() => setTimeYears((prev) => Math.max(0, prev + 1))}
+                              className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
+                            >
+                              <BiSolidUpArrow size={24} />
+                            </button>
+                            <button
+                              type="button"
+                              tabIndex={-1}
+                              aria-label="Decrease amount"
+                              onClick={() => setTimeYears((prev) => Math.max(0, prev - 1))}
+                              className="hover:text-grey-med-dark focus:outline-none"
+                            >
+                              <BiSolidDownArrow size={24} />
+                            </button>
+                          </div>
                         </div>
+                        <Label className="font-medium">Years</Label>
                       </div>
-                      <Label className="font-medium">Years</Label>
+                      {validation.errors.timeYears && (
+                        <p className="text-sm font-semibold text-[var(--color-inline-error)]">
+                          {validation.errors.timeYears}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex flex-row gap-2 items-center">
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          value={timeMonths === 0 ? "" : timeMonths}
-                          placeholder="Months"
-                          onChange={(e) =>
-                            setTimeMonths(
-                              Math.min(MAX_MONTHS, Math.max(0, parseInt(e.target.value) || 0))
-                            )
-                          }
-                          max={MAX_MONTHS.toString()}
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Increase months"
-                            onClick={() => setTimeMonths((prev) => Math.min(MAX_MONTHS, prev + 1))}
-                            disabled={timeMonths >= MAX_MONTHS}
-                            className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                              timeMonths >= MAX_MONTHS ? 'opacity-30 cursor-not-allowed' : ''
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row gap-2 items-center">
+                        <div className="relative flex-1">
+                          <Input
+                            type="number"
+                            value={timeMonths === 0 ? "" : timeMonths}
+                            placeholder="Months"
+                            onChange={(e) => setTimeMonths(parseInt(e.target.value) || 0)}
+                            onBlur={() => handleFieldBlur("timeMonths")}
+                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
                             }`}
-                          >
-                            <BiSolidUpArrow size={24} />
-                          </button>
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Decrease months"
-                            onClick={() => setTimeMonths((prev) => Math.max(0, prev - 1))}
-                            disabled={timeMonths > MAX_MONTHS}
-                            className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                              timeMonths <= 1 ? 'opacity-30 cursor-not-allowed' : ''
-                            }`}
-                          >
-                            <BiSolidDownArrow size={24} />
-                          </button>
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
+                            <button
+                              type="button"
+                              tabIndex={-1}
+                              aria-label="Increase months"
+                              onClick={() => setTimeMonths((prev) => Math.min(MAX_MONTHS, prev + 1))}
+                              disabled={timeMonths >= MAX_MONTHS}
+                              className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
+                                timeMonths >= MAX_MONTHS ? 'opacity-30 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              <BiSolidUpArrow size={24} />
+                            </button>
+                            <button
+                              type="button"
+                              tabIndex={-1}
+                              aria-label="Decrease months"
+                              onClick={() => setTimeMonths((prev) => Math.max(0, prev - 1))}
+                              disabled={timeMonths > MAX_MONTHS}
+                              className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
+                                timeMonths <= 1 ? 'opacity-30 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              <BiSolidDownArrow size={24} />
+                            </button>
+                          </div>
                         </div>
+                        <Label className="font-medium">Months</Label>
                       </div>
-                      <Label className="font-medium">Months</Label>
+                      {validation.errors.timeMonths && (
+                        <p className="text-sm font-semibold text-[var(--color-inline-error)]">
+                          {validation.errors.timeMonths}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -476,13 +566,18 @@ export default function SavingsCalculator() {
                     type="number"
                     step="0.1"
                     min="0.1"
-                    value={interestRate === 0 ? "" : interestRate}
+                    value={interestRate === -1 ? "" : interestRate === 0 ? "0" : interestRate}
                     placeholder="Enter rate"
-                    onChange={(e) => setInterestRate(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Set to -1 if empty string, otherwise parse as number
+                      setInterestRate(val === "" ? -1 : Number(val));
+                    }}
+                    onBlur={() => handleFieldBlur("interestRate")}
                     className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita ${
-                      interestRate === 0
+                      validation.errors.interestRate ? "border-[var(--color-inline-error)]" : interestRate === 0
                         ? "placeholder:text-berry bg-berry-light"
-                        : "placeholder:text-lagunita"
+                        : "placeholder:text-lagunita border-input"
                     }`}
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
@@ -506,6 +601,16 @@ export default function SavingsCalculator() {
                     </button>
                   </div>
                 </div>
+                {validation.errors.interestRate && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                    {validation.errors.interestRate}
+                  </p>
+                )}
+                {validation.info.interestRate && !validation.errors.interestRate && (
+                  <p className="text-xs text-[var(--foreground)]/60 mt-1">
+                    {validation.info.interestRate}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-md font-medium text-[var(--foreground)] mb-1">Compounding</label>
@@ -539,11 +644,11 @@ export default function SavingsCalculator() {
                   <CardTitle className="text-center text-md font-bold">Saving per compounding period:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited)
-                        ? "text-berry"
+                        ? "text-foreground"
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? "$0"
+                      ? "-"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -552,8 +657,11 @@ export default function SavingsCalculator() {
               {mode === "time-to-goal" && (
                 <>
                 <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
-                  <div className="text-4xl font-bold text-lagunita text-center">
-                    {Math.floor(results.timeInMonths / 12)} years {results.timeInMonths % 12} months
+                  <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) ? "var(--foreground)" : "var(--lagunita)" }}>
+                    {isInvalid(results.timeInMonths)
+                      ? "-"
+                      : `${Math.floor(results.timeInMonths / 12)} years ${results.timeInMonths % 12} months`
+                    }
                   </div>
                 </>
               )}
@@ -563,11 +671,11 @@ export default function SavingsCalculator() {
                 <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
                 <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.finalBalance)
-                        ? "text-berry"
+                        ? "text-foreground"
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? "$0"
+                      ? "-"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -584,7 +692,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                         {isInvalid(results.totalDeposited)
-                        ? "$0"
+                        ? "-"
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -594,8 +702,8 @@ export default function SavingsCalculator() {
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
                       >
-                        {(isInvalid(results.interestEarned) || results.interestEarned < 0)
-                        ? "$0"
+                        {isInvalid(results.interestEarned)
+                        ? "-"
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -605,7 +713,9 @@ export default function SavingsCalculator() {
                         Final balance:
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        ${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {isInvalid(results.finalBalance)
+                        ? "-"
+                        : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     )}
@@ -652,23 +762,23 @@ export default function SavingsCalculator() {
                                 {year.year}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                {(isInvalid(year.startingBalance) || year.startingBalance < 0)
-                                ? "$0"
+                                {isInvalid(year.startingBalance)
+                                ? "-"
                                 : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                {(isInvalid(year.contributions) || year.contributions < 0)
-                                ? "$0"
+                                {isInvalid(year.contributions)
+                                ? "-"
                                 : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
-                                {(isInvalid(year.interestEarned) || year.interestEarned < 0)
-                                ? "$0"
+                                {isInvalid(year.interestEarned)
+                                ? "-"
                                 : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
-                                {(isInvalid(year.endingBalance) || year.endingBalance < 0)
-                                ? "$0"
+                                {isInvalid(year.endingBalance)
+                                ? "-"
                                 : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                             </tr>
