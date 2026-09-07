@@ -147,9 +147,13 @@ export function validateInterestRate(
   value: number,
   touched: boolean
 ): { error?: string; info?: string } {
-  if (touched && value === -1) {
-    // -1 represents an emptied field
-    return { error: "Please enter an annual interest rate." };
+  // Check for sentinel value (-1 = empty field) first, before range check
+  if (value === -1) {
+    if (touched) {
+      return { error: "Please enter an annual interest rate." };
+    }
+    // Not touched yet, so don't show error
+    return {};
   }
 
   if (value < 0 || value > 30) {

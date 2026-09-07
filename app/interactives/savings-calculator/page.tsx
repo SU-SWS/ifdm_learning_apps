@@ -45,22 +45,22 @@ function getCompoundingParams(frequency: CompoundingFrequency, annualRate: numbe
 
 export default function SavingsCalculator() {
   const [mode, setMode] = useState<CalculationMode>("monthly-savings")
-  const [savingsGoal, setSavingsGoal] = useState(8000)
-  const [currentBalance, setCurrentBalance] = useState(100)
-  const [timeYears, setTimeYears] = useState(1)
-  const [timeMonths, setTimeMonths] = useState(3)
-  const [interestRate, setInterestRate] = useState(5.0)
+  const [savingsGoal, setSavingsGoal] = useState(0)
+  const [currentBalance, setCurrentBalance] = useState(0)
+  const [timeYears, setTimeYears] = useState(0)
+  const [timeMonths, setTimeMonths] = useState(0)
+  const [interestRate, setInterestRate] = useState(-1)
   const [compounding, setCompounding] = useState<CompoundingFrequency>("monthly")
-  const [contributionPerPeriod, setcontributionPerPeriod] = useState(203)
+  const [contributionPerPeriod, setcontributionPerPeriod] = useState(0)
   const [showBreakdown, setShowBreakdown] = useState(false)
   const MAX_MONTHS = 11;
 
   const [results, setResults] = useState<CalculationResults>({
-    contributionPerPeriod: 203,
-    totalDeposited: 7424,
-    interestEarned: 576,
-    finalBalance: 8000,
-    timeInMonths: 24,
+    contributionPerPeriod: NaN,
+    totalDeposited: NaN,
+    interestEarned: NaN,
+    finalBalance: NaN,
+    timeInMonths: NaN,
   })
 
   const [yearlyBreakdown, setYearlyBreakdown] = useState<YearlyBreakdown[]>([])
@@ -326,7 +326,7 @@ export default function SavingsCalculator() {
                     type="number"
                     min="0"
                     value={savingsGoal === 0 ? "" : savingsGoal}
-                    placeholder="Savings goal amount"
+                    placeholder=""
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
                     onBlur={() => handleFieldBlur("savingsGoal")}
                     className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
@@ -334,26 +334,6 @@ export default function SavingsCalculator() {
                     }`}
 
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Increase amount"
-                      onClick={() => setSavingsGoal((prev) => Math.max(0, prev + 1))}
-                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidUpArrow size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Decrease amount"
-                      onClick={() => setSavingsGoal((prev) => Math.max(0, prev - 1))}
-                      className="hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidDownArrow size={24} />
-                    </button>
-                  </div>
                 </div>
                 {validation.errors.savingsGoal && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -377,7 +357,7 @@ export default function SavingsCalculator() {
                     id="current-balance"
                     type="number"
                     value={currentBalance === 0 ? "" : currentBalance}
-                    placeholder="Current savings balance (leave blank for 0)"
+                    placeholder=""
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
                     onBlur={() => handleFieldBlur("currentBalance")}
 
@@ -385,26 +365,6 @@ export default function SavingsCalculator() {
                       validation.errors.currentBalance ? "border-[var(--color-inline-error)]" : "border-input"
                     }`}
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Increase amount"
-                      onClick={() => setCurrentBalance((prev) => Math.max(0, prev + 1))}
-                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidUpArrow size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Decrease amount"
-                      onClick={() => setCurrentBalance((prev) => Math.max(0, prev - 1))}
-                      className="hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidDownArrow size={24} />
-                    </button>
-                  </div>
                 </div>
                 {validation.errors.currentBalance && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -420,33 +380,13 @@ export default function SavingsCalculator() {
                     <Input
                       type="number"
                       value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
-                      placeholder="0"
+                      placeholder=""
                       onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
                       onBlur={() => handleFieldBlur("contributionPerPeriod")}
                       className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
                       }`}
                     />
-                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase amount"
-                        onClick={() => setcontributionPerPeriod((prev) => Math.max(0, prev + 1))}
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease amount"
-                        onClick={() => setcontributionPerPeriod((prev) => Math.max(0, prev - 1))}
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
                   </div>
                   {validation.errors.contributionPerPeriod && (
                     <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
@@ -468,33 +408,13 @@ export default function SavingsCalculator() {
                           <Input
                             type="number"
                             value={timeYears === 0 ? "" : timeYears}
-                            placeholder="Years"
+                            placeholder=""
                             onChange={(e) => setTimeYears(Number(e.target.value))}
                             onBlur={() => handleFieldBlur("timeYears")}
                             className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Increase amount"
-                              onClick={() => setTimeYears((prev) => Math.max(0, prev + 1))}
-                              className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                            >
-                              <BiSolidUpArrow size={24} />
-                            </button>
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Decrease amount"
-                              onClick={() => setTimeYears((prev) => Math.max(0, prev - 1))}
-                              className="hover:text-grey-med-dark focus:outline-none"
-                            >
-                              <BiSolidDownArrow size={24} />
-                            </button>
-                          </div>
                         </div>
                         <Label className="font-medium">Years</Label>
                       </div>
@@ -510,39 +430,13 @@ export default function SavingsCalculator() {
                           <Input
                             type="number"
                             value={timeMonths === 0 ? "" : timeMonths}
-                            placeholder="Months"
+                            placeholder=""
                             onChange={(e) => setTimeMonths(parseInt(e.target.value) || 0)}
                             onBlur={() => handleFieldBlur("timeMonths")}
                             className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Increase months"
-                              onClick={() => setTimeMonths((prev) => Math.min(MAX_MONTHS, prev + 1))}
-                              disabled={timeMonths >= MAX_MONTHS}
-                              className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                                timeMonths >= MAX_MONTHS ? 'opacity-30 cursor-not-allowed' : ''
-                              }`}
-                            >
-                              <BiSolidUpArrow size={24} />
-                            </button>
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              aria-label="Decrease months"
-                              onClick={() => setTimeMonths((prev) => Math.max(0, prev - 1))}
-                              disabled={timeMonths > MAX_MONTHS}
-                              className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                                timeMonths <= 1 ? 'opacity-30 cursor-not-allowed' : ''
-                              }`}
-                            >
-                              <BiSolidDownArrow size={24} />
-                            </button>
-                          </div>
                         </div>
                         <Label className="font-medium">Months</Label>
                       </div>
@@ -567,7 +461,7 @@ export default function SavingsCalculator() {
                     step="0.1"
                     min="0.1"
                     value={interestRate === -1 ? "" : interestRate === 0 ? "0" : interestRate}
-                    placeholder="Enter rate"
+                    placeholder=""
                     onChange={(e) => {
                       const val = e.target.value;
                       // Set to -1 if empty string, otherwise parse as number
@@ -580,26 +474,6 @@ export default function SavingsCalculator() {
                         : "placeholder:text-lagunita border-input"
                     }`}
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Increase amount"
-                      onClick={() => setInterestRate((prev) => Math.max(0, prev + 1))}
-                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidUpArrow size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Decrease amount"
-                      onClick={() => setInterestRate((prev) => Math.max(0, prev - 1))}
-                      className="hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidDownArrow size={24} />
-                    </button>
-                  </div>
                 </div>
                 {validation.errors.interestRate && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
