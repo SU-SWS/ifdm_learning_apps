@@ -131,7 +131,7 @@ export function RefinanceCalculator() {
           closingCosts,
           years,
         }),
-      300,
+      1000,
     );
     return () => clearTimeout(t);
   }, [
@@ -819,8 +819,8 @@ function ResultPanel({
             role="alert"
             className="text-sm font-semibold text-[var(--color-inline-error)]"
           >
-            Your current loan details are incomplete or out of range. Fix them to
-            see your refinance analysis.
+            Your current loan details are incomplete or out of range. Fix them
+            to see your refinance analysis.
           </p>
           <Button
             type="button"
@@ -891,11 +891,7 @@ function ResultPanel({
 
       {/* Current vs New side-by-side comparison */}
       <div className="mt-6">
-        <LoanComparison
-          current={current}
-          next={next}
-          validation={validation}
-        />
+        <LoanComparison current={current} next={next} validation={validation} />
       </div>
 
       {/* How this was calculated (equation-style breakdown) — after the terms table */}
