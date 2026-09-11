@@ -62,8 +62,14 @@ function hasValue(value: string): boolean {
  * Format a raw input string with thousands separators as the user types while
  * preserving a trailing decimal point and decimal digits (e.g. "5000" ->
  * "5,000", "1234.5" -> "1,234.5"). Invalid characters are stripped.
+ *
+ * A leading "-" is preserved rather than stripped (IFDM-342): every field's
+ * range starts at 0 or above, so a negative value is always out of range, and
+ * the validator needs to see it in order to show the range message instead of
+ * silently discarding what the user typed.
  */
 function formatThousands(raw: string): string {
+  const isNegative = raw.trim().startsWith("-");
   let cleaned = raw.replace(/[^\d.]/g, "");
   const firstDot = cleaned.indexOf(".");
   if (firstDot !== -1) {
@@ -71,10 +77,12 @@ function formatThousands(raw: string): string {
       cleaned.slice(0, firstDot + 1) +
       cleaned.slice(firstDot + 1).replace(/\./g, "");
   }
-  if (cleaned === "") return "";
+  if (cleaned === "") return isNegative ? "-" : "";
   const [intPart, decPart] = cleaned.split(".");
   const intFormatted = intPart ? Number(intPart).toLocaleString("en-US") : "";
-  return decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+  const formatted =
+    decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+  return isNegative ? `-${formatted}` : formatted;
 }
 
 export function RefinanceCalculator() {
@@ -147,7 +155,7 @@ export function RefinanceCalculator() {
           closingCosts,
           years,
         }),
-      300,
+      500,
     );
     return () => clearTimeout(t);
   }, [
@@ -212,6 +220,14 @@ export function RefinanceCalculator() {
       analyzed,
     ],
   );
+
+  const debouncedV = useMemo(
+    () => validate(debounced, { touched, focusedField, analyzed }),
+    [debounced, touched, focusedField, analyzed],
+  );
+  const currentBalanceBlocking =
+    v.currentBlocking || debouncedV.currentBlocking;
+  const refiAnalysisBlocking = v.refiBlocking || debouncedV.refiBlocking;
 
   // --- Refinance analysis ---
   // Single net-present-value formula for every case:
@@ -414,7 +430,7 @@ export function RefinanceCalculator() {
               </p>
               {/* Suppressed rather than computed from zero-coerced blanks. */}
               <p className="mt-1 text-4xl font-bold text-primary">
-                {v.currentBlocking ? DASH : formatCurrency(currentBalance)}
+                {currentBalanceBlocking ? DASH : formatCurrency(currentBalance)}
               </p>
               <Button
                 type="button"
@@ -428,8 +444,10 @@ export function RefinanceCalculator() {
           ) : (
             <ResultPanel
               analysis={analysis}
-              showAnalysis={hasStartedEditing && !v.refiBlocking}
+              showAnalysis={hasStartedEditing && !refiAnalysisBlocking}
               validation={v}
+              currentBalanceBlocking={currentBalanceBlocking}
+              refiAnalysisBlocking={refiAnalysisBlocking}
               hasClosing={hasClosing}
               onAnalyze={handleAnalyze}
               onEditBalance={() => setTab("current")}
@@ -786,6 +804,8 @@ function ResultPanel({
   analysis,
   showAnalysis,
   validation,
+  currentBalanceBlocking,
+  refiAnalysisBlocking,
   hasClosing,
   onAnalyze,
   onEditBalance,
@@ -806,6 +826,8 @@ function ResultPanel({
   };
   showAnalysis: boolean;
   validation: Validation;
+  currentBalanceBlocking: boolean;
+  refiAnalysisBlocking: boolean;
   hasClosing: boolean;
   onAnalyze: () => void;
   onEditBalance: () => void;
@@ -836,8 +858,8 @@ function ResultPanel({
             role="alert"
             className="text-sm font-semibold text-[var(--color-inline-error)]"
           >
-            Your current loan details are incomplete or out of range. Fix them to
-            see your refinance analysis.
+            Your current loan details are incomplete or out of range. Fix them
+            to see your refinance analysis.
           </p>
           <Button
             type="button"
@@ -924,6 +946,8 @@ function ResultPanel({
           current={current}
           next={next}
           validation={validation}
+          currentBalanceBlocking={currentBalanceBlocking}
+          refiAnalysisBlocking={refiAnalysisBlocking}
         />
       </div>
 
@@ -954,13 +978,17 @@ function LoanComparison({
   current,
   next,
   validation,
+  currentBalanceBlocking,
+  refiAnalysisBlocking,
 }: {
   current: LoanTerms;
   next: LoanTerms;
   validation: Validation;
+  currentBalanceBlocking: boolean;
+  refiAnalysisBlocking: boolean;
 }) {
   const paymentDelta = next.payment - current.payment;
-  const { bad, currentBlocking, refiBlocking } = validation;
+  const { bad } = validation;
 
   // The current balance is derived from all three Current Balance fields, and
   // the new payment from all of the refinance inputs, so those two cells use
@@ -976,7 +1004,11 @@ function LoanComparison({
   }[] = [
     {
       label: "Current balance",
-      cur: dash(currentBlocking, formatCurrency(current.balance)),
+      // current.balance is derived from the debounced snapshot, so it must be
+      // dashed off currentBalanceBlocking (which accounts for that lag) rather
+      // than the raw, instantly-updating validation.currentBlocking — see
+      // currentBalanceBlocking's definition.
+      cur: dash(currentBalanceBlocking, formatCurrency(current.balance)),
       nxt: dash(bad.newAmount, formatCurrency(next.balance)),
     },
     {
@@ -992,9 +1024,9 @@ function LoanComparison({
     {
       label: "Monthly payment",
       cur: dash(bad.monthlyPayment, formatCurrency(current.payment)),
-      nxt: dash(refiBlocking, formatCurrency(next.payment)),
+      nxt: dash(refiAnalysisBlocking, formatCurrency(next.payment)),
       delta:
-        !refiBlocking && !bad.monthlyPayment && paymentDelta !== 0
+        !refiAnalysisBlocking && !bad.monthlyPayment && paymentDelta !== 0
           ? `${paymentDelta < 0 ? "−" : "+"}${formatCurrency(Math.abs(paymentDelta))}/mo`
           : undefined,
       deltaGood: paymentDelta < 0,
