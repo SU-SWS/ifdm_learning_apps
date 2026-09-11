@@ -768,7 +768,7 @@ export default function RetirementCalculator() {
 
           {/* Right Column - Results */}
           <div
-            className="bg-[var(--card-background)] rounded-3xl p-[32px]"
+            className="rounded-3xl p-[32px]"
             aria-live="polite"
             aria-atomic="true"
           >
