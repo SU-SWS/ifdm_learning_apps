@@ -784,7 +784,7 @@ export default function RetirementCalculator() {
                       {formatCurrency(calculatedRequiredBalance)}
                     </p>
                     <p className="mt-3 mb-6 text-sm">
-                      This estimates the lump sum needed at retirement to fund{" "}
+                      Estimated lump sum needed at retirement to fund{" "}
                       {formatCurrency(inputs.annualSpending)} per year for{" "}
                       {inputs.retirementLength}{" "}
                       {yearsLabel(inputs.retirementLength)}, assuming a{" "}
@@ -832,7 +832,7 @@ export default function RetirementCalculator() {
                       {formatCurrency(results.requiredBalance)}
                     </p>
                     <p className="mt-3 mb-6 text-sm">
-                      This estimates the lump sum needed at retirement to fund{" "}
+                      Estimated lump sum needed at retirement to fund{" "}
                       {formatCurrency(inputs.annualSpending)} per year for{" "}
                       {inputs.retirementLength}{" "}
                       {yearsLabel(inputs.retirementLength)}, assuming a{" "}
