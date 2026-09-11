@@ -28,14 +28,24 @@ import {
 // actively editing them — see the focusedField comment below.
 type FocusableField = "debtAmount" | "interestRate" | "payment" | "targetYears" | "targetMonths"
 
+const NO_FIELDS_TOUCHED: Record<FocusableField, boolean> = {
+  debtAmount: false,
+  interestRate: false,
+  payment: false,
+  targetYears: false,
+  targetMonths: false,
+}
+
 export default function DebtPayoffCalculator() {
-  const [debtAmount, setDebtAmount] = useState<string>("30,000")
-  const [interestRate, setInterestRate] = useState<string>("4")
+  // All fields start blank so the user enters their own numbers rather than
+  // editing a pre-filled example (IFDM-241).
+  const [debtAmount, setDebtAmount] = useState<string>("")
+  const [interestRate, setInterestRate] = useState<string>("")
   const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("monthly")
-  const [payment, setPayment] = useState<string>("303.74")
+  const [payment, setPayment] = useState<string>("")
   const [additionalPayment, setAdditionalPayment] = useState<string>("")
-  const [targetYears, setTargetYears] = useState<string>("10")
-  const [targetMonths, setTargetMonths] = useState<string>("11")
+  const [targetYears, setTargetYears] = useState<string>("")
+  const [targetMonths, setTargetMonths] = useState<string>("")
 
   // The field currently being edited, or null. A required field's "Please
   // enter…" message waits until the user leaves the field, so clearing it
@@ -43,8 +53,14 @@ export default function DebtPayoffCalculator() {
   // are never deferred this way — the user needs to know right away why the
   // result stopped updating.
   const [focusedField, setFocusedField] = useState<FocusableField | null>(null)
-  const clearFocus = (field: FocusableField) =>
+  // Fields the user has entered and left at least once. A required field's
+  // "Please enter…" message additionally waits for this, so the page doesn't
+  // shout at the user the moment it loads with every field blank.
+  const [touched, setTouched] = useState<Record<FocusableField, boolean>>(NO_FIELDS_TOUCHED)
+  const clearFocus = (field: FocusableField) => {
     setFocusedField((current) => (current === field ? null : current))
+    setTouched((current) => ({ ...current, [field]: true }))
+  }
 
   const v = validateDebtPayoffInputs({
     debtAmount,
@@ -57,12 +73,20 @@ export default function DebtPayoffCalculator() {
   })
 
   const showDebtAmountError =
-    !!v.debtAmountError && !(debtAmount.trim() === "" && focusedField === "debtAmount")
+    !!v.debtAmountError &&
+    touched.debtAmount &&
+    !(debtAmount.trim() === "" && focusedField === "debtAmount")
   const showInterestRateError =
-    !!v.interestRateError && !(interestRate.trim() === "" && focusedField === "interestRate")
-  const showPaymentError = !!v.paymentError && !(payment.trim() === "" && focusedField === "payment")
+    !!v.interestRateError &&
+    touched.interestRate &&
+    !(interestRate.trim() === "" && focusedField === "interestRate")
+  const showPaymentError =
+    !!v.paymentError && touched.payment && !(payment.trim() === "" && focusedField === "payment")
   const showTargetTimeError =
-    !!v.targetTimeError && focusedField !== "targetYears" && focusedField !== "targetMonths"
+    !!v.targetTimeError &&
+    (touched.targetYears || touched.targetMonths) &&
+    focusedField !== "targetYears" &&
+    focusedField !== "targetMonths"
 
   const payoffResult = calculatePayoffTime({
     principal: v.debtAmountNum,
