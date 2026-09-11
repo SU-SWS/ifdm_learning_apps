@@ -495,13 +495,13 @@ export default function SavingsCalculator() {
                 <>
                   <CardTitle className="text-center text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
-                      isInvalid(results.totalDeposited)
+                      isInvalid(results.totalDeposited) || overflowWarning
                         ? "text-foreground"
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.totalDeposited)
                       ? "-"
-                      : isOverflow(results.contributionPerPeriod)
+                      : overflowWarning
                       ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
@@ -512,8 +512,10 @@ export default function SavingsCalculator() {
                 <>
                 <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
                   <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
-                    {isInvalid(results.timeInMonths) || overflowWarning
+                    {isInvalid(results.timeInMonths)
                       ? "-"
+                      : overflowWarning
+                      ? "Too large to display"
                       : `${Math.floor(results.timeInMonths / 12)} years ${results.timeInMonths % 12} months`
                     }
                   </div>
@@ -524,13 +526,13 @@ export default function SavingsCalculator() {
                 <>
                 <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
                 <div className={`text-4xl font-bold text-center ${
-                      isInvalid(results.finalBalance)
+                      isInvalid(results.finalBalance) || overflowWarning
                         ? "text-foreground"
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.finalBalance)
                       ? "-"
-                      : isOverflow(results.finalBalance)
+                      : overflowWarning
                       ? "Too large to display"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
@@ -546,11 +548,9 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                         Total deposited:
                       </div>
-                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--secondary-background)] ${isOverflow(results.totalDeposited) ? "" : "overflow-hidden text-ellipsis"}`}>
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--secondary-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.totalDeposited) || overflowWarning
                         ? "-"
-                        : isOverflow(results.totalDeposited)
-                        ? "Too large to display"
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -558,12 +558,10 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-md p-4 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-lagunita font-bold text-white">
                         Interest earned:
                       </div>
-                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold ${isOverflow(results.interestEarned) ? "" : "overflow-hidden text-ellipsis"}`}
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis`}
                       >
                         {isInvalid(results.interestEarned) || overflowWarning
                         ? "-"
-                        : isOverflow(results.interestEarned)
-                        ? "Too large to display"
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -572,11 +570,9 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
                       </div>
-                      <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] ${isOverflow(results.finalBalance) ? "" : "overflow-hidden text-ellipsis"}`}>
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.finalBalance) || overflowWarning
                         ? "-"
-                        : isOverflow(results.finalBalance)
-                        ? "Too large to display"
                         : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
