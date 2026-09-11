@@ -55,6 +55,7 @@ export default function SavingsCalculator() {
   })
 
   const [yearlyBreakdown, setYearlyBreakdown] = useState<YearlyBreakdown[]>([])
+  const [overflowWarning, setOverflowWarning] = useState(false)
 
   // Track which fields have been touched (blurred without value or skipped)
   const [touched, setTouched] = useState<Record<string, boolean>>({
@@ -134,6 +135,12 @@ export default function SavingsCalculator() {
   // Check for invalid inputs
   const isInvalid = (value: number) => isNaN(value) || !isFinite(value);
 
+  // Display ceiling: max value that fits nicely on UI
+  const DISPLAY_MAX = 99_999_999;
+
+  // Check if a value exceeds display limits
+  const isOverflow = (value: number) => !isInvalid(value) && value > DISPLAY_MAX;
+
   // Get validation results
   const validation = validateAllFields(
     {
@@ -193,11 +200,22 @@ export default function SavingsCalculator() {
         timeInMonths: NaN,
       });
       setYearlyBreakdown([]);
+      setOverflowWarning(false);
       return;
     }
 
     calculateResults();
   }, [calculateResults, validation.hasBlockingErrors]);
+
+  // Check for overflow after results are calculated
+  useEffect(() => {
+    const hasOverflow =
+      isOverflow(results.contributionPerPeriod) ||
+      isOverflow(results.totalDeposited) ||
+      isOverflow(results.interestEarned) ||
+      isOverflow(results.finalBalance);
+    setOverflowWarning(hasOverflow);
+  }, [results]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -252,6 +270,13 @@ export default function SavingsCalculator() {
               )}
             </CardHeader>
             <CardContent className="space-y-6">
+              {overflowWarning && (
+                <div className="p-3 rounded-md bg-[var(--color-inline-warning)]/10 border border-[var(--color-inline-warning)]">
+                  <p className="text-sm font-semibold text-[var(--color-inline-warning)]">
+                    Results exceed display limits. Try a smaller balance, lower rate, or shorter time period.
+                  </p>
+                </div>
+              )}
               {mode !== "future-balance" && (
               <div>
                 <Label htmlFor="savings-goal" className="font-medium">
@@ -476,6 +501,8 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.totalDeposited)
                       ? "-"
+                      : isOverflow(results.contributionPerPeriod)
+                      ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -484,8 +511,8 @@ export default function SavingsCalculator() {
               {mode === "time-to-goal" && (
                 <>
                 <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
-                  <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) ? "var(--foreground)" : "var(--lagunita)" }}>
-                    {isInvalid(results.timeInMonths)
+                  <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
+                    {isInvalid(results.timeInMonths) || overflowWarning
                       ? "-"
                       : `${Math.floor(results.timeInMonths / 12)} years ${results.timeInMonths % 12} months`
                     }
@@ -503,6 +530,8 @@ export default function SavingsCalculator() {
                     }`}>
                       {isInvalid(results.finalBalance)
                       ? "-"
+                      : isOverflow(results.finalBalance)
+                      ? "Too large to display"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -517,9 +546,11 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                         Total deposited:
                       </div>
-                      <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                        {isInvalid(results.totalDeposited)
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--secondary-background)] ${isOverflow(results.totalDeposited) ? "" : "overflow-hidden text-ellipsis"}`}>
+                        {isInvalid(results.totalDeposited) || overflowWarning
                         ? "-"
+                        : isOverflow(results.totalDeposited)
+                        ? "Too large to display"
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -527,10 +558,12 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-md p-4 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-lagunita font-bold text-white">
                         Interest earned:
                       </div>
-                      <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold ${isOverflow(results.interestEarned) ? "" : "overflow-hidden text-ellipsis"}`}
                       >
-                        {isInvalid(results.interestEarned)
+                        {isInvalid(results.interestEarned) || overflowWarning
                         ? "-"
+                        : isOverflow(results.interestEarned)
+                        ? "Too large to display"
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -539,9 +572,11 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
                       </div>
-                      <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        {isInvalid(results.finalBalance)
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] ${isOverflow(results.finalBalance) ? "" : "overflow-hidden text-ellipsis"}`}>
+                        {isInvalid(results.finalBalance) || overflowWarning
                         ? "-"
+                        : isOverflow(results.finalBalance)
+                        ? "Too large to display"
                         : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -591,21 +626,29 @@ export default function SavingsCalculator() {
                               <td className="py-2 px-3 text-right">
                                 {isInvalid(year.startingBalance)
                                 ? "-"
+                                : isOverflow(year.startingBalance)
+                                ? "Too large to display"
                                 : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right">
                                 {isInvalid(year.contributions)
                                 ? "-"
+                                : isOverflow(year.contributions)
+                                ? "Too large to display"
                                 : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
                                 {isInvalid(year.interestEarned)
                                 ? "-"
+                                : isOverflow(year.interestEarned)
+                                ? "Too large to display"
                                 : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
                                 {isInvalid(year.endingBalance)
                                 ? "-"
+                                : isOverflow(year.endingBalance)
+                                ? "Too large to display"
                                 : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                             </tr>

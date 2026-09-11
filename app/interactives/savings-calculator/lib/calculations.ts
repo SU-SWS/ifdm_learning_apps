@@ -107,6 +107,20 @@ export function calculateMonthySavings(
   interestRate: number,
   compounding: CompoundingFrequency
 ): { results: CalculationResults; breakdown: YearlyBreakdown[] } {
+  // Guard: prevent calculation with unset/invalid interest rate
+  if (interestRate === -1) {
+    return {
+      results: {
+        contributionPerPeriod: NaN,
+        totalDeposited: NaN,
+        interestEarned: NaN,
+        finalBalance: NaN,
+        timeInMonths: NaN,
+      },
+      breakdown: [],
+    };
+  }
+
   const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
   const totalTimeInMonths = timeYears * 12 + timeMonths;
   const totalPeriods = timeYears * periodsPerYear + timeMonths * (periodsPerYear / 12);
@@ -169,6 +183,20 @@ export function calculateFutureBalance(
   interestRate: number,
   compounding: CompoundingFrequency
 ): { results: CalculationResults; breakdown: YearlyBreakdown[] } {
+  // Guard: prevent calculation with unset/invalid interest rate
+  if (interestRate === -1) {
+    return {
+      results: {
+        contributionPerPeriod: NaN,
+        totalDeposited: NaN,
+        interestEarned: NaN,
+        finalBalance: NaN,
+        timeInMonths: NaN,
+      },
+      breakdown: [],
+    };
+  }
+
   const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
   const totalTimeInMonths = timeYears * 12 + timeMonths;
   const totalPeriods = timeYears * periodsPerYear + timeMonths * (periodsPerYear / 12);
@@ -208,6 +236,20 @@ export function calculateTimeToGoal(
   interestRate: number,
   compounding: CompoundingFrequency
 ): { results: CalculationResults; breakdown: YearlyBreakdown[] } {
+  // Guard: prevent calculation with unset/invalid interest rate
+  if (interestRate === -1) {
+    return {
+      results: {
+        contributionPerPeriod: NaN,
+        totalDeposited: NaN,
+        interestEarned: NaN,
+        finalBalance: NaN,
+        timeInMonths: NaN,
+      },
+      breakdown: [],
+    };
+  }
+
   const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
 
   let results: CalculationResults;
