@@ -42,6 +42,8 @@ const capDecimalPlaces = (value: string): string => {
   return value.slice(0, dotIndex + 3);
 };
 
+const yearsLabel = (value: number): string => (value === 1 ? "year" : "years");
+
 const baseInputClass =
   "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 const inputStateClass = (error?: string, warning?: string) =>
@@ -408,7 +410,8 @@ export default function RetirementCalculator() {
                     >
                       {errors.retirementLength}
                     </p>
-                  ) : !isRetirementLengthFocused && warnings.retirementLength ? (
+                  ) : !isRetirementLengthFocused &&
+                    warnings.retirementLength ? (
                     <p
                       id="retirement-length-warning"
                       role="status"
@@ -783,7 +786,8 @@ export default function RetirementCalculator() {
                     <p className="mt-3 mb-6 text-sm">
                       This estimates the lump sum needed at retirement to fund{" "}
                       {formatCurrency(inputs.annualSpending)} per year for{" "}
-                      {inputs.retirementLength} years, assuming a{" "}
+                      {inputs.retirementLength}{" "}
+                      {yearsLabel(inputs.retirementLength)}, assuming a{" "}
                       {inputs.expectedReturnDuringRetirement}% annual return
                       during retirement.
                     </p>
@@ -830,7 +834,8 @@ export default function RetirementCalculator() {
                     <p className="mt-3 mb-6 text-sm">
                       This estimates the lump sum needed at retirement to fund{" "}
                       {formatCurrency(inputs.annualSpending)} per year for{" "}
-                      {inputs.retirementLength} years, assuming a{" "}
+                      {inputs.retirementLength}{" "}
+                      {yearsLabel(inputs.retirementLength)}, assuming a{" "}
                       {inputs.expectedReturnDuringRetirement}% annual return
                       during retirement.
                     </p>
@@ -877,7 +882,8 @@ export default function RetirementCalculator() {
                     </p>
                     <p className="mt-3 mb-6 text-sm">
                       Amount to save each year over {inputs.yearsToRetirement}{" "}
-                      years to reach your target balance, assuming a{" "}
+                      {yearsLabel(inputs.yearsToRetirement)} to reach your
+                      target balance, assuming a{" "}
                       {inputs.expectedReturnBeforeRetirement}% annual return
                       before retirement.
                     </p>
