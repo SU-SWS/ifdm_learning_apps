@@ -14,6 +14,7 @@ import {
   formatCurrency,
   formatDate,
   formatTime,
+  getPeriodLabel,
   type CompoundingFrequency,
 } from "../lib/debt-payoff"
 import {
@@ -562,7 +563,7 @@ export default function DebtPayoffCalculator() {
                     <CardContent className="">
                       <div className="rounded-lg mb-6 text-center">
                         <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">
-                          Payment per period
+                          Payment per {getPeriodLabel(compoundingFrequency)}
                         </p>
                         <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                           {v.requiredPaymentBlocked
