@@ -1,12 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { RotateCcw } from "lucide-react"
-import { Button } from "@/app/ui/components/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
-import { Input } from "@/app/ui/components/input"
-import { Label } from "@/app/ui/components/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
+import { useState } from "react";
+import { RotateCcw } from "lucide-react";
+import { Button } from "@/app/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/app/ui/components/card";
+import { Input } from "@/app/ui/components/input";
+import { Label } from "@/app/ui/components/label";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/app/ui/components/tabs";
 import { FaAngleDown } from "react-icons/fa";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import InfoPopover from "@/app/ui/components/popover";
@@ -18,17 +28,22 @@ import {
   formatTime,
   getPeriodLabel,
   type CompoundingFrequency,
-} from "../lib/debt-payoff"
+} from "../lib/debt-payoff";
 import {
   formatThousands,
   sanitizeDecimal,
   sanitizeInteger,
   validateDebtPayoffInputs,
-} from "../lib/validation"
+} from "../lib/validation";
 
 // Fields whose "please enter…" message defers while the user is still
 // actively editing them — see the focusedField comment below.
-type FocusableField = "debtAmount" | "interestRate" | "payment" | "targetYears" | "targetMonths"
+type FocusableField =
+  | "debtAmount"
+  | "interestRate"
+  | "payment"
+  | "targetYears"
+  | "targetMonths";
 
 const NO_FIELDS_TOUCHED: Record<FocusableField, boolean> = {
   debtAmount: false,
@@ -36,49 +51,51 @@ const NO_FIELDS_TOUCHED: Record<FocusableField, boolean> = {
   payment: false,
   targetYears: false,
   targetMonths: false,
-}
+};
 
 export default function DebtPayoffCalculator() {
   // All fields start blank so the user enters their own numbers rather than
   // editing a pre-filled example (IFDM-241).
-  const [debtAmount, setDebtAmount] = useState<string>("")
-  const [interestRate, setInterestRate] = useState<string>("")
-  const [compoundingFrequency, setCompoundingFrequency] = useState<CompoundingFrequency>("monthly")
-  const [payment, setPayment] = useState<string>("")
-  const [additionalPayment, setAdditionalPayment] = useState<string>("")
-  const [targetYears, setTargetYears] = useState<string>("")
-  const [targetMonths, setTargetMonths] = useState<string>("")
+  const [debtAmount, setDebtAmount] = useState<string>("");
+  const [interestRate, setInterestRate] = useState<string>("");
+  const [compoundingFrequency, setCompoundingFrequency] =
+    useState<CompoundingFrequency>("monthly");
+  const [payment, setPayment] = useState<string>("");
+  const [additionalPayment, setAdditionalPayment] = useState<string>("");
+  const [targetYears, setTargetYears] = useState<string>("");
+  const [targetMonths, setTargetMonths] = useState<string>("");
 
   // The field currently being edited, or null. A required field's "Please
   // enter…" message waits until the user leaves the field, so clearing it
   // to retype a value doesn't flash an error mid-edit. Out-of-range messages
   // are never deferred this way — the user needs to know right away why the
   // result stopped updating.
-  const [focusedField, setFocusedField] = useState<FocusableField | null>(null)
+  const [focusedField, setFocusedField] = useState<FocusableField | null>(null);
   // Fields the user has entered and left at least once. A required field's
   // "Please enter…" message additionally waits for this, so the page doesn't
   // shout at the user the moment it loads with every field blank.
-  const [touched, setTouched] = useState<Record<FocusableField, boolean>>(NO_FIELDS_TOUCHED)
+  const [touched, setTouched] =
+    useState<Record<FocusableField, boolean>>(NO_FIELDS_TOUCHED);
   const clearFocus = (field: FocusableField) => {
-    setFocusedField((current) => (current === field ? null : current))
-    setTouched((current) => ({ ...current, [field]: true }))
-  }
+    setFocusedField((current) => (current === field ? null : current));
+    setTouched((current) => ({ ...current, [field]: true }));
+  };
 
   // Clears every field on both tabs back to blank (IFDM-240). Debt amount,
   // annual interest rate, and compounding frequency are shared state, so one
   // Reset — available on either tab — resets the whole calculator rather
   // than just the fields visible on the active tab.
   const resetAll = () => {
-    setDebtAmount("")
-    setInterestRate("")
-    setCompoundingFrequency("monthly")
-    setPayment("")
-    setAdditionalPayment("")
-    setTargetYears("")
-    setTargetMonths("")
-    setFocusedField(null)
-    setTouched(NO_FIELDS_TOUCHED)
-  }
+    setDebtAmount("");
+    setInterestRate("");
+    setCompoundingFrequency("monthly");
+    setPayment("");
+    setAdditionalPayment("");
+    setTargetYears("");
+    setTargetMonths("");
+    setFocusedField(null);
+    setTouched(NO_FIELDS_TOUCHED);
+  };
 
   const v = validateDebtPayoffInputs({
     debtAmount,
@@ -88,23 +105,25 @@ export default function DebtPayoffCalculator() {
     targetYears,
     targetMonths,
     compoundingFrequency,
-  })
+  });
 
   const showDebtAmountError =
     !!v.debtAmountError &&
     touched.debtAmount &&
-    !(debtAmount.trim() === "" && focusedField === "debtAmount")
+    !(debtAmount.trim() === "" && focusedField === "debtAmount");
   const showInterestRateError =
     !!v.interestRateError &&
     touched.interestRate &&
-    !(interestRate.trim() === "" && focusedField === "interestRate")
+    !(interestRate.trim() === "" && focusedField === "interestRate");
   const showPaymentError =
-    !!v.paymentError && touched.payment && !(payment.trim() === "" && focusedField === "payment")
+    !!v.paymentError &&
+    touched.payment &&
+    !(payment.trim() === "" && focusedField === "payment");
   const showTargetTimeError =
     !!v.targetTimeError &&
     (touched.targetYears || touched.targetMonths) &&
     focusedField !== "targetYears" &&
-    focusedField !== "targetMonths"
+    focusedField !== "targetMonths";
 
   const payoffResult = calculatePayoffTime({
     principal: v.debtAmountNum,
@@ -114,14 +133,14 @@ export default function DebtPayoffCalculator() {
     additionalPayment: v.additionalPaymentNum,
     totalPayment: v.totalPaymentNum,
     paymentTooLow: v.paymentTooLow,
-  })
+  });
 
   const requiredPaymentResult = calculateRequiredPayment({
     principal: v.debtAmountNum,
     periodicRate: v.periodicRate,
     periodsPerYear: v.periodsPerYear,
     totalTargetMonths: v.totalTargetMonths,
-  })
+  });
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -158,19 +177,27 @@ export default function DebtPayoffCalculator() {
                           </InfoPopover>
                         </div>
                         <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                           <Input
                             id="debt-amount"
                             type="text"
                             inputMode="numeric"
                             value={debtAmount}
-                            onChange={(e) => setDebtAmount(formatThousands(e.target.value))}
+                            onChange={(e) =>
+                              setDebtAmount(formatThousands(e.target.value))
+                            }
                             onFocus={() => setFocusedField("debtAmount")}
                             onBlur={() => clearFocus("debtAmount")}
-                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {showDebtAmountError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.debtAmountError}
                           </p>
                         )}
@@ -195,17 +222,22 @@ export default function DebtPayoffCalculator() {
                             type="text"
                             inputMode="decimal"
                             value={interestRate}
-                            onChange={(e) => setInterestRate(sanitizeDecimal(e.target.value))}
+                            onChange={(e) =>
+                              setInterestRate(sanitizeDecimal(e.target.value))
+                            }
                             onFocus={() => setFocusedField("interestRate")}
                             onBlur={() => clearFocus("interestRate")}
-                            className={`relative font-bold block w-full text-[var(--color-teal)] rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`relative block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
                           </span>
                         </div>
                         {showInterestRateError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.interestRateError}
                           </p>
                         )}
@@ -274,10 +306,12 @@ export default function DebtPayoffCalculator() {
                             type="text"
                             inputMode="numeric"
                             value={payment}
-                            onChange={(e) => setPayment(formatThousands(e.target.value))}
+                            onChange={(e) =>
+                              setPayment(formatThousands(e.target.value))
+                            }
                             onFocus={() => setFocusedField("payment")}
                             onBlur={() => clearFocus("payment")}
-                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               showPaymentError
                                 ? "border-2 border-[var(--color-inline-error)]"
                                 : v.paymentWarning
@@ -287,7 +321,10 @@ export default function DebtPayoffCalculator() {
                           />
                         </div>
                         {showPaymentError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.paymentError}
                           </p>
                         )}
@@ -319,17 +356,25 @@ export default function DebtPayoffCalculator() {
                             type="text"
                             inputMode="numeric"
                             value={additionalPayment}
-                            onChange={(e) => setAdditionalPayment(formatThousands(e.target.value))}
-                            className={`font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            onChange={(e) =>
+                              setAdditionalPayment(
+                                formatThousands(e.target.value),
+                              )
+                            }
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {v.additionalPaymentError ? (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.additionalPaymentError}
                           </p>
                         ) : (
                           <p className="text-sm">
-                            Each steady extra payment reduces your total interest.
+                            Each steady extra payment reduces your total
+                            interest.
                           </p>
                         )}
                       </div>
@@ -341,7 +386,8 @@ export default function DebtPayoffCalculator() {
                           variant="lagunita"
                           className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                         >
-                          Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                          Reset{" "}
+                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </div>
                     </CardContent>
@@ -362,7 +408,9 @@ export default function DebtPayoffCalculator() {
                           Time to pay off
                         </p>
                         <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">
-                          {v.payoffBlocked ? "-" : formatTime(payoffResult.timeInMonths)}
+                          {v.payoffBlocked
+                            ? "-"
+                            : formatTime(payoffResult.timeInMonths)}
                         </p>
                         {!v.payoffBlocked && (
                           <p className="text-medium font-semibold text-[var(--color-teal)]">
@@ -377,7 +425,9 @@ export default function DebtPayoffCalculator() {
                             Total interest:
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                            {v.payoffBlocked ? "-" : formatCurrency(payoffResult.totalInterest)}
+                            {v.payoffBlocked
+                              ? "-"
+                              : formatCurrency(payoffResult.totalInterest)}
                           </div>
                         </div>
 
@@ -386,7 +436,9 @@ export default function DebtPayoffCalculator() {
                             Total amount paid:
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                            {v.payoffBlocked ? "-" : formatCurrency(payoffResult.totalAmountPaid)}
+                            {v.payoffBlocked
+                              ? "-"
+                              : formatCurrency(payoffResult.totalAmountPaid)}
                           </div>
                         </div>
 
@@ -395,7 +447,9 @@ export default function DebtPayoffCalculator() {
                             Interest saved:
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
-                            {v.payoffBlocked ? "-" : formatCurrency(payoffResult.interestSaved)}
+                            {v.payoffBlocked
+                              ? "-"
+                              : formatCurrency(payoffResult.interestSaved)}
                           </div>
                         </div>
                       </div>
@@ -429,19 +483,27 @@ export default function DebtPayoffCalculator() {
                           </InfoPopover>
                         </div>
                         <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                           <Input
                             id="debt-amount-2"
                             type="text"
                             inputMode="numeric"
                             value={debtAmount}
-                            onChange={(e) => setDebtAmount(formatThousands(e.target.value))}
+                            onChange={(e) =>
+                              setDebtAmount(formatThousands(e.target.value))
+                            }
                             onFocus={() => setFocusedField("debtAmount")}
                             onBlur={() => clearFocus("debtAmount")}
-                            className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {showDebtAmountError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.debtAmountError}
                           </p>
                         )}
@@ -466,17 +528,22 @@ export default function DebtPayoffCalculator() {
                             type="text"
                             inputMode="decimal"
                             value={interestRate}
-                            onChange={(e) => setInterestRate(sanitizeDecimal(e.target.value))}
+                            onChange={(e) =>
+                              setInterestRate(sanitizeDecimal(e.target.value))
+                            }
                             onFocus={() => setFocusedField("interestRate")}
                             onBlur={() => clearFocus("interestRate")}
-                            className={`font-bold text-[var(--color-teal)] block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
                           </span>
                         </div>
                         {showInterestRateError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.interestRateError}
                           </p>
                         )}
@@ -551,10 +618,14 @@ export default function DebtPayoffCalculator() {
                                 type="text"
                                 inputMode="numeric"
                                 value={targetYears}
-                                onChange={(e) => setTargetYears(sanitizeInteger(e.target.value))}
+                                onChange={(e) =>
+                                  setTargetYears(
+                                    sanitizeInteger(e.target.value),
+                                  )
+                                }
                                 onFocus={() => setFocusedField("targetYears")}
                                 onBlur={() => clearFocus("targetYears")}
-                                className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetYearsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetYearsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                               />
                             </div>
                           </div>
@@ -565,10 +636,14 @@ export default function DebtPayoffCalculator() {
                                 type="text"
                                 inputMode="numeric"
                                 value={targetMonths}
-                                onChange={(e) => setTargetMonths(sanitizeInteger(e.target.value))}
+                                onChange={(e) =>
+                                  setTargetMonths(
+                                    sanitizeInteger(e.target.value),
+                                  )
+                                }
                                 onFocus={() => setFocusedField("targetMonths")}
                                 onBlur={() => clearFocus("targetMonths")}
-                                className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetMonthsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetMonthsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                               />
                             </div>
                             <Label
@@ -580,23 +655,33 @@ export default function DebtPayoffCalculator() {
                           </div>
                         </div>
                         {v.targetYearsError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.targetYearsError}
                           </p>
                         )}
                         {v.targetMonthsError && (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.targetMonthsError}
                           </p>
                         )}
                         {showTargetTimeError ? (
-                          <p role="alert" className="text-sm text-[var(--color-inline-error)] font-semibold">
+                          <p
+                            role="alert"
+                            className="text-sm text-[var(--color-inline-error)] font-semibold"
+                          >
                             {v.targetTimeError}
                           </p>
                         ) : (
                           <div className="text-md font-semibold text-[var(--color-teal)]">
                             Total: {v.targetYearsNum} year
-                            {v.targetYearsNum !== 1 ? "s" : ""} {v.targetMonthsNum} month
+                            {v.targetYearsNum !== 1 ? "s" : ""}{" "}
+                            {v.targetMonthsNum} month
                             {v.targetMonthsNum !== 1 ? "s" : ""}
                           </div>
                         )}
@@ -609,7 +694,8 @@ export default function DebtPayoffCalculator() {
                           variant="lagunita"
                           className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                         >
-                          Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                          Reset{" "}
+                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </div>
                     </CardContent>
@@ -632,12 +718,16 @@ export default function DebtPayoffCalculator() {
                         <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                           {v.requiredPaymentBlocked
                             ? "-"
-                            : formatCurrency(requiredPaymentResult.requiredPayment)}
+                            : formatCurrency(
+                                requiredPaymentResult.requiredPayment,
+                              )}
                         </p>
                         {!v.requiredPaymentBlocked && (
                           <p className="text-[var(--color-teal)] text-lg font-semibold">
                             To pay off in{" "}
-                            {formatTime(v.targetYearsNum * 12 + v.targetMonthsNum)}
+                            {formatTime(
+                              v.targetYearsNum * 12 + v.targetMonthsNum,
+                            )}
                           </p>
                         )}
                       </div>
@@ -650,7 +740,9 @@ export default function DebtPayoffCalculator() {
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
                               ? "-"
-                              : formatCurrency(requiredPaymentResult.totalInterest)}
+                              : formatCurrency(
+                                  requiredPaymentResult.totalInterest,
+                                )}
                           </div>
                         </div>
 
@@ -661,7 +753,9 @@ export default function DebtPayoffCalculator() {
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
                               ? "-"
-                              : formatCurrency(requiredPaymentResult.totalAmountPaid)}
+                              : formatCurrency(
+                                  requiredPaymentResult.totalAmountPaid,
+                                )}
                           </div>
                         </div>
                       </div>
