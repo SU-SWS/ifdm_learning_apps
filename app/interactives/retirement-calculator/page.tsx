@@ -21,19 +21,24 @@ import {
   validateYearsToRetirement,
 } from "./lib/validation";
 
-// Strips anything but digits and a single "." from a currency input, and
-// truncates to at most 2 decimal places, so the raw string can be kept
-// around for display without losing a trailing "." or trailing zeros.
+// Strips anything but digits, a single ".", and a leading "-" from a
+// currency input, and truncates to at most 2 decimal places, so the raw
+// string can be kept around for display without losing a trailing "." or
+// trailing zeros. A leading "-" is preserved (rather than stripped) so a
+// negative entry stays visible and hits validation instead of silently
+// disappearing.
 const sanitizeDecimalInput = (value: string): string => {
+  const isNegative = value.trim().startsWith("-");
   const cleaned = value.replace(/,/g, "").replace(/[^0-9.]/g, "");
   const firstDot = cleaned.indexOf(".");
-  if (firstDot === -1) return cleaned;
-  const intPart = cleaned.slice(0, firstDot);
-  const decPart = cleaned
-    .slice(firstDot + 1)
-    .replace(/\./g, "")
-    .slice(0, 2);
-  return `${intPart}.${decPart}`;
+  const digits =
+    firstDot === -1
+      ? cleaned
+      : `${cleaned.slice(0, firstDot)}.${cleaned
+          .slice(firstDot + 1)
+          .replace(/\./g, "")
+          .slice(0, 2)}`;
+  return isNegative ? `-${digits}` : digits;
 };
 
 const capDecimalPlaces = (value: string): string => {
