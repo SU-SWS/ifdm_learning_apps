@@ -362,7 +362,7 @@ export default function DebtPayoffCalculator() {
                           Time to pay off
                         </p>
                         <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">
-                          {v.payoffBlocked ? "—" : formatTime(payoffResult.timeInMonths)}
+                          {v.payoffBlocked ? "-" : formatTime(payoffResult.timeInMonths)}
                         </p>
                         {!v.payoffBlocked && (
                           <p className="text-medium font-semibold text-[var(--color-teal)]">
@@ -377,7 +377,7 @@ export default function DebtPayoffCalculator() {
                             Total interest:
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                            {v.payoffBlocked ? "—" : formatCurrency(payoffResult.totalInterest)}
+                            {v.payoffBlocked ? "-" : formatCurrency(payoffResult.totalInterest)}
                           </div>
                         </div>
 
@@ -386,7 +386,7 @@ export default function DebtPayoffCalculator() {
                             Total amount paid:
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                            {v.payoffBlocked ? "—" : formatCurrency(payoffResult.totalAmountPaid)}
+                            {v.payoffBlocked ? "-" : formatCurrency(payoffResult.totalAmountPaid)}
                           </div>
                         </div>
 
@@ -395,7 +395,7 @@ export default function DebtPayoffCalculator() {
                             Interest saved:
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
-                            {v.payoffBlocked ? "—" : formatCurrency(payoffResult.interestSaved)}
+                            {v.payoffBlocked ? "-" : formatCurrency(payoffResult.interestSaved)}
                           </div>
                         </div>
                       </div>
@@ -631,7 +631,7 @@ export default function DebtPayoffCalculator() {
                         </p>
                         <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                           {v.requiredPaymentBlocked
-                            ? "—"
+                            ? "-"
                             : formatCurrency(requiredPaymentResult.requiredPayment)}
                         </p>
                         {!v.requiredPaymentBlocked && (
@@ -649,7 +649,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
-                              ? "—"
+                              ? "-"
                               : formatCurrency(requiredPaymentResult.totalInterest)}
                           </div>
                         </div>
@@ -660,7 +660,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
-                              ? "—"
+                              ? "-"
                               : formatCurrency(requiredPaymentResult.totalAmountPaid)}
                           </div>
                         </div>
