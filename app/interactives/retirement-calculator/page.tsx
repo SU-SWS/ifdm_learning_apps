@@ -845,7 +845,15 @@ export default function RetirementCalculator() {
                 )}
 
                 {showSavingsResults &&
-                results.fvCurrentSavings >= results.requiredBalance ? (
+                inputs.currentSavings >= results.requiredBalance ? (
+                  <div className="border-2 px-4 py-3 rounded-xl">
+                    <p className="mt-3 mb-6 text-sm">
+                      Current retirement savings already exceed your target
+                      retirement balance, no growth or contributions needed.
+                    </p>
+                  </div>
+                ) : showSavingsResults &&
+                  results.fvCurrentSavings >= results.requiredBalance ? (
                   <div className="border-2 px-4 py-3 rounded-xl">
                     <p className="mt-3 mb-6 text-sm">
                       With an expected {inputs.expectedReturnBeforeRetirement}%
