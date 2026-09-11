@@ -21,19 +21,24 @@ import {
   validateYearsToRetirement,
 } from "./lib/validation";
 
-// Strips anything but digits and a single "." from a currency input, and
-// truncates to at most 2 decimal places, so the raw string can be kept
-// around for display without losing a trailing "." or trailing zeros.
+// Strips anything but digits, a single ".", and a leading "-" from a
+// currency input, and truncates to at most 2 decimal places, so the raw
+// string can be kept around for display without losing a trailing "." or
+// trailing zeros. A leading "-" is preserved (rather than stripped) so a
+// negative entry stays visible and hits validation instead of silently
+// disappearing.
 const sanitizeDecimalInput = (value: string): string => {
+  const isNegative = value.trim().startsWith("-");
   const cleaned = value.replace(/,/g, "").replace(/[^0-9.]/g, "");
   const firstDot = cleaned.indexOf(".");
-  if (firstDot === -1) return cleaned;
-  const intPart = cleaned.slice(0, firstDot);
-  const decPart = cleaned
-    .slice(firstDot + 1)
-    .replace(/\./g, "")
-    .slice(0, 2);
-  return `${intPart}.${decPart}`;
+  const digits =
+    firstDot === -1
+      ? cleaned
+      : `${cleaned.slice(0, firstDot)}.${cleaned
+          .slice(firstDot + 1)
+          .replace(/\./g, "")
+          .slice(0, 2)}`;
+  return isNegative ? `-${digits}` : digits;
 };
 
 const capDecimalPlaces = (value: string): string => {
@@ -41,6 +46,8 @@ const capDecimalPlaces = (value: string): string => {
   if (dotIndex === -1) return value;
   return value.slice(0, dotIndex + 3);
 };
+
+const yearsLabel = (value: number): string => (value === 1 ? "year" : "years");
 
 const baseInputClass =
   "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
@@ -73,8 +80,6 @@ export default function RetirementCalculator() {
   const [currentSavingsInput, setCurrentSavingsInput] = useState("");
   const [retirementLengthInput, setRetirementLengthInput] = useState("");
   const [yearsToRetirementInput, setYearsToRetirementInput] = useState("");
-  const [isAnnualSpendingFocused, setIsAnnualSpendingFocused] = useState(false);
-  const [isCurrentSavingsFocused, setIsCurrentSavingsFocused] = useState(false);
   const [isRetirementLengthFocused, setIsRetirementLengthFocused] =
     useState(false);
 
@@ -213,7 +218,6 @@ export default function RetirementCalculator() {
     setInputs(defaultInputs);
     setErrors({});
     setWarnings({});
-    setIsAnnualSpendingFocused(false);
     setIsRetirementLengthFocused(false);
     setExpectedReturnBeforeRetirementInput("");
     setExpectedReturnDuringRetirementInput("");
@@ -294,11 +298,7 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!!errors.annualSpending}
-                      value={
-                        isAnnualSpendingFocused
-                          ? annualSpendingInput
-                          : formatNumberWithCommas(annualSpendingInput)
-                      }
+                      value={formatNumberWithCommas(annualSpendingInput)}
                       onChange={(e) =>
                         updateInput(
                           "annualSpending",
@@ -306,7 +306,6 @@ export default function RetirementCalculator() {
                         )
                       }
                       onFocus={() => {
-                        setIsAnnualSpendingFocused(true);
                         if (annualSpendingInput === "") {
                           setErrors((prev) => ({
                             ...prev,
@@ -315,7 +314,6 @@ export default function RetirementCalculator() {
                         }
                       }}
                       onBlur={(e) => {
-                        setIsAnnualSpendingFocused(false);
                         if (e.target.value === "") {
                           setErrors((prev) => ({
                             ...prev,
@@ -408,7 +406,8 @@ export default function RetirementCalculator() {
                     >
                       {errors.retirementLength}
                     </p>
-                  ) : !isRetirementLengthFocused && warnings.retirementLength ? (
+                  ) : !isRetirementLengthFocused &&
+                    warnings.retirementLength ? (
                     <p
                       id="retirement-length-warning"
                       role="status"
@@ -557,19 +556,13 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!!errors.currentSavings}
-                      value={
-                        isCurrentSavingsFocused
-                          ? currentSavingsInput
-                          : formatNumberWithCommas(currentSavingsInput)
-                      }
+                      value={formatNumberWithCommas(currentSavingsInput)}
                       onChange={(e) =>
                         updateInput(
                           "currentSavings",
                           sanitizeDecimalInput(e.target.value),
                         )
                       }
-                      onFocus={() => setIsCurrentSavingsFocused(true)}
-                      onBlur={() => setIsCurrentSavingsFocused(false)}
                       className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.currentSavings)}`}
                     />
                   </div>
@@ -765,7 +758,7 @@ export default function RetirementCalculator() {
 
           {/* Right Column - Results */}
           <div
-            className="bg-[var(--card-background)] rounded-3xl p-[32px]"
+            className="rounded-3xl p-[32px]"
             aria-live="polite"
             aria-atomic="true"
           >
@@ -781,9 +774,10 @@ export default function RetirementCalculator() {
                       {formatCurrency(calculatedRequiredBalance)}
                     </p>
                     <p className="mt-3 mb-6 text-sm">
-                      This estimates the lump sum needed at retirement to fund{" "}
+                      Estimated lump sum needed at retirement to fund{" "}
                       {formatCurrency(inputs.annualSpending)} per year for{" "}
-                      {inputs.retirementLength} years, assuming a{" "}
+                      {inputs.retirementLength}{" "}
+                      {yearsLabel(inputs.retirementLength)}, assuming a{" "}
                       {inputs.expectedReturnDuringRetirement}% annual return
                       during retirement.
                     </p>
@@ -828,9 +822,10 @@ export default function RetirementCalculator() {
                       {formatCurrency(results.requiredBalance)}
                     </p>
                     <p className="mt-3 mb-6 text-sm">
-                      This estimates the lump sum needed at retirement to fund{" "}
+                      Estimated lump sum needed at retirement to fund{" "}
                       {formatCurrency(inputs.annualSpending)} per year for{" "}
-                      {inputs.retirementLength} years, assuming a{" "}
+                      {inputs.retirementLength}{" "}
+                      {yearsLabel(inputs.retirementLength)}, assuming a{" "}
                       {inputs.expectedReturnDuringRetirement}% annual return
                       during retirement.
                     </p>
@@ -845,7 +840,15 @@ export default function RetirementCalculator() {
                 )}
 
                 {showSavingsResults &&
-                results.fvCurrentSavings >= results.requiredBalance ? (
+                inputs.currentSavings >= results.requiredBalance ? (
+                  <div className="border-2 px-4 py-3 rounded-xl">
+                    <p className="mt-3 mb-6 text-sm">
+                      Current retirement savings already exceed your target
+                      retirement balance, no growth or contributions needed.
+                    </p>
+                  </div>
+                ) : showSavingsResults &&
+                  results.fvCurrentSavings >= results.requiredBalance ? (
                   <div className="border-2 px-4 py-3 rounded-xl">
                     <p className="mt-3 mb-6 text-sm">
                       With an expected {inputs.expectedReturnBeforeRetirement}%
@@ -869,7 +872,8 @@ export default function RetirementCalculator() {
                     </p>
                     <p className="mt-3 mb-6 text-sm">
                       Amount to save each year over {inputs.yearsToRetirement}{" "}
-                      years to reach your target balance, assuming a{" "}
+                      {yearsLabel(inputs.yearsToRetirement)} to reach your
+                      target balance, assuming a{" "}
                       {inputs.expectedReturnBeforeRetirement}% annual return
                       before retirement.
                     </p>

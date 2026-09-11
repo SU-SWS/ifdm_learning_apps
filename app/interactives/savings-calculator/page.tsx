@@ -5,10 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/ca
 import { Button } from "@/app/ui/components/button"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
-import { ChevronDown } from "lucide-react"
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+import { ChevronDown, RotateCcw } from "lucide-react"
 import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
+import { validateAllFields } from "./lib/validation";
+import {
+  getPeriodLabel,
+  calculateMonthySavings,
+  calculateFutureBalance,
+  calculateTimeToGoal,
+} from "./lib/calculations";
 
 type CalculationMode = "monthly-savings" | "time-to-goal" | "future-balance"
 type CompoundingFrequency = "daily" | "weekly" | "bi-weekly" | "monthly" | "quarterly" | "semi-annually" | "annually"
@@ -29,173 +35,91 @@ interface YearlyBreakdown {
   endingBalance: number
 }
 
-// Helper to get periods per year and rate per period
-function getCompoundingParams(frequency: CompoundingFrequency, annualRate: number) {
-  let periodsPerYear = 12;
-  if (frequency === "daily") periodsPerYear = 365;
-  else if (frequency === "weekly") periodsPerYear = 52;
-  else if (frequency === "bi-weekly") periodsPerYear = 26;
-  else if (frequency === "quarterly") periodsPerYear = 4;
-  else if (frequency === "annually") periodsPerYear = 1;
-  else if (frequency === "semi-annually") periodsPerYear = 2;
-  const ratePerPeriod = annualRate / 100 / periodsPerYear;
-  return { periodsPerYear, ratePerPeriod };
-}
-
 export default function SavingsCalculator() {
   const [mode, setMode] = useState<CalculationMode>("monthly-savings")
-  const [savingsGoal, setSavingsGoal] = useState(8000)
-  const [currentBalance, setCurrentBalance] = useState(100)
-  const [timeYears, setTimeYears] = useState(1)
-  const [timeMonths, setTimeMonths] = useState(3)
-  const [interestRate, setInterestRate] = useState(5.0)
+  const [savingsGoal, setSavingsGoal] = useState(0)
+  const [currentBalance, setCurrentBalance] = useState(0)
+  const [timeYears, setTimeYears] = useState(0)
+  const [timeMonths, setTimeMonths] = useState(0)
+  const [interestRate, setInterestRate] = useState(-1)
   const [compounding, setCompounding] = useState<CompoundingFrequency>("monthly")
-  const [contributionPerPeriod, setcontributionPerPeriod] = useState(203)
+  const [contributionPerPeriod, setcontributionPerPeriod] = useState(0)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  const MAX_MONTHS = 11;
 
   const [results, setResults] = useState<CalculationResults>({
-    contributionPerPeriod: 203,
-    totalDeposited: 7424,
-    interestEarned: 576,
-    finalBalance: 8000,
-    timeInMonths: 24,
+    contributionPerPeriod: NaN,
+    totalDeposited: NaN,
+    interestEarned: NaN,
+    finalBalance: NaN,
+    timeInMonths: NaN,
   })
 
   const [yearlyBreakdown, setYearlyBreakdown] = useState<YearlyBreakdown[]>([])
+  const [overflowWarning, setOverflowWarning] = useState(false)
 
-  // Updated breakdown to use compounding frequency
-  const calculateYearlyBreakdown = useCallback(
-    (contribution: number, totalPeriods: number) => {
-      const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
-      const breakdown: YearlyBreakdown[] = [];
-      let balance = currentBalance;
-      const totalYears = Math.ceil(totalPeriods / periodsPerYear);
+  // Track which fields have been touched (blurred without value or skipped)
+  const [touched, setTouched] = useState<Record<string, boolean>>({
+    savingsGoal: false,
+    currentBalance: false,
+    timeYears: false,
+    timeMonths: false,
+    interestRate: false,
+    contributionPerPeriod: false,
+  })
 
-      for (let year = 1; year <= totalYears; year++) {
-        const startingBalance = balance;
-        const periodsInThisYear = Math.min(periodsPerYear, totalPeriods - (year - 1) * periodsPerYear);
-        let yearlyContributions = 0;
-        let yearlyInterest = 0;
+  // Clear all input fields when switching tabs
+  useEffect(() => {
+    setSavingsGoal(0);
+    setCurrentBalance(0);
+    setTimeYears(0);
+    setTimeMonths(0);
+    setInterestRate(-1);
+    setcontributionPerPeriod(0);
+    setTouched({
+      savingsGoal: false,
+      currentBalance: false,
+      timeYears: false,
+      timeMonths: false,
+      interestRate: false,
+      contributionPerPeriod: false,
+    });
+  }, [mode]);
 
-        const futureValueOfInitial = startingBalance * Math.pow(1 + ratePerPeriod, periodsInThisYear);
-        const futureValueOfAnnuity =
-          contribution * ((Math.pow(1 + ratePerPeriod, periodsInThisYear) - 1) / ratePerPeriod);
-        balance = futureValueOfInitial + futureValueOfAnnuity;
-        yearlyContributions = contribution * periodsInThisYear;
-        yearlyInterest = balance - (startingBalance + yearlyContributions);
-
-        breakdown.push({
-          year,
-          startingBalance,
-          contributions: yearlyContributions,
-          interestEarned: yearlyInterest,
-          endingBalance: balance,
-        });
-      }
-
-      return breakdown;
-    },
-    [compounding, interestRate, currentBalance]
-  );
-
-  // Updated calculation logic to use compounding frequency
+  // Calculate results based on mode using library functions
   const calculateResults = useCallback(() => {
-    const { periodsPerYear, ratePerPeriod } = getCompoundingParams(compounding, interestRate);
-    const totalTimeInMonths = timeYears * 12 + timeMonths;
-    const totalPeriods = timeYears * periodsPerYear + timeMonths * (periodsPerYear / 12);
-
     if (mode === "monthly-savings") {
-      // Calculate required monthly contribution to reach goal
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
-      const remainingAmount = savingsGoal - futureValueOfInitial;
-
-        if (remainingAmount <= 0) {
-          const contributionNeeded = 0;
-          setResults({
-            contributionPerPeriod: contributionNeeded,
-            totalDeposited: currentBalance,
-            interestEarned: savingsGoal - currentBalance,
-            finalBalance: savingsGoal,
-            timeInMonths: totalTimeInMonths,
-          });
-          setYearlyBreakdown(calculateYearlyBreakdown(contributionNeeded, totalPeriods));
-        } else if (totalPeriods < 1) {
-          // If time to goal is less than one compounding period, ignore interest
-          const requiredContributionPerPeriod = savingsGoal - currentBalance;
-          const totalDeposited = currentBalance + requiredContributionPerPeriod;
-          setResults({
-            contributionPerPeriod: requiredContributionPerPeriod,
-            totalDeposited: totalDeposited,
-            interestEarned: 0,
-            finalBalance: savingsGoal,
-            timeInMonths: totalTimeInMonths,
-          });
-          setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
-        } else {
-          const requiredContributionPerPeriod =
-            remainingAmount / ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-          const totalDeposited = currentBalance + requiredContributionPerPeriod * totalPeriods;
-
-          setResults({
-            contributionPerPeriod: requiredContributionPerPeriod,
-            totalDeposited: totalDeposited,
-            interestEarned: savingsGoal - totalDeposited,
-            finalBalance: savingsGoal,
-            timeInMonths: totalTimeInMonths,
-          });
-          setYearlyBreakdown(calculateYearlyBreakdown(requiredContributionPerPeriod, totalPeriods));
-        }
+      const { results, breakdown } = calculateMonthySavings(
+        savingsGoal,
+        currentBalance,
+        timeYears,
+        timeMonths,
+        interestRate,
+        compounding
+      );
+      setResults(results);
+      setYearlyBreakdown(breakdown);
     } else if (mode === "future-balance") {
-      // Calculate future balance with current contribution
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
-      const futureValueOfAnnuity =
-        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
-      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
-
-      setResults({
-        contributionPerPeriod: contributionPerPeriod,
-        totalDeposited: totalDeposited,
-        interestEarned: finalBalance - totalDeposited,
-        finalBalance: finalBalance,
-        timeInMonths: totalTimeInMonths,
-      });
-      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, totalPeriods));
+      const { results, breakdown } = calculateFutureBalance(
+        currentBalance,
+        contributionPerPeriod,
+        timeYears,
+        timeMonths,
+        interestRate,
+        compounding
+      );
+      setResults(results);
+      setYearlyBreakdown(breakdown);
     } else {
-      // Calculate time to reach goal with current contribution
-      if (contributionPerPeriod <= 0) {
-        setResults({
-          contributionPerPeriod: contributionPerPeriod,
-          totalDeposited: currentBalance,
-          interestEarned: 0,
-          finalBalance: currentBalance,
-          timeInMonths: 0,
-        });
-        setYearlyBreakdown([]);
-        return;
-      }
-
-      const numerator = savingsGoal + (contributionPerPeriod / ratePerPeriod);
-      const denominator = currentBalance + (contributionPerPeriod / ratePerPeriod);
-      const periodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
-      const months = Math.round(periodsToGoal * (12 / periodsPerYear))
-
-      // Calculate final balance now with calculated period data.
-      const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
-      const futureValueOfAnnuity =
-        contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
-      const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
-      const totalDeposited = currentBalance + contributionPerPeriod * periodsToGoal;
-
-      setResults({
-        contributionPerPeriod: contributionPerPeriod,
-        totalDeposited: totalDeposited,
-        interestEarned: finalBalance - totalDeposited,
-        finalBalance: finalBalance,
-        timeInMonths: months,
-      });
-      setYearlyBreakdown(calculateYearlyBreakdown(contributionPerPeriod, periodsToGoal));
+      // time-to-goal
+      const { results, breakdown } = calculateTimeToGoal(
+        savingsGoal,
+        currentBalance,
+        contributionPerPeriod,
+        interestRate,
+        compounding
+      );
+      setResults(results);
+      setYearlyBreakdown(breakdown);
     }
   }, [
     mode,
@@ -206,15 +130,92 @@ export default function SavingsCalculator() {
     interestRate,
     compounding,
     contributionPerPeriod,
-    calculateYearlyBreakdown,
   ]);
 
   // Check for invalid inputs
   const isInvalid = (value: number) => isNaN(value) || !isFinite(value);
 
+  // Display ceiling: max value that fits nicely on UI
+  const DISPLAY_MAX = 99_999_999;
+
+  // Check if a value exceeds display limits
+  const isOverflow = (value: number) => !isInvalid(value) && value > DISPLAY_MAX;
+
+  // Get validation results
+  const validation = validateAllFields(
+    {
+      savingsGoal,
+      currentBalance,
+      timeYears,
+      timeMonths,
+      interestRate,
+      contributionPerPeriod,
+    },
+    touched,
+    mode
+  );
+
+  // Handle field blur - mark field as touched
+  const handleFieldBlur = (fieldName: string) => {
+    setTouched((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+  };
+
+  // Reset all fields to initial state
+  const handleReset = () => {
+    setSavingsGoal(0);
+    setCurrentBalance(0);
+    setTimeYears(0);
+    setTimeMonths(0);
+    setInterestRate(-1);
+    setcontributionPerPeriod(0);
+    setTouched({
+      savingsGoal: false,
+      currentBalance: false,
+      timeYears: false,
+      timeMonths: false,
+      interestRate: false,
+      contributionPerPeriod: false,
+    });
+    setResults({
+      contributionPerPeriod: NaN,
+      totalDeposited: NaN,
+      interestEarned: NaN,
+      finalBalance: NaN,
+      timeInMonths: NaN,
+    });
+    setYearlyBreakdown([]);
+  };
+
   useEffect(() => {
+    // Block calculation if there are blocking errors
+    if (validation.hasBlockingErrors) {
+      setResults({
+        contributionPerPeriod: NaN,
+        totalDeposited: NaN,
+        interestEarned: NaN,
+        finalBalance: NaN,
+        timeInMonths: NaN,
+      });
+      setYearlyBreakdown([]);
+      setOverflowWarning(false);
+      return;
+    }
+
     calculateResults();
-  }, [calculateResults]);
+  }, [calculateResults, validation.hasBlockingErrors]);
+
+  // Check for overflow after results are calculated
+  useEffect(() => {
+    const hasOverflow =
+      isOverflow(results.contributionPerPeriod) ||
+      isOverflow(results.totalDeposited) ||
+      isOverflow(results.interestEarned) ||
+      isOverflow(results.finalBalance);
+    setOverflowWarning(hasOverflow);
+  }, [results]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -269,6 +270,13 @@ export default function SavingsCalculator() {
               )}
             </CardHeader>
             <CardContent className="space-y-6">
+              {overflowWarning && (
+                <div className="p-3 rounded-md bg-[var(--color-inline-warning)]/10 border border-[var(--color-inline-warning)]">
+                  <p className="text-sm font-semibold text-[var(--color-inline-warning)]">
+                    Results exceed display limits. Try a smaller balance, lower rate, or shorter time period.
+                  </p>
+                </div>
+              )}
               {mode !== "future-balance" && (
               <div>
                 <Label htmlFor="savings-goal" className="font-medium">
@@ -280,32 +288,26 @@ export default function SavingsCalculator() {
                     type="number"
                     min="0"
                     value={savingsGoal === 0 ? "" : savingsGoal}
-                    placeholder="Savings goal amount"
+                    placeholder=""
                     onChange={(e) => setSavingsGoal(Number(e.target.value))}
-                    className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    onBlur={() => handleFieldBlur("savingsGoal")}
+                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      validation.errors.savingsGoal ? "border-[var(--color-inline-error)]" : "border-input"
+                    }`}
 
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Increase amount"
-                      onClick={() => setSavingsGoal((prev) => Math.max(0, prev + 1))}
-                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidUpArrow size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Decrease amount"
-                      onClick={() => setSavingsGoal((prev) => Math.max(0, prev - 1))}
-                      className="hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidDownArrow size={24} />
-                    </button>
-                  </div>
+                  <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                 </div>
+                {validation.errors.savingsGoal && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                    {validation.errors.savingsGoal}
+                  </p>
+                )}
+                {validation.info.savingsGoal && !validation.errors.savingsGoal && (
+                  <p className="text-xs text-[var(--foreground)]/60 mt-1">
+                    {validation.info.savingsGoal}
+                  </p>
+                )}
               </div>
               )}
 
@@ -318,149 +320,101 @@ export default function SavingsCalculator() {
                     id="current-balance"
                     type="number"
                     value={currentBalance === 0 ? "" : currentBalance}
-                    placeholder="Current savings balance (leave blank for 0)"
+                    placeholder=""
                     onChange={(e) => setCurrentBalance(Number(e.target.value))}
+                    onBlur={() => handleFieldBlur("currentBalance")}
 
-                    className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      validation.errors.currentBalance ? "border-[var(--color-inline-error)]" : "border-input"
+                    }`}
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Increase amount"
-                      onClick={() => setCurrentBalance((prev) => Math.max(0, prev + 1))}
-                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidUpArrow size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Decrease amount"
-                      onClick={() => setCurrentBalance((prev) => Math.max(0, prev - 1))}
-                      className="hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidDownArrow size={24} />
-                    </button>
-                  </div>
+                  <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                    $
+                  </span>
                 </div>
+                {validation.errors.currentBalance && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                    {validation.errors.currentBalance}
+                  </p>
+                )}
               </div>
 
               {mode !== "monthly-savings" && (
                 <div>
-                  <Label className="font-medium">Saving per compounding period:</Label>
+                  <Label htmlFor="contribution-period" className="font-medium">Saving per compounding period:</Label>
                   <div className="relative mt-1">
                     <Input
+                      id="contribution-period"
                       type="number"
                       value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
-                      placeholder="0"
+                      placeholder=""
                       onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
-                      className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onBlur={() => handleFieldBlur("contributionPerPeriod")}
+                      className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
+                      }`}
                     />
-                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Increase amount"
-                        onClick={() => setcontributionPerPeriod((prev) => Math.max(0, prev + 1))}
-                        className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidUpArrow size={24} />
-                      </button>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        aria-label="Decrease amount"
-                        onClick={() => setcontributionPerPeriod((prev) => Math.max(0, prev - 1))}
-                        className="hover:text-grey-med-dark focus:outline-none"
-                      >
-                        <BiSolidDownArrow size={24} />
-                      </button>
-                    </div>
+                    <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                   </div>
+                  {validation.errors.contributionPerPeriod && (
+                    <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                      {validation.errors.contributionPerPeriod}
+                    </p>
+                  )}
                 </div>
               )}
 
               {mode !== "time-to-goal" && (
                 <div>
-                  <Label className="font-medium">
+                  <Label htmlFor="time-years" className="font-medium">
                     {mode === "future-balance" ? "Time period" : "Time to goal"}:
                   </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
-                    <div className="flex flex-row gap-2 items-center">
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          value={timeYears === 0 ? "" : timeYears}
-                          placeholder="Years"
-                          onChange={(e) => setTimeYears(Number(e.target.value))}
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Increase amount"
-                            onClick={() => setTimeYears((prev) => Math.max(0, prev + 1))}
-                            className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                          >
-                            <BiSolidUpArrow size={24} />
-                          </button>
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Decrease amount"
-                            onClick={() => setTimeYears((prev) => Math.max(0, prev - 1))}
-                            className="hover:text-grey-med-dark focus:outline-none"
-                          >
-                            <BiSolidDownArrow size={24} />
-                          </button>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row gap-2 items-center">
+                        <div className="relative flex-1">
+                          <Input
+                            id="time-years"
+                            type="number"
+                            value={timeYears === 0 ? "" : timeYears}
+                            placeholder=""
+                            onChange={(e) => setTimeYears(Number(e.target.value))}
+                            onBlur={() => handleFieldBlur("timeYears")}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
+                            }`}
+                          />
                         </div>
+                        <Label htmlFor="time-years" className="font-medium">Years</Label>
                       </div>
-                      <Label className="font-medium">Years</Label>
+                      {validation.errors.timeYears && (
+                        <p className="text-sm font-semibold text-[var(--color-inline-error)]">
+                          {validation.errors.timeYears}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex flex-row gap-2 items-center">
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          value={timeMonths === 0 ? "" : timeMonths}
-                          placeholder="Months"
-                          onChange={(e) =>
-                            setTimeMonths(
-                              Math.min(MAX_MONTHS, Math.max(0, parseInt(e.target.value) || 0))
-                            )
-                          }
-                          max={MAX_MONTHS.toString()}
-                          className="font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Increase months"
-                            onClick={() => setTimeMonths((prev) => Math.min(MAX_MONTHS, prev + 1))}
-                            disabled={timeMonths >= MAX_MONTHS}
-                            className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                              timeMonths >= MAX_MONTHS ? 'opacity-30 cursor-not-allowed' : ''
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row gap-2 items-center">
+                        <div className="relative flex-1">
+                          <Input
+                            id="time-months"
+                            type="number"
+                            value={timeMonths === 0 ? "" : timeMonths}
+                            placeholder=""
+                            onChange={(e) => setTimeMonths(parseInt(e.target.value) || 0)}
+                            onBlur={() => handleFieldBlur("timeMonths")}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
                             }`}
-                          >
-                            <BiSolidUpArrow size={24} />
-                          </button>
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            aria-label="Decrease months"
-                            onClick={() => setTimeMonths((prev) => Math.max(0, prev - 1))}
-                            disabled={timeMonths > MAX_MONTHS}
-                            className={`mb-[-5px] hover:text-grey-med-dark focus:outline-none ${
-                              timeMonths <= 1 ? 'opacity-30 cursor-not-allowed' : ''
-                            }`}
-                          >
-                            <BiSolidDownArrow size={24} />
-                          </button>
+                          />
                         </div>
+                        <Label htmlFor="time-months" className="font-medium">Months</Label>
                       </div>
-                      <Label className="font-medium">Months</Label>
+                      {validation.errors.timeMonths && (
+                        <p className="text-sm font-semibold text-[var(--color-inline-error)]">
+                          {validation.errors.timeMonths}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -468,7 +422,7 @@ export default function SavingsCalculator() {
 
               <div className="relative">
                 <Label htmlFor="interest-rate" className="font-medium">
-                  Annual interest rate (%)
+                  Annual interest rate
                 </Label>
                 <div className="relative mt-1">
                   <Input
@@ -476,41 +430,34 @@ export default function SavingsCalculator() {
                     type="number"
                     step="0.1"
                     min="0.1"
-                    value={interestRate === 0 ? "" : interestRate}
-                    placeholder="Enter rate"
-                    onChange={(e) => setInterestRate(Number(e.target.value))}
-                    className={`font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-lagunita ${
-                      interestRate === 0
-                        ? "placeholder:text-berry bg-berry-light"
-                        : "placeholder:text-lagunita"
-                    }`}
+                    value={interestRate === -1 ? "" : interestRate === 0 ? "0" : interestRate}
+                    placeholder=""
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Set to -1 if empty string, otherwise parse as number
+                      setInterestRate(val === "" ? -1 : Number(val));
+                    }}
+                    onBlur={() => handleFieldBlur("interestRate")}
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Increase amount"
-                      onClick={() => setInterestRate((prev) => Math.max(0, prev + 1))}
-                      className="mb-[-5px] hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidUpArrow size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label="Decrease amount"
-                      onClick={() => setInterestRate((prev) => Math.max(0, prev - 1))}
-                      className="hover:text-grey-med-dark focus:outline-none"
-                    >
-                      <BiSolidDownArrow size={24} />
-                    </button>
-                  </div>
+                  <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                 </div>
+                {validation.errors.interestRate && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
+                    {validation.errors.interestRate}
+                  </p>
+                )}
+                {validation.info.interestRate && !validation.errors.interestRate && (
+                  <p className="text-xs text-[var(--foreground)]/60 mt-1">
+                    {validation.info.interestRate}
+                  </p>
+                )}
               </div>
               <div>
-                <label className="block text-md font-medium text-[var(--foreground)] mb-1">Compounding</label>
+                <label htmlFor="compounding-select" className="block text-md font-medium text-[var(--foreground)] mb-1">Compounding</label>
                   <div className="relative">
                   <select
+                  id="compounding-select"
                   value={compounding}
                   onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
@@ -528,6 +475,16 @@ export default function SavingsCalculator() {
                   </div>
                 </div>
               </div>
+              <div>
+                <Button
+                  type="button"
+                  onClick={handleReset}
+                  variant="lagunita"
+                  className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                >
+                  Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -536,14 +493,16 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Saving per compounding period:</CardTitle>
+                  <CardTitle className="text-center text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
                   <div className={`text-4xl font-bold text-center ${
-                      isInvalid(results.totalDeposited)
-                        ? "text-berry"
+                      isInvalid(results.totalDeposited) || overflowWarning
+                        ? "text-foreground"
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? "$0"
+                      ? "-"
+                      : overflowWarning
+                      ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -552,8 +511,13 @@ export default function SavingsCalculator() {
               {mode === "time-to-goal" && (
                 <>
                 <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
-                  <div className="text-4xl font-bold text-lagunita text-center">
-                    {Math.floor(results.timeInMonths / 12)} years {results.timeInMonths % 12} months
+                  <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
+                    {isInvalid(results.timeInMonths)
+                      ? "-"
+                      : overflowWarning
+                      ? "Too large to display"
+                      : `${Math.floor(results.timeInMonths / 12)} years ${results.timeInMonths % 12} months`
+                    }
                   </div>
                 </>
               )}
@@ -562,12 +526,14 @@ export default function SavingsCalculator() {
                 <>
                 <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
                 <div className={`text-4xl font-bold text-center ${
-                      isInvalid(results.finalBalance)
-                        ? "text-berry"
+                      isInvalid(results.finalBalance) || overflowWarning
+                        ? "text-foreground"
                         : "text-lagunita"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? "$0"
+                      ? "-"
+                      : overflowWarning
+                      ? "Too large to display"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
                 </>
@@ -582,9 +548,9 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                         Total deposited:
                       </div>
-                      <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-                        {isInvalid(results.totalDeposited)
-                        ? "$0"
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--secondary-background)] overflow-hidden text-ellipsis`}>
+                        {isInvalid(results.totalDeposited) || overflowWarning
+                        ? "-"
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -592,10 +558,10 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-md p-4 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-lagunita font-bold text-white">
                         Interest earned:
                       </div>
-                      <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis"
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis`}
                       >
-                        {(isInvalid(results.interestEarned) || results.interestEarned < 0)
-                        ? "$0"
+                        {isInvalid(results.interestEarned) || overflowWarning
+                        ? "-"
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -604,8 +570,10 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
                       </div>
-                      <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center text-[var(--foreground)] bg-[var(--results-blue-background)]">
-                        ${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis`}>
+                        {isInvalid(results.finalBalance) || overflowWarning
+                        ? "-"
+                        : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
                     )}
@@ -652,23 +620,31 @@ export default function SavingsCalculator() {
                                 {year.year}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                {(isInvalid(year.startingBalance) || year.startingBalance < 0)
-                                ? "$0"
+                                {isInvalid(year.startingBalance)
+                                ? "-"
+                                : isOverflow(year.startingBalance)
+                                ? "Too large to display"
                                 : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right">
-                                {(isInvalid(year.contributions) || year.contributions < 0)
-                                ? "$0"
+                                {isInvalid(year.contributions)
+                                ? "-"
+                                : isOverflow(year.contributions)
+                                ? "Too large to display"
                                 : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-3 text-right font-bold text-lagunita">
-                                {(isInvalid(year.interestEarned) || year.interestEarned < 0)
-                                ? "$0"
+                                {isInvalid(year.interestEarned)
+                                ? "-"
+                                : isOverflow(year.interestEarned)
+                                ? "Too large to display"
                                 : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                               <td className="py-2 px-1 text-right font-bold">
-                                {(isInvalid(year.endingBalance) || year.endingBalance < 0)
-                                ? "$0"
+                                {isInvalid(year.endingBalance)
+                                ? "-"
+                                : isOverflow(year.endingBalance)
+                                ? "Too large to display"
                                 : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </td>
                             </tr>
