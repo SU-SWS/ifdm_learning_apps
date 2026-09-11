@@ -829,54 +829,52 @@ function ResultPanel({
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-      {/* Show the "Calculate results" button only on first load (before user
-          starts editing). Once they type in any refi field, switch to live
-          results display. */}
-      {!hasStartedEditing ? (
-        <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
-          {/* Deliberately not disabled: pressing it is what reveals the
-              "Please enter…" messages on the empty required fields. */}
-          <p className="mb-3 text-sm text-panel-foreground/70">The refinance verdict will show here.</p>
+      {/* Show error message if current balance has errors, regardless of edit state */}
+      {validation.currentBlocking ? (
+        <div className="mb-6 rounded-lg border border-[var(--color-inline-error)]/30 bg-[var(--color-inline-error)]/5 p-4">
+          <p
+            role="alert"
+            className="text-sm font-semibold text-[var(--color-inline-error)]"
+          >
+            Your current loan details are incomplete or out of range. Fix them to
+            see your refinance analysis.
+          </p>
           <Button
             type="button"
-            onClick={onAnalyze}
-            variant="lagunita"
-            className="w-full md:w-full flex flex-row items-center justify-center gap-2 whitespace-normal font-medium cursor-pointer"
+            onClick={onEditBalance}
+            variant="ghost"
+            className="mt-2 flex items-center gap-2 text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
           >
-            See if it's worth it
+            <ArrowLeft size={12} aria-hidden="true" /> Edit current loan
           </Button>
-          <p className="mt-3 text-sm text-panel-foreground/70">
-            Fill in the new loan terms and any optional details, then see whether refinancing is worth it.
-          </p>
         </div>
       ) : (
         <>
-          {/* The refinance math depends on all three Current Balance inputs, so a
-              problem over there has to be surfaced here — otherwise the analysis
-              just silently disappears with the fix one tab away. */}
-          {validation.currentBlocking ? (
-            <div className="mb-6">
-              <p
-                role="alert"
-                className="text-sm font-semibold text-[var(--color-inline-error)]"
-              >
-                Your current loan details are incomplete or out of range. Fix them to
-                see your refinance analysis.
-              </p>
+          {/* Show the "Calculate results" button only on first load (before user
+              starts editing). Once they type in any refi field, switch to live
+              results display. */}
+          {!hasStartedEditing ? (
+            <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
+              {/* Deliberately not disabled: pressing it is what reveals the
+                  "Please enter…" messages on the empty required fields. */}
+              <p className="mb-3 text-sm text-panel-foreground/70">The refinance verdict will show here.</p>
               <Button
                 type="button"
-                onClick={onEditBalance}
-                variant="ghost"
-                className="mt-1 flex items-center gap-2 text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
+                onClick={onAnalyze}
+                variant="lagunita"
+                className="w-full md:w-full flex flex-row items-center justify-center gap-2 whitespace-normal font-medium cursor-pointer"
               >
-                <ArrowLeft size={12} aria-hidden="true" /> Edit current loan
+                See if it&apos;s worth it
               </Button>
+              <p className="mt-3 text-sm text-panel-foreground/70">
+                Fill in the new loan terms and any optional details, then see whether refinancing is worth it.
+              </p>
             </div>
-          ) : null}
-
-          {/* Hero: net value today — always show when editing has started,
-              but display a dash if inputs are incomplete or have errors. */}
-          <div>
+          ) : (
+            <>
+              {/* Hero: net value today — always show when editing has started,
+                  but display a dash if inputs are incomplete or have errors. */}
+              <div>
             <p className=" font-medium text-panel-foreground/70">
               Net value today
             </p>
@@ -914,7 +912,9 @@ function ResultPanel({
                 </p>
               </>
             )}
-          </div>
+              </div>
+            </>
+          )}
         </>
       )}
 
