@@ -80,8 +80,6 @@ export default function RetirementCalculator() {
   const [currentSavingsInput, setCurrentSavingsInput] = useState("");
   const [retirementLengthInput, setRetirementLengthInput] = useState("");
   const [yearsToRetirementInput, setYearsToRetirementInput] = useState("");
-  const [isAnnualSpendingFocused, setIsAnnualSpendingFocused] = useState(false);
-  const [isCurrentSavingsFocused, setIsCurrentSavingsFocused] = useState(false);
   const [isRetirementLengthFocused, setIsRetirementLengthFocused] =
     useState(false);
 
@@ -220,7 +218,6 @@ export default function RetirementCalculator() {
     setInputs(defaultInputs);
     setErrors({});
     setWarnings({});
-    setIsAnnualSpendingFocused(false);
     setIsRetirementLengthFocused(false);
     setExpectedReturnBeforeRetirementInput("");
     setExpectedReturnDuringRetirementInput("");
@@ -301,11 +298,7 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!!errors.annualSpending}
-                      value={
-                        isAnnualSpendingFocused
-                          ? annualSpendingInput
-                          : formatNumberWithCommas(annualSpendingInput)
-                      }
+                      value={formatNumberWithCommas(annualSpendingInput)}
                       onChange={(e) =>
                         updateInput(
                           "annualSpending",
@@ -313,7 +306,6 @@ export default function RetirementCalculator() {
                         )
                       }
                       onFocus={() => {
-                        setIsAnnualSpendingFocused(true);
                         if (annualSpendingInput === "") {
                           setErrors((prev) => ({
                             ...prev,
@@ -322,7 +314,6 @@ export default function RetirementCalculator() {
                         }
                       }}
                       onBlur={(e) => {
-                        setIsAnnualSpendingFocused(false);
                         if (e.target.value === "") {
                           setErrors((prev) => ({
                             ...prev,
@@ -565,19 +556,13 @@ export default function RetirementCalculator() {
                           : undefined
                       }
                       aria-invalid={!!errors.currentSavings}
-                      value={
-                        isCurrentSavingsFocused
-                          ? currentSavingsInput
-                          : formatNumberWithCommas(currentSavingsInput)
-                      }
+                      value={formatNumberWithCommas(currentSavingsInput)}
                       onChange={(e) =>
                         updateInput(
                           "currentSavings",
                           sanitizeDecimalInput(e.target.value),
                         )
                       }
-                      onFocus={() => setIsCurrentSavingsFocused(true)}
-                      onBlur={() => setIsCurrentSavingsFocused(false)}
                       className={`${baseInputClass} pl-8 pr-16 ${inputStateClass(errors.currentSavings)}`}
                     />
                   </div>
