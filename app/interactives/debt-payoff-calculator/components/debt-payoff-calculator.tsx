@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { RotateCcw } from "lucide-react"
+import { Button } from "@/app/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/card"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
@@ -60,6 +62,22 @@ export default function DebtPayoffCalculator() {
   const clearFocus = (field: FocusableField) => {
     setFocusedField((current) => (current === field ? null : current))
     setTouched((current) => ({ ...current, [field]: true }))
+  }
+
+  // Clears every field on both tabs back to blank (IFDM-240). Debt amount,
+  // annual interest rate, and compounding frequency are shared state, so one
+  // Reset — available on either tab — resets the whole calculator rather
+  // than just the fields visible on the active tab.
+  const resetAll = () => {
+    setDebtAmount("")
+    setInterestRate("")
+    setCompoundingFrequency("monthly")
+    setPayment("")
+    setAdditionalPayment("")
+    setTargetYears("")
+    setTargetMonths("")
+    setFocusedField(null)
+    setTouched(NO_FIELDS_TOUCHED)
   }
 
   const v = validateDebtPayoffInputs({
@@ -314,6 +332,17 @@ export default function DebtPayoffCalculator() {
                             Each steady extra payment reduces your total interest.
                           </p>
                         )}
+                      </div>
+
+                      <div>
+                        <Button
+                          type="button"
+                          onClick={resetAll}
+                          variant="lagunita"
+                          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                        >
+                          Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -571,6 +600,17 @@ export default function DebtPayoffCalculator() {
                             {v.targetMonthsNum !== 1 ? "s" : ""}
                           </div>
                         )}
+                      </div>
+
+                      <div>
+                        <Button
+                          type="button"
+                          onClick={resetAll}
+                          variant="lagunita"
+                          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                        >
+                          Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
