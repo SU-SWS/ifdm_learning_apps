@@ -464,6 +464,7 @@ export function RefinanceCalculator() {
                 payment: analysis.newPayment,
               }}
               hasStartedEditing={hasStartedEditing}
+              analyzed={analyzed}
             />
           )}
         </div>
@@ -812,6 +813,7 @@ function ResultPanel({
   current,
   next,
   hasStartedEditing,
+  analyzed,
 }: {
   analysis: {
     newPayment: number;
@@ -834,6 +836,7 @@ function ResultPanel({
   current: LoanTerms;
   next: LoanTerms;
   hasStartedEditing: boolean;
+  analyzed: boolean;
 }) {
   const worthIt = analysis.overallBenefit >= 0;
 
@@ -872,10 +875,9 @@ function ResultPanel({
         </div>
       ) : (
         <>
-          {/* Show the "Calculate results" button only on first load (before user
-              starts editing). Once they type in any refi field, switch to live
-              results display. */}
-          {!hasStartedEditing ? (
+          {/* Show the "Calculate results" button until clicked. Once the user
+              clicks it, show live results instead. */}
+          {!analyzed ? (
             <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
               {/* Deliberately not disabled: pressing it is what reveals the
                   "Please enter…" messages on the empty required fields. */}
@@ -894,7 +896,7 @@ function ResultPanel({
             </div>
           ) : (
             <>
-              {/* Hero: net value today — always show when editing has started,
+              {/* Hero: net value today — show after button is clicked,
                   but display a dash if inputs are incomplete or have errors. */}
               <div>
             <p className=" font-medium text-panel-foreground/70">
