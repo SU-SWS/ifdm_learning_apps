@@ -565,7 +565,7 @@ export default function SavingsCalculator() {
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
-                    {mode !== "future-balance" && (
+                    {mode === "future-balance" && (
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-blue-background)] rounded-lg">
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
