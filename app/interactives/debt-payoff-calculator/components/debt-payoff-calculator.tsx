@@ -42,6 +42,7 @@ type FocusableField =
   | "debtAmount"
   | "interestRate"
   | "payment"
+  | "additionalPayment"
   | "targetYears"
   | "targetMonths";
 
@@ -49,6 +50,7 @@ const NO_FIELDS_TOUCHED: Record<FocusableField, boolean> = {
   debtAmount: false,
   interestRate: false,
   payment: false,
+  additionalPayment: false,
   targetYears: false,
   targetMonths: false,
 };
@@ -124,6 +126,14 @@ export default function DebtPayoffCalculator() {
     (touched.targetYears || touched.targetMonths) &&
     focusedField !== "targetYears" &&
     focusedField !== "targetMonths";
+  const showPaymentWarning =
+    !!v.paymentWarning &&
+    !showPaymentError &&
+    touched.payment &&
+    focusedField !== "payment" &&
+    focusedField !== "additionalPayment" &&
+    focusedField !== "debtAmount" &&
+    focusedField !== "interestRate";
 
   const payoffResult = calculatePayoffTime({
     principal: v.debtAmountNum,
@@ -314,7 +324,7 @@ export default function DebtPayoffCalculator() {
                             className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               showPaymentError
                                 ? "border-2 border-[var(--color-inline-error)]"
-                                : v.paymentWarning
+                                : showPaymentWarning
                                   ? "border-2 border-[var(--color-inline-warning)]"
                                   : ""
                             }`}
@@ -328,7 +338,7 @@ export default function DebtPayoffCalculator() {
                             {v.paymentError}
                           </p>
                         )}
-                        {!showPaymentError && v.paymentWarning && (
+                        {showPaymentWarning && (
                           <p className="text-sm text-[var(--color-inline-warning)] font-semibold">
                             {v.paymentWarning}
                           </p>
@@ -361,6 +371,8 @@ export default function DebtPayoffCalculator() {
                                 formatThousands(e.target.value),
                               )
                             }
+                            onFocus={() => setFocusedField("additionalPayment")}
+                            onBlur={() => clearFocus("additionalPayment")}
                             className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
