@@ -801,7 +801,7 @@ export default function RetirementCalculator() {
                     —
                   </p>
                 ) : (
-                  <div className="border-2 px-4 py-3 rounded-xl">
+                  <div className="py-3">
                     <p className="text-sm">
                       The required retirement balance will appear here. Enter
                       annual retirement spending, expected retirement length
@@ -831,7 +831,7 @@ export default function RetirementCalculator() {
                     </p>
                   </>
                 ) : (
-                  <div className="border-2 px-4 py-3 rounded-xl">
+                  <div className="py-3">
                     <p className="text-sm">
                       The required retirement balance will appear here. Complete
                       Step 1 on the Required balance tab first.
@@ -841,7 +841,7 @@ export default function RetirementCalculator() {
 
                 {showSavingsResults &&
                 inputs.currentSavings >= results.requiredBalance ? (
-                  <div className="border-2 px-4 py-3 rounded-xl">
+                  <div className="py-3">
                     <p className="mt-3 mb-6 text-sm">
                       Current retirement savings already exceed your target
                       retirement balance, no growth or contributions needed.
@@ -849,7 +849,7 @@ export default function RetirementCalculator() {
                   </div>
                 ) : showSavingsResults &&
                   results.fvCurrentSavings >= results.requiredBalance ? (
-                  <div className="border-2 px-4 py-3 rounded-xl">
+                  <div className="py-3">
                     <p className="mt-3 mb-6 text-sm">
                       With an expected {inputs.expectedReturnBeforeRetirement}%
                       annual return, your current savings of{" "}
