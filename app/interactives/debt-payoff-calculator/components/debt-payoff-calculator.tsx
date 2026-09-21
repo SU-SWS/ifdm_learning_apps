@@ -127,6 +127,7 @@ export default function DebtPayoffCalculator() {
     (touched.targetYears || touched.targetMonths) &&
     focusedField !== "targetYears" &&
     focusedField !== "targetMonths";
+  const showTargetTotal = !v.targetYearsError && !v.targetMonthsError;
   const showPaymentWarning =
     !!v.paymentWarning &&
     !showPaymentError &&
@@ -690,14 +691,14 @@ export default function DebtPayoffCalculator() {
                           >
                             {v.targetTimeError}
                           </p>
-                        ) : (
+                        ) : showTargetTotal ? (
                           <div className="text-md font-semibold text-[var(--color-teal)]">
                             Total: {v.targetYearsNum} year
                             {v.targetYearsNum !== 1 ? "s" : ""}{" "}
                             {v.targetMonthsNum} month
                             {v.targetMonthsNum !== 1 ? "s" : ""}
                           </div>
-                        )}
+                        ) : null}
                       </div>
 
                       <div>
