@@ -256,11 +256,12 @@ export default function SavingsCalculator() {
 
   // Check for overflow after results are calculated
   useEffect(() => {
+    const DISPLAY_MAX = 99_999_999;
     const hasOverflow =
-      isOverflow(results.contributionPerPeriod) ||
-      isOverflow(results.totalDeposited) ||
-      isOverflow(results.interestEarned) ||
-      isOverflow(results.finalBalance);
+      (!isInvalid(results.contributionPerPeriod) && results.contributionPerPeriod > DISPLAY_MAX) ||
+      (!isInvalid(results.totalDeposited) && results.totalDeposited > DISPLAY_MAX) ||
+      (!isInvalid(results.interestEarned) && results.interestEarned > DISPLAY_MAX) ||
+      (!isInvalid(results.finalBalance) && results.finalBalance > DISPLAY_MAX);
     setOverflowWarning(hasOverflow);
   }, [results]);
 

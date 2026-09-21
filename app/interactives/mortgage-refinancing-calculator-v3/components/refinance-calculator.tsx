@@ -463,7 +463,6 @@ export function RefinanceCalculator() {
                 rate: num(newRate),
                 payment: analysis.newPayment,
               }}
-              hasStartedEditing={hasStartedEditing}
               analyzed={analyzed}
             />
           )}
@@ -812,7 +811,6 @@ function ResultPanel({
   onEditBalance,
   current,
   next,
-  hasStartedEditing,
   analyzed,
 }: {
   analysis: {
@@ -835,7 +833,6 @@ function ResultPanel({
   onEditBalance: () => void;
   current: LoanTerms;
   next: LoanTerms;
-  hasStartedEditing: boolean;
   analyzed: boolean;
 }) {
   const worthIt = analysis.overallBenefit >= 0;
