@@ -31,27 +31,50 @@ const MSG_TARGET_TIME_EMPTY = "Please enter a target payoff time of at least 1 m
 export const MSG_PAYMENT_TOO_LOW =
   "This payment is too low to cover the interest accrued each period. The balance will not decrease over time. Try increasing the payment amount."
 
-// Strips a raw input down to digits and a single decimal point. Debt amounts
-// and payments are never negative, so no sign handling is needed.
 export function sanitizeDecimal(raw: string): string {
+  const negative = raw.trimStart().startsWith("-")
   const stripped = raw.replace(/[^\d.]/g, "")
   const firstDot = stripped.indexOf(".")
-  if (firstDot === -1) return stripped
-  return stripped.slice(0, firstDot + 1) + stripped.slice(firstDot + 1).replace(/\./g, "")
+  const digits =
+    firstDot === -1
+      ? stripped
+      : stripped.slice(0, firstDot + 1) + stripped.slice(firstDot + 1).replace(/\./g, "")
+  return negative ? `-${digits}` : digits
 }
 
 // Same as sanitizeDecimal, but also inserts thousands separators for
 // currency-style fields (debt amount, payment, additional payment).
 export function formatThousands(raw: string): string {
   const cleaned = sanitizeDecimal(raw)
-  if (cleaned === "") return ""
-  const [intPart, decPart] = cleaned.split(".")
+  if (isBlankEntry(cleaned)) return cleaned
+  const negative = cleaned.startsWith("-")
+  const [intPart, decPart] = (negative ? cleaned.slice(1) : cleaned).split(".")
   const intFormatted = intPart ? Number(intPart).toLocaleString("en-US") : ""
-  return decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted
+  const formatted = decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted
+  return negative ? `-${formatted}` : formatted
 }
 
 export function sanitizeInteger(raw: string): string {
-  return raw.replace(/\D/g, "")
+  const negative = raw.trimStart().startsWith("-")
+  const digits = raw.replace(/\D/g, "")
+  return negative ? `-${digits}` : digits
+}
+
+export function isBlankEntry(raw: string): boolean {
+  return !/\d/.test(raw)
+}
+
+function normalizeRaw(raw: string): string {
+  const trimmed = raw.replace(/,/g, "").trim()
+  return isBlankEntry(trimmed) ? "" : trimmed
+}
+
+function isOutOfRange(
+  raw: string,
+  num: number,
+  range: { min: number; max: number },
+): boolean {
+  return raw.startsWith("-") || num < range.min || num > range.max
 }
 
 export function parseNum(raw: string): number {
@@ -99,55 +122,55 @@ export interface DebtPayoffValidation {
 }
 
 export function validateDebtPayoffInputs(input: ValidationInput): DebtPayoffValidation {
-  const debtAmountRaw = input.debtAmount.replace(/,/g, "").trim()
+  const debtAmountRaw = normalizeRaw(input.debtAmount)
   const debtAmountNum = parseNum(input.debtAmount)
   const debtAmountError =
     debtAmountRaw === ""
       ? MSG_DEBT_AMOUNT_EMPTY
-      : debtAmountNum < CONSTRAINTS.debtAmount.min || debtAmountNum > CONSTRAINTS.debtAmount.max
+      : isOutOfRange(debtAmountRaw, debtAmountNum, CONSTRAINTS.debtAmount)
         ? MSG_DEBT_AMOUNT_RANGE
         : ""
 
-  const interestRateRaw = input.interestRate.trim()
+  const interestRateRaw = normalizeRaw(input.interestRate)
   const interestRateNum = parseNum(input.interestRate)
   const interestRateError =
     interestRateRaw === ""
       ? MSG_RATE_EMPTY
-      : interestRateNum < CONSTRAINTS.annualRate.min || interestRateNum > CONSTRAINTS.annualRate.max
+      : isOutOfRange(interestRateRaw, interestRateNum, CONSTRAINTS.annualRate)
         ? MSG_RATE_RANGE
         : ""
 
-  const paymentRaw = input.payment.replace(/,/g, "").trim()
+  const paymentRaw = normalizeRaw(input.payment)
   const paymentNum = parseNum(input.payment)
   const paymentError =
     paymentRaw === ""
       ? MSG_PAYMENT_EMPTY
-      : paymentNum < CONSTRAINTS.payment.min || paymentNum > CONSTRAINTS.payment.max
+      : isOutOfRange(paymentRaw, paymentNum, CONSTRAINTS.payment)
         ? MSG_PAYMENT_RANGE
         : ""
 
   // Additional payment is optional — blank is never an error, only an
   // out-of-range value (when present) is.
-  const additionalPaymentRaw = input.additionalPayment.replace(/,/g, "").trim()
+  const additionalPaymentRaw = normalizeRaw(input.additionalPayment)
   const additionalPaymentNum = parseNum(input.additionalPayment)
   const additionalPaymentError =
     additionalPaymentRaw !== "" &&
-    (additionalPaymentNum < CONSTRAINTS.additionalPayment.min || additionalPaymentNum > CONSTRAINTS.additionalPayment.max)
+    isOutOfRange(additionalPaymentRaw, additionalPaymentNum, CONSTRAINTS.additionalPayment)
       ? MSG_ADDITIONAL_PAYMENT_RANGE
       : ""
 
-  const targetYearsRaw = input.targetYears.trim()
+  const targetYearsRaw = normalizeRaw(input.targetYears)
   const targetYearsNum = targetYearsRaw === "" ? 0 : parseNum(input.targetYears)
   const targetYearsError =
-    targetYearsRaw !== "" && (targetYearsNum < CONSTRAINTS.targetYears.min || targetYearsNum > CONSTRAINTS.targetYears.max)
+    targetYearsRaw !== "" && isOutOfRange(targetYearsRaw, targetYearsNum, CONSTRAINTS.targetYears)
       ? MSG_YEARS_RANGE
       : ""
 
-  const targetMonthsRaw = input.targetMonths.trim()
+  const targetMonthsRaw = normalizeRaw(input.targetMonths)
   const targetMonthsNum = targetMonthsRaw === "" ? 0 : parseNum(input.targetMonths)
   const targetMonthsError =
     targetMonthsRaw !== "" &&
-    (targetMonthsNum < CONSTRAINTS.targetMonths.min || targetMonthsNum > CONSTRAINTS.targetMonths.max)
+    isOutOfRange(targetMonthsRaw, targetMonthsNum, CONSTRAINTS.targetMonths)
       ? MSG_MONTHS_RANGE
       : ""
 

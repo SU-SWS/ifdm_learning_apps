@@ -31,6 +31,7 @@ import {
 } from "../lib/debt-payoff";
 import {
   formatThousands,
+  isBlankEntry,
   sanitizeDecimal,
   sanitizeInteger,
   validateDebtPayoffInputs,
@@ -112,15 +113,15 @@ export default function DebtPayoffCalculator() {
   const showDebtAmountError =
     !!v.debtAmountError &&
     touched.debtAmount &&
-    !(debtAmount.trim() === "" && focusedField === "debtAmount");
+    !(isBlankEntry(debtAmount) && focusedField === "debtAmount");
   const showInterestRateError =
     !!v.interestRateError &&
     touched.interestRate &&
-    !(interestRate.trim() === "" && focusedField === "interestRate");
+    !(isBlankEntry(interestRate) && focusedField === "interestRate");
   const showPaymentError =
     !!v.paymentError &&
     touched.payment &&
-    !(payment.trim() === "" && focusedField === "payment");
+    !(isBlankEntry(payment) && focusedField === "payment");
   const showTargetTimeError =
     !!v.targetTimeError &&
     (touched.targetYears || touched.targetMonths) &&
