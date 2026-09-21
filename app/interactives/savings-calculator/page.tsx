@@ -35,6 +35,17 @@ interface YearlyBreakdown {
   endingBalance: number
 }
 
+function formatDuration(totalMonths: number) {
+  const years = Math.floor(totalMonths / 12)
+  const months = totalMonths % 12
+  const parts: string[] = []
+
+  if (years > 0) parts.push(`${years} ${years === 1 ? "year" : "years"}`)
+  if (months > 0) parts.push(`${months} ${months === 1 ? "month" : "months"}`)
+
+  return parts.join(" and ")
+}
+
 export default function SavingsCalculator() {
   const [mode, setMode] = useState<CalculationMode>("monthly-savings")
   const [savingsGoal, setSavingsGoal] = useState(0)
@@ -67,6 +78,18 @@ export default function SavingsCalculator() {
     contributionPerPeriod: false,
   })
 
+  // Track which fields have been edited (onChange fired)
+  const [editedFields, setEditedFields] = useState<Record<string, boolean>>({
+    savingsGoal: false,
+    currentBalance: false,
+    timeYears: false,
+    timeMonths: false,
+    contributionPerPeriod: false,
+  })
+
+  // Track which field currently has focus (for deferring error messages)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+
   // Clear all input fields when switching tabs
   useEffect(() => {
     setSavingsGoal(0);
@@ -83,6 +106,14 @@ export default function SavingsCalculator() {
       interestRate: false,
       contributionPerPeriod: false,
     });
+    setEditedFields({
+      savingsGoal: false,
+      currentBalance: false,
+      timeYears: false,
+      timeMonths: false,
+      contributionPerPeriod: false,
+    });
+    setFocusedField(null);
   }, [mode]);
 
   // Calculate results based on mode using library functions
@@ -152,8 +183,16 @@ export default function SavingsCalculator() {
       contributionPerPeriod,
     },
     touched,
-    mode
+    mode,
+    focusedField
   );
+
+  const hasReachedGoal =
+    mode !== "future-balance" &&
+    savingsGoal > 0 &&
+    savingsGoal <= 1000000000 &&
+    currentBalance <= 1000000000 &&
+    savingsGoal <= currentBalance;
 
   // Handle field blur - mark field as touched
   const handleFieldBlur = (fieldName: string) => {
@@ -179,6 +218,14 @@ export default function SavingsCalculator() {
       interestRate: false,
       contributionPerPeriod: false,
     });
+    setEditedFields({
+      savingsGoal: false,
+      currentBalance: false,
+      timeYears: false,
+      timeMonths: false,
+      contributionPerPeriod: false,
+    });
+    setFocusedField(null);
     setResults({
       contributionPerPeriod: NaN,
       totalDeposited: NaN,
@@ -237,7 +284,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "time-to-goal" ? "default" : "outline"}
-              className={`h-18 whitespace-normal cursor-pointer ${mode === "time-to-goal" ? "bg-navy text-white hover:bg-lagunita" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "time-to-goal" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("time-to-goal")}
             >
               <FaRegCalendar className="hidden sm:block h-5 w-5 mr-2" />
@@ -245,7 +292,7 @@ export default function SavingsCalculator() {
             </Button>
             <Button
               variant={mode === "future-balance" ? "default" : "outline"}
-              className={`h-18 whitespace-normal cursor-pointer ${mode === "future-balance" ? "bg-palo-verde text-white hover:bg-[var(--button-green)]" : "bg-[var(--results-white-background)] hover:bg-[var(--button-green)] hover:text-white"}`}
+              className={`h-18 whitespace-normal cursor-pointer ${mode === "future-balance" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("future-balance")}
             >
               <FaArrowTrendUp className="hidden sm:block h-5 w-5 mr-2" />
@@ -287,12 +334,23 @@ export default function SavingsCalculator() {
                     id="savings-goal"
                     type="number"
                     min="0"
-                    value={savingsGoal === 0 ? "" : savingsGoal}
+                    value={savingsGoal === 0 && !editedFields.savingsGoal ? "" : savingsGoal}
                     placeholder=""
-                    onChange={(e) => setSavingsGoal(Number(e.target.value))}
-                    onBlur={() => handleFieldBlur("savingsGoal")}
+                    onChange={(e) => {
+                      setSavingsGoal(Number(e.target.value) || 0);
+                      setEditedFields(prev => ({ ...prev, savingsGoal: e.target.value !== "" }));
+                    }}
+                    onFocus={() => setFocusedField("savingsGoal")}
+                    onBlur={() => {
+                      handleFieldBlur("savingsGoal");
+                      setFocusedField(null);
+                    }}
                     className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                      validation.errors.savingsGoal ? "border-[var(--color-inline-error)]" : "border-input"
+                      validation.errors.savingsGoal
+                        ? "border-[var(--color-inline-error)]"
+                        : validation.warnings.savingsGoal
+                        ? "border-[var(--color-inline-warning)]"
+                        : "border-input"
                     }`}
 
                   />
@@ -303,7 +361,12 @@ export default function SavingsCalculator() {
                     {validation.errors.savingsGoal}
                   </p>
                 )}
-                {validation.info.savingsGoal && !validation.errors.savingsGoal && (
+                {validation.warnings.savingsGoal && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-warning)] mt-1">
+                    {validation.warnings.savingsGoal}
+                  </p>
+                )}
+                {validation.info.savingsGoal && !validation.errors.savingsGoal && !validation.warnings.savingsGoal && (
                   <p className="text-xs text-[var(--foreground)]/60 mt-1">
                     {validation.info.savingsGoal}
                   </p>
@@ -319,13 +382,20 @@ export default function SavingsCalculator() {
                   <Input
                     id="current-balance"
                     type="number"
-                    value={currentBalance === 0 ? "" : currentBalance}
+                    value={currentBalance === 0 && !editedFields.currentBalance ? "" : currentBalance}
                     placeholder=""
-                    onChange={(e) => setCurrentBalance(Number(e.target.value))}
+                    onChange={(e) => {
+                      setCurrentBalance(Number(e.target.value) || 0);
+                      setEditedFields(prev => ({ ...prev, currentBalance: e.target.value !== "" }));
+                    }}
                     onBlur={() => handleFieldBlur("currentBalance")}
 
                     className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                      validation.errors.currentBalance ? "border-[var(--color-inline-error)]" : "border-input"
+                      validation.errors.currentBalance
+                        ? "border-[var(--color-inline-error)]"
+                        : validation.warnings.currentBalance
+                        ? "border-[var(--color-inline-warning)]"
+                        : "border-input"
                     }`}
                   />
                   <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
@@ -337,6 +407,11 @@ export default function SavingsCalculator() {
                     {validation.errors.currentBalance}
                   </p>
                 )}
+                {validation.warnings.currentBalance && !validation.errors.currentBalance && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-warning)] mt-1">
+                    {validation.warnings.currentBalance}
+                  </p>
+                )}
               </div>
 
               {mode !== "monthly-savings" && (
@@ -346,19 +421,34 @@ export default function SavingsCalculator() {
                     <Input
                       id="contribution-period"
                       type="number"
-                      value={contributionPerPeriod === 0 ? "" : contributionPerPeriod}
-                      placeholder=""
-                      onChange={(e) => setcontributionPerPeriod(Number(e.target.value))}
-                      onBlur={() => handleFieldBlur("contributionPerPeriod")}
+                      value={hasReachedGoal ? "" : contributionPerPeriod === 0 && !editedFields.contributionPerPeriod ? "" : contributionPerPeriod}
+                      placeholder={hasReachedGoal ? "-" : ""}
+                      disabled={hasReachedGoal}
+                      onChange={(e) => {
+                        setcontributionPerPeriod(Number(e.target.value) || 0);
+                        setEditedFields(prev => ({ ...prev, contributionPerPeriod: e.target.value !== "" }));
+                      }}
+                      onFocus={() => setFocusedField("contributionPerPeriod")}
+                      onBlur={() => {
+                        handleFieldBlur("contributionPerPeriod");
+                        setFocusedField(null);
+                      }}
                       className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
                       }`}
                     />
-                    <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
+                    {!hasReachedGoal && (
+                      <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
+                    )}
                   </div>
                   {validation.errors.contributionPerPeriod && (
                     <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
                       {validation.errors.contributionPerPeriod}
+                    </p>
+                  )}
+                  {validation.warnings.contributionPerPeriod && (
+                    <p className="text-sm font-semibold text-[var(--color-inline-warning)] mt-1">
+                      {validation.warnings.contributionPerPeriod}
                     </p>
                   )}
                 </div>
@@ -376,9 +466,13 @@ export default function SavingsCalculator() {
                           <Input
                             id="time-years"
                             type="number"
-                            value={timeYears === 0 ? "" : timeYears}
-                            placeholder=""
-                            onChange={(e) => setTimeYears(Number(e.target.value))}
+                            value={hasReachedGoal ? "" : timeYears === 0 && !editedFields.timeYears ? "" : timeYears}
+                            placeholder={hasReachedGoal ? "-" : ""}
+                            disabled={hasReachedGoal}
+                            onChange={(e) => {
+                              setTimeYears(Number(e.target.value) || 0);
+                              setEditedFields(prev => ({ ...prev, timeYears: e.target.value !== "" }));
+                            }}
                             onBlur={() => handleFieldBlur("timeYears")}
                             className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
@@ -399,9 +493,13 @@ export default function SavingsCalculator() {
                           <Input
                             id="time-months"
                             type="number"
-                            value={timeMonths === 0 ? "" : timeMonths}
-                            placeholder=""
-                            onChange={(e) => setTimeMonths(parseInt(e.target.value) || 0)}
+                            value={hasReachedGoal ? "" : timeMonths === 0 && !editedFields.timeMonths ? "" : timeMonths}
+                            placeholder={hasReachedGoal ? "-" : ""}
+                            disabled={hasReachedGoal}
+                            onChange={(e) => {
+                              setTimeMonths(parseInt(e.target.value) || 0);
+                              setEditedFields(prev => ({ ...prev, timeMonths: e.target.value !== "" }));
+                            }}
                             onBlur={() => handleFieldBlur("timeMonths")}
                             className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
@@ -430,24 +528,42 @@ export default function SavingsCalculator() {
                     type="number"
                     step="0.1"
                     min="0.1"
-                    value={interestRate === -1 ? "" : interestRate === 0 ? "0" : interestRate}
-                    placeholder=""
+                    value={hasReachedGoal ? "" : interestRate === -1 ? "" : interestRate === 0 ? "0" : interestRate}
+                    placeholder={hasReachedGoal ? "-" : ""}
+                    disabled={hasReachedGoal}
                     onChange={(e) => {
                       const val = e.target.value;
                       // Set to -1 if empty string, otherwise parse as number
                       setInterestRate(val === "" ? -1 : Number(val));
                     }}
-                    onBlur={() => handleFieldBlur("interestRate")}
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+                    onFocus={() => setFocusedField("interestRate")}
+                    onBlur={() => {
+                      handleFieldBlur("interestRate");
+                      setFocusedField(null);
+                    }}
+                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      validation.errors.interestRate
+                        ? "border-[var(--color-inline-error)]"
+                        : validation.warnings.interestRate
+                        ? "border-[var(--color-inline-warning)]"
+                        : "border-input"
+                    }`}
                   />
-                  <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
+                  {!hasReachedGoal && (
+                    <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
+                  )}
                 </div>
                 {validation.errors.interestRate && (
                   <p className="text-sm font-semibold text-[var(--color-inline-error)] mt-1">
                     {validation.errors.interestRate}
                   </p>
                 )}
-                {validation.info.interestRate && !validation.errors.interestRate && (
+                {validation.warnings.interestRate && (
+                  <p className="text-sm font-semibold text-[var(--color-inline-warning)] mt-1">
+                    {validation.warnings.interestRate}
+                  </p>
+                )}
+                {validation.info.interestRate && !validation.errors.interestRate && !validation.warnings.interestRate && (
                   <p className="text-xs text-[var(--foreground)]/60 mt-1">
                     {validation.info.interestRate}
                   </p>
@@ -458,10 +574,12 @@ export default function SavingsCalculator() {
                   <div className="relative">
                   <select
                   id="compounding-select"
-                  value={compounding}
+                  value={hasReachedGoal ? "" : compounding}
+                  disabled={hasReachedGoal}
                   onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
                   className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
                   >
+                    {hasReachedGoal && <option value="">-</option>}
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="bi-weekly">Bi-weekly</option>
@@ -505,6 +623,14 @@ export default function SavingsCalculator() {
                       ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </div>
+                  {results.contributionPerPeriod === 0 &&
+                    savingsGoal > currentBalance &&
+                    results.timeInMonths > 0 &&
+                    !overflowWarning && (
+                      <p className="mt-2 text-center text-sm text-[var(--foreground)]">
+                        No further contributions are needed — due to compounding, you&apos;ll reach your goal in {formatDuration(results.timeInMonths)}.
+                      </p>
+                    )}
                 </>
               )}
 
@@ -565,7 +691,7 @@ export default function SavingsCalculator() {
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
-                    {mode !== "future-balance" && (
+                    {mode === "future-balance" && (
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-blue-background)] rounded-lg">
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
@@ -614,41 +740,46 @@ export default function SavingsCalculator() {
                           </tr>
                         </thead>
                         <tbody>
-                          {yearlyBreakdown.map((year) => (
-                            <tr key={year.year} className="border-b border-[var(--year-by-year-table-line)] hover:bg-[var(--muted)]">
-                              <td className="py-2 px-1 font-bold">
-                                {year.year}
-                              </td>
-                              <td className="py-2 px-3 text-right">
-                                {isInvalid(year.startingBalance)
-                                ? "-"
-                                : isOverflow(year.startingBalance)
-                                ? "Too large to display"
-                                : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                              </td>
-                              <td className="py-2 px-3 text-right">
-                                {isInvalid(year.contributions)
-                                ? "-"
-                                : isOverflow(year.contributions)
-                                ? "Too large to display"
-                                : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                              </td>
-                              <td className="py-2 px-3 text-right font-bold text-lagunita">
-                                {isInvalid(year.interestEarned)
-                                ? "-"
-                                : isOverflow(year.interestEarned)
-                                ? "Too large to display"
-                                : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                              </td>
-                              <td className="py-2 px-1 text-right font-bold">
-                                {isInvalid(year.endingBalance)
-                                ? "-"
-                                : isOverflow(year.endingBalance)
-                                ? "Too large to display"
-                                : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                              </td>
-                            </tr>
-                          ))}
+                          {yearlyBreakdown.map((year) => {
+                            const displayYear = Number.isInteger(year.year)
+                              ? year.year
+                              : year.year.toFixed(1);
+                            return (
+                              <tr key={year.year} className="border-b border-[var(--year-by-year-table-line)] hover:bg-[var(--muted)]">
+                                <td className="py-2 px-1 font-bold">
+                                  {displayYear}
+                                </td>
+                                <td className="py-2 px-3 text-right">
+                                  {isInvalid(year.startingBalance)
+                                  ? "-"
+                                  : isOverflow(year.startingBalance)
+                                  ? "Too large to display"
+                                  : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                </td>
+                                <td className="py-2 px-3 text-right">
+                                  {isInvalid(year.contributions)
+                                  ? "-"
+                                  : isOverflow(year.contributions)
+                                  ? "Too large to display"
+                                  : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                </td>
+                                <td className="py-2 px-3 text-right font-bold text-lagunita">
+                                  {isInvalid(year.interestEarned)
+                                  ? "-"
+                                  : isOverflow(year.interestEarned)
+                                  ? "Too large to display"
+                                  : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                </td>
+                                <td className="py-2 px-1 text-right font-bold">
+                                  {isInvalid(year.endingBalance)
+                                  ? "-"
+                                  : isOverflow(year.endingBalance)
+                                  ? "Too large to display"
+                                  : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -661,4 +792,3 @@ export default function SavingsCalculator() {
     </div>
   )
 }
-                
