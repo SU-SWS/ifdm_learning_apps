@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/components/ca
 import { Button } from "@/app/ui/components/button"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
-import { ChevronDown, RotateCcw } from "lucide-react"
+import { RotateCcw } from "lucide-react"
 import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { validateAllFields } from "./lib/validation";
@@ -25,14 +25,6 @@ interface CalculationResults {
   interestEarned: number
   finalBalance: number
   timeInMonths: number
-}
-
-interface YearlyBreakdown {
-  year: number
-  startingBalance: number
-  contributions: number
-  interestEarned: number
-  endingBalance: number
 }
 
 function formatDuration(totalMonths: number) {
@@ -55,7 +47,6 @@ export default function SavingsCalculator() {
   const [interestRate, setInterestRate] = useState(-1)
   const [compounding, setCompounding] = useState<CompoundingFrequency>("monthly")
   const [contributionPerPeriod, setcontributionPerPeriod] = useState(0)
-  const [showBreakdown, setShowBreakdown] = useState(false)
 
   const [results, setResults] = useState<CalculationResults>({
     contributionPerPeriod: NaN,
@@ -65,7 +56,6 @@ export default function SavingsCalculator() {
     timeInMonths: NaN,
   })
 
-  const [yearlyBreakdown, setYearlyBreakdown] = useState<YearlyBreakdown[]>([])
   const [overflowWarning, setOverflowWarning] = useState(false)
 
   // Track which fields have been touched (blurred without value or skipped)
@@ -119,7 +109,7 @@ export default function SavingsCalculator() {
   // Calculate results based on mode using library functions
   const calculateResults = useCallback(() => {
     if (mode === "monthly-savings") {
-      const { results, breakdown } = calculateMonthySavings(
+      const { results } = calculateMonthySavings(
         savingsGoal,
         currentBalance,
         timeYears,
@@ -128,9 +118,8 @@ export default function SavingsCalculator() {
         compounding
       );
       setResults(results);
-      setYearlyBreakdown(breakdown);
     } else if (mode === "future-balance") {
-      const { results, breakdown } = calculateFutureBalance(
+      const { results } = calculateFutureBalance(
         currentBalance,
         contributionPerPeriod,
         timeYears,
@@ -139,10 +128,9 @@ export default function SavingsCalculator() {
         compounding
       );
       setResults(results);
-      setYearlyBreakdown(breakdown);
     } else {
       // time-to-goal
-      const { results, breakdown } = calculateTimeToGoal(
+      const { results } = calculateTimeToGoal(
         savingsGoal,
         currentBalance,
         contributionPerPeriod,
@@ -150,7 +138,6 @@ export default function SavingsCalculator() {
         compounding
       );
       setResults(results);
-      setYearlyBreakdown(breakdown);
     }
   }, [
     mode,
@@ -165,10 +152,6 @@ export default function SavingsCalculator() {
 
   // Check for invalid inputs
   const isInvalid = (value: number) => isNaN(value) || !isFinite(value);
-
-  // Display ceiling: max value that fits nicely on UI
-  const DISPLAY_MAX = 99_999_999;
-
 
   // Get validation results
   const validation = validateAllFields(
@@ -231,7 +214,6 @@ export default function SavingsCalculator() {
       finalBalance: NaN,
       timeInMonths: NaN,
     });
-    setYearlyBreakdown([]);
   };
 
   useEffect(() => {
@@ -244,7 +226,6 @@ export default function SavingsCalculator() {
         finalBalance: NaN,
         timeInMonths: NaN,
       });
-      setYearlyBreakdown([]);
       setOverflowWarning(false);
       return;
     }
