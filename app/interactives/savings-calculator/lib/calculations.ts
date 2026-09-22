@@ -238,8 +238,9 @@ export function calculateFutureBalance(
   const totalPeriods = timeYears * periodsPerYear + timeMonths * (periodsPerYear / 12);
 
   const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, totalPeriods);
-  const futureValueOfAnnuity =
-    contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
+  const futureValueOfAnnuity = ratePerPeriod === 0
+    ? contributionPerPeriod * totalPeriods
+    : contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod);
   const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
   const totalDeposited = currentBalance + contributionPerPeriod * totalPeriods;
 

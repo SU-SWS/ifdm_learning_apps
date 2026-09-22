@@ -183,7 +183,7 @@ export function validateInterestRate(
   if (value === 0) {
     const message = "At 0%, your balance grows only from deposits. No interest is earned.";
 
-    if (mode === "monthly-savings") {
+    if (mode === "monthly-savings" || mode === "future-balance") {
       return { warning: message };
     }
 
