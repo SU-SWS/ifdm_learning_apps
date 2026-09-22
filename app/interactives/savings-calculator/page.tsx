@@ -169,8 +169,6 @@ export default function SavingsCalculator() {
   // Display ceiling: max value that fits nicely on UI
   const DISPLAY_MAX = 99_999_999;
 
-  // Check if a value exceeds display limits
-  const isOverflow = (value: number) => !isInvalid(value) && value > DISPLAY_MAX;
 
   // Get validation results
   const validation = validateAllFields(
@@ -713,82 +711,7 @@ export default function SavingsCalculator() {
             </CardContent>
           </Card>
         </div>
-        {/* Year by Year section */}
-        <div className="hidden min-[600px]:block flex-1 mt-6 flex-row mb-1 bg-[var(--year-by-year-table)] rounded-lg border border-grey-border">
-          <div className="p-4">
-              <div
-                onClick={() => setShowBreakdown(!showBreakdown)}
-                className="flex flex-row justify-between items-center gap-2 text-[var(--foreground)] whitespace-normal cursor-pointer select-none"
-              >
-                <div>
-                  <p className="font-bold">Year by year breakdown</p>
-                </div>
-                <ChevronDown className={`h-8 w-8 transition-transform ${showBreakdown ? "rotate-180" : ""}`} />
-              </div>
-
-              {showBreakdown && (
-                <Card className="mb-8">
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full mt-5">
-                        <thead>
-                          <tr className="border-b border-[var(--year-by-year-table-line)]">
-                            <th className="text-left py-2 px-1 font-bold">Year</th>
-                            <th className="text-right py-2 px-3 font-bold">Starting Balance</th>
-                            <th className="text-right py-2 px-3 font-bold">Contributions</th>
-                            <th className="text-right py-2 px-3 font-bold text-lagunita">Interest Earned</th>
-                            <th className="text-right py-2 px-1 font-bold">Ending Balance</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {yearlyBreakdown.map((year) => {
-                            const displayYear = Number.isInteger(year.year)
-                              ? year.year
-                              : year.year.toFixed(1);
-                            return (
-                              <tr key={year.year} className="border-b border-[var(--year-by-year-table-line)] hover:bg-[var(--muted)]">
-                                <td className="py-2 px-1 font-bold">
-                                  {displayYear}
-                                </td>
-                                <td className="py-2 px-3 text-right">
-                                  {isInvalid(year.startingBalance)
-                                  ? "-"
-                                  : isOverflow(year.startingBalance)
-                                  ? "Too large to display"
-                                  : `$${year.startingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                </td>
-                                <td className="py-2 px-3 text-right">
-                                  {isInvalid(year.contributions)
-                                  ? "-"
-                                  : isOverflow(year.contributions)
-                                  ? "Too large to display"
-                                  : `$${year.contributions.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                </td>
-                                <td className="py-2 px-3 text-right font-bold text-lagunita">
-                                  {isInvalid(year.interestEarned)
-                                  ? "-"
-                                  : isOverflow(year.interestEarned)
-                                  ? "Too large to display"
-                                  : `$${year.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                </td>
-                                <td className="py-2 px-1 text-right font-bold">
-                                  {isInvalid(year.endingBalance)
-                                  ? "-"
-                                  : isOverflow(year.endingBalance)
-                                  ? "Too large to display"
-                                  : `$${year.endingBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-        </div>
+        {/* Year by Year section — hidden for current release, to be worked on in next sprint */}
       </div>
     </div>
   )
