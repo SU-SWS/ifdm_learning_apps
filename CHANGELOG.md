@@ -5,6 +5,37 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.0] - 2026-09-23
+
+Release PR [#191](https://github.com/SU-SWS/ifdm_learning_apps/pull/191) (`dev` into `1.x`).
+
+### Added
+
+- Savings Calculator: Added inline validation across all three tabs, including input limits, goal-already-reached warnings, zero-interest guidance, and suppression of results when inputs are invalid or the goal cannot be reached (IFDM-172, #180, #185).
+- Debt Payoff Calculator: Added required-field and range validation, a warning when payments do not cover interest, and suppression of results for invalid inputs. Added Reset controls on both tabs to clear the calculator and its validation state (IFDM-168, #182, #186).
+
+### Changed
+
+- Savings and Debt Payoff Calculators: Moved calculation and validation logic into dedicated modules; Debt Payoff also now has a separate calculator component (#180, #182).
+- Savings Calculator: Inputs now start empty and clear when switching tabs. Removed numeric input spinners and limited the future-balance result row to the Future Balance tab (IFDM-280, IFDM-347, #180, #185).
+- Debt Payoff Calculator: Replaced prefilled examples with blank inputs, added currency symbols, standardized input styling, and clarified payment labels for the selected frequency (#182, #186).
+- Mortgage Refinancing Calculator v3: The initial analysis action now reads "See if it's worth it"; after the first analysis, results update as loan details change. Updated guidance and the alert linking back to invalid current-loan details (IFDM-337, IFDM-339, #179, #184).
+- Retirement Calculator: Simplified result-panel styling and explanatory text, corrected singular/plural year labels, and added a distinct message when current savings already meet the retirement target without growth or further contributions (#183, #187).
+
+### Fixed
+
+- Savings Calculator: Corrected Future Balance calculations at 0% interest so the balance equals initial savings plus contributions, with no interest earned (IFDM-172, #190).
+- Savings Calculator: Refined validation timing while editing and handling of already-reached goals, zero contributions, and results exceeding display limits (#180, #185).
+- Debt Payoff Calculator: Added zero-interest handling for payoff time and required payments, avoiding division by zero. Invalid target years or months no longer produce a negative or out-of-range total-time summary (#182, #189).
+- Mortgage Refinancing Calculator v3: Negative entries remain visible for validation instead of becoming positive values. Results remain suppressed while invalid inputs or pending calculation updates would otherwise show stale values (IFDM-342, #181).
+- Retirement Calculator: Negative currency entries remain visible for validation, and thousands separators remain visible while editing annual spending and current savings (#183).
+- Build: Resolved unused-code and React hook dependency lint issues in the Savings and Mortgage Refinancing calculators (#188, #190).
+
+### Removed
+
+- Savings Calculator: Removed the entire year-by-year breakdown section, including its expand/collapse control, for this release (#190).
+- Removed `package-lock.json` to keep dependency management aligned with Yarn (#181).
+
 ## [1.2.0] - 2026-09-02
 
 ### Added
