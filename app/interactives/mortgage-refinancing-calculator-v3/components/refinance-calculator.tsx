@@ -34,7 +34,7 @@ const NO_FIELDS_TOUCHED: Record<FieldName, boolean> = {
 };
 
 /** Shown in place of a number whenever an input it depends on is unusable. */
-const DASH = "—";
+const DASH = "-";
 
 // All fields start blank so the user enters their own loan details. Optional
 // fields (closing costs, expected years) being blank also drives the simpler
@@ -62,8 +62,14 @@ function hasValue(value: string): boolean {
  * Format a raw input string with thousands separators as the user types while
  * preserving a trailing decimal point and decimal digits (e.g. "5000" ->
  * "5,000", "1234.5" -> "1,234.5"). Invalid characters are stripped.
+ *
+ * A leading "-" is preserved rather than stripped (IFDM-342): every field's
+ * range starts at 0 or above, so a negative value is always out of range, and
+ * the validator needs to see it in order to show the range message instead of
+ * silently discarding what the user typed.
  */
 function formatThousands(raw: string): string {
+  const isNegative = raw.trim().startsWith("-");
   let cleaned = raw.replace(/[^\d.]/g, "");
   const firstDot = cleaned.indexOf(".");
   if (firstDot !== -1) {
@@ -71,10 +77,12 @@ function formatThousands(raw: string): string {
       cleaned.slice(0, firstDot + 1) +
       cleaned.slice(firstDot + 1).replace(/\./g, "");
   }
-  if (cleaned === "") return "";
+  if (cleaned === "") return isNegative ? "-" : "";
   const [intPart, decPart] = cleaned.split(".");
   const intFormatted = intPart ? Number(intPart).toLocaleString("en-US") : "";
-  return decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+  const formatted =
+    decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+  return isNegative ? `-${formatted}` : formatted;
 }
 
 export function RefinanceCalculator() {
@@ -95,6 +103,11 @@ export function RefinanceCalculator() {
   // Whether the user has run the analysis. Results stay hidden until pressed.
   const [analyzed, setAnalyzed] = useState(false);
 
+  // Whether the user has started editing refinance fields (any keystroke in
+  // newAmount, newTerm, newRate, closingCosts, or years). Once true, the
+  // "Calculate results" button disappears and results display live.
+  const [hasStartedEditing, setHasStartedEditing] = useState(false);
+
   // Validation UI state. `touched` defers required-field messages until the
   // user has entered and left a field; `focusedField` hides them again while
   // that field is being edited.
@@ -105,6 +118,17 @@ export function RefinanceCalculator() {
   function markTouched(field: FieldName) {
     setTouched((t) => (t[field] ? t : { ...t, [field]: true }));
   }
+
+  // Detect first keystroke in any refinance field. Once the user starts
+  // typing, show results live instead of the "Calculate results" button.
+  useEffect(() => {
+    if (
+      !hasStartedEditing &&
+      (newAmount || newTerm || newRate || closingCosts || years)
+    ) {
+      setHasStartedEditing(true);
+    }
+  }, [newAmount, newTerm, newRate, closingCosts, years, hasStartedEditing]);
 
   // Debounced snapshot of the calculation inputs, updated 300ms after typing
   // pauses. handleAnalyze/resetCurrent/resetNewLoan flush it immediately.
@@ -131,7 +155,7 @@ export function RefinanceCalculator() {
           closingCosts,
           years,
         }),
-      300,
+      500,
     );
     return () => clearTimeout(t);
   }, [
@@ -196,6 +220,14 @@ export function RefinanceCalculator() {
       analyzed,
     ],
   );
+
+  const debouncedV = useMemo(
+    () => validate(debounced, { touched, focusedField, analyzed }),
+    [debounced, touched, focusedField, analyzed],
+  );
+  const currentBalanceBlocking =
+    v.currentBlocking || debouncedV.currentBlocking;
+  const refiAnalysisBlocking = v.refiBlocking || debouncedV.refiBlocking;
 
   // --- Refinance analysis ---
   // Single net-present-value formula for every case:
@@ -398,7 +430,7 @@ export function RefinanceCalculator() {
               </p>
               {/* Suppressed rather than computed from zero-coerced blanks. */}
               <p className="mt-1 text-4xl font-bold text-primary">
-                {v.currentBlocking ? DASH : formatCurrency(currentBalance)}
+                {currentBalanceBlocking ? DASH : formatCurrency(currentBalance)}
               </p>
               <Button
                 type="button"
@@ -412,8 +444,10 @@ export function RefinanceCalculator() {
           ) : (
             <ResultPanel
               analysis={analysis}
-              showAnalysis={analyzed && !v.refiBlocking}
+              showAnalysis={hasStartedEditing && !refiAnalysisBlocking}
               validation={v}
+              currentBalanceBlocking={currentBalanceBlocking}
+              refiAnalysisBlocking={refiAnalysisBlocking}
               hasClosing={hasClosing}
               onAnalyze={handleAnalyze}
               onEditBalance={() => setTab("current")}
@@ -429,6 +463,7 @@ export function RefinanceCalculator() {
                 rate: num(newRate),
                 payment: analysis.newPayment,
               }}
+              analyzed={analyzed}
             />
           )}
         </div>
@@ -769,11 +804,14 @@ function ResultPanel({
   analysis,
   showAnalysis,
   validation,
+  currentBalanceBlocking,
+  refiAnalysisBlocking,
   hasClosing,
   onAnalyze,
   onEditBalance,
   current,
   next,
+  analyzed,
 }: {
   analysis: {
     newPayment: number;
@@ -788,11 +826,14 @@ function ResultPanel({
   };
   showAnalysis: boolean;
   validation: Validation;
+  currentBalanceBlocking: boolean;
+  refiAnalysisBlocking: boolean;
   hasClosing: boolean;
   onAnalyze: () => void;
   onEditBalance: () => void;
   current: LoanTerms;
   next: LoanTerms;
+  analyzed: boolean;
 }) {
   const worthIt = analysis.overallBenefit >= 0;
 
@@ -810,82 +851,91 @@ function ResultPanel({
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-      {/* The refinance math depends on all three Current Balance inputs, so a
-          problem over there has to be surfaced here — otherwise the analysis
-          just silently disappears with the fix one tab away. */}
+      {/* Show error message if current balance has errors, regardless of edit state */}
       {validation.currentBlocking ? (
-        <div className="mb-6">
+        <div className="mb-6 rounded-lg border border-[var(--color-inline-error)]/30 bg-[var(--color-inline-error)]/5 p-4">
           <p
             role="alert"
             className="text-sm font-semibold text-[var(--color-inline-error)]"
           >
-            Your current loan details are incomplete or out of range. Fix them to
-            see your refinance analysis.
+            Your current loan details are incomplete or out of range. Fix them
+            to see your refinance analysis.
           </p>
           <Button
             type="button"
             onClick={onEditBalance}
             variant="ghost"
-            className="mt-1 flex items-center gap-2 text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
+            className="mt-2 flex items-center gap-2 text-[var(--color-teal)] font-semibold hover:underline cursor-pointer"
           >
             <ArrowLeft size={12} aria-hidden="true" /> Edit current loan
           </Button>
         </div>
-      ) : null}
-
-      {!showAnalysis ? (
-        <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
-          {/* Deliberately not disabled: pressing it is what reveals the
-              "Please enter…" messages on the empty required fields. */}
-          <Button
-            type="button"
-            onClick={onAnalyze}
-            variant="lagunita"
-            className="w-full md:w-full flex flex-row items-center justify-center gap-2 whitespace-normal font-medium cursor-pointer"
-          >
-            Calculate results
-          </Button>
-          <p className="mt-1 text-sm text-panel-foreground/70">
-            Fill in the new loan amount, term, rate, and any optional details,
-            then press to calculate the results.
-          </p>
-        </div>
       ) : (
         <>
-          {/* Hero: net value today */}
-          <div>
+          {/* Show the "Calculate results" button until clicked. Once the user
+              clicks it, show live results instead. */}
+          {!analyzed ? (
+            <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
+              {/* Deliberately not disabled: pressing it is what reveals the
+                  "Please enter…" messages on the empty required fields. */}
+              <p className="mb-3 text-sm text-panel-foreground/70">The refinance verdict will show here.</p>
+              <Button
+                type="button"
+                onClick={onAnalyze}
+                variant="lagunita"
+                className="w-full md:w-full flex flex-row items-center justify-center gap-2 whitespace-normal font-medium cursor-pointer"
+              >
+                See if it&apos;s worth it
+              </Button>
+              <p className="mt-3 text-sm text-panel-foreground/70">
+                Fill in the new loan terms and any optional details, then see whether refinancing is worth it.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Hero: net value today — show after button is clicked,
+                  but display a dash if inputs are incomplete or have errors. */}
+              <div>
             <p className=" font-medium text-panel-foreground/70">
               Net value today
             </p>
             <p
               className={[
                 "text-4xl font-bold tracking-tight",
-                verdictColor,
+                showAnalysis ? verdictColor : "text-foreground",
               ].join(" ")}
             >
-              {analysis.overallBenefit < 0
-                ? `−${formatCurrency(Math.abs(analysis.overallBenefit))}`
-                : formatCurrency(analysis.overallBenefit)}
+              {showAnalysis
+                ? analysis.overallBenefit < 0
+                  ? `−${formatCurrency(Math.abs(analysis.overallBenefit))}`
+                  : formatCurrency(analysis.overallBenefit)
+                : DASH}
             </p>
-            <p
-              className={[
-                "mt-2 flex items-center gap-1.5  font-semibold",
-                verdictColor,
-              ].join(" ")}
-            >
-              {verdict === "positive" ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-              ) : (
-                <XCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-              )}
-              {headline}
-            </p>
-            <p className="mt-1  text-panel-foreground/70">
-              {verdict === "positive"
-                ? "Adjusted to today's dollars, refinancing comes out ahead."
-                : "Adjusted to today's dollars, refinancing costs more than it saves."}
-            </p>
-          </div>
+            {showAnalysis && (
+              <>
+                <p
+                  className={[
+                    "mt-2 flex items-center gap-1.5  font-semibold",
+                    verdictColor,
+                  ].join(" ")}
+                >
+                  {verdict === "positive" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <XCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  )}
+                  {headline}
+                </p>
+                <p className="mt-1  text-panel-foreground/70">
+                  {verdict === "positive"
+                    ? "Adjusted to today's dollars, refinancing comes out ahead."
+                    : "Adjusted to today's dollars, refinancing costs more than it saves."}
+                </p>
+              </>
+            )}
+              </div>
+            </>
+          )}
         </>
       )}
 
@@ -895,6 +945,8 @@ function ResultPanel({
           current={current}
           next={next}
           validation={validation}
+          currentBalanceBlocking={currentBalanceBlocking}
+          refiAnalysisBlocking={refiAnalysisBlocking}
         />
       </div>
 
@@ -925,13 +977,17 @@ function LoanComparison({
   current,
   next,
   validation,
+  currentBalanceBlocking,
+  refiAnalysisBlocking,
 }: {
   current: LoanTerms;
   next: LoanTerms;
   validation: Validation;
+  currentBalanceBlocking: boolean;
+  refiAnalysisBlocking: boolean;
 }) {
   const paymentDelta = next.payment - current.payment;
-  const { bad, currentBlocking, refiBlocking } = validation;
+  const { bad } = validation;
 
   // The current balance is derived from all three Current Balance fields, and
   // the new payment from all of the refinance inputs, so those two cells use
@@ -947,7 +1003,11 @@ function LoanComparison({
   }[] = [
     {
       label: "Current balance",
-      cur: dash(currentBlocking, formatCurrency(current.balance)),
+      // current.balance is derived from the debounced snapshot, so it must be
+      // dashed off currentBalanceBlocking (which accounts for that lag) rather
+      // than the raw, instantly-updating validation.currentBlocking — see
+      // currentBalanceBlocking's definition.
+      cur: dash(currentBalanceBlocking, formatCurrency(current.balance)),
       nxt: dash(bad.newAmount, formatCurrency(next.balance)),
     },
     {
@@ -963,9 +1023,9 @@ function LoanComparison({
     {
       label: "Monthly payment",
       cur: dash(bad.monthlyPayment, formatCurrency(current.payment)),
-      nxt: dash(refiBlocking, formatCurrency(next.payment)),
+      nxt: dash(refiAnalysisBlocking, formatCurrency(next.payment)),
       delta:
-        !refiBlocking && !bad.monthlyPayment && paymentDelta !== 0
+        !refiAnalysisBlocking && !bad.monthlyPayment && paymentDelta !== 0
           ? `${paymentDelta < 0 ? "−" : "+"}${formatCurrency(Math.abs(paymentDelta))}/mo`
           : undefined,
       deltaGood: paymentDelta < 0,
