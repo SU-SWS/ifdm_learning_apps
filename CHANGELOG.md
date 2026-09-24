@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.1] - 2026-09-24
+
+### Fixed
+
+- Savings Calculator: Corrected time-to-goal calculations to use exact fractional periods instead of rounding up to the next whole year. Time estimates, total deposits, and interest earnings now reflect precise calculations (IFDM-365).
+
 ## [1.3.0] - 2026-09-23
 
 Release PR [#191](https://github.com/SU-SWS/ifdm_learning_apps/pull/191) (`dev` into `1.x`).
