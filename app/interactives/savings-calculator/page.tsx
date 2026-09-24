@@ -616,13 +616,13 @@ export default function SavingsCalculator() {
 
               {mode === "time-to-goal" && (
                 <>
-                <CardTitle className="text-center text-md font-bold">Time to reach goal:</CardTitle>
+                <CardTitle className="text-center text-md font-bold">Estimated time to reach goal:</CardTitle>
                   <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
                     {isInvalid(results.timeInMonths)
                       ? "-"
                       : overflowWarning
                       ? "Too large to display"
-                      : `${Math.floor(results.timeInMonths / 12)} years ${results.timeInMonths % 12} months`
+                      : `${Math.floor(Math.round(results.timeInMonths) / 12)} years ${Math.round(results.timeInMonths) % 12} months`
                     }
                   </div>
                 </>
