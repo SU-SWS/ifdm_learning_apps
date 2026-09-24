@@ -291,7 +291,6 @@ export function calculateTimeToGoal(
 
   let results: CalculationResults;
   let periodsForBreakdown = 0;
-  let finalContributionReduction = 0;
 
   if (contributionPerPeriod === 0) {
     // Interest-only growth (no contributions)
@@ -316,8 +315,8 @@ export function calculateTimeToGoal(
       // Use compound interest formula: n = log(FV/PV) / log(1 + r)
       const ratio = savingsGoal / currentBalance;
       const exactPeriodsToGoal = Math.log(ratio) / Math.log(1 + ratePerPeriod);
-      const periodsToGoal = Math.ceil(exactPeriodsToGoal - 1e-10);
-      const months = Math.ceil(periodsToGoal * (12 / periodsPerYear) - 1e-10);
+      const periodsToGoal = exactPeriodsToGoal;
+      const months = periodsToGoal * (12 / periodsPerYear);
       const finalBalance = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
       const interestEarned = finalBalance - currentBalance;
       periodsForBreakdown = periodsToGoal;
@@ -344,21 +343,16 @@ export function calculateTimeToGoal(
       exactPeriodsToGoal = Math.log(numerator / denominator) / Math.log(1 + ratePerPeriod);
     }
 
-    const periodsToGoal = Math.ceil(exactPeriodsToGoal - 1e-10);
-    const months = Math.ceil(periodsToGoal * (12 / periodsPerYear) - 1e-10);
+    // Use the same fractional-period annuity model as the other savings modes.
+    const periodsToGoal = exactPeriodsToGoal;
+    const months = periodsToGoal * (12 / periodsPerYear);
     const futureValueOfInitial = currentBalance * Math.pow(1 + ratePerPeriod, periodsToGoal);
     const futureValueOfAnnuity = ratePerPeriod === 0
       ? contributionPerPeriod * periodsToGoal
       : contributionPerPeriod * ((Math.pow(1 + ratePerPeriod, periodsToGoal) - 1) / ratePerPeriod);
-    const balanceWithFullFinalContribution = futureValueOfInitial + futureValueOfAnnuity;
-    // The last scheduled contribution may be smaller than the regular amount.
-    finalContributionReduction = Math.min(
-      contributionPerPeriod,
-      Math.max(0, balanceWithFullFinalContribution - savingsGoal)
-    );
-    const finalBalance = balanceWithFullFinalContribution - finalContributionReduction;
+    const finalBalance = futureValueOfInitial + futureValueOfAnnuity;
     const totalDeposited =
-      currentBalance + contributionPerPeriod * periodsToGoal - finalContributionReduction;
+      currentBalance + contributionPerPeriod * periodsToGoal;
     periodsForBreakdown = periodsToGoal;
 
     results = {
@@ -386,15 +380,6 @@ export function calculateTimeToGoal(
     compounding,
     interestRate
   );
-
-  if (finalContributionReduction > 0 && breakdown.length > 0) {
-    const finalRow = breakdown[breakdown.length - 1];
-    breakdown[breakdown.length - 1] = {
-      ...finalRow,
-      contributions: finalRow.contributions - finalContributionReduction,
-      endingBalance: results.finalBalance,
-    };
-  }
 
   return { results, breakdown };
 }
