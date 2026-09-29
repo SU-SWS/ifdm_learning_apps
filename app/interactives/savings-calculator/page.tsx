@@ -27,6 +27,23 @@ interface CalculationResults {
   timeInMonths: number
 }
 
+function formatThousands(raw: string): string {
+  const isNegative = raw.trim().startsWith("-");
+  let cleaned = raw.replace(/[^\d.]/g, "");
+  const firstDot = cleaned.indexOf(".");
+  if (firstDot !== -1) {
+    cleaned =
+      cleaned.slice(0, firstDot + 1) +
+      cleaned.slice(firstDot + 1).replace(/\./g, "");
+  }
+  if (cleaned === "") return isNegative ? "-" : "";
+  const [intPart, decPart] = cleaned.split(".");
+  const intFormatted = intPart ? Number(intPart).toLocaleString("en-US") : "";
+  const formatted =
+    decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+  return isNegative ? `-${formatted}` : formatted;
+}
+
 function formatDuration(totalMonths: number) {
   const years = Math.floor(totalMonths / 12)
   const months = totalMonths % 12
@@ -165,7 +182,8 @@ export default function SavingsCalculator() {
     },
     touched,
     mode,
-    focusedField
+    focusedField,
+    editedFields
   );
 
   const hasReachedGoal =
@@ -312,12 +330,13 @@ export default function SavingsCalculator() {
                 <div className="relative mt-1">
                   <Input
                     id="savings-goal"
-                    type="number"
-                    min="0"
-                    value={savingsGoal === 0 && !editedFields.savingsGoal ? "" : savingsGoal}
+                    type="text"
+                    inputMode="decimal"
+                    value={savingsGoal === 0 && !editedFields.savingsGoal ? "" : formatThousands(savingsGoal.toString())}
                     placeholder=""
                     onChange={(e) => {
-                      setSavingsGoal(Number(e.target.value) || 0);
+                      const formattedValue = formatThousands(e.target.value);
+                      setSavingsGoal(Number(formattedValue.replace(/,/g, "")) || 0);
                       setEditedFields(prev => ({ ...prev, savingsGoal: e.target.value !== "" }));
                     }}
                     onFocus={() => setFocusedField("savingsGoal")}
@@ -361,14 +380,20 @@ export default function SavingsCalculator() {
                 <div className="relative mt-1">
                   <Input
                     id="current-balance"
-                    type="number"
-                    value={currentBalance === 0 && !editedFields.currentBalance ? "" : currentBalance}
+                    type="text"
+                    inputMode="decimal"
+                    value={currentBalance === 0 && !editedFields.currentBalance ? "" : formatThousands(currentBalance.toString())}
                     placeholder=""
                     onChange={(e) => {
-                      setCurrentBalance(Number(e.target.value) || 0);
+                      const formattedValue = formatThousands(e.target.value);
+                      setCurrentBalance(Number(formattedValue.replace(/,/g, "")) || 0);
                       setEditedFields(prev => ({ ...prev, currentBalance: e.target.value !== "" }));
                     }}
-                    onBlur={() => handleFieldBlur("currentBalance")}
+                    onFocus={() => setFocusedField("currentBalance")}
+                    onBlur={() => {
+                      handleFieldBlur("currentBalance");
+                      setFocusedField(null);
+                    }}
 
                     className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.currentBalance
@@ -400,12 +425,14 @@ export default function SavingsCalculator() {
                   <div className="relative mt-1">
                     <Input
                       id="contribution-period"
-                      type="number"
-                      value={hasReachedGoal ? "" : contributionPerPeriod === 0 && !editedFields.contributionPerPeriod ? "" : contributionPerPeriod}
+                      type="text"
+                      inputMode="decimal"
+                      value={hasReachedGoal ? "" : contributionPerPeriod === 0 && !editedFields.contributionPerPeriod ? "" : formatThousands(contributionPerPeriod.toString())}
                       placeholder={hasReachedGoal ? "-" : ""}
                       disabled={hasReachedGoal}
                       onChange={(e) => {
-                        setcontributionPerPeriod(Number(e.target.value) || 0);
+                        const formattedValue = formatThousands(e.target.value);
+                        setcontributionPerPeriod(Number(formattedValue.replace(/,/g, "")) || 0);
                         setEditedFields(prev => ({ ...prev, contributionPerPeriod: e.target.value !== "" }));
                       }}
                       onFocus={() => setFocusedField("contributionPerPeriod")}
