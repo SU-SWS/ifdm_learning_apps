@@ -1073,7 +1073,7 @@ function LoanComparison({
                   "text-xs font-medium",
                   row.deltaGood
                     ? "text-primary"
-                    : "text-[var(--color-inline-error)]",
+                    : "text-foreground/60",
                 ].join(" ")}
               >
                 {row.delta}
