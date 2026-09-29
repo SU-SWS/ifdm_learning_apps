@@ -959,7 +959,7 @@ function ResultPanel({
       </div>
 
       {/* How this was calculated (equation-style breakdown) — after the terms table */}
-      {showAnalysis ? (
+      {analyzed && showAnalysis ? (
         <CalculationBreakdown
           pvSavings={analysis.pvSavings}
           pvDiffBalance={analysis.pvDiffBalance}
