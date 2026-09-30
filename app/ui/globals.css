@@ -71,6 +71,8 @@
   --text-lg-title: 20px;
   --color-border-dark: rgba(80, 80, 80, 1);
   --button-green: rgba(30, 113, 102, 1);
+  --color-results-panel: var(--results-panel);
+  --color-results-panel-foreground: var(--results-panel-foreground);
 }
 
 :root {
@@ -140,6 +142,8 @@
   --info-popup-background: rgba(239, 255, 252, 1);
   --sticky-footer-background: #95C0CB;
   --sticky-footer-text: #000000;
+  --results-panel: #285F63;
+  --results-panel-foreground: rgba(255, 255, 255, 1);
 }
 
 .dark {
@@ -201,6 +205,8 @@
   --color-inline-warning: #C37C09;
   --results-card-empty: oklch(0.985 0 0);
   --info-popup-background: rgba(35, 35, 35, 1);
+  --results-panel: #2F6E73;
+  --results-panel-foreground: rgba(255, 255, 255, 1);
 }
 
 @layer base {

@@ -9,6 +9,7 @@ import {
   defaultInputs,
   calculateRequiredBalance,
   calculateSavingsResults,
+  calculatePeriodicSavings,
   formatCurrency,
   formatNumberWithCommas,
 } from "./lib/retirement";
@@ -49,6 +50,35 @@ const capDecimalPlaces = (value: string): string => {
 
 const yearsLabel = (value: number): string => (value === 1 ? "year" : "years");
 
+const SAVINGS_FREQUENCIES = [
+  {
+    key: "annualSavings",
+    label: "Annual",
+    perLabel: "per year",
+    periodsPerYear: 1,
+  },
+  {
+    key: "monthlySavings",
+    label: "Monthly",
+    perLabel: "per month",
+    periodsPerYear: 12,
+  },
+  {
+    key: "biWeeklySavings",
+    label: "Bi-Weekly",
+    perLabel: "every two weeks",
+    periodsPerYear: 26,
+  },
+  {
+    key: "weeklySavings",
+    label: "Weekly",
+    perLabel: "per week",
+    periodsPerYear: 52,
+  },
+] as const;
+
+type SavingsFrequencyKey = (typeof SAVINGS_FREQUENCIES)[number]["key"];
+
 const baseInputClass =
   "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 const inputStateClass = (error?: string, warning?: string) =>
@@ -82,6 +112,8 @@ export default function RetirementCalculator() {
   const [yearsToRetirementInput, setYearsToRetirementInput] = useState("");
   const [isRetirementLengthFocused, setIsRetirementLengthFocused] =
     useState(false);
+  const [savingsFrequency, setSavingsFrequency] =
+    useState<SavingsFrequencyKey>("annualSavings");
 
   const calculatedRequiredBalance = useMemo(() => {
     return calculateRequiredBalance(
@@ -130,6 +162,21 @@ export default function RetirementCalculator() {
       inputs.expectedReturnBeforeRetirement / 100,
     );
   }, [inputs, activeTab, frozenRequiredBalance, calculatedRequiredBalance]);
+
+  const selectedFrequency =
+    SAVINGS_FREQUENCIES.find((f) => f.key === savingsFrequency) ??
+    SAVINGS_FREQUENCIES[0];
+
+  const totalContributions =
+    calculatePeriodicSavings(
+      results.requiredBalance,
+      inputs.currentSavings,
+      inputs.expectedReturnBeforeRetirement / 100,
+      inputs.yearsToRetirement,
+      selectedFrequency.periodsPerYear,
+    ) *
+    inputs.yearsToRetirement *
+    selectedFrequency.periodsPerYear;
 
   const updateInput = (key: keyof CalculatorInputs, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -227,7 +274,18 @@ export default function RetirementCalculator() {
     setYearsToRetirementInput("");
     setActiveTab("balance");
     setFrozenRequiredBalance(0);
+    setSavingsFrequency("annualSavings");
   };
+
+  const balanceDescription = (
+    <p className="mt-3 text-sm text-results-panel-foreground/80">
+      This estimates the lump sum needed at retirement to fund{" "}
+      {formatCurrency(inputs.annualSpending)} per year for{" "}
+      {inputs.retirementLength} {yearsLabel(inputs.retirementLength)}, assuming
+      a {inputs.expectedReturnDuringRetirement}% annual return during
+      retirement.
+    </p>
+  );
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -243,10 +301,16 @@ export default function RetirementCalculator() {
           className="mb-10"
         >
           <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
-            <TabsTrigger value="balance" className="cursor-pointer">
+            <TabsTrigger
+              value="balance"
+              className="cursor-pointer border-results-panel text-results-panel dark:text-results-panel-foreground hover:bg-results-panel hover:text-results-panel-foreground data-[state=active]:bg-results-panel data-[state=active]:text-results-panel-foreground"
+            >
               Required balance
             </TabsTrigger>
-            <TabsTrigger value="savings" className="cursor-pointer">
+            <TabsTrigger
+              value="savings"
+              className="cursor-pointer border-results-panel text-results-panel dark:text-results-panel-foreground hover:bg-results-panel hover:text-results-panel-foreground data-[state=active]:bg-results-panel data-[state=active]:text-results-panel-foreground"
+            >
               Annual savings
             </TabsTrigger>
           </TabsList>
@@ -749,7 +813,7 @@ export default function RetirementCalculator() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-results-panel border-2 border-results-panel cursor-pointer hover:bg-white hover:text-results-panel text-results-panel-foreground w-full md:w-auto"
               >
                 Reset
               </button>
@@ -758,7 +822,7 @@ export default function RetirementCalculator() {
 
           {/* Right Column - Results */}
           <div
-            className="rounded-3xl p-[32px]"
+            className="self-start rounded-2xl bg-results-panel p-8 text-results-panel-foreground shadow-md"
             aria-live="polite"
             aria-atomic="true"
           >
@@ -770,18 +834,11 @@ export default function RetirementCalculator() {
 
                 {showBalanceResults ? (
                   <>
-                    <p className="text-4xl font-bold text-[var(--color-teal)]">
+                    <p className="text-4xl font-bold">
                       {formatCurrency(calculatedRequiredBalance)}
                     </p>
-                    <p className="mt-3 mb-6 text-sm">
-                      Estimated lump sum needed at retirement to fund{" "}
-                      {formatCurrency(inputs.annualSpending)} per year for{" "}
-                      {inputs.retirementLength}{" "}
-                      {yearsLabel(inputs.retirementLength)}, assuming a{" "}
-                      {inputs.expectedReturnDuringRetirement}% annual return
-                      during retirement.
-                    </p>
-                    <div className="flex gap-3">
+                    {balanceDescription}
+                    <div className="mt-6 flex gap-3">
                       <button
                         type="button"
                         onClick={() => {
@@ -790,19 +847,17 @@ export default function RetirementCalculator() {
                           );
                           setActiveTab("savings");
                         }}
-                        className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-12 whitespace-normal bg-lagunita border-2 border-lagunita hover:bg-white hover:text-[var(--color-teal)] text-white"
+                        className="inline-flex items-center justify-center rounded-md font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-results-panel disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-12 whitespace-normal cursor-pointer bg-white border-2 border-white text-results-panel hover:bg-transparent hover:text-white"
                       >
                         Continue to annual savings
                       </button>
                     </div>
                   </>
                 ) : balanceRateOutOfRange ? (
-                  <p className="text-4xl font-bold text-[var(--color-teal)]">
-                    —
-                  </p>
+                  <p className="text-4xl font-bold">—</p>
                 ) : (
                   <div className="py-3">
-                    <p className="text-sm">
+                    <p className="text-sm text-results-panel-foreground/80">
                       The required retirement balance will appear here. Enter
                       annual retirement spending, expected retirement length
                       (years), and expected annual return during retirement.
@@ -818,100 +873,108 @@ export default function RetirementCalculator() {
 
                 {frozenRequiredBalance > 0 ? (
                   <>
-                    <p className="text-4xl font-bold text-[var(--color-teal)]">
+                    <p className="text-4xl font-bold">
                       {formatCurrency(results.requiredBalance)}
                     </p>
-                    <p className="mt-3 mb-6 text-sm">
-                      Estimated lump sum needed at retirement to fund{" "}
-                      {formatCurrency(inputs.annualSpending)} per year for{" "}
-                      {inputs.retirementLength}{" "}
-                      {yearsLabel(inputs.retirementLength)}, assuming a{" "}
-                      {inputs.expectedReturnDuringRetirement}% annual return
-                      during retirement.
-                    </p>
+                    {balanceDescription}
                   </>
                 ) : (
                   <div className="py-3">
-                    <p className="text-sm">
+                    <p className="text-sm text-results-panel-foreground/80">
                       The required retirement balance will appear here. Complete
                       Step 1 on the Required balance tab first.
                     </p>
                   </div>
                 )}
 
+                {frozenRequiredBalance > 0 && (
+                  <hr className="my-6 border-results-panel-foreground/20" />
+                )}
+
                 {showSavingsResults &&
                 inputs.currentSavings >= results.requiredBalance ? (
-                  <div className="py-3">
-                    <p className="mt-3 mb-6 text-sm">
-                      Current retirement savings already exceed your target
-                      retirement balance, no growth or contributions needed.
-                    </p>
-                  </div>
+                  <p className="text-sm text-results-panel-foreground/80">
+                    Current retirement savings already exceed your target
+                    retirement balance, no growth or contributions needed.
+                  </p>
                 ) : showSavingsResults &&
                   results.fvCurrentSavings >= results.requiredBalance ? (
-                  <div className="py-3">
-                    <p className="mt-3 mb-6 text-sm">
-                      With an expected {inputs.expectedReturnBeforeRetirement}%
-                      annual return, your current savings of{" "}
-                      {formatCurrency(inputs.currentSavings)} are projected to{" "}
-                      {results.fvCurrentSavings > results.requiredBalance
-                        ? "exceed"
-                        : "reach"}{" "}
-                      your target retirement balance with no additional
-                      contributions. Estimated balance at retirement:{" "}
-                      {formatCurrency(results.fvCurrentSavings)}.
-                    </p>
-                  </div>
+                  <p className="text-sm text-results-panel-foreground/80">
+                    With an expected {inputs.expectedReturnBeforeRetirement}%
+                    annual return, your current savings of{" "}
+                    {formatCurrency(inputs.currentSavings)} are projected to{" "}
+                    {results.fvCurrentSavings > results.requiredBalance
+                      ? "exceed"
+                      : "reach"}{" "}
+                    your target retirement balance with no additional
+                    contributions. Estimated balance at retirement:{" "}
+                    {formatCurrency(results.fvCurrentSavings)}.
+                  </p>
                 ) : showSavingsResults ? (
                   <>
-                    <h3 className="mb-1 font-bold text-lg">
-                      Required Annual Savings
-                    </h3>
-                    <p className="text-4xl font-bold text-[var(--color-teal)]">
-                      {formatCurrency(results.annualSavings)}
-                    </p>
-                    <p className="mt-3 mb-6 text-sm">
-                      Amount to save each year over {inputs.yearsToRetirement}{" "}
+                    <h3 className="mb-4 font-bold text-lg">Required Savings</h3>
+
+                    <div className="rounded-xl bg-results-panel-foreground/15 p-5">
+                      <p className="text-4xl font-bold">
+                        {formatCurrency(results[selectedFrequency.key])}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm text-results-panel-foreground/80">
+                        <span>{selectedFrequency.perLabel}</span>
+                        <span>
+                          Total contributions:{" "}
+                          {formatCurrency(totalContributions)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <fieldset className="mt-4 space-y-2">
+                      <legend className="sr-only">Savings frequency</legend>
+                      {SAVINGS_FREQUENCIES.map((frequency) => {
+                        const isSelected = frequency.key === savingsFrequency;
+                        return (
+                          <label
+                            key={frequency.key}
+                            className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-results-panel-foreground has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-results-panel ${
+                              isSelected
+                                ? "bg-white text-results-panel"
+                                : "bg-results-panel-foreground/10 hover:bg-results-panel-foreground/20"
+                            }`}
+                          >
+                            <span className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                name="savings-frequency"
+                                value={frequency.key}
+                                checked={isSelected}
+                                onChange={() =>
+                                  setSavingsFrequency(frequency.key)
+                                }
+                                className="h-4 w-4 cursor-pointer accent-results-panel focus:outline-none"
+                              />
+                              <span className="font-medium">
+                                {frequency.label}
+                              </span>
+                            </span>
+                            <span className="font-bold">
+                              {formatCurrency(results[frequency.key])}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </fieldset>
+
+                    <p className="mt-6 text-sm text-results-panel-foreground/80">
+                      Amount to save over {inputs.yearsToRetirement}{" "}
                       {yearsLabel(inputs.yearsToRetirement)} to reach your
                       target balance, assuming a{" "}
                       {inputs.expectedReturnBeforeRetirement}% annual return
                       before retirement.
                     </p>
-
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <h3 className="font-bold text-lg mb-4">
-                        Savings at Different Frequencies
-                      </h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Monthly</span>
-                          <span className="font-semibold text-[var(--color-teal)]">
-                            {formatCurrency(results.monthlySavings)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Bi-weekly</span>
-                          <span className="font-semibold text-[var(--color-teal)]">
-                            {formatCurrency(results.biWeeklySavings)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Weekly</span>
-                          <span className="font-semibold text-[var(--color-teal)]">
-                            {formatCurrency(results.weeklySavings)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
                   </>
                 ) : frozenRequiredBalance > 0 ? (
                   <>
-                    <h3 className="mb-1 font-bold text-lg">
-                      Required Annual Savings
-                    </h3>
-                    <p className="text-4xl font-bold text-[var(--color-teal)]">
-                      —
-                    </p>
+                    <h3 className="mb-1 font-bold text-lg">Required Savings</h3>
+                    <p className="text-4xl font-bold">—</p>
                   </>
                 ) : null}
               </>
