@@ -813,7 +813,7 @@ export default function RetirementCalculator() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-18 whitespace-normal bg-results-panel border-2 border-results-panel cursor-pointer hover:bg-white hover:text-results-panel text-results-panel-foreground w-full md:w-auto"
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-8 py-2 h-10 whitespace-normal bg-results-panel border-2 border-results-panel cursor-pointer hover:bg-white hover:text-results-panel text-results-panel-foreground w-full md:w-auto"
               >
                 Reset
               </button>
