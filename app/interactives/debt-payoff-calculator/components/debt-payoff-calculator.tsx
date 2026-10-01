@@ -180,7 +180,10 @@ export default function DebtPayoffCalculator() {
                     <CardContent className="space-y-6">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="debt-amount" className="font-semibold">
+                          <Label
+                            htmlFor="debt-amount"
+                            className="font-semibold"
+                          >
                             Debt amount
                           </Label>
                           <InfoPopover title="Debt amount">
@@ -350,20 +353,18 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Label
-                              htmlFor="addtlpayment"
-                              className="text-medium font-bold"
-                            >
-                              Additional payment per period (optional)
-                            </Label>
-                            <InfoPopover title="Additional payment per period (optional)">
-                              Enter a fixed extra amount you plan to pay each
-                              month.
-                            </InfoPopover>
-                          </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="addtlpayment"
+                            className="font-semibold"
+                          >
+                            Additional payment per period (optional)
+                          </Label>
+                          <InfoPopover title="Additional payment per period (optional)">
+                            Enter a fixed extra amount you plan to pay each
+                            month.
+                          </InfoPopover>
                         </div>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
@@ -462,11 +463,11 @@ export default function DebtPayoffCalculator() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-highlight-background)]">
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
                           <div className="w-full sm:w-[50%] p-4 bg-lagunita font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none">
                             Interest saved:
                           </div>
-                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--results-highlight-background)] text-[var(--color-teal)]">
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--results-white-background)] text-[var(--color-teal)]">
                             {v.payoffBlocked
                               ? "-"
                               : formatCurrency(payoffResult.interestSaved)}

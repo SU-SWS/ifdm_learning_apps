@@ -51,7 +51,7 @@
   --color-sky-dark: rgba(14, 59, 79, 1);
   --color-berry: rgba(195, 31, 112, 1);
   --color-berry-light: rgba(255, 237, 246, 1);
-  --color-error: #8C1515;
+  --color-error: #8c1515;
   --color-palo-verde: rgba(39, 153, 137, 1);
   --color-palo-verde-light: rgba(239, 247, 239, 1);
   --color-lagunita: rgba(0, 124, 146, 1);
@@ -79,7 +79,7 @@
   --background: oklch(1 0 0);
   --foreground: rgba(0, 0, 0, 1);
   --radius: 0.625rem;
-  --card:  oklch(0.985 0 0);
+  --card: oklch(0.985 0 0);
   --card-background: rgba(247, 248, 255, 1);
   --card-foreground: oklch(0.145 0 0);
   --grey-foreground: oklch(0.145 0 0);
@@ -87,7 +87,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --popover-link: rgba(0, 124, 146, 1);
-  --popover-link-hover:  oklch(0.145 0 0);
+  --popover-link-hover: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
@@ -97,7 +97,6 @@
   --muted-foreground: oklch(0.556 0 0);
   --results-blue-background: rgba(255, 255, 255, 1);
   --results-white-background: rgba(255, 255, 255, 1);
-  --results-highlight-background: rgba(240, 251, 253, 1);
   --results-year-background: rgba(233, 255, 251, 1);
   --results-card-grey-background: rgba(248, 248, 248, 1);
   --year-by-year-table: rgba(246, 246, 246, 1);
@@ -124,26 +123,26 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --text-navy:  rgba(14, 59, 79, 1);
+  --text-navy: rgba(14, 59, 79, 1);
   /* Brand navy for the bg-navy/text-navy utilities. Previously inlined as a
      literal in @theme; moved here so it resolves identically while remaining
      overridable by scoped themes (e.g. mortgage-refinancing-calculator-v3). */
   --navy: rgba(14, 59, 79, 1);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --button-green:  rgba(30, 113, 102, 1);
+  --button-green: rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
   --color-berry: rgba(195, 31, 112, 1);
   --color-teal: rgba(0, 124, 146, 1);
   --color-palo-verde-var: rgba(39, 153, 137, 1);
   --color-symbols: #616877;
-  --color-inline-error: #8C1515;
-  --color-inline-warning: #9A6207;
+  --color-inline-error: #8c1515;
+  --color-inline-warning: #9a6207;
   --results-card-empty: rgba(102, 112, 133, 1);
   --info-popup-background: rgba(239, 255, 252, 1);
-  --sticky-footer-background: #95C0CB;
+  --sticky-footer-background: #95c0cb;
   --sticky-footer-text: #000000;
-  --results-panel: #285F63;
+  --results-panel: #285f63;
   --results-panel-foreground: rgba(255, 255, 255, 1);
 }
 
@@ -160,15 +159,14 @@
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: rgba(35, 35, 35, 1);
-  --secondary-foreground:  oklch(0.985 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
   --secondary-background: rgba(18, 18, 18, 1);
-  --grey-foreground:  oklch(0.985 0 0);
-  --grey-background:  rgba(35, 35, 35, 1);
+  --grey-foreground: oklch(0.985 0 0);
+  --grey-background: rgba(35, 35, 35, 1);
   --muted: oklch(0.269 0 0);
   --results-blue-background: rgba(25, 47, 57, 1);
-  --results-white-background:  oklch(0.145 0 0);
-  --results-highlight-background: rgba(18, 18, 18, 1);
-  --results-year-background:  oklch(0.145 0 0);
+  --results-white-background: oklch(0.145 0 0);
+  --results-year-background: oklch(0.145 0 0);
   --results-card-grey-background: oklch(0.145 0 0);
   --year-by-year-table: oklch(0.145 0 0);
   --year-by-year-table-line: rgba(255, 255, 255, 1);
@@ -176,10 +174,10 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border:  rgba(80, 80, 80, 1);
+  --border: rgba(80, 80, 80, 1);
   --input: rgba(80, 80, 80, 1);
   --input-text: rgba(255, 255, 255, 1);
-  --input-background:rgba(35, 35, 35, 1);
+  --input-background: rgba(35, 35, 35, 1);
   --input-border-color: rgba(80, 80, 80, 1);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
@@ -197,17 +195,17 @@
   --sidebar-ring: oklch(0.556 0 0);
   --text-navy: oklch(0.985 0 0);
   --additional-background: rgb(52, 51, 51);
-  --button-green:  rgba(30, 113, 102, 1);
+  --button-green: rgba(30, 113, 102, 1);
   --button-berry: rgba(151, 24, 87, 1);
-  --color-berry: #EC83B8;
+  --color-berry: #ec83b8;
   --color-teal: rgba(74, 203, 225, 1);
-  --color-palo-verde-var: #38CCB8;
+  --color-palo-verde-var: #38ccb8;
   --color-symbols: oklch(0.985 0 0);
-  --color-inline-error: #F4795B;
-  --color-inline-warning: #C37C09;
+  --color-inline-error: #f4795b;
+  --color-inline-warning: #c37c09;
   --results-card-empty: oklch(0.985 0 0);
   --info-popup-background: rgba(35, 35, 35, 1);
-  --results-panel: #2F6E73;
+  --results-panel: #2f6e73;
   --results-panel-foreground: rgba(255, 255, 255, 1);
 }
 
@@ -223,7 +221,7 @@
 }
 
 html {
- font-size: 17.5px;
+  font-size: 17.5px;
 }
 
 body {
