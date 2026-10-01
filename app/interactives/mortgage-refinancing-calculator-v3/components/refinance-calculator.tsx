@@ -517,10 +517,11 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={[
-        "rounded-xl border px-4 py-4 text-center  font-semibold transition-colors",
+        "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal rounded-md text-center font-bold ring-offset-background transition-colors cursor-pointer",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-navy hover:text-white",
         active
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-primary/40 bg-card text-primary hover:bg-primary/5",
+          ? "bg-lagunita text-white"
+          : "bg-transparent text-lagunita",
       ].join(" ")}
     >
       {children}
@@ -1066,14 +1067,25 @@ function LoanComparison({
             {row.cur}
           </div>
           <div className="px-4 py-3 text-right tabular-nums">
-            <div className=" font-bold text-foreground">{row.nxt}</div>
+            <div
+              className={[
+                "font-bold",
+                row.label === "Monthly payment" && !refiAnalysisBlocking && !bad.monthlyPayment
+                  ? row.deltaGood
+                    ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                    : "text-foreground"
+                  : "text-foreground",
+              ].join(" ")}
+            >
+              {row.nxt}
+            </div>
             {row.delta ? (
               <div
                 className={[
                   "text-xs font-medium",
                   row.deltaGood
-                    ? "text-primary"
-                    : "text-foreground/60",
+                    ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                    : "text-foreground",
                 ].join(" ")}
               >
                 {row.delta}
