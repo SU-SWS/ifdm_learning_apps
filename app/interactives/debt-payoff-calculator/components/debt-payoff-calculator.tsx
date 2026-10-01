@@ -456,11 +456,11 @@ export default function DebtPayoffCalculator() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-lagunita-lighter">
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-highlight-background)]">
                           <div className="w-full sm:w-[50%] p-4 bg-lagunita font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none">
                             Interest saved:
                           </div>
-                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--results-highlight-background)] text-[var(--color-teal)]">
                             {v.payoffBlocked
                               ? "-"
                               : formatCurrency(payoffResult.interestSaved)}

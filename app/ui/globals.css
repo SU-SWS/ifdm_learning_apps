@@ -97,6 +97,7 @@
   --muted-foreground: oklch(0.556 0 0);
   --results-blue-background: rgba(255, 255, 255, 1);
   --results-white-background: rgba(255, 255, 255, 1);
+  --results-highlight-background: rgba(240, 251, 253, 1);
   --results-year-background: rgba(233, 255, 251, 1);
   --results-card-grey-background: rgba(248, 248, 248, 1);
   --year-by-year-table: rgba(246, 246, 246, 1);
@@ -166,6 +167,7 @@
   --muted: oklch(0.269 0 0);
   --results-blue-background: rgba(25, 47, 57, 1);
   --results-white-background:  oklch(0.145 0 0);
+  --results-highlight-background: rgba(18, 18, 18, 1);
   --results-year-background:  oklch(0.145 0 0);
   --results-card-grey-background: oklch(0.145 0 0);
   --year-by-year-table: oklch(0.145 0 0);
