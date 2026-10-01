@@ -313,6 +313,9 @@ export default function DebtPayoffCalculator() {
                           </InfoPopover>
                         </div>
                         <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                           <Input
                             id="payment"
                             type="text"
@@ -323,7 +326,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("payment")}
                             onBlur={() => clearFocus("payment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               showPaymentError
                                 ? "border-2 border-[var(--color-inline-error)]"
                                 : showPaymentWarning
@@ -363,6 +366,9 @@ export default function DebtPayoffCalculator() {
                           </div>
                         </div>
                         <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                           <Input
                             id="addtlpayment"
                             type="text"
@@ -375,7 +381,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("additionalPayment")}
                             onBlur={() => clearFocus("additionalPayment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {v.additionalPaymentError ? (
