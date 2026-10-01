@@ -180,7 +180,7 @@ export default function DebtPayoffCalculator() {
                     <CardContent className="space-y-6">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="debt-amount" className="font-medium">
+                          <Label htmlFor="debt-amount" className="font-semibold">
                             Debt amount
                           </Label>
                           <InfoPopover title="Debt amount">
@@ -219,7 +219,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Annual interest rate
                           </Label>
@@ -259,7 +259,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Compounding frequency
                           </Label>
@@ -304,7 +304,7 @@ export default function DebtPayoffCalculator() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="payment" className="font-medium">
+                          <Label htmlFor="payment" className="font-semibold">
                             Payment per compounding period
                           </Label>
                           <InfoPopover title="Payment per compounding period">
@@ -487,7 +487,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="debt-amount-2"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Debt amount
                           </Label>
@@ -527,7 +527,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate-2"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Annual interest rate
                           </Label>
@@ -567,7 +567,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select-2"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Compounding frequency
                           </Label>
@@ -611,7 +611,7 @@ export default function DebtPayoffCalculator() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label className="font-medium">
+                          <Label className="font-semibold">
                             Target time to payoff
                           </Label>
                           <InfoPopover title="Target time to payoff">
