@@ -182,8 +182,8 @@ export function validateInterestRate(
   // Check for sentinel value (-1 = empty field) first, before range check
   if (value === -1) {
     if (touched) {
-      // For time-to-goal tab, defer error while editing. For other tabs, show immediately.
-      if (mode === "time-to-goal" && isFocused) {
+      // Defer error while editing
+      if (isFocused) {
         return {};
       }
       return { error: "Please enter an annual interest rate." };
