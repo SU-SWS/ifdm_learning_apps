@@ -338,8 +338,12 @@ export function validateAllFields(
   // Only show the info message if we don't have a blocking warning for this field
   if (interestRateValidation.info && !warnings.interestRate) info.interestRate = interestRateValidation.info;
 
-  // For time-to-goal mode, the remaining warnings are also blocking
-  const hasWarningsThatBlock = mode === "time-to-goal" && Object.keys(warnings).length > 0;
+  // For time-to-goal mode, only block on impossible situations (goal reached or 0% with no contributions)
+  const hasImpossibleGoal =
+    mode === "time-to-goal" &&
+    !!(warnings.interestRate?.includes("will not reach your goal") ||
+       warnings.contributionPerPeriod?.includes("already reached this goal") ||
+       warnings.currentBalance);
   const hasFocusedEmptySavingsGoal =
     mode !== "future-balance" &&
     state.savingsGoal === 0 &&
@@ -352,7 +356,7 @@ export function validateAllFields(
     warnings,
     hasBlockingErrors:
       Object.keys(errors).length > 0 ||
-      hasWarningsThatBlock ||
+      hasImpossibleGoal ||
       hasFocusedEmptySavingsGoal,
   };
 }
