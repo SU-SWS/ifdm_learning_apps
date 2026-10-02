@@ -622,7 +622,7 @@ export default function SavingsCalculator() {
                   <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.totalDeposited) || overflowWarning
                         ? "text-foreground"
-                        : "text-lagunita"
+                        : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.totalDeposited)
                       ? "-"
@@ -661,7 +661,7 @@ export default function SavingsCalculator() {
                 <div className={`text-4xl font-bold text-center ${
                       isInvalid(results.finalBalance) || overflowWarning
                         ? "text-foreground"
-                        : "text-lagunita"
+                        : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.finalBalance)
                       ? "-"
@@ -681,17 +681,17 @@ export default function SavingsCalculator() {
                       <div className="w-full sm:w-[50%] p-4 text-black font-bold rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-grey-med-dark">
                         Total deposited:
                       </div>
-                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--secondary-background)] overflow-hidden text-ellipsis`}>
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.totalDeposited) || overflowWarning
                         ? "-"
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row mb-1 bg-lagunita-lighter rounded-lg">
+                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div className="w-full sm:w-[50%] text-md p-4 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-lagunita font-bold text-white">
                         Interest earned:
                       </div>
-                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-lagunita-lighter text-lagunita font-bold overflow-hidden text-ellipsis`}
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg sm:bg-[var(--results-white-background)] text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis`}
                       >
                         {isInvalid(results.interestEarned) || overflowWarning
                         ? "-"
@@ -699,11 +699,11 @@ export default function SavingsCalculator() {
                       </div>
                     </div>
                     {mode === "future-balance" && (
-                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-blue-background)] rounded-lg">
+                    <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-white bg-navy rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
                         Final balance:
                       </div>
-                      <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] bg-[var(--results-blue-background)] overflow-hidden text-ellipsis`}>
+                      <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.finalBalance) || overflowWarning
                         ? "-"
                         : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
