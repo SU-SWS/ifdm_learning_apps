@@ -176,8 +176,7 @@ export function validateContributionPerPeriod(
 export function validateInterestRate(
   value: number,
   touched: boolean,
-  isFocused?: boolean,
-  mode?: CalculationMode
+  isFocused?: boolean
 ): { error?: string; info?: string; warning?: string } {
   // Check for sentinel value (-1 = empty field) first, before range check
   if (value === -1) {
@@ -332,8 +331,7 @@ export function validateAllFields(
   const interestRateValidation = validateInterestRate(
     state.interestRate,
     touched.interestRate || false,
-    focusedField === "interestRate",
-    mode
+    focusedField === "interestRate"
   );
   if (interestRateValidation.error) errors.interestRate = interestRateValidation.error;
   if (interestRateValidation.warning) warnings.interestRate = interestRateValidation.warning;
