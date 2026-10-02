@@ -36,7 +36,8 @@ export function validateSavingsGoal(
   currentBalance: number,
   touched: boolean,
   mode: CalculationMode,
-  isFocused = false
+  isFocused = false,
+  hasBeenEdited = false
 ): { error?: string; info?: string; warning?: string } {
   if (mode === "future-balance") return {};
 
@@ -46,8 +47,23 @@ export function validateSavingsGoal(
     return {};
   }
 
-  if (touched && (value === 0 || value < 1 || value > 1000000000)) {
+  // Required field error: empty after being touched and leaving
+  if (touched && value === 0 && !isFocused) {
+    return { error: "Please enter a savings goal amount." };
+  }
+
+  // Range error: out of bounds value (while typing or after touch)
+  if ((touched || hasBeenEdited) && value > 0 && value < 1) {
     return { error: "Enter an amount between $1 and $1,000,000,000" };
+  }
+
+  if ((touched || hasBeenEdited) && value > 1000000000) {
+    return { error: "Enter an amount between $1 and $1,000,000,000" };
+  }
+
+  // Defer "goal reached" warning while editing savings goal or current balance
+  if (isFocused) {
+    return {};
   }
 
   if (
@@ -166,8 +182,8 @@ export function validateInterestRate(
   // Check for sentinel value (-1 = empty field) first, before range check
   if (value === -1) {
     if (touched) {
-      // For time-to-goal tab, defer error while editing. For other tabs, show immediately.
-      if (mode === "time-to-goal" && isFocused) {
+      // Defer error while editing
+      if (isFocused) {
         return {};
       }
       return { error: "Please enter an annual interest rate." };
@@ -182,14 +198,7 @@ export function validateInterestRate(
 
   if (value === 0) {
     const message = "At 0%, your balance grows only from deposits. No interest is earned.";
-
-    if (mode === "monthly-savings" || mode === "future-balance") {
-      return { warning: message };
-    }
-
-    return {
-      info: message,
-    };
+    return { warning: message };
   }
 
   return {};
@@ -210,7 +219,8 @@ export function validateAllFields(
   },
   touched: Record<string, boolean>,
   mode: CalculationMode,
-  focusedField?: string | null
+  focusedField?: string | null,
+  editedFields?: Record<string, boolean>
 ): ValidationResult {
   const errors: FieldErrors = {};
   const info: FieldInfo = {};
@@ -222,7 +232,8 @@ export function validateAllFields(
     state.currentBalance,
     touched.savingsGoal || false,
     mode,
-    focusedField === "savingsGoal"
+    focusedField === "savingsGoal",
+    editedFields?.savingsGoal || false
   );
   if (savingsGoalValidation.error) errors.savingsGoal = savingsGoalValidation.error;
   if (savingsGoalValidation.info) info.savingsGoal = savingsGoalValidation.info;
@@ -240,7 +251,9 @@ export function validateAllFields(
     state.savingsGoal > 0 &&
     state.savingsGoal <= 1000000000 &&
     state.currentBalance <= 1000000000 &&
-    state.savingsGoal <= state.currentBalance;
+    state.savingsGoal <= state.currentBalance &&
+    focusedField !== "savingsGoal" &&
+    focusedField !== "currentBalance";
 
   if (hasReachedGoal) {
     warnings.currentBalance = GOAL_REACHED_WARNING;
