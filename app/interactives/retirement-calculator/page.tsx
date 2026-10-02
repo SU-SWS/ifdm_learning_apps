@@ -9,8 +9,8 @@ import {
   defaultInputs,
   calculateRequiredBalance,
   calculateSavingsResults,
-  calculatePeriodicSavings,
   formatCurrency,
+  formatCurrencyWithCents,
   formatNumberWithCommas,
 } from "./lib/retirement";
 import {
@@ -182,13 +182,7 @@ export default function RetirementCalculator() {
     SAVINGS_FREQUENCIES[0];
 
   const totalContributions =
-    calculatePeriodicSavings(
-      results.requiredBalance,
-      inputs.currentSavings,
-      inputs.expectedReturnBeforeRetirement / 100,
-      inputs.yearsToRetirement,
-      selectedFrequency.periodsPerYear,
-    ) *
+    results[selectedFrequency.key] *
     inputs.yearsToRetirement *
     selectedFrequency.periodsPerYear;
 
@@ -932,7 +926,9 @@ export default function RetirementCalculator() {
 
                     <div className="rounded-xl bg-results-panel-foreground/15 p-5">
                       <p className="text-4xl font-bold">
-                        {formatCurrency(results[selectedFrequency.key])}
+                        {formatCurrencyWithCents(
+                          results[selectedFrequency.key],
+                        )}
                       </p>
                       <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm text-results-panel-foreground/80">
                         <span>{selectedFrequency.perLabel}</span>
@@ -972,7 +968,7 @@ export default function RetirementCalculator() {
                               </span>
                             </span>
                             <span className="font-bold">
-                              {formatCurrency(results[frequency.key])}
+                              {formatCurrencyWithCents(results[frequency.key])}
                             </span>
                           </label>
                         );
