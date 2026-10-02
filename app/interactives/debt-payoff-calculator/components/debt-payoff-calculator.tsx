@@ -180,7 +180,10 @@ export default function DebtPayoffCalculator() {
                     <CardContent className="space-y-6">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="debt-amount" className="font-medium">
+                          <Label
+                            htmlFor="debt-amount"
+                            className="font-semibold"
+                          >
                             Debt amount
                           </Label>
                           <InfoPopover title="Debt amount">
@@ -219,7 +222,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Annual interest rate
                           </Label>
@@ -259,7 +262,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Compounding frequency
                           </Label>
@@ -304,7 +307,7 @@ export default function DebtPayoffCalculator() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="payment" className="font-medium">
+                          <Label htmlFor="payment" className="font-semibold">
                             Payment per compounding period
                           </Label>
                           <InfoPopover title="Payment per compounding period">
@@ -313,6 +316,9 @@ export default function DebtPayoffCalculator() {
                           </InfoPopover>
                         </div>
                         <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                           <Input
                             id="payment"
                             type="text"
@@ -323,7 +329,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("payment")}
                             onBlur={() => clearFocus("payment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               showPaymentError
                                 ? "border-2 border-[var(--color-inline-error)]"
                                 : showPaymentWarning
@@ -347,22 +353,23 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-4 p-4 bg-[var(--results-year-background)] border-1 border-grey-border rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Label
-                              htmlFor="addtlpayment"
-                              className="text-medium font-bold"
-                            >
-                              Additional payment per period (optional)
-                            </Label>
-                            <InfoPopover title="Additional payment per period (optional)">
-                              Enter a fixed extra amount you plan to pay each
-                              month.
-                            </InfoPopover>
-                          </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="addtlpayment"
+                            className="font-semibold"
+                          >
+                            Additional payment per period (optional)
+                          </Label>
+                          <InfoPopover title="Additional payment per period (optional)">
+                            Enter a fixed extra amount you plan to pay each
+                            month.
+                          </InfoPopover>
                         </div>
                         <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
+                            $
+                          </span>
                           <Input
                             id="addtlpayment"
                             type="text"
@@ -375,7 +382,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("additionalPayment")}
                             onBlur={() => clearFocus("additionalPayment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {v.additionalPaymentError ? (
@@ -456,11 +463,11 @@ export default function DebtPayoffCalculator() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-lagunita-lighter">
+                        <div className="flex flex-col sm:flex-row mb-1 rounded-lg sm:bg-[var(--results-white-background)]">
                           <div className="w-full sm:w-[50%] p-4 bg-lagunita font-bold text-white rounded-lg sm:rounded-l-lg sm:rounded-r-none">
                             Interest saved:
                           </div>
-                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-lagunita-lighter text-[var(--color-teal)]">
+                          <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--results-white-background)] text-[var(--color-teal)]">
                             {v.payoffBlocked
                               ? "-"
                               : formatCurrency(payoffResult.interestSaved)}
@@ -487,7 +494,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="debt-amount-2"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Debt amount
                           </Label>
@@ -527,7 +534,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate-2"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Annual interest rate
                           </Label>
@@ -567,7 +574,7 @@ export default function DebtPayoffCalculator() {
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select-2"
-                            className="font-medium"
+                            className="font-semibold"
                           >
                             Compounding frequency
                           </Label>
@@ -611,7 +618,7 @@ export default function DebtPayoffCalculator() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label className="font-medium">
+                          <Label className="font-semibold">
                             Target time to payoff
                           </Label>
                           <InfoPopover title="Target time to payoff">
