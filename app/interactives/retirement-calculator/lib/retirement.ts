@@ -71,6 +71,18 @@ export function calculatePeriodicSavings(requiredBalance: number, currentSavings
   return targetBalance * (periodRate / (Math.pow(1 + periodRate, totalPeriods) - 1))
 }
 
+export function calculateContributionPerPeriod(requiredBalance: number, currentSavings: number, annualRate: number, years: number, periodsPerYear: number): number {
+  if (years <= 0) return 0
+  const totalPeriods = years * periodsPerYear
+  const fvCurrentSavings = futureValue(currentSavings, annualRate, years)
+  const targetBalance = Math.max(0, requiredBalance - fvCurrentSavings)
+  if (annualRate === 0) {
+    return targetBalance / totalPeriods
+  }
+  const periodRate = Math.pow(1 + annualRate, 1 / periodsPerYear) - 1
+  return targetBalance * (periodRate / (Math.pow(1 + periodRate, totalPeriods) - 1))
+}
+
 function roundToCents(value: number): number {
   return Math.round(value * 100) / 100
 }
@@ -88,10 +100,10 @@ export function calculateSavingsResults(
   return {
     requiredBalance: Math.round(requiredBalance),
     targetBalance: Math.round(targetBalance),
-    annualSavings: roundToCents(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 1)),
-    monthlySavings: roundToCents(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 12)),
-    biWeeklySavings: roundToCents(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 26)),
-    weeklySavings: roundToCents(calculatePeriodicSavings(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 52)),
+    annualSavings: roundToCents(calculateContributionPerPeriod(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 1)),
+    monthlySavings: roundToCents(calculateContributionPerPeriod(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 12)),
+    biWeeklySavings: roundToCents(calculateContributionPerPeriod(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 26)),
+    weeklySavings: roundToCents(calculateContributionPerPeriod(requiredBalance, currentSavings, returnBeforeRetirement, yearsToRetirement, 52)),
     fvCurrentSavings: Math.round(fvCurrentSavings),
   }
 }

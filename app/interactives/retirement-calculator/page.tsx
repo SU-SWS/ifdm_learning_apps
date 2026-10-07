@@ -286,7 +286,7 @@ export default function RetirementCalculator() {
   };
 
   const balanceDescription = (
-    <p className="mt-3 text-sm text-results-panel-foreground/80">
+    <p className="mt-3 text-sm">
       This estimates the lump sum needed at retirement to fund{" "}
       {formatCurrency(inputs.annualSpending)} per year for{" "}
       {inputs.retirementLength} {yearsLabel(inputs.retirementLength)}, assuming
@@ -309,16 +309,10 @@ export default function RetirementCalculator() {
           className="mb-10"
         >
           <TabsList className="grid w-full grid-rows-1 sm:grid-cols-2 p-0 gap-4">
-            <TabsTrigger
-              value="balance"
-              className="cursor-pointer border-results-panel text-results-panel dark:text-results-panel-foreground hover:bg-results-panel hover:text-results-panel-foreground data-[state=active]:bg-results-panel data-[state=active]:text-results-panel-foreground"
-            >
+            <TabsTrigger value="balance" className="cursor-pointer">
               Required balance
             </TabsTrigger>
-            <TabsTrigger
-              value="savings"
-              className="cursor-pointer border-results-panel text-results-panel dark:text-results-panel-foreground hover:bg-results-panel hover:text-results-panel-foreground data-[state=active]:bg-results-panel data-[state=active]:text-results-panel-foreground"
-            >
+            <TabsTrigger value="savings" className="cursor-pointer">
               Annual savings
             </TabsTrigger>
           </TabsList>
@@ -821,7 +815,7 @@ export default function RetirementCalculator() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-8 py-2 h-10 whitespace-normal bg-results-panel border-2 border-results-panel cursor-pointer hover:bg-white hover:text-results-panel text-results-panel-foreground w-full md:w-auto"
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-8 py-2 h-10 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
               >
                 Reset
               </button>
@@ -830,7 +824,7 @@ export default function RetirementCalculator() {
 
           {/* Right Column - Results */}
           <div
-            className="self-start rounded-2xl bg-results-panel p-8 text-results-panel-foreground shadow-md"
+            className="self-start rounded-3xl bg-lagunita p-[32px] text-white [.dark_&]:bg-[var(--card-background)] [.dark_&]:text-foreground"
             aria-live="polite"
             aria-atomic="true"
           >
@@ -855,7 +849,7 @@ export default function RetirementCalculator() {
                           );
                           setActiveTab("savings");
                         }}
-                        className="inline-flex items-center justify-center rounded-md font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-results-panel disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-12 whitespace-normal cursor-pointer bg-white border-2 border-white text-results-panel hover:bg-transparent hover:text-white"
+                        className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-lagunita disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-12 whitespace-normal cursor-pointer bg-white border-2 border-white text-lagunita hover:bg-navy hover:border-navy hover:text-white [.dark_&]:bg-navy [.dark_&]:border-navy [.dark_&]:text-white [.dark_&]:hover:bg-white [.dark_&]:hover:border-lagunita [.dark_&]:hover:text-lagunita [.dark_&]:focus-visible:ring-ring [.dark_&]:focus-visible:ring-offset-background"
                       >
                         Continue to annual savings
                       </button>
@@ -865,7 +859,7 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold">—</p>
                 ) : (
                   <div className="py-3">
-                    <p className="text-sm text-results-panel-foreground/80">
+                    <p className="text-sm">
                       The required retirement balance will appear here. Enter
                       annual retirement spending, expected retirement length
                       (years), and expected annual return during retirement.
@@ -890,7 +884,7 @@ export default function RetirementCalculator() {
                   <p className="text-4xl font-bold">—</p>
                 ) : (
                   <div className="py-3">
-                    <p className="text-sm text-results-panel-foreground/80">
+                    <p className="text-sm">
                       The required retirement balance will appear here. Complete
                       Step 1 on the Required balance tab first.
                     </p>
@@ -898,18 +892,18 @@ export default function RetirementCalculator() {
                 )}
 
                 {hasRequiredBalance && (
-                  <hr className="my-6 border-results-panel-foreground/20" />
+                  <hr className="my-6 border-white/30 [.dark_&]:border-border" />
                 )}
 
                 {showSavingsResults &&
                 inputs.currentSavings >= results.requiredBalance ? (
-                  <p className="text-sm text-results-panel-foreground/80">
+                  <p className="text-sm">
                     Current retirement savings already exceed your target
                     retirement balance, no growth or contributions needed.
                   </p>
                 ) : showSavingsResults &&
                   results.fvCurrentSavings >= results.requiredBalance ? (
-                  <p className="text-sm text-results-panel-foreground/80">
+                  <p className="text-sm">
                     With an expected {inputs.expectedReturnBeforeRetirement}%
                     annual return, your current savings of{" "}
                     {formatCurrency(inputs.currentSavings)} are projected to{" "}
@@ -924,13 +918,13 @@ export default function RetirementCalculator() {
                   <>
                     <h3 className="mb-4 font-bold text-lg">Required Savings</h3>
 
-                    <div className="rounded-xl bg-results-panel-foreground/15 p-5">
+                    <div className="rounded-xl bg-white/15 p-5 [.dark_&]:border [.dark_&]:border-border [.dark_&]:bg-card/50">
                       <p className="text-4xl font-bold">
                         {formatCurrencyWithCents(
                           results[selectedFrequency.key],
                         )}
                       </p>
-                      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm text-results-panel-foreground/80">
+                      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
                         <span>{selectedFrequency.perLabel}</span>
                         <span>
                           Total contributions:{" "}
@@ -946,10 +940,10 @@ export default function RetirementCalculator() {
                         return (
                           <label
                             key={frequency.key}
-                            className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-results-panel-foreground has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-results-panel ${
+                            className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border-2 px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-white has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-lagunita [.dark_&]:has-[:focus-visible]:ring-ring [.dark_&]:has-[:focus-visible]:ring-offset-background ${
                               isSelected
-                                ? "bg-white text-results-panel"
-                                : "bg-results-panel-foreground/10 hover:bg-results-panel-foreground/20"
+                                ? "border-white bg-white text-lagunita [.dark_&]:border-lagunita [.dark_&]:bg-lagunita [.dark_&]:text-white"
+                                : "border-white/30 hover:border-white [.dark_&]:border-border [.dark_&]:hover:border-lagunita"
                             }`}
                           >
                             <span className="flex items-center gap-3">
@@ -961,13 +955,13 @@ export default function RetirementCalculator() {
                                 onChange={() =>
                                   setSavingsFrequency(frequency.key)
                                 }
-                                className="h-4 w-4 cursor-pointer accent-results-panel focus:outline-none"
+                                className="h-4 w-4 cursor-pointer accent-lagunita focus:outline-none"
                               />
                               <span className="font-medium">
                                 {frequency.label}
                               </span>
                             </span>
-                            <span className="font-bold">
+                            <span className="font-semibold">
                               {formatCurrencyWithCents(results[frequency.key])}
                             </span>
                           </label>
@@ -975,7 +969,7 @@ export default function RetirementCalculator() {
                       })}
                     </fieldset>
 
-                    <p className="mt-6 text-sm text-results-panel-foreground/80">
+                    <p className="mt-6 text-sm">
                       Amount to save over {inputs.yearsToRetirement}{" "}
                       {yearsLabel(inputs.yearsToRetirement)} to reach your
                       target balance, assuming a{" "}
