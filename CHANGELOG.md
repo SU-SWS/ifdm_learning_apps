@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.2] - 2026-10-07
+
+Release PR [#200](https://github.com/SU-SWS/ifdm_learning_apps/pull/200) (`dev` into `1.x`).
+
+### Fixed
+
+- Debt Payoff Calculator: Corrected calculation handling for 0% interest rates to avoid divide-by-zero errors and produce accurate payoff timelines (IFDM-355, #198).
+- Savings Calculator: Fixed validation and edge-case handling in the time-to-goal calculations (IFDM-353, #195).
+- Retirement Calculator: Corrected periodic contribution calculations to match the selected contribution frequency, ensuring consistency across monthly, bi-weekly, and weekly contribution periods (IFDM-242, IFDM-246, IFDM-247, IFDM-248, #197, #196).
+- Mortgage Refinancing Calculator v3: Refined calculation display and UI refinements (IFDM-338, #194).
+- Time Value of Money Calculator: Fixed calculation accuracy issues (IFDM-366, #199).
+
+### Changed
+
+- Retirement and Debt Payoff Calculators: Updated dark mode color handling for improved consistency (IFDM-247, IFDM-248, #197).
+- Mortgage Refinancing Calculator v3: Updated result panel styling and messaging (IFDM-308, IFDM-329, IFDM-345, #196, #194).
+- Savings Calculator: Refined validation timing and user guidance (IFDM-276, IFDM-352, #195).
+- Debt Payoff Calculator: Repositioned reset button and updated field labels for clarity (IFDM-320, IFDM-234, #197).
+
 ## [1.3.1] - 2026-09-24
 
 ### Fixed

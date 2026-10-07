@@ -15,9 +15,6 @@ export default function Page() {
           <h1 className="sr-only">
             Mortgage Refinancing Calculator
           </h1>
-          <p className="mt-1">
-            Estimate your current balance, then see whether refinancing is worth it.
-          </p>
         </div>
         <RefinanceCalculator />
       </main>
