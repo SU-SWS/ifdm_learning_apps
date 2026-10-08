@@ -80,13 +80,13 @@ const SAVINGS_FREQUENCIES = [
 type SavingsFrequencyKey = (typeof SAVINGS_FREQUENCIES)[number]["key"];
 
 const baseInputClass =
-  "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+  "w-full h-[55px] rounded-md border bg-background shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 const inputStateClass = (error?: string, warning?: string) =>
   error
-    ? "border-[var(--color-inline-error)] focus:border-[var(--color-inline-error)] focus:ring-2 focus:ring-[var(--color-inline-error)]/20"
+    ? "border-2 border-[var(--color-inline-error)]"
     : warning
-      ? "border-[var(--color-inline-warning)] focus:border-[var(--color-inline-warning)] focus:ring-2 focus:ring-[var(--color-inline-warning)]/20"
-      : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200";
+      ? "border-2 border-[var(--color-inline-warning)]"
+      : "border-input";
 
 export default function RetirementCalculator() {
   const [activeTab, setActiveTab] = useState<"balance" | "savings">("balance");
