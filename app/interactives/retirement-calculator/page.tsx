@@ -334,7 +334,7 @@ export default function RetirementCalculator() {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="annual-spending"
-                      className="block text-sm text-foreground"
+                      className="block text-base text-foreground"
                     >
                       Annual spending in retirement
                     </label>
@@ -410,7 +410,7 @@ export default function RetirementCalculator() {
                 <div key="retirement-length-field" className="space-y-2">
                   <label
                     htmlFor="retirement-length"
-                    className="block text-sm text-foreground"
+                    className="block text-base text-foreground"
                   >
                     Expected length of retirement
                   </label>
@@ -493,7 +493,7 @@ export default function RetirementCalculator() {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-during-retirement"
-                      className="block text-sm text-foreground"
+                      className="block text-base text-foreground"
                     >
                       Expected annual return during retirement
                     </label>
@@ -599,7 +599,7 @@ export default function RetirementCalculator() {
                 <div key="current-savings-field" className="space-y-2">
                   <label
                     htmlFor="current-savings"
-                    className="block text-sm text-foreground"
+                    className="block text-base text-foreground"
                   >
                     Current retirement savings
                   </label>
@@ -651,7 +651,7 @@ export default function RetirementCalculator() {
                 <div key="years-to-retirement-field" className="space-y-2">
                   <label
                     htmlFor="years-to-retirement"
-                    className="block text-sm text-foreground"
+                    className="block text-base text-foreground"
                   >
                     Years until retirement
                   </label>
@@ -726,7 +726,7 @@ export default function RetirementCalculator() {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-before-retirement"
-                      className="block text-sm text-foreground"
+                      className="block text-base text-foreground"
                     >
                       Expected annual return before retirement
                     </label>
