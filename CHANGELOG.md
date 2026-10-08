@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.3] - 2026-10-08
+
+### Fixed
+- Retirement calculator: Reverted to use calculatePeriodicSavings for calculating periodic contributions.
+
 ## [1.3.2] - 2026-10-07
 
 Release PR [#200](https://github.com/SU-SWS/ifdm_learning_apps/pull/200) (`dev` into `1.x`).
