@@ -66,7 +66,7 @@ export function isBlankEntry(raw: string): boolean {
 
 function normalizeRaw(raw: string): string {
   const trimmed = raw.replace(/,/g, "").trim()
-  return isBlankEntry(trimmed) ? "" : trimmed
+  return isBlankEntry(trimmed) && !trimmed.startsWith("-") ? "" : trimmed
 }
 
 function isOutOfRange(

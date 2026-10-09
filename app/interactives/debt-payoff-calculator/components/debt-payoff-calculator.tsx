@@ -112,16 +112,19 @@ export default function DebtPayoffCalculator() {
 
   const showDebtAmountError =
     !!v.debtAmountError &&
-    touched.debtAmount &&
-    !(isBlankEntry(debtAmount) && focusedField === "debtAmount");
+    (debtAmount.startsWith("-") ||
+      (touched.debtAmount &&
+        !(isBlankEntry(debtAmount) && focusedField === "debtAmount")));
   const showInterestRateError =
     !!v.interestRateError &&
-    touched.interestRate &&
-    !(isBlankEntry(interestRate) && focusedField === "interestRate");
+    (interestRate.startsWith("-") ||
+      (touched.interestRate &&
+        !(isBlankEntry(interestRate) && focusedField === "interestRate")));
   const showPaymentError =
     !!v.paymentError &&
-    touched.payment &&
-    !(isBlankEntry(payment) && focusedField === "payment");
+    (payment.startsWith("-") ||
+      (touched.payment &&
+        !(isBlankEntry(payment) && focusedField === "payment")));
   const showTargetTimeError =
     !!v.targetTimeError &&
     (touched.targetYears || touched.targetMonths) &&
