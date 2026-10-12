@@ -29,6 +29,11 @@ export function discountFactor(r: number, n: number): number {
   return Math.pow(1 + r, -n)
 }
 
+/** Treat tiny amounts as zero for display without changing the math. */
+export function normalizeDisplayValue(value: number): number {
+  return Math.abs(value) < 0.001 ? 0 : value
+}
+
 /** Format a number as USD currency with two decimals. */
 export function formatCurrency(value: number): string {
   return value.toLocaleString('en-US', {

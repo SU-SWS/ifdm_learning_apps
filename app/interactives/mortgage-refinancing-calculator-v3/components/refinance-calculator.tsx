@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Info,
+  MinusCircle,
   XCircle,
 } from "lucide-react";
 import {
@@ -14,6 +15,7 @@ import {
   paymentFromLoan,
   discountFactor,
   formatCurrency,
+  normalizeDisplayValue,
 } from "../lib/mortgage";
 import { validate, type FieldName, type Validation } from "../lib/validation";
 import { Button } from "@/app/ui/components/button";
@@ -870,19 +872,35 @@ function ResultPanel({
   next: LoanTerms;
   analyzed: boolean;
 }) {
-  const worthIt = analysis.overallBenefit >= 0;
+  const displayedNet = normalizeDisplayValue(analysis.overallBenefit);
 
-  // Two-way verdict:
-  //  - positive  → refinancing comes out ahead (green / primary)
-  //  - negative  → refinancing does not come out ahead (red / destructive)
-  const verdict: "positive" | "negative" = worthIt ? "positive" : "negative";
-  const headline = worthIt
-    ? "Refinancing may be worth it"
-    : "Refinancing may not be worth it";
-  const verdictColor =
-    verdict === "positive"
+const verdict: "positive" | "negative" | "neutral" =
+  displayedNet === 0
+    ? "neutral"
+    : displayedNet > 0
+      ? "positive"
+      : "negative";
+
+const headline =
+  verdict === "neutral"
+    ? "Refinancing may not make a difference"
+    : verdict === "positive"
+      ? "Refinancing may be worth it"
+      : "Refinancing may not be worth it";
+
+const verdictColor =
+  verdict === "neutral"
+    ? "text-muted-foreground"
+    : verdict === "positive"
       ? "text-primary"
       : "text-[var(--color-inline-error)]";
+
+const subtext =
+  verdict === "neutral"
+    ? "Adjusted to today's dollars, refinancing's benefits and costs roughly cancel out."
+    : verdict === "positive"
+      ? "Adjusted to today's dollars, refinancing comes out ahead."
+      : "Adjusted to today's dollars, refinancing costs more than it saves.";
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
@@ -941,9 +959,9 @@ function ResultPanel({
               ].join(" ")}
             >
               {showAnalysis
-                ? analysis.overallBenefit < 0
-                  ? `−${formatCurrency(Math.abs(analysis.overallBenefit))}`
-                  : formatCurrency(analysis.overallBenefit)
+                ? displayedNet < 0
+                  ? `−${formatCurrency(Math.abs(displayedNet))}`
+                  : formatCurrency(displayedNet)
                 : DASH}
             </p>
             {showAnalysis && (
@@ -954,7 +972,9 @@ function ResultPanel({
                     verdictColor,
                   ].join(" ")}
                 >
-                  {verdict === "positive" ? (
+                  {verdict === "neutral" ? (
+                    <MinusCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  ) : verdict === "positive" ? (
                     <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
                   ) : (
                     <XCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -962,9 +982,7 @@ function ResultPanel({
                   {headline}
                 </p>
                 <p className="mt-1  text-panel-foreground/70">
-                  {verdict === "positive"
-                    ? "Adjusted to today's dollars, refinancing comes out ahead."
-                    : "Adjusted to today's dollars, refinancing costs more than it saves."}
+                  {subtext}
                 </p>
               </>
             )}
@@ -988,10 +1006,10 @@ function ResultPanel({
       {/* How this was calculated (equation-style breakdown) — after the terms table */}
       {analyzed && showAnalysis ? (
         <CalculationBreakdown
-          pvSavings={analysis.pvSavings}
-          pvDiffBalance={analysis.pvDiffBalance}
-          closing={hasClosing ? analysis.closing : 0}
-          net={analysis.overallBenefit}
+          pvSavings={normalizeDisplayValue(analysis.pvSavings)}
+          pvDiffBalance={normalizeDisplayValue(analysis.pvDiffBalance)}
+          closing={normalizeDisplayValue(hasClosing ? analysis.closing : 0)}
+          net={displayedNet}
           hasClosing={hasClosing && analysis.closing > 0}
           hasYears={!analysis.usedDefaultHorizon}
         />
@@ -1167,8 +1185,10 @@ function CalculationBreakdown({
     rows.push({ label: "Closing costs", value: -closing });
   }
 
-  const signed = (v: number) =>
-    `${v < 0 ? "−" : "+"}${formatCurrency(Math.abs(v))}`;
+  const signed = (value: number) => {
+    if (value === 0) return formatCurrency(0);
+      return `${value < 0 ? "−" : "+"}${formatCurrency(Math.abs(value))}`;
+    };
 
   return (
     <div className="mt-6 overflow-hidden rounded-lg border border-border bg-card">
@@ -1216,7 +1236,11 @@ function CalculationBreakdown({
               <span
                 className={[
                   "tabular-nums text-base font-bold",
-                  net < 0 ? "text-[var(--color-inline-error)]" : "text-primary",
+                  net === 0
+                  ? "text-muted-foreground"
+                  : net < 0
+                    ? "text-[var(--color-inline-error)]"
+                    : "text-primary",
                 ].join(" ")}
               >
                 {net < 0
