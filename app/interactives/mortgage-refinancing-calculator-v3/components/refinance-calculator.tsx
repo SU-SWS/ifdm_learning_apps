@@ -364,6 +364,9 @@ export function RefinanceCalculator() {
     setAnalyzed(true);
   }
 
+  const mobileShowAnalysis = analyzed && hasStartedEditing && !refiAnalysisBlocking;
+  const mobileNet = normalizeDisplayValue(analysis.overallBenefit);
+
   return (
     <div className="mx-auto w-full max-w-5xl">
       {/* Tabs */}
@@ -377,6 +380,36 @@ export function RefinanceCalculator() {
         >
           Refinance Analysis
         </TabButton>
+      </div>
+
+      {/* Mobile summary stays above the inputs while this calculator scrolls. */}
+      <div
+        className="sticky top-0 z-20 mt-6 rounded-xl border border-border bg-[var(--card-background)] px-4 py-3 shadow-sm sm:hidden"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <p className="text-sm text-panel-foreground/70">
+          {tab === "current" ? "Estimated current balance" : "Net value today"}
+        </p>
+        <p className="mt-1 text-2xl font-bold text-foreground tabular-nums">
+          {tab === "current"
+            ? currentBalanceBlocking ? DASH : formatCurrency(currentBalance)
+            : mobileShowAnalysis
+              ? mobileNet < 0
+                ? `−${formatCurrency(Math.abs(mobileNet))}`
+                : formatCurrency(mobileNet)
+              : DASH}
+        </p>
+        {tab === "refinance" && mobileShowAnalysis && (
+          <p className="mt-1 text-sm font-semibold text-foreground">
+            {mobileNet === 0
+              ? "Refinancing may not make a difference"
+              : mobileNet > 0
+                ? "Refinancing may be worth it"
+                : "Refinancing may not be worth it"}
+          </p>
+        )}
       </div>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
@@ -446,7 +479,7 @@ export function RefinanceCalculator() {
           {tab === "current" ? (
             <>
               <div
-                className="bg-[var(--card-background)] rounded-3xl p-[32px]"
+                className="hidden sm:block bg-[var(--card-background)] rounded-3xl p-[32px]"
                 role="status"
                 aria-live="polite"
                 aria-atomic="true"
@@ -902,11 +935,19 @@ const subtext =
       ? "Adjusted to today's dollars, refinancing comes out ahead."
       : "Adjusted to today's dollars, refinancing costs more than it saves.";
 
+  const hasCurrentLoanError = validation.currentBlocking && (
+    analyzed || Boolean(
+      validation.messages.months ||
+      validation.messages.currentRate ||
+      validation.messages.monthlyPayment
+    )
+  );
+
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-      {/* The introductory box guides users before analysis is requested. */}
-      {validation.currentBlocking && analyzed ? (
-        <div className="mb-6 rounded-lg border border-[var(--color-inline-error)]/30 bg-[var(--color-inline-error)]/5 p-4">
+      {/* Unresolved current-loan errors take priority over analysis controls. */}
+      {hasCurrentLoanError ? (
+        <div className="mb-6">
           <p
             role="alert"
             className="text-sm font-semibold text-[var(--color-inline-error)]"
@@ -1022,9 +1063,8 @@ const subtext =
  * Side-by-side comparison of the current loan terms (carried over from the
  * Current Balance tab) against the proposed new loan terms.
  *
- * Each cell dashes independently, driven by whether the input it reads is
- * unusable (blank or out of range) rather than by whether it happens to be
- * zero. That keeps a valid 0% rate visible while still blanking a rate of 25%.
+ * All values are dashed while the current balance is unusable. Once it is
+ * valid, each cell follows its own input validation. Valid 0% rates stay visible.
  */
 function LoanComparison({
   current,
@@ -1045,7 +1085,8 @@ function LoanComparison({
   // The current balance is derived from all three Current Balance fields, and
   // the new payment from all of the refinance inputs, so those two cells use
   // the aggregate flags instead of a single field's.
-  const dash = (unusable: boolean, text: string) => (unusable ? DASH : text);
+  const dash = (unusable: boolean, text: string) =>
+    (currentBalanceBlocking || unusable ? DASH : text);
 
   const rows: {
     label: string;
@@ -1087,11 +1128,11 @@ function LoanComparison({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
-        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide ">
+      <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
+        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">
           Terms
         </div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide ">
+        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">
           Current loan terms
         </div>
         <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-primary">
@@ -1102,39 +1143,45 @@ function LoanComparison({
         <div
           key={row.label}
           className={[
-            "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center",
+            "grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-border last:border-b-0 sm:border-b-0",
             i % 2 === 1 ? "bg-muted/20" : "",
           ].join(" ")}
         >
-          <div className="px-4 py-3  ">{row.label}</div>
-          <div className="px-4 py-3 text-right  font-medium text-foreground tabular-nums">
-            {row.cur}
+          <div className="px-4 pt-4 pb-2 font-semibold sm:py-3 sm:font-normal">
+            {row.label}
           </div>
-          <div className="px-4 py-3 text-right tabular-nums">
-            <div
-              className={[
-                "font-bold",
-                row.label === "Monthly payment" && !refiAnalysisBlocking && !bad.monthlyPayment
-                  ? row.deltaGood
-                    ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
-                    : "text-foreground"
-                  : "text-foreground",
-              ].join(" ")}
-            >
-              {row.nxt}
-            </div>
-            {row.delta ? (
+          <div className="flex items-baseline justify-between gap-3 px-4 py-2 sm:block sm:py-3 sm:text-right text-foreground">
+            <span className="text-sm sm:hidden">Current loan</span>
+            <span className="font-medium tabular-nums">{row.cur}</span>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 px-4 pt-2 pb-4 sm:block sm:py-3">
+            <span className="text-sm sm:hidden">New loan</span>
+            <div className="text-right tabular-nums">
               <div
                 className={[
-                  "text-xs font-medium",
-                  row.deltaGood
-                    ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                  "font-bold",
+                  row.label === "Monthly payment" && !refiAnalysisBlocking && !bad.monthlyPayment
+                    ? row.deltaGood
+                      ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                      : "text-foreground"
                     : "text-foreground",
                 ].join(" ")}
               >
-                {row.delta}
+                {row.nxt}
               </div>
-            ) : null}
+              {row.delta ? (
+                <div
+                  className={[
+                    "text-xs font-medium",
+                    row.deltaGood
+                      ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                      : "text-foreground",
+                  ].join(" ")}
+                >
+                  {row.delta}
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       ))}
