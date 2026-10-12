@@ -380,6 +380,24 @@ export function RefinanceCalculator() {
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         {/* Left column */}
         <div>
+          {tab === "refinance" && v.currentBlocking && (
+            <div
+              className="mb-6 p-5 bg-blue-50 rounded-lg border border-blue-200 [.dark_&]:bg-[var(--info-popup-background)]"
+            >
+              <p className="text-blue-900 [.dark_&]:text-blue-100 font-semibold text-sm">
+                Start by calculating your current mortgage balance first. Enter
+                your details in the Current Balance tab, then come back here to
+                explore refinance options.
+              </p>
+              <button
+                type="button"
+                onClick={() => setTab("current")}
+                className="mt-2 inline-flex items-center gap-2 text-sm text-[var(--color-teal)] font-semibold underline underline-offset-4 hover:no-underline cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <ArrowLeft size={12} aria-hidden="true" /> Calculate current balance
+              </button>
+            </div>
+          )}
           {tab === "current" ? (
             <CurrentBalanceForm
               months={months}
@@ -868,8 +886,8 @@ function ResultPanel({
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-      {/* Show error message if current balance has errors, regardless of edit state */}
-      {validation.currentBlocking ? (
+      {/* The introductory box guides users before analysis is requested. */}
+      {validation.currentBlocking && analyzed ? (
         <div className="mb-6 rounded-lg border border-[var(--color-inline-error)]/30 bg-[var(--color-inline-error)]/5 p-4">
           <p
             role="alert"
