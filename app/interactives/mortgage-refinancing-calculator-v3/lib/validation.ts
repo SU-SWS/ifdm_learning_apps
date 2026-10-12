@@ -136,10 +136,15 @@ export function validate(values: Values, ui: UiState): Validation {
     // the same as out of range rather than letting num() coerce it to 0.
     const n = Number.parseFloat(raw)
     const outOfRange = !Number.isFinite(n) || n < min || n > max
-    bad[field] = outOfRange
+    const fractionalTerm =
+      (field === 'months' || field === 'newTerm') &&
+      Number.isFinite(n) && !Number.isInteger(n)
+    bad[field] = outOfRange || fractionalTerm
     // Range messages are never hidden while focused: the user needs to know
     // why the result stopped updating.
-    messages[field] = outOfRange ? RANGE_MESSAGES[field] : ''
+    messages[field] = outOfRange
+      ? RANGE_MESSAGES[field]
+      : fractionalTerm ? 'Please enter a whole number of months.' : ''
   }
 
   const currentBlocking = CURRENT_FIELDS.some((f) => bad[f])

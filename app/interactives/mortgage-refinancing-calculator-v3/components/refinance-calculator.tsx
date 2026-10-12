@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   ChevronDown,
   Info,
-  RotateCcw,
   XCircle,
 } from "lucide-react";
 import {
@@ -554,6 +553,7 @@ function NumberField({
   info?: boolean;
 }) {
   const id = `refi-${field}`;
+  const isTermField = field === "months" || field === "newTerm";
   const error = validation.messages[field];
   const describedBy =
     [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
@@ -584,14 +584,17 @@ function NumberField({
         <input
           id={id}
           type="text"
-          inputMode="decimal"
+          inputMode={isTermField ? "numeric" : "decimal"}
           value={value}
           placeholder={placeholder}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          // The setter is unconditional: an out-of-range value stays visible in
-          // the field so the user keeps the context of what they typed.
-          onChange={(e) => onChange(formatThousands(e.target.value))}
+          onChange={(e) => {
+            // Reject decimal edits, including pasted values, for month terms.
+            // Out-of-range whole numbers still stay visible for validation.
+            if (isTermField && e.target.value.includes(".")) return;
+            onChange(formatThousands(e.target.value));
+          }}
           onFocus={() => onFocusField(field)}
           onBlur={() => onBlurField(field)}
           className="w-full bg-transparent py-3 text-foreground outline-none"
