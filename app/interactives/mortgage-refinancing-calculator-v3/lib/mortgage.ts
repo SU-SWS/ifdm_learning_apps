@@ -29,9 +29,12 @@ export function discountFactor(r: number, n: number): number {
   return Math.pow(1 + r, -n)
 }
 
-/** Treat tiny amounts as zero for display without changing the math. */
+/**
+ * Treat amounts that would display as $0.00 as zero, so they never show a
+ * sign or color. Threshold is half a cent, matching formatCurrency's rounding.
+ */
 export function normalizeDisplayValue(value: number): number {
-  return Math.abs(value) < 0.001 ? 0 : value
+  return Math.abs(value) < 0.005 ? 0 : value
 }
 
 /** Format a number as USD currency with two decimals. */
