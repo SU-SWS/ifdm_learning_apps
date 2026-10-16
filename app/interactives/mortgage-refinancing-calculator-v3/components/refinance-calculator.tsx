@@ -367,8 +367,18 @@ export function RefinanceCalculator() {
   const mobileShowAnalysis = analyzed && hasStartedEditing && !refiAnalysisBlocking;
   const mobileNet = normalizeDisplayValue(analysis.overallBenefit);
 
+  // Reset is only offered once something has been typed on that tab, and
+  // Continue waits until the current balance has actually calculated.
+  const currentHasInput = [months, currentRate, monthlyPayment].some(
+    (value) => value.trim() !== "",
+  );
+  const refiHasInput = [newAmount, newTerm, newRate, closingCosts, years].some(
+    (value) => value.trim() !== "",
+  );
+  const continueDisabled = currentBalanceBlocking;
+
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="mx-auto w-full max-w-5xl pb-48 sm:pb-0">
       {/* Tabs */}
       <div className="grid grid-cols-2 gap-4 [&_button]:cursor-pointer">
         <TabButton active={tab === "current"} onClick={() => setTab("current")}>
@@ -382,36 +392,6 @@ export function RefinanceCalculator() {
         </TabButton>
       </div>
 
-      {/* Mobile summary stays above the inputs while this calculator scrolls. */}
-      <div
-        className="sticky top-0 z-20 mt-6 rounded-xl border border-border bg-[var(--card-background)] px-4 py-3 shadow-sm sm:hidden"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <p className="text-sm text-panel-foreground/70">
-          {tab === "current" ? "Estimated current balance" : "Net value today"}
-        </p>
-        <p className="mt-1 text-2xl font-bold text-foreground tabular-nums">
-          {tab === "current"
-            ? currentBalanceBlocking ? DASH : formatCurrency(currentBalance)
-            : mobileShowAnalysis
-              ? mobileNet < 0
-                ? `−${formatCurrency(Math.abs(mobileNet))}`
-                : formatCurrency(mobileNet)
-              : DASH}
-        </p>
-        {tab === "refinance" && mobileShowAnalysis && (
-          <p className="mt-1 text-sm font-semibold text-foreground">
-            {mobileNet === 0
-              ? "Refinancing may not make a difference"
-              : mobileNet > 0
-                ? "Refinancing may be worth it"
-                : "Refinancing may not be worth it"}
-          </p>
-        )}
-      </div>
-
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         {/* Left column */}
         <div>
@@ -420,7 +400,7 @@ export function RefinanceCalculator() {
               className="mb-6 p-5 bg-blue-50 rounded-lg border border-blue-200 [.dark_&]:bg-[var(--info-popup-background)]"
             >
               <p className="text-blue-900 [.dark_&]:text-blue-100 font-semibold text-sm">
-                Start by calculating your current mortgage balance first. Enter
+                Start by calculating your current mortgage balance. Enter
                 your details in the Current Balance tab, then come back here to
                 explore refinance options.
               </p>
@@ -448,7 +428,9 @@ export function RefinanceCalculator() {
                 setFocusedField(null);
               }}
               onReset={resetCurrent}
+              resetDisabled={!currentHasInput}
               onContinue={() => setTab("refinance")}
+              continueDisabled={continueDisabled}
             />
           ) : (
             <RefinanceForm
@@ -528,6 +510,7 @@ export function RefinanceCalculator() {
           <Button
             type="button"
             onClick={resetNewLoan}
+            disabled={!refiHasInput}
             variant="lagunita"
             className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
           >
@@ -536,6 +519,78 @@ export function RefinanceCalculator() {
         </div>
       )}
 
+      {/* Mobile sticky footer: summary and Reset stay in view while scrolling. */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-[var(--sticky-footer-background)] px-4 py-3 text-[var(--sticky-footer-text)] shadow-lg sm:hidden">
+        <div
+          className={
+            tab === "current"
+              ? "flex flex-col gap-3"
+              : "flex items-center justify-between gap-3"
+          }
+        >
+          <div className="min-w-0">
+            <p className="text-xs">
+              {tab === "current" ? "Estimated current balance" : "Net value today"}
+            </p>
+            <p
+              className="text-xl font-bold tabular-nums"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {tab === "current"
+                ? currentBalanceBlocking ? DASH : formatCurrency(currentBalance)
+                : mobileShowAnalysis
+                  ? mobileNet < 0
+                    ? `−${formatCurrency(Math.abs(mobileNet))}`
+                    : formatCurrency(mobileNet)
+                  : DASH}
+            </p>
+            {tab === "refinance" && mobileShowAnalysis && (
+              <p className="text-xs font-semibold">
+                {mobileNet === 0
+                  ? "Refinancing may not make a difference"
+                  : mobileNet > 0
+                    ? "Refinancing may be worth it"
+                    : "Refinancing may not be worth it"}
+              </p>
+            )}
+          </div>
+          {tab === "current" ? (
+            <div className="flex items-stretch gap-3">
+              <Button
+                type="button"
+                onClick={() => setTab("refinance")}
+                disabled={continueDisabled}
+                variant="lagunita"
+                className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal px-4 py-2 font-medium"
+              >
+                Continue to refinance analysis
+              </Button>
+              <Button
+                type="button"
+                onClick={resetCurrent}
+                disabled={!currentHasInput}
+                variant="outline"
+                className="h-auto w-auto shrink-0 cursor-pointer bg-white px-4 font-medium text-lagunita hover:bg-lagunita hover:text-white"
+              >
+                Reset
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              onClick={resetNewLoan}
+              disabled={!refiHasInput}
+              variant="lagunita"
+              size="sm"
+              className="h-auto w-auto shrink-0 px-4"
+            >
+              Reset
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -690,7 +745,9 @@ function CurrentBalanceForm(
     monthlyPayment: string;
     setMonthlyPayment: (v: string) => void;
     onReset: () => void;
+    resetDisabled: boolean;
     onContinue: () => void;
+    continueDisabled: boolean;
   },
 ) {
   const a11y = {
@@ -734,10 +791,12 @@ function CurrentBalanceForm(
         prefix="$"
       />
 
-      <div className="flex items-stretch gap-3">
+      {/* Mobile puts these in the sticky footer instead. */}
+      <div className="hidden items-stretch gap-3 sm:flex">
         <Button
           type="button"
           onClick={props.onContinue}
+          disabled={props.continueDisabled}
           variant="lagunita"
           className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal font-medium px-4 py-2 sm:flex-none sm:px-8"
         >
@@ -746,6 +805,7 @@ function CurrentBalanceForm(
         <Button
           type="button"
           onClick={props.onReset}
+          disabled={props.resetDisabled}
           variant="outline"
           className="h-auto w-auto shrink-0 cursor-pointer bg-transparent text-lagunita hover:bg-lagunita hover:text-white dark:text-lagunita-light dark:hover:text-white font-medium px-4"
         >
