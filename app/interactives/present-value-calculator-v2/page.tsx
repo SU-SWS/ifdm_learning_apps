@@ -308,7 +308,7 @@ export default function PresentValueCalculator() {
                             setFutureValue(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                         min={0}
                         max={1000000000}
                       />
@@ -389,11 +389,11 @@ export default function PresentValueCalculator() {
                             setInterestRate(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                           interestRateError
-                          ? "border-[var(--color-inline-error)] border-2"
+                          ? "border-2 border-[var(--color-inline-error)]"
                           : interestRateWarning
-                            ? "border-[var(--color-inline-warning)] border-2"
+                            ? "border-2 border-[var(--color-inline-warning)]"
                             : ""
                         }`}
                         min={0}
@@ -479,7 +479,7 @@ export default function PresentValueCalculator() {
                           if (!isNaN(val)) setTimePeriod(String(val));
                         }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : timePeriodWarning ? "border-[var(--color-inline-warning)] border-2" : ""}`}
+                      className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-2 border-[var(--color-inline-error)]" : timePeriodWarning ? "border-2 border-[var(--color-inline-warning)]" : ""}`}
                       min={0}
                       max={singleMaxPeriods}
                       step={1}
@@ -525,7 +525,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="single-compounding-frequency-label"
                       >
                         <SelectValue />
@@ -665,7 +665,7 @@ export default function PresentValueCalculator() {
                             setPaymentAmount(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(paymentAmount) > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(paymentAmount) > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                       />
                     </div>
                     {paymentAmountError && (
@@ -740,7 +740,7 @@ export default function PresentValueCalculator() {
                             setFinalAmount(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(finalAmount) > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(finalAmount) > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                       />
                     </div>
                     {finalAmountError && (
@@ -819,10 +819,10 @@ export default function PresentValueCalculator() {
                             setPaymentInterestRate(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError
-                        ? "border-[var(--color-inline-error)] border-2"
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : paymentInterestRateWarning
-                          ? "border-[var(--color-inline-warning)] border-2"
+                          ? "border-2 border-[var(--color-inline-warning)]"
                           : ""}`}
                         min={0}
                         max={1000}
@@ -908,11 +908,11 @@ export default function PresentValueCalculator() {
                           if (!isNaN(val)) setNumberOfPayments(String(val));
                         }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         numberOfPaymentsError
-                        ? "border-[var(--color-inline-error)] border-2"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : numberOfPaymentsWarning
-                          ? "border-[var(--color-inline-warning)] border-2"
+                          ? "border-2 border-[var(--color-inline-warning)]"
                           : ""
                       }`}
                       min={0}
@@ -960,7 +960,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="compounding-frequency-label"
                       >
                         <SelectValue />

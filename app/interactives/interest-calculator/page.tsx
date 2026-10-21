@@ -397,7 +397,7 @@ export default function InterestRateVisual() {
                     onBlur={handleAmountBlur}
                     aria-invalid={!!amountError}
                     aria-describedby="amount-msg"
-                    className={`block w-full rounded-md shadow-sm py-2 pl-7 pr-10 border ${amountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 pl-7 pr-10 border ${amountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 <p
@@ -431,7 +431,7 @@ export default function InterestRateVisual() {
                     onBlur={handleRateBlur}
                     aria-invalid={!!rateError}
                     aria-describedby="rate-msg"
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       rateError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : rateWarning
@@ -486,7 +486,7 @@ export default function InterestRateVisual() {
                     onBlur={handlePeriodsBlur}
                     aria-invalid={!!periodsError}
                     aria-describedby="periods-msg"
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       periodsError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : periodsWarning
@@ -523,7 +523,7 @@ export default function InterestRateVisual() {
                     id="compounding"
                     value={compounding}
                     onChange={handleCompoundingChange}
-                    className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
+                    className="block w-full h-[55px] rounded-md shadow-sm py-2 px-3 border border-input appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     {Object.entries(frequencyMap).map(([key, { label }]) => (
                       <option key={key} value={key}>

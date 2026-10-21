@@ -67,7 +67,7 @@ export default function PresentValueCalculator() {
                   type="number"
                   value={futureValue === 0 ? "" : futureValue}
                   onChange={(e) => setFutureValue(Number(e.target.value))}
-                  className="text-md font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="text-md font-bold block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="absolute right-2 top-[41%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}

@@ -584,7 +584,7 @@ export default function MortgageCalculator() {
                         }}
                         aria-describedby={v.paymentMsg ? "monthly-payment-error" : undefined}
                         aria-invalid={!!v.paymentMsg}
-                        className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.paymentMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.paymentMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                     </div>
                     {v.paymentMsg ? (
@@ -672,7 +672,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment percentage"
                             aria-describedby={v.dpMsg ? "down-payment-afford-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -699,7 +699,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment amount in dollars"
                             aria-describedby={v.dpMsg ? "down-payment-afford-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
                         </div>
@@ -733,7 +733,7 @@ export default function MortgageCalculator() {
                         }}
                         aria-describedby={v.rateMsg ? "interest-rate-afford-error" : undefined}
                         aria-invalid={!!v.rateMsg}
-                        className={`w-full pr-8 pl-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pr-8 pl-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                       <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                     </div>
@@ -823,7 +823,7 @@ export default function MortgageCalculator() {
                             aria-label="Property tax percentage"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
                             aria-invalid={!!v.taxMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -844,7 +844,7 @@ export default function MortgageCalculator() {
                             aria-label="Property tax annual dollar amount"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
                             aria-invalid={!!v.taxMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
@@ -914,7 +914,7 @@ export default function MortgageCalculator() {
                             aria-label="Home insurance percentage"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
                             aria-invalid={!!v.insMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -935,7 +935,7 @@ export default function MortgageCalculator() {
                             aria-label="Home insurance annual dollar amount"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
                             aria-invalid={!!v.insMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
@@ -961,7 +961,7 @@ export default function MortgageCalculator() {
                           onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-afford-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
-                          className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                          className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                         />
                       </div>
                       {v.hoaMsg && <FieldError id="hoa-dues-afford-error">{v.hoaMsg}</FieldError>}
@@ -1028,7 +1028,7 @@ export default function MortgageCalculator() {
                         }}
                         aria-describedby={v.priceMsg ? "home-price-error" : undefined}
                         aria-invalid={!!v.priceMsg}
-                        className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.priceMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.priceMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                     </div>
                     {v.priceMsg ? (
@@ -1108,7 +1108,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment percentage"
                             aria-describedby={v.dpMsg ? "down-payment-payment-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -1141,7 +1141,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment amount in dollars"
                             aria-describedby={v.dpMsg ? "down-payment-payment-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
@@ -1173,7 +1173,7 @@ export default function MortgageCalculator() {
                         }}
                         aria-describedby={v.rateMsg ? "interest-rate-payment-error" : undefined}
                         aria-invalid={!!v.rateMsg}
-                        className={`w-full pr-8 pl-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pr-8 pl-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                       <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                     </div>
@@ -1262,7 +1262,7 @@ export default function MortgageCalculator() {
                               aria-label="Property tax percentage"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
                               aria-invalid={!!v.taxMsg}
-                              className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                           </>
@@ -1283,7 +1283,7 @@ export default function MortgageCalculator() {
                               aria-label="Property tax annual dollar amount"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
                               aria-invalid={!!v.taxMsg}
-                              className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                           </>
@@ -1353,7 +1353,7 @@ export default function MortgageCalculator() {
                               aria-label="Home insurance percentage"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
                               aria-invalid={!!v.insMsg}
-                              className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                           </>
@@ -1374,7 +1374,7 @@ export default function MortgageCalculator() {
                               aria-label="Home insurance annual dollar amount"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
                               aria-invalid={!!v.insMsg}
-                              className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
                           </>
@@ -1401,7 +1401,7 @@ export default function MortgageCalculator() {
                           onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-payment-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
-                          className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                          className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                         />
                       </div>
                       {v.hoaMsg && <FieldError id="hoa-dues-payment-error">{v.hoaMsg}</FieldError>}

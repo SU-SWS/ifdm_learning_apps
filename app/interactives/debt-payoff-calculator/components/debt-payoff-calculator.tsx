@@ -205,7 +205,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("debtAmount")}
                             onBlur={() => clearFocus("debtAmount")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {showDebtAmountError && (
@@ -242,7 +242,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("interestRate")}
                             onBlur={() => clearFocus("interestRate")}
-                            className={`relative block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`relative block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
@@ -282,7 +282,7 @@ export default function DebtPayoffCalculator() {
                             }
                             id="compounding-select"
                             aria-describedby="compounding-desc"
-                            className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
+                            className="h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                           >
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
@@ -329,7 +329,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("payment")}
                             onBlur={() => clearFocus("payment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               showPaymentError
                                 ? "border-2 border-[var(--color-inline-error)]"
                                 : showPaymentWarning
@@ -382,7 +382,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("additionalPayment")}
                             onBlur={() => clearFocus("additionalPayment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {v.additionalPaymentError ? (
@@ -517,7 +517,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("debtAmount")}
                             onBlur={() => clearFocus("debtAmount")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {showDebtAmountError && (
@@ -554,7 +554,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("interestRate")}
                             onBlur={() => clearFocus("interestRate")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
@@ -592,7 +592,7 @@ export default function DebtPayoffCalculator() {
                               )
                             }
                             id="compounding-select-2"
-                            className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
+                            className="h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             aria-describedby="compounding-desc-2"
                           >
                             <option value="daily">Daily</option>
@@ -646,7 +646,7 @@ export default function DebtPayoffCalculator() {
                                 }
                                 onFocus={() => setFocusedField("targetYears")}
                                 onBlur={() => clearFocus("targetYears")}
-                                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetYearsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                                className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetYearsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                               />
                             </div>
                           </div>
@@ -664,7 +664,7 @@ export default function DebtPayoffCalculator() {
                                 }
                                 onFocus={() => setFocusedField("targetMonths")}
                                 onBlur={() => clearFocus("targetMonths")}
-                                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetMonthsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                                className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetMonthsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                               />
                             </div>
                             <Label

@@ -682,10 +682,10 @@ function NumberField({
 
       <div
         className={[
-          "flex items-center rounded-md bg-card px-3 focus-within:ring-2 focus-within:ring-primary/30",
+          "flex h-[55px] items-center rounded-md bg-card px-3 shadow-sm ring-offset-background transition focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           error
             ? "border-2 border-[var(--color-inline-error)]"
-            : "border border-input focus-within:border-primary",
+            : "border border-input",
         ].join(" ")}
       >
         {prefix ? <span className="mr-2">{prefix}</span> : null}

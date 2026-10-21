@@ -295,7 +295,7 @@ export default function CompoundInterestCalculator() {
                       );
                   }}
                   min="0"
-                  className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                  className={`block w-full pl-8 h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
                   $
@@ -354,7 +354,7 @@ export default function CompoundInterestCalculator() {
                         150,
                       );
                   }}
-                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                  className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   min="0"
                   step="0.1"
                 />
@@ -425,7 +425,7 @@ export default function CompoundInterestCalculator() {
                         150,
                       );
                   }}
-                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${periodsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                  className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${periodsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   min="0"
                 />
               </div>
@@ -474,7 +474,7 @@ export default function CompoundInterestCalculator() {
                       }
                     }
                   }}
-                  className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
+                  className="h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {compoundingOptions.map((option) => (
                     <option key={option.value} value={option.value}>

@@ -133,7 +133,7 @@ export default function InflationCalculator() {
                     }}
                     aria-invalid={showError}
                     aria-describedby="initial-price-error"
-                    className={`bg-[var(--input-background)] text-[var(--input-text)] text-md w-full rounded-md shadow-sm pl-7 border pr-10 ${
+                    className={`bg-[var(--input-background)] text-[var(--input-text)] text-md w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 pl-7 border pr-10 ${
                       showError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : "bg-[var(--input-border)]"

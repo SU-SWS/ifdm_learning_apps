@@ -365,7 +365,7 @@ export default function MortgageCalculator() {
                             data-1p-ignore
                             data-bwignore
                             data-form-type="other"
-                            className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full pl-8 pr-4 py-3 h-[55px] border border-input rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                             $
@@ -542,7 +542,7 @@ export default function MortgageCalculator() {
                               step="0.01"
                               aria-describedby={refErrors.newLoanAmount ? "loan-amount-error" : undefined}
                               aria-invalid={!!refErrors.newLoanAmount}
-                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                             />
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                               $
@@ -580,7 +580,7 @@ export default function MortgageCalculator() {
                                 refErrors.newMonths ? "new-months-error" : "",
                               ].filter(Boolean).join(" ") || undefined}
                               aria-invalid={!!refErrors.newMonths}
-                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none" aria-hidden="true">
                               months
@@ -622,7 +622,7 @@ export default function MortgageCalculator() {
                               step="0.1"
                               aria-describedby={refErrors.newRate ? "new-rate-error" : undefined}
                               aria-invalid={!!refErrors.newRate}
-                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                             />
                             {refNewRate && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-teal)] font-bold pointer-events-none" aria-hidden="true">

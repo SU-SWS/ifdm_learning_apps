@@ -833,7 +833,7 @@ export default function Page() {
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setPresentValue)
                     }
-                    className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("presentValue") && (
@@ -867,7 +867,7 @@ export default function Page() {
                       handleInputChange(e.target.value, setPayment)
                     }
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("payment") && (
@@ -903,7 +903,7 @@ export default function Page() {
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setFutureValue)
                     }
-                    className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("futureValue") && (
@@ -941,7 +941,7 @@ export default function Page() {
                       onBlur={(e) =>
                         handleInputBlur(e.target.value, setPayment)
                       }
-                      className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                      className={`border-input pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                     />
                   </div>
                   {getFieldError("payment") && (
@@ -973,7 +973,7 @@ export default function Page() {
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setAnnualRate)
                     }
-                    className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">
                     %
@@ -1005,7 +1005,7 @@ export default function Page() {
                     const val = e.target.value;
                     if (val === "" || /^\d*$/.test(val)) setPeriods(val);
                   }}
-                  className={`border-border bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  className={`border-input bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                 />
                 {getFieldError("periods") && (
                   <p className="text-sm text-[var(--color-inline-error)]">

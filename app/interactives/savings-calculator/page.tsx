@@ -344,11 +344,11 @@ export default function SavingsCalculator() {
                       handleFieldBlur("savingsGoal");
                       setFocusedField(null);
                     }}
-                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.savingsGoal
-                        ? "border-[var(--color-inline-error)]"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : validation.warnings.savingsGoal
-                        ? "border-[var(--color-inline-warning)]"
+                        ? "border-2 border-[var(--color-inline-warning)]"
                         : "border-input"
                     }`}
 
@@ -395,11 +395,11 @@ export default function SavingsCalculator() {
                       setFocusedField(null);
                     }}
 
-                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.currentBalance
-                        ? "border-[var(--color-inline-error)]"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : validation.warnings.currentBalance
-                        ? "border-[var(--color-inline-warning)]"
+                        ? "border-2 border-[var(--color-inline-warning)]"
                         : "border-input"
                     }`}
                   />
@@ -440,8 +440,8 @@ export default function SavingsCalculator() {
                         handleFieldBlur("contributionPerPeriod");
                         setFocusedField(null);
                       }}
-                      className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                        validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
+                      className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        validation.errors.contributionPerPeriod ? "border-2 border-[var(--color-inline-error)]" : "border-input"
                       }`}
                     />
                     {!hasReachedGoal && (
@@ -481,8 +481,8 @@ export default function SavingsCalculator() {
                               setEditedFields(prev => ({ ...prev, timeYears: e.target.value !== "" }));
                             }}
                             onBlur={() => handleFieldBlur("timeYears")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                              validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeYears ? "border-2 border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
                         </div>
@@ -508,8 +508,8 @@ export default function SavingsCalculator() {
                               setEditedFields(prev => ({ ...prev, timeMonths: e.target.value !== "" }));
                             }}
                             onBlur={() => handleFieldBlur("timeMonths")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                              validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeMonths ? "border-2 border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
                         </div>
@@ -548,11 +548,11 @@ export default function SavingsCalculator() {
                       handleFieldBlur("interestRate");
                       setFocusedField(null);
                     }}
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.interestRate
-                        ? "border-[var(--color-inline-error)]"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : validation.warnings.interestRate
-                        ? "border-[var(--color-inline-warning)]"
+                        ? "border-2 border-[var(--color-inline-warning)]"
                         : "border-input"
                     }`}
                   />
@@ -584,7 +584,7 @@ export default function SavingsCalculator() {
                   value={hasReachedGoal ? "" : compounding}
                   disabled={hasReachedGoal}
                   onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
-                  className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
+                  className="block w-full h-[55px] rounded-md shadow-sm py-2 px-3 border border-input appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     {hasReachedGoal && <option value="">-</option>}
                     <option value="daily">Daily</option>
