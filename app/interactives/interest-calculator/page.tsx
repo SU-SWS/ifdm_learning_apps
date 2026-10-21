@@ -334,7 +334,7 @@ export default function InterestRateVisual() {
       <div className="mb-8">
         {/* Mode toggle (spans the full width above the two columns) */}
         <div className="flex flex-col mb-6">
-          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
+          <h2 className="text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
           <div className="flex-1 flex gap-4">
             <button
               className={`group min-w-[150px] flex-1 px-4 py-2 h-18 text-md font-bold rounded-lg border-1 border-lagunita hover:bg-lagunita ${mode === "saving" ? "bg-lagunita" : ""}`}
@@ -554,7 +554,7 @@ export default function InterestRateVisual() {
 
           {/* RIGHT: results */}
           <div className="p-4 rounded-lg bg-[var(--card-background)]">
-            <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">
+            <h2 className="text-lg-title text-[var(--foreground)] font-bold pb-4">
               {mode === "saving" ? "What you'll have" : "What you'd owe"}
             </h2>
             <div aria-live="polite" aria-atomic="true">

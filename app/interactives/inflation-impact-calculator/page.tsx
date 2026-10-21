@@ -185,7 +185,7 @@ export default function InflationCalculator() {
                   className="w-full"
                 />
                 <div
-                  className="flex justify-between text-md font-medium font-poppins"
+                  className="flex justify-between text-md font-medium"
                   aria-hidden="true"
                 >
                   <span>0%</span>
@@ -226,7 +226,7 @@ export default function InflationCalculator() {
                   rangeClassName="time-period-range bg-lagunita-light"
                 />
                 <div
-                  className="flex justify-between text-md font-medium font-poppins"
+                  className="flex justify-between text-md font-medium"
                   aria-hidden="true"
                 >
                   <span>1 year</span>
@@ -239,7 +239,7 @@ export default function InflationCalculator() {
           {/* Results Panel */}
           <Card className="rounded-3xl p-[32px] bg-[var(--card-background)]">
             <CardHeader className="py-1">
-              <CardTitle className="py-1 font-bold font-poppins">
+              <CardTitle className="py-1 font-bold">
                 Results:
               </CardTitle>
             </CardHeader>
@@ -248,7 +248,7 @@ export default function InflationCalculator() {
                 aria-live="polite"
                 aria-atomic="true"
               >
-                <span className="text-md font-bold font-poppins text-[var(--color-teal)]">
+                <span className="text-md font-bold text-[var(--color-teal)]">
                   After {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                 </span>
                 <div className="pt-4 rounded-lg">

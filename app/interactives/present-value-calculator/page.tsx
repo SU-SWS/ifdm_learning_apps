@@ -103,7 +103,7 @@ export default function PresentValueCalculator() {
                   step={0.1}
                   className="w-full border-color-lagunita"
                 />
-                <div className="flex justify-between text-black font-medium font-poppins">
+                <div className="flex justify-between text-black font-medium">
                   <span>0.1%</span>
                   <span>12%</span>
                 </div>
@@ -120,7 +120,7 @@ export default function PresentValueCalculator() {
                   step={1}
                   className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"/>
-                  <div className="flex justify-between text-black font-medium font-poppins">
+                  <div className="flex justify-between text-black font-medium">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>

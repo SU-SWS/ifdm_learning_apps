@@ -270,7 +270,7 @@ export default function SavingsCalculator() {
         <h1 className="sr-only">Savings Calculator</h1>
         {/* Mode Selection */}
         <div className="mb-8">
-          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">Solve for:</h2>
+          <h2 className="text-lg-title text-[var(--foreground)] font-bold mb-1">Solve for:</h2>
           <div className="grid grid-cols-3 gap-2">
             <Button
               variant={mode === "monthly-savings" ? "default" : "outline"}
