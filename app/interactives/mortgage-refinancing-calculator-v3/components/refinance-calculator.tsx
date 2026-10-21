@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Info,
-  RotateCcw,
+  MinusCircle,
   XCircle,
 } from "lucide-react";
 import {
@@ -15,6 +15,7 @@ import {
   paymentFromLoan,
   discountFactor,
   formatCurrency,
+  normalizeDisplayValue,
 } from "../lib/mortgage";
 import { validate, type FieldName, type Validation } from "../lib/validation";
 import { Button } from "@/app/ui/components/button";
@@ -363,8 +364,21 @@ export function RefinanceCalculator() {
     setAnalyzed(true);
   }
 
+  const mobileShowAnalysis = analyzed && hasStartedEditing && !refiAnalysisBlocking;
+  const mobileNet = normalizeDisplayValue(analysis.overallBenefit);
+
+  // Reset is only offered once something has been typed on that tab, and
+  // Continue waits until the current balance has actually calculated.
+  const currentHasInput = [months, currentRate, monthlyPayment].some(
+    (value) => value.trim() !== "",
+  );
+  const refiHasInput = [newAmount, newTerm, newRate, closingCosts, years].some(
+    (value) => value.trim() !== "",
+  );
+  const continueDisabled = currentBalanceBlocking;
+
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="mx-auto w-full max-w-5xl pb-48 sm:pb-0">
       {/* Tabs */}
       <div className="grid grid-cols-2 gap-4 [&_button]:cursor-pointer">
         <TabButton active={tab === "current"} onClick={() => setTab("current")}>
@@ -381,6 +395,24 @@ export function RefinanceCalculator() {
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         {/* Left column */}
         <div>
+          {tab === "refinance" && v.currentBlocking && (
+            <div
+              className="mb-6 p-5 bg-blue-50 rounded-lg border border-blue-200 [.dark_&]:bg-[var(--info-popup-background)]"
+            >
+              <p className="text-blue-900 [.dark_&]:text-blue-100 font-semibold text-sm">
+                Start by calculating your current mortgage balance. Enter
+                your details in the Current Balance tab, then come back here to
+                explore refinance options.
+              </p>
+              <button
+                type="button"
+                onClick={() => setTab("current")}
+                className="mt-2 inline-flex items-center gap-2 text-sm text-[var(--color-teal)] font-semibold underline underline-offset-4 hover:no-underline cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <ArrowLeft size={12} aria-hidden="true" /> Calculate current balance
+              </button>
+            </div>
+          )}
           {tab === "current" ? (
             <CurrentBalanceForm
               months={months}
@@ -396,6 +428,9 @@ export function RefinanceCalculator() {
                 setFocusedField(null);
               }}
               onReset={resetCurrent}
+              resetDisabled={!currentHasInput}
+              onContinue={() => setTab("refinance")}
+              continueDisabled={continueDisabled}
             />
           ) : (
             <RefinanceForm
@@ -425,7 +460,12 @@ export function RefinanceCalculator() {
         <div>
           {tab === "current" ? (
             <>
-              <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
+              <div
+                className="hidden sm:block bg-[var(--card-background)] rounded-3xl p-[32px]"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 <p className="text-panel-foreground/70">
                   Estimated current balance
                 </p>
@@ -433,14 +473,6 @@ export function RefinanceCalculator() {
                 <p className="mt-1 text-4xl font-bold text-primary">
                   {currentBalanceBlocking ? DASH : formatCurrency(currentBalance)}
                 </p>
-                <Button
-                  type="button"
-                  onClick={() => setTab("refinance")}
-                  variant="lagunita"
-                  className="mt-5 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
-                >
-                  Continue to refinance analysis
-                </Button>
               </div>
             </>
           ) : (
@@ -478,27 +510,87 @@ export function RefinanceCalculator() {
           <Button
             type="button"
             onClick={resetNewLoan}
+            disabled={!refiHasInput}
             variant="lagunita"
             className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
           >
             Reset new loan terms{" "}
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       )}
 
-      {tab === "current" && (
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Button
-            type="button"
-            onClick={resetCurrent}
-            variant="lagunita"
-            className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
-          >
-            Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />
-          </Button>
+      {/* Mobile sticky footer: summary and Reset stay in view while scrolling. */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-[var(--sticky-footer-background)] px-4 py-3 text-[var(--sticky-footer-text)] shadow-lg sm:hidden">
+        <div
+          className={
+            tab === "current"
+              ? "flex flex-col gap-3"
+              : "flex items-center justify-between gap-3"
+          }
+        >
+          <div className="min-w-0">
+            <p className="text-xs">
+              {tab === "current" ? "Estimated current balance" : "Net value today"}
+            </p>
+            <p
+              className="text-xl font-bold tabular-nums"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {tab === "current"
+                ? currentBalanceBlocking ? DASH : formatCurrency(currentBalance)
+                : mobileShowAnalysis
+                  ? mobileNet < 0
+                    ? `−${formatCurrency(Math.abs(mobileNet))}`
+                    : formatCurrency(mobileNet)
+                  : DASH}
+            </p>
+            {tab === "refinance" && mobileShowAnalysis && (
+              <p className="text-xs font-semibold">
+                {mobileNet === 0
+                  ? "Refinancing may not make a difference"
+                  : mobileNet > 0
+                    ? "Refinancing may be worth it"
+                    : "Refinancing may not be worth it"}
+              </p>
+            )}
+          </div>
+          {tab === "current" ? (
+            <div className="flex items-stretch gap-3">
+              <Button
+                type="button"
+                onClick={() => setTab("refinance")}
+                disabled={continueDisabled}
+                variant="lagunita"
+                className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal px-4 py-2 font-medium"
+              >
+                Continue to refinance analysis
+              </Button>
+              <Button
+                type="button"
+                onClick={resetCurrent}
+                disabled={!currentHasInput}
+                variant="outline"
+                className="h-auto w-auto shrink-0 cursor-pointer bg-white px-4 font-medium text-lagunita hover:bg-lagunita hover:text-white"
+              >
+                Reset
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              onClick={resetNewLoan}
+              disabled={!refiHasInput}
+              variant="lagunita"
+              size="sm"
+              className="h-auto w-auto shrink-0 px-4"
+            >
+              Reset
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -569,6 +661,7 @@ function NumberField({
   info?: boolean;
 }) {
   const id = `refi-${field}`;
+  const isTermField = field === "months" || field === "newTerm";
   const error = validation.messages[field];
   const describedBy =
     [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
@@ -599,14 +692,17 @@ function NumberField({
         <input
           id={id}
           type="text"
-          inputMode="decimal"
+          inputMode={isTermField ? "numeric" : "decimal"}
           value={value}
           placeholder={placeholder}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          // The setter is unconditional: an out-of-range value stays visible in
-          // the field so the user keeps the context of what they typed.
-          onChange={(e) => onChange(formatThousands(e.target.value))}
+          onChange={(e) => {
+            // Reject decimal edits, including pasted values, for month terms.
+            // Out-of-range whole numbers still stay visible for validation.
+            if (isTermField && e.target.value.includes(".")) return;
+            onChange(formatThousands(e.target.value));
+          }}
           onFocus={() => onFocusField(field)}
           onBlur={() => onBlurField(field)}
           className="w-full bg-transparent py-3 text-foreground outline-none"
@@ -649,6 +745,9 @@ function CurrentBalanceForm(
     monthlyPayment: string;
     setMonthlyPayment: (v: string) => void;
     onReset: () => void;
+    resetDisabled: boolean;
+    onContinue: () => void;
+    continueDisabled: boolean;
   },
 ) {
   const a11y = {
@@ -691,6 +790,28 @@ function CurrentBalanceForm(
         onChange={props.setMonthlyPayment}
         prefix="$"
       />
+
+      {/* Mobile puts these in the sticky footer instead. */}
+      <div className="hidden items-stretch gap-3 sm:flex">
+        <Button
+          type="button"
+          onClick={props.onContinue}
+          disabled={props.continueDisabled}
+          variant="lagunita"
+          className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal font-medium px-4 py-2 sm:flex-none sm:px-8"
+        >
+          Continue to refinance analysis
+        </Button>
+        <Button
+          type="button"
+          onClick={props.onReset}
+          disabled={props.resetDisabled}
+          variant="outline"
+          className="h-auto w-auto shrink-0 cursor-pointer bg-transparent text-lagunita hover:bg-lagunita hover:text-white dark:text-lagunita-light dark:hover:text-white font-medium px-4"
+        >
+          Reset
+        </Button>
+      </div>
     </div>
   );
 }
@@ -844,25 +965,49 @@ function ResultPanel({
   next: LoanTerms;
   analyzed: boolean;
 }) {
-  const worthIt = analysis.overallBenefit >= 0;
+  const displayedNet = normalizeDisplayValue(analysis.overallBenefit);
 
-  // Two-way verdict:
-  //  - positive  → refinancing comes out ahead (green / primary)
-  //  - negative  → refinancing does not come out ahead (red / destructive)
-  const verdict: "positive" | "negative" = worthIt ? "positive" : "negative";
-  const headline = worthIt
-    ? "Refinancing may be worth it"
-    : "Refinancing may not be worth it";
-  const verdictColor =
-    verdict === "positive"
+const verdict: "positive" | "negative" | "neutral" =
+  displayedNet === 0
+    ? "neutral"
+    : displayedNet > 0
+      ? "positive"
+      : "negative";
+
+const headline =
+  verdict === "neutral"
+    ? "Refinancing may not make a difference"
+    : verdict === "positive"
+      ? "Refinancing may be worth it"
+      : "Refinancing may not be worth it";
+
+const verdictColor =
+  verdict === "neutral"
+    ? "text-muted-foreground"
+    : verdict === "positive"
       ? "text-primary"
       : "text-[var(--color-inline-error)]";
 
+const subtext =
+  verdict === "neutral"
+    ? "Adjusted to today's dollars, refinancing's benefits and costs roughly cancel out."
+    : verdict === "positive"
+      ? "Adjusted to today's dollars, refinancing comes out ahead."
+      : "Adjusted to today's dollars, refinancing costs more than it saves.";
+
+  const hasCurrentLoanError = validation.currentBlocking && (
+    analyzed || Boolean(
+      validation.messages.months ||
+      validation.messages.currentRate ||
+      validation.messages.monthlyPayment
+    )
+  );
+
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
-      {/* Show error message if current balance has errors, regardless of edit state */}
-      {validation.currentBlocking ? (
-        <div className="mb-6 rounded-lg border border-[var(--color-inline-error)]/30 bg-[var(--color-inline-error)]/5 p-4">
+      {/* Unresolved current-loan errors take priority over analysis controls. */}
+      {hasCurrentLoanError ? (
+        <div className="mb-6">
           <p
             role="alert"
             className="text-sm font-semibold text-[var(--color-inline-error)]"
@@ -915,9 +1060,9 @@ function ResultPanel({
               ].join(" ")}
             >
               {showAnalysis
-                ? analysis.overallBenefit < 0
-                  ? `−${formatCurrency(Math.abs(analysis.overallBenefit))}`
-                  : formatCurrency(analysis.overallBenefit)
+                ? displayedNet < 0
+                  ? `−${formatCurrency(Math.abs(displayedNet))}`
+                  : formatCurrency(displayedNet)
                 : DASH}
             </p>
             {showAnalysis && (
@@ -928,7 +1073,9 @@ function ResultPanel({
                     verdictColor,
                   ].join(" ")}
                 >
-                  {verdict === "positive" ? (
+                  {verdict === "neutral" ? (
+                    <MinusCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  ) : verdict === "positive" ? (
                     <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
                   ) : (
                     <XCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -936,9 +1083,7 @@ function ResultPanel({
                   {headline}
                 </p>
                 <p className="mt-1  text-panel-foreground/70">
-                  {verdict === "positive"
-                    ? "Adjusted to today's dollars, refinancing comes out ahead."
-                    : "Adjusted to today's dollars, refinancing costs more than it saves."}
+                  {subtext}
                 </p>
               </>
             )}
@@ -962,10 +1107,10 @@ function ResultPanel({
       {/* How this was calculated (equation-style breakdown) — after the terms table */}
       {analyzed && showAnalysis ? (
         <CalculationBreakdown
-          pvSavings={analysis.pvSavings}
-          pvDiffBalance={analysis.pvDiffBalance}
-          closing={hasClosing ? analysis.closing : 0}
-          net={analysis.overallBenefit}
+          pvSavings={normalizeDisplayValue(analysis.pvSavings)}
+          pvDiffBalance={normalizeDisplayValue(analysis.pvDiffBalance)}
+          closing={normalizeDisplayValue(hasClosing ? analysis.closing : 0)}
+          net={displayedNet}
           hasClosing={hasClosing && analysis.closing > 0}
           hasYears={!analysis.usedDefaultHorizon}
         />
@@ -978,9 +1123,8 @@ function ResultPanel({
  * Side-by-side comparison of the current loan terms (carried over from the
  * Current Balance tab) against the proposed new loan terms.
  *
- * Each cell dashes independently, driven by whether the input it reads is
- * unusable (blank or out of range) rather than by whether it happens to be
- * zero. That keeps a valid 0% rate visible while still blanking a rate of 25%.
+ * All values are dashed while the current balance is unusable. Once it is
+ * valid, each cell follows its own input validation. Valid 0% rates stay visible.
  */
 function LoanComparison({
   current,
@@ -1001,7 +1145,8 @@ function LoanComparison({
   // The current balance is derived from all three Current Balance fields, and
   // the new payment from all of the refinance inputs, so those two cells use
   // the aggregate flags instead of a single field's.
-  const dash = (unusable: boolean, text: string) => (unusable ? DASH : text);
+  const dash = (unusable: boolean, text: string) =>
+    (currentBalanceBlocking || unusable ? DASH : text);
 
   const rows: {
     label: string;
@@ -1043,11 +1188,11 @@ function LoanComparison({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
-        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide ">
+      <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
+        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">
           Terms
         </div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide ">
+        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">
           Current loan terms
         </div>
         <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-primary">
@@ -1058,39 +1203,45 @@ function LoanComparison({
         <div
           key={row.label}
           className={[
-            "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center",
+            "grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-border last:border-b-0 sm:border-b-0",
             i % 2 === 1 ? "bg-muted/20" : "",
           ].join(" ")}
         >
-          <div className="px-4 py-3  ">{row.label}</div>
-          <div className="px-4 py-3 text-right  font-medium text-foreground tabular-nums">
-            {row.cur}
+          <div className="px-4 pt-4 pb-2 font-semibold sm:py-3 sm:font-normal">
+            {row.label}
           </div>
-          <div className="px-4 py-3 text-right tabular-nums">
-            <div
-              className={[
-                "font-bold",
-                row.label === "Monthly payment" && !refiAnalysisBlocking && !bad.monthlyPayment
-                  ? row.deltaGood
-                    ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
-                    : "text-foreground"
-                  : "text-foreground",
-              ].join(" ")}
-            >
-              {row.nxt}
-            </div>
-            {row.delta ? (
+          <div className="flex items-baseline justify-between gap-3 px-4 py-2 sm:block sm:py-3 sm:text-right text-foreground">
+            <span className="text-sm sm:hidden">Current loan</span>
+            <span className="font-medium tabular-nums">{row.cur}</span>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 px-4 pt-2 pb-4 sm:block sm:py-3">
+            <span className="text-sm sm:hidden">New loan</span>
+            <div className="text-right tabular-nums">
               <div
                 className={[
-                  "text-xs font-medium",
-                  row.deltaGood
-                    ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                  "font-bold",
+                  row.label === "Monthly payment" && !refiAnalysisBlocking && !bad.monthlyPayment
+                    ? row.deltaGood
+                      ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                      : "text-foreground"
                     : "text-foreground",
                 ].join(" ")}
               >
-                {row.delta}
+                {row.nxt}
               </div>
-            ) : null}
+              {row.delta ? (
+                <div
+                  className={[
+                    "text-xs font-medium",
+                    row.deltaGood
+                      ? "text-[var(--button-green)] dark:text-[var(--color-palo-verde-var)]"
+                      : "text-foreground",
+                  ].join(" ")}
+                >
+                  {row.delta}
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       ))}
@@ -1141,8 +1292,10 @@ function CalculationBreakdown({
     rows.push({ label: "Closing costs", value: -closing });
   }
 
-  const signed = (v: number) =>
-    `${v < 0 ? "−" : "+"}${formatCurrency(Math.abs(v))}`;
+  const signed = (value: number) => {
+    if (value === 0) return formatCurrency(0);
+      return `${value < 0 ? "−" : "+"}${formatCurrency(Math.abs(value))}`;
+    };
 
   return (
     <div className="mt-6 overflow-hidden rounded-lg border border-border bg-card">
@@ -1190,7 +1343,11 @@ function CalculationBreakdown({
               <span
                 className={[
                   "tabular-nums text-base font-bold",
-                  net < 0 ? "text-[var(--color-inline-error)]" : "text-primary",
+                  net === 0
+                  ? "text-muted-foreground"
+                  : net < 0
+                    ? "text-[var(--color-inline-error)]"
+                    : "text-primary",
                 ].join(" ")}
               >
                 {net < 0

@@ -80,13 +80,13 @@ const SAVINGS_FREQUENCIES = [
 type SavingsFrequencyKey = (typeof SAVINGS_FREQUENCIES)[number]["key"];
 
 const baseInputClass =
-  "w-full py-3 border-2 rounded-lg outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+  "w-full h-[55px] rounded-md border bg-background shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 const inputStateClass = (error?: string, warning?: string) =>
   error
-    ? "border-[var(--color-inline-error)] focus:border-[var(--color-inline-error)] focus:ring-2 focus:ring-[var(--color-inline-error)]/20"
+    ? "border-2 border-[var(--color-inline-error)]"
     : warning
-      ? "border-[var(--color-inline-warning)] focus:border-[var(--color-inline-warning)] focus:ring-2 focus:ring-[var(--color-inline-warning)]/20"
-      : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200";
+      ? "border-2 border-[var(--color-inline-warning)]"
+      : "border-input";
 
 export default function RetirementCalculator() {
   const [activeTab, setActiveTab] = useState<"balance" | "savings">("balance");
@@ -334,7 +334,7 @@ export default function RetirementCalculator() {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="annual-spending"
-                      className="block text-sm text-foreground"
+                      className="block text-base text-foreground"
                     >
                       Annual spending in retirement
                     </label>
@@ -410,7 +410,7 @@ export default function RetirementCalculator() {
                 <div key="retirement-length-field" className="space-y-2">
                   <label
                     htmlFor="retirement-length"
-                    className="block text-sm text-foreground"
+                    className="block text-base text-foreground"
                   >
                     Expected length of retirement
                   </label>
@@ -493,7 +493,7 @@ export default function RetirementCalculator() {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-during-retirement"
-                      className="block text-sm text-foreground"
+                      className="block text-base text-foreground"
                     >
                       Expected annual return during retirement
                     </label>
@@ -599,7 +599,7 @@ export default function RetirementCalculator() {
                 <div key="current-savings-field" className="space-y-2">
                   <label
                     htmlFor="current-savings"
-                    className="block text-sm text-foreground"
+                    className="block text-base text-foreground"
                   >
                     Current retirement savings
                   </label>
@@ -651,7 +651,7 @@ export default function RetirementCalculator() {
                 <div key="years-to-retirement-field" className="space-y-2">
                   <label
                     htmlFor="years-to-retirement"
-                    className="block text-sm text-foreground"
+                    className="block text-base text-foreground"
                   >
                     Years until retirement
                   </label>
@@ -726,7 +726,7 @@ export default function RetirementCalculator() {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-before-retirement"
-                      className="block text-sm text-foreground"
+                      className="block text-base text-foreground"
                     >
                       Expected annual return before retirement
                     </label>
