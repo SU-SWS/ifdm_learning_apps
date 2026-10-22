@@ -304,7 +304,7 @@ export default function MortgageCalculator() {
                               type="button"
                               aria-label="Interest rate help"
                               aria-describedby="rate-tooltip"
-                              className="cursor-help text-[#A7C1CC] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
+                              className="cursor-help text-[var(--info-icon)] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
                             >
                               <FaCircleInfo size={16} aria-hidden="true" />
                             </button>

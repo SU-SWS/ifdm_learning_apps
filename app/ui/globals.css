@@ -140,6 +140,7 @@
   --sticky-footer-background: rgba(149, 192, 203, 1);
   --sticky-footer-text: rgba(0, 0, 0, 1);
   --tab-text-color: rgba(0, 124, 146, 1);
+  --info-icon: rgba(167, 193, 204, 1);
 }
 
 .dark {
