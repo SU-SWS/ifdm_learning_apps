@@ -419,12 +419,12 @@ export default function DebtPayoffCalculator() {
                     className="bg-[var(--card-background)] rounded-3xl p-[32px]"
                   >
                     <CardHeader>
-                      <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">
+                      <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">
                         Your payoff summary
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                      <div className="rounded-lg mb-6 text-center">
+                      <div className="rounded-lg mb-6">
                         <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">
                           Time to pay off
                         </p>
@@ -727,12 +727,12 @@ export default function DebtPayoffCalculator() {
                     className="bg-[var(--card-background)] rounded-3xl p-[32px]"
                   >
                     <CardHeader className="">
-                      <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">
+                      <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">
                         Required payment
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="">
-                      <div className="rounded-lg mb-6 text-center">
+                      <div className="rounded-lg mb-6">
                         <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">
                           Payment per {getPeriodLabel(compoundingFrequency)}
                         </p>

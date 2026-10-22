@@ -49,7 +49,7 @@ function FieldError({ id, children }: { id: string; children: React.ReactNode })
     <p
       id={id}
       role="alert"
-      className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]"
+      className="mt-1 text-base font-semibold text-[var(--color-inline-error)]"
     >
       {children}
     </p>
@@ -465,7 +465,7 @@ export default function MortgageCalculator() {
           </div>
         </div>
         <div className="flex flex-col my-3">
-          <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
+          <h3 className="text-lg-title tracking-tight text-md font-bold mb-4">Monthly breakdown</h3>
           <hr />
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -509,7 +509,7 @@ export default function MortgageCalculator() {
           </div>
         </div>
         <div className="py-5">
-          <p className="text-sm">{headline}</p>
+          <p className="text-base">{headline}</p>
         </div>
       </div>
     </div>
@@ -538,7 +538,7 @@ export default function MortgageCalculator() {
 
             {/* ── Tab 1: Afford ─────────────────────────────────────────── */}
             <TabsContent value="afford">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Estimate home price based on a monthly payment you can allocate
                 toward a mortgage.
               </p>
@@ -549,7 +549,7 @@ export default function MortgageCalculator() {
                     <div className="flex items-center gap-2 mb-1">
                       <label
                         htmlFor="monthly-payment"
-                        className="block text-sm font-semibold"
+                        className="block text-base font-semibold"
                       >
                         Monthly mortgage payment (principal + interest)
                       </label>
@@ -601,7 +601,7 @@ export default function MortgageCalculator() {
                   {/* Down Payment */}
                   <div className="pb-5">
                     <div className="flex flex-row pb-2 justify-between items-center">
-                      <span className="block text-sm font-semibold">Down payment</span>
+                      <span className="block text-base font-semibold">Down payment</span>
                       <fieldset className="border-0 p-0 m-0">
                         <legend className="sr-only">Down payment type</legend>
                         <div className="flex flex-row gap-4">
@@ -714,7 +714,7 @@ export default function MortgageCalculator() {
 
                   {/* Interest Rate */}
                   <div className="pb-5">
-                    <label htmlFor="interest-rate-afford" className="block text-sm font-semibold">
+                    <label htmlFor="interest-rate-afford" className="block text-base font-semibold">
                       Interest rate
                     </label>
                     <div className="relative">
@@ -743,7 +743,7 @@ export default function MortgageCalculator() {
                   {/* Loan Term */}
                   <div className="pb-5">
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="block text-sm font-semibold mb-2">Loan term</legend>
+                      <legend className="block text-base font-semibold mb-2">Loan term</legend>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <label className="flex-1 cursor-pointer flex flex-row">
                           <input type="radio" name="loanTermAfford" value="15" checked={loanTerm === 15} onChange={() => setLoanTerm(15)} className="mr-3 w-4 accent-lagunita" />
@@ -759,12 +759,12 @@ export default function MortgageCalculator() {
 
                   {/* Optional Section */}
                   <div className="pt-4 border-t border-gray-200">
-                    <h2 className="text-lg font-semibold mb-4">Additional housing costs</h2>
+                    <h2 className="text-lg-title tracking-tight text-md font-bold mb-4">Additional housing costs</h2>
 
                     {/* Property Taxes */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Property taxes (annual)</span>
+                        <span className="block text-base font-semibold">Property taxes (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Property tax input type</legend>
                           <div className="flex flex-row gap-4">
@@ -855,7 +855,7 @@ export default function MortgageCalculator() {
                     {/* Homeowners Insurance */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Homeowners insurance (annual)</span>
+                        <span className="block text-base font-semibold">Homeowners insurance (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Home insurance input type</legend>
                           <div className="flex flex-row gap-4">
@@ -945,7 +945,7 @@ export default function MortgageCalculator() {
 
                     {/* HOA Dues */}
                     <div className="pb-5">
-                      <label htmlFor="hoa-dues-afford" className="block text-sm font-semibold">HOA dues (monthly)</label>
+                      <label htmlFor="hoa-dues-afford" className="block text-base font-semibold">HOA dues (monthly)</label>
                       <div className="relative">
                         <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] font-medium">$</span>
                         <input
@@ -990,14 +990,14 @@ export default function MortgageCalculator() {
 
             {/* ── Tab 2: Payment ────────────────────────────────────────── */}
             <TabsContent value="payment">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Estimate a monthly mortgage payment based on your target home price.
               </p>
               <div className="grid md:grid-cols-2 py-8 gap-8">
                 <div className="pb-5">
                   {/* Home Price */}
                   <div className="pb-5">
-                    <label htmlFor="home-price" className="block text-sm font-semibold">Home price</label>
+                    <label htmlFor="home-price" className="block text-base font-semibold">Home price</label>
                     <div className="relative">
                       <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                       <input
@@ -1041,7 +1041,7 @@ export default function MortgageCalculator() {
                   {/* Down Payment */}
                   <div className="pb-5">
                     <div className="flex flex-row pb-2 justify-between items-center">
-                      <span className="block text-sm font-semibold">Down payment</span>
+                      <span className="block text-base font-semibold">Down payment</span>
                       <fieldset className="border-0 p-0 m-0">
                         <legend className="sr-only">Down payment type</legend>
                         <div className="flex flex-row gap-4">
@@ -1156,7 +1156,7 @@ export default function MortgageCalculator() {
 
                   {/* Interest Rate */}
                   <div className="pb-5">
-                    <label htmlFor="interest-rate-payment" className="block text-sm font-semibold">Interest rate</label>
+                    <label htmlFor="interest-rate-payment" className="block text-base font-semibold">Interest rate</label>
                     <div className="relative">
                       <input
                         id="interest-rate-payment"
@@ -1183,7 +1183,7 @@ export default function MortgageCalculator() {
                   {/* Loan Term */}
                   <div className="pb-5">
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="block text-sm font-semibold mb-2">Loan term</legend>
+                      <legend className="block text-base font-semibold mb-2">Loan term</legend>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <label className="flex-1 cursor-pointer flex flex-row">
                           <input type="radio" name="loanTermPayment" value="15" checked={loanTerm === 15} onChange={() => setLoanTerm(15)} className="mr-3 w-4 accent-lagunita" />
@@ -1204,7 +1204,7 @@ export default function MortgageCalculator() {
                     {/* Property Taxes */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Property taxes (annual)</span>
+                        <span className="block text-base font-semibold">Property taxes (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Property tax input type</legend>
                           <div className="flex flex-row gap-4">
@@ -1295,7 +1295,7 @@ export default function MortgageCalculator() {
                     {/* Homeowners Insurance */}
                     <div className="pb-5">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Homeowners insurance (annual)</span>
+                        <span className="block text-base font-semibold">Homeowners insurance (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Home insurance input type</legend>
                           <div className="flex flex-row gap-4">
@@ -1385,7 +1385,7 @@ export default function MortgageCalculator() {
 
                     {/* HOA Dues */}
                     <div className="pb-5">
-                      <label htmlFor="hoa-dues-payment" className="block text-sm font-semibold">HOA dues (monthly)</label>
+                      <label htmlFor="hoa-dues-payment" className="block text-base font-semibold">HOA dues (monthly)</label>
                       <div className="relative">
                         <span aria-hidden="true" className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                         <input

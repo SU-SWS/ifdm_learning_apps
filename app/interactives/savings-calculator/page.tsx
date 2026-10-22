@@ -618,8 +618,8 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
-                  <div className={`text-4xl font-bold text-center ${
+                  <CardTitle className="text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
+                  <div className={`text-4xl font-bold ${
                       isInvalid(results.totalDeposited) || overflowWarning
                         ? "text-foreground"
                         : "text-[var(--color-teal)]"
@@ -643,8 +643,8 @@ export default function SavingsCalculator() {
 
               {mode === "time-to-goal" && (
                 <>
-                <CardTitle className="text-center text-md font-bold">Estimated time to reach goal:</CardTitle>
-                  <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
+                <CardTitle className="text-md font-bold">Estimated time to reach goal:</CardTitle>
+                  <div className="text-4xl font-bold" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
                     {isInvalid(results.timeInMonths)
                       ? "-"
                       : overflowWarning
@@ -657,8 +657,8 @@ export default function SavingsCalculator() {
 
               {mode === "future-balance" && (
                 <>
-                <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
-                <div className={`text-4xl font-bold text-center ${
+                <CardTitle className="text-md font-bold">Future balance:</CardTitle>
+                <div className={`text-4xl font-bold ${
                       isInvalid(results.finalBalance) || overflowWarning
                         ? "text-foreground"
                         : "text-[var(--color-teal)]"
