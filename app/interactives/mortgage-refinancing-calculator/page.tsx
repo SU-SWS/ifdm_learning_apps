@@ -356,7 +356,7 @@ export default function MortgageCalculator() {
                 <CardContent className="space-y-6">
                   <div className="md:grid md:grid-cols-2 gap-4">
                     <div className="pr-4">
-                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
+                      <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
                   
                       <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-balance">Remaining balance ($)</Label>
@@ -519,7 +519,7 @@ export default function MortgageCalculator() {
                       </div>
                     </div>
                     <div className="pl-0">
-                      <h2 className="mb-4 text-lg text-lagunita font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
+                      <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
 
                       <div className="mb-5 relative">
                         <Label className="font-semibold" htmlFor="ref-new-loan-amount">New loan amount</Label>

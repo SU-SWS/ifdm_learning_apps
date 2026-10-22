@@ -609,11 +609,11 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={[
-        "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal rounded-md text-center font-bold ring-offset-background transition-colors cursor-pointer",
+        "text-[var(--tab-text-color)] border-2 border-lagunita px-4 py-2 h-18 whitespace-normal rounded-md text-center font-bold ring-offset-background transition-colors cursor-pointer",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-navy hover:text-white",
         active
           ? "bg-lagunita text-white"
-          : "bg-transparent text-lagunita",
+          : "bg-transparent",
       ].join(" ")}
     >
       {children}
