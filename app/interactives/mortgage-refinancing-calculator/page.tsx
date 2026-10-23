@@ -198,9 +198,9 @@ export default function MortgageCalculator() {
                     Calculate the present value of your remaining monthly mortgage payments (your mortgage balance).
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-3">
                   <div className="relative">
-                    <Label className="font-semibold" htmlFor="months">Months remaining on loan</Label>
+                    <Label className="block mb-1 font-semibold" htmlFor="months">Months remaining on loan</Label>
                     <Input
                       id="months"
                       type="number"
@@ -243,7 +243,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="relative">
-                    <Label className="font-semibold" htmlFor="rate">Annual interest rate (%)</Label>
+                    <Label className="block mb-1 font-semibold" htmlFor="rate">Annual interest rate (%)</Label>
                     <Input
                       id="rate"
                       type="number"
@@ -283,7 +283,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   <div className="relative">
-                    <Label className="font-semibold" htmlFor="payment">Monthly payment amount ($)</Label>
+                    <Label className="block mb-1 font-semibold" htmlFor="payment">Monthly payment amount ($)</Label>
                     <Input
                       id="payment"
                       type="number"
@@ -353,13 +353,13 @@ export default function MortgageCalculator() {
                   <CardDescription>Analyze if refinancing makes financial sense for your situation.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-3">
                   <div className="md:grid md:grid-cols-2 gap-4">
                     <div className="pr-4">
                       <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b-1 border-lagunita">Current Loan Term</h2>
                   
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-balance">Remaining balance ($)</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-balance">Remaining balance ($)</Label>
                         <Input
                           id="ref-balance"
                           type="number"
@@ -398,8 +398,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-current-months">Months remaining on loan</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-current-months">Months remaining on loan</Label>
                         <Input
                           id="ref-current-months"
                           type="number"
@@ -438,8 +438,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-current-rate">Current interest rate (%)</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-current-rate">Current interest rate (%)</Label>
                         <Input
                           id="ref-current-rate"
                           type="number"
@@ -478,8 +478,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-current-monthly-payment">Current monthly payment amount</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-current-monthly-payment">Current monthly payment amount</Label>
                         <Input
                           id="ref-current-monthly-payment"
                           type="number"
@@ -521,8 +521,8 @@ export default function MortgageCalculator() {
                     <div className="pl-0">
                       <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b-1 border-lagunita">New Loan Terms</h2>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-loan-amount">New loan amount</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-new-loan-amount">New loan amount</Label>
                         <Input
                           id="ref-new-loan-amount"
                           type="number"
@@ -561,8 +561,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-months">New loan term (months)</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-new-months">New loan term (months)</Label>
                         <Input
                           id="ref-new-months"
                           type="number"
@@ -602,8 +602,8 @@ export default function MortgageCalculator() {
                         <p className="mt-3 text-[14px]">{refNewMonths || "0"} months = {(Number.parseFloat(refNewMonths || "0") / 12).toFixed(1)} years</p>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-new-rate">New annual interest rate (%)</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-new-rate">New annual interest rate (%)</Label>
                         <Input
                           id="ref-new-rate"
                           type="number"
@@ -644,8 +644,8 @@ export default function MortgageCalculator() {
 
                       <div className="my-6 border-b-1 border-lagunita"/>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-closing">Closing cost & fees</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-closing">Closing cost & fees</Label>
                         <Input
                           id="ref-closing"
                           type="number"
@@ -684,8 +684,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="ref-years-in-house">Expected years living in house</Label>
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="ref-years-in-house">Expected years living in house</Label>
                         <Input
                           id="ref-years-in-house"
                           type="number"

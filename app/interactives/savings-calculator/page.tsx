@@ -314,7 +314,7 @@ export default function SavingsCalculator() {
                 <p className="font-semibold">What will my savings grow to in the future?</p>
               )}
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-3">
               {overflowWarning && (
                 <div className="p-3 rounded-md bg-[var(--color-inline-warning)]/10 border border-[var(--color-inline-warning)]">
                   <p className="text-sm font-semibold text-[var(--color-inline-warning)]">

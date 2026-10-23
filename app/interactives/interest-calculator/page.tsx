@@ -370,7 +370,7 @@ export default function InterestRateVisual() {
           {/* LEFT: inputs */}
           <div>
             {/* Amount + Rate */}
-            <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col gap-3 mb-3">
               {/* Initial Amount */}
               <div className="flex-1 min-w-[150px] space-y-1">
                 <label
@@ -463,7 +463,7 @@ export default function InterestRateVisual() {
             </div>
 
             {/* Periods + Compounding */}
-            <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col gap-3 mb-3">
               {/* Periods */}
               <div className="flex-1 min-w-[150px] space-y-1">
                 <label

@@ -254,7 +254,7 @@ export default function MortgageCalculator() {
             {/* ── Tab 1: Current Balance ─────────────────────────────────── */}
             <TabsContent value="current-balance">
               <Card>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-3">
                   <div className="grid gap-12 lg:grid-cols-2">
                     {/* Left — inputs */}
                     <div>
@@ -263,8 +263,8 @@ export default function MortgageCalculator() {
                         value of your remaining monthly mortgage payments).
                       </p>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="months">
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="months">
                           Months remaining on loan
                         </Label>
                         <div className="relative">
@@ -294,7 +294,7 @@ export default function MortgageCalculator() {
                         )}
                       </div>
 
-                      <div className="mb-5 relative">
+                      <div className="mb-3 relative">
                         <div className="flex items-center gap-1 mb-1">
                           <Label className="font-semibold" htmlFor="rate">
                             Current interest rate
@@ -340,8 +340,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="payment">
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="payment">
                           Monthly payment amount
                         </Label>
                         <div className="relative">
@@ -515,9 +515,9 @@ export default function MortgageCalculator() {
                           New Loan Terms
                         </h2>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-new-loan-amount"
                           >
                             New loan amount
@@ -559,9 +559,9 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-new-months"
                           >
                             New loan term (months)
@@ -604,9 +604,9 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-new-rate"
                           >
                             New interest rate
@@ -641,10 +641,10 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b border-lagunita pb-2">Optional</h2>
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-closing"
                           >
                             Closing costs & fees
@@ -677,9 +677,9 @@ export default function MortgageCalculator() {
                           </div>
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-years-in-house"
                           >
                             Expected years living in house

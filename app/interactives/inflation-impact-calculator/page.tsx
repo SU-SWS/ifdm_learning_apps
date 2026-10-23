@@ -94,9 +94,9 @@ export default function InflationCalculator() {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Parameters Panel */}
           <Card>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-3">
               {/* Initial Price */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="initial-price" className="text-md font-medium">
                   Initial price
                 </Label>
@@ -155,7 +155,7 @@ export default function InflationCalculator() {
               </div>
 
               {/* Inflation Rate Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <div className="flex sm:items-center space-between gap-2 flex-col sm:flex-row">
                   <Label
                     htmlFor="inflation-rate-slider"
@@ -194,7 +194,7 @@ export default function InflationCalculator() {
               </div>
 
               {/* Time Period Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <div className="flex items-center gap-1">
                   <Label
                     htmlFor="time-period-slider"

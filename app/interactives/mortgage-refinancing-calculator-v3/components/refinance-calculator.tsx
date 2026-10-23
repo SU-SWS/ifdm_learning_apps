@@ -669,7 +669,7 @@ function NumberField({
       .join(" ") || undefined;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <label
         htmlFor={id}
         className="flex items-center gap-1.5 font-semibold text-foreground"
@@ -757,7 +757,7 @@ function CurrentBalanceForm(
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-3">
       <p className=" leading-relaxed ">
         Calculate your remaining mortgage balance (the present value of your
         remaining monthly mortgage payments).
@@ -847,7 +847,7 @@ function RefinanceForm(
       </p>
 
       {/* New loan terms */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
           <h2 className="text-base font-semibold text-primary">
             New Loan Terms
@@ -892,7 +892,7 @@ function RefinanceForm(
       </div>
 
       {/* Optional */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <h2 className="border-b border-border pb-2 text-base font-semibold text-primary">
           Optional
         </h2>

@@ -320,7 +320,7 @@ export default function RetirementCalculator() {
 
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Left Column - Inputs */}
-          <div className="space-y-8">
+          <div className="space-y-3">
             {activeTab === "balance" ? (
               <>
                 <div key="step1-heading" className="mb-4">
@@ -330,7 +330,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Annual Spending */}
-                <div key="annual-spending-field" className="space-y-2">
+                <div key="annual-spending-field" className="space-y-1">
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="annual-spending"
@@ -407,7 +407,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Retirement Length */}
-                <div key="retirement-length-field" className="space-y-2">
+                <div key="retirement-length-field" className="space-y-1">
                   <label
                     htmlFor="retirement-length"
                     className="block text-base text-foreground"
@@ -489,7 +489,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Expected Return During Retirement */}
-                <div key="return-during-retirement-field" className="space-y-2">
+                <div key="return-during-retirement-field" className="space-y-1">
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-during-retirement"
@@ -588,7 +588,7 @@ export default function RetirementCalculator() {
                     </p>
                   </div>
                 )}
-                <div key="step2-heading" className="mb-4">
+                <div key="step2-heading" className="mt-8 mb-4">
                   <p className="font-semibold">
                     Step 2: Calculate savings needed to reach the required
                     balance
@@ -596,7 +596,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Current Savings */}
-                <div key="current-savings-field" className="space-y-2">
+                <div key="current-savings-field" className="space-y-1">
                   <label
                     htmlFor="current-savings"
                     className="block text-base text-foreground"
@@ -648,7 +648,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Years to Retirement */}
-                <div key="years-to-retirement-field" className="space-y-2">
+                <div key="years-to-retirement-field" className="space-y-1">
                   <label
                     htmlFor="years-to-retirement"
                     className="block text-base text-foreground"
@@ -722,7 +722,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Expected Return Before Retirement */}
-                <div key="return-before-retirement-field" className="space-y-2">
+                <div key="return-before-retirement-field" className="space-y-1">
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-before-retirement"

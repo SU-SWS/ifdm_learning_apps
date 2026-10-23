@@ -806,14 +806,14 @@ export default function Page() {
           {/* Input Fields */}
           <section
             aria-label="Calculator inputs"
-            className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2"
+            className="space-y-3 mb-25 md:mb-0 w-full lg:w-1/2"
           >
             {/* Present Value */}
             {solveFor !== "PV" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="pv"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Present value
                 </Label>
@@ -846,10 +846,10 @@ export default function Page() {
 
             {/* Payment — early position for RATE/NPER */}
             {(solveFor === "RATE" || solveFor === "NPER") && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="pmt"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Payment per period
                 </Label>
@@ -880,10 +880,10 @@ export default function Page() {
 
             {/* Future Value */}
             {solveFor !== "FV" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="fv"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Future value
                 </Label>
@@ -918,10 +918,10 @@ export default function Page() {
             {solveFor !== "PMT" &&
               solveFor !== "RATE" &&
               solveFor !== "NPER" && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label
                     htmlFor="pmt"
-                    className="block font-semibold text-foreground mb-2"
+                    className="block font-semibold text-foreground mb-1"
                   >
                     Payment per period
                   </Label>
@@ -954,10 +954,10 @@ export default function Page() {
 
             {/* Annual Interest Rate */}
             {solveFor !== "RATE" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="rate"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Annual interest rate
                 </Label>
@@ -989,10 +989,10 @@ export default function Page() {
 
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="periods"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Number of periods
                 </Label>
@@ -1016,10 +1016,10 @@ export default function Page() {
             )}
 
             {/* Compounding Frequency */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label
                 htmlFor="compounding"
-                className="block font-semibold text-foreground mb-2"
+                className="block font-semibold text-foreground mb-1"
               >
                 Compounding frequency
               </Label>
@@ -1044,8 +1044,8 @@ export default function Page() {
             </div>
 
             {/* Payment Frequency */}
-            <div className="space-y-3">
-              <Label className="block font-semibold text-foreground mb-2">
+            <div className="space-y-1">
+              <Label className="block font-semibold text-foreground mb-1">
                 Payments occur
               </Label>
               <div className="flex items-center gap-4">
@@ -1099,8 +1099,8 @@ export default function Page() {
             </div>
 
             {/* Payment Timing */}
-            <div className="space-y-2">
-              <Label className="block font-semibold text-foreground mb-2">
+            <div className="space-y-1">
+              <Label className="block font-semibold text-foreground mb-1">
                 Payment timing
               </Label>
               <div className="flex rounded-md border border-border overflow-hidden w-fit">

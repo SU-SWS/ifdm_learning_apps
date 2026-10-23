@@ -545,7 +545,7 @@ export default function MortgageCalculator() {
               <div className="grid md:grid-cols-2 gap-8 py-8">
                 <div className="pr-0">
                   {/* Monthly payment */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <div className="flex items-center gap-2 mb-1">
                       <label
                         htmlFor="monthly-payment"
@@ -599,7 +599,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Down Payment */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <div className="flex flex-row pb-2 justify-between items-center">
                       <span className="block text-base font-semibold">Down payment</span>
                       <fieldset className="border-0 p-0 m-0">
@@ -713,8 +713,8 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Interest Rate */}
-                  <div className="pb-5">
-                    <label htmlFor="interest-rate-afford" className="block text-base font-semibold">
+                  <div className="pb-3">
+                    <label htmlFor="interest-rate-afford" className="block text-base font-semibold mb-1">
                       Interest rate
                     </label>
                     <div className="relative">
@@ -741,9 +741,9 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Loan Term */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="block text-base font-semibold mb-2">Loan term</legend>
+                      <legend className="block text-base font-semibold mb-1">Loan term</legend>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <label className="flex-1 cursor-pointer flex flex-row">
                           <input type="radio" name="loanTermAfford" value="15" checked={loanTerm === 15} onChange={() => setLoanTerm(15)} className="mr-3 w-4 accent-lagunita" />
@@ -762,7 +762,7 @@ export default function MortgageCalculator() {
                     <h2 className="text-lg-title tracking-tight text-md font-bold mb-4">Additional housing costs</h2>
 
                     {/* Property Taxes */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
                         <span className="block text-base font-semibold">Property taxes (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
@@ -853,7 +853,7 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* Homeowners Insurance */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
                         <span className="block text-base font-semibold">Homeowners insurance (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
@@ -944,8 +944,8 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* HOA Dues */}
-                    <div className="pb-5">
-                      <label htmlFor="hoa-dues-afford" className="block text-base font-semibold">HOA dues (monthly)</label>
+                    <div className="pb-3">
+                      <label htmlFor="hoa-dues-afford" className="block text-base font-semibold mb-1">HOA dues (monthly)</label>
                       <div className="relative">
                         <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] font-medium">$</span>
                         <input
@@ -994,10 +994,10 @@ export default function MortgageCalculator() {
                 Estimate a monthly mortgage payment based on your target home price.
               </p>
               <div className="grid md:grid-cols-2 py-8 gap-8">
-                <div className="pb-5">
+                <div className="pb-3">
                   {/* Home Price */}
-                  <div className="pb-5">
-                    <label htmlFor="home-price" className="block text-base font-semibold">Home price</label>
+                  <div className="pb-3">
+                    <label htmlFor="home-price" className="block text-base font-semibold mb-1">Home price</label>
                     <div className="relative">
                       <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                       <input
@@ -1039,7 +1039,7 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Down Payment */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <div className="flex flex-row pb-2 justify-between items-center">
                       <span className="block text-base font-semibold">Down payment</span>
                       <fieldset className="border-0 p-0 m-0">
@@ -1155,8 +1155,8 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Interest Rate */}
-                  <div className="pb-5">
-                    <label htmlFor="interest-rate-payment" className="block text-base font-semibold">Interest rate</label>
+                  <div className="pb-3">
+                    <label htmlFor="interest-rate-payment" className="block text-base font-semibold mb-1">Interest rate</label>
                     <div className="relative">
                       <input
                         id="interest-rate-payment"
@@ -1181,9 +1181,9 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Loan Term */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="block text-base font-semibold mb-2">Loan term</legend>
+                      <legend className="block text-base font-semibold mb-1">Loan term</legend>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <label className="flex-1 cursor-pointer flex flex-row">
                           <input type="radio" name="loanTermPayment" value="15" checked={loanTerm === 15} onChange={() => setLoanTerm(15)} className="mr-3 w-4 accent-lagunita" />
@@ -1202,7 +1202,7 @@ export default function MortgageCalculator() {
                     <h2 className="text-lg font-semibold mb-4">Additional housing costs</h2>
 
                     {/* Property Taxes */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
                         <span className="block text-base font-semibold">Property taxes (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
@@ -1293,7 +1293,7 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* Homeowners Insurance */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
                         <span className="block text-base font-semibold">Homeowners insurance (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
@@ -1384,8 +1384,8 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* HOA Dues */}
-                    <div className="pb-5">
-                      <label htmlFor="hoa-dues-payment" className="block text-base font-semibold">HOA dues (monthly)</label>
+                    <div className="pb-3">
+                      <label htmlFor="hoa-dues-payment" className="block text-base font-semibold mb-1">HOA dues (monthly)</label>
                       <div className="relative">
                         <span aria-hidden="true" className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                         <input

@@ -177,8 +177,8 @@ export default function DebtPayoffCalculator() {
               <>
                 <div className="grid md:grid-cols-2 gap-8">
                   <Card className="mb-6">
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
+                    <CardContent className="space-y-3">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="debt-amount"
@@ -218,7 +218,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate"
@@ -258,7 +258,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2 relative">
+                      <div className="space-y-1 relative">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select"
@@ -305,7 +305,7 @@ export default function DebtPayoffCalculator() {
                           12 debt payments per year.
                         </p>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label htmlFor="payment" className="font-semibold">
                             Payment per compounding period
@@ -353,7 +353,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="addtlpayment"
@@ -489,8 +489,8 @@ export default function DebtPayoffCalculator() {
               <>
                 <div className="grid md:grid-cols-2 gap-8">
                   <Card className="mb-6">
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
+                    <CardContent className="space-y-3">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="debt-amount-2"
@@ -530,7 +530,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2 relative">
+                      <div className="space-y-1 relative">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate-2"
@@ -570,7 +570,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select-2"
@@ -616,7 +616,7 @@ export default function DebtPayoffCalculator() {
                           12 debt payments per year.
                         </p>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label className="font-semibold">
                             Target time to payoff

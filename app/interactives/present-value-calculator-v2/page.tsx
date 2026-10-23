@@ -246,16 +246,16 @@ export default function PresentValueCalculator() {
             {/* Single Amount Tab */}
             <TabsContent value="single" className="space-y-8">
               <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
-                <div className="w-full md:w-1/2 space-y-6 bg-transparent">
+                <div className="w-full md:w-1/2 space-y-3 bg-transparent">
                   <p>
                     Enter a future value to calculate what it is worth today.
                   </p>
 
                   {/* Future Value */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="future-value"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Future value
                     </Label>
@@ -324,11 +324,11 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Interest Rate */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div className="relative">
                       <Label
                         htmlFor="interest-rate"
-                        className="block font-semibold text-foreground mb-2"
+                        className="block font-semibold text-foreground mb-1"
                       >
                         Annual interest rate
                       </Label>
@@ -423,10 +423,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Time Period */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="time-period"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Number of compounding periods
                     </Label>
@@ -500,10 +500,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Compounding Frequency */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       id="single-compounding-frequency-label"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Compounding frequency
                     </Label>
@@ -601,7 +601,7 @@ export default function PresentValueCalculator() {
             {/* Payment Series Tab */}
             <TabsContent value="series" className="space-y-8">
               <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
-                <div className="bg-transparent w-full md:w-1/2 space-y-6">
+                <div className="bg-transparent w-full md:w-1/2 space-y-3">
                   <p>
                     Find what a series of payments is worth today. Enter the
                     payment per period and number of periods (payments) to
@@ -609,10 +609,10 @@ export default function PresentValueCalculator() {
                   </p>
 
                   {/* Payment Amount */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="payment-amount"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Payment per period
                     </Label>
@@ -679,11 +679,11 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Final Amount */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div className="space-y-2 flex items-center gap-1 mb-1">
                       <Label
                         htmlFor="final-amount"
-                        className="block font-semibold text-foreground mb-2"
+                        className="block font-semibold text-foreground mb-1"
                       >
                         Final amount (optional)
                       </Label>
@@ -754,10 +754,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Payment Interest Rate */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="payment-interest-rate"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Annual interest rate
                     </Label>
@@ -852,10 +852,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Number of Payments */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="number-of-payments"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Number of compounding periods (payments)
                     </Label>
@@ -935,10 +935,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Payment Frequency */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       id="compounding-frequency-label"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Compounding frequency
                     </Label>

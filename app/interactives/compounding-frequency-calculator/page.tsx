@@ -245,12 +245,12 @@ export default function CompoundInterestCalculator() {
           {/* Input Fields */}
           <section
             aria-label="Calculator inputs"
-            className="space-y-6 mb-10 w-full lg:w-1/2"
+            className="space-y-3 mb-10 w-full lg:w-1/2"
           >
             <div>
               <label
                 htmlFor="initial-amount"
-                className="block font-semibold text-foreground mb-2"
+                className="block font-semibold text-foreground mb-1"
               >
                 Initial amount
               </label>
@@ -314,7 +314,7 @@ export default function CompoundInterestCalculator() {
             <div>
               <label
                 htmlFor="annual-rate"
-                className="block font-semibold text-foreground mb-2"
+                className="block font-semibold text-foreground mb-1"
               >
                 Annual interest rate
               </label>
@@ -379,7 +379,7 @@ export default function CompoundInterestCalculator() {
               <div className="flex items-start gap-2">
                 <label
                   htmlFor="periods"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Number of compounding periods
                 </label>
@@ -443,7 +443,7 @@ export default function CompoundInterestCalculator() {
               <div className="flex items-start gap-2">
                 <label
                   htmlFor="compounding-frequency"
-                  className="block font-semibold text-foreground mb-3"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Compounding frequency
                 </label>

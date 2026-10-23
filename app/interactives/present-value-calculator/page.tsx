@@ -56,9 +56,9 @@ export default function PresentValueCalculator() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Parameters Panel */}
           <Card className="flex-1">
-             <CardContent className="space-y-6">
+             <CardContent className="space-y-3">
               {/* Future Value Input */}
-              <div className="space-y-2 relative">
+              <div className="space-y-1 relative">
                 <Label htmlFor="future-value" className="text-md mb-1 block font-bold">
                   Future value ($):
                 </Label>
@@ -93,7 +93,7 @@ export default function PresentValueCalculator() {
               </div>
 
               {/* Interest Rate Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <Label className="text-md mb-1 block font-bold">Interest rate (%): <span className="text-lagunita">{interestRate[0].toFixed(1)} </span></Label>
                 <CustomSlider
                   value={interestRate}
@@ -110,7 +110,7 @@ export default function PresentValueCalculator() {
               </div>
 
               {/* Time Period Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <Label className="text-md mb-1 block font-bold">Time period: <span className="text-lagunita">{timePeriod[0]} years</span></Label>
                 <CustomSlider
                   value={timePeriod}
