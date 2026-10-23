@@ -193,6 +193,12 @@ export default function SavingsCalculator() {
     currentBalance <= 1000000000 &&
     savingsGoal <= currentBalance;
 
+  // Results dash only when the calculation is blocked by a visible error or warning.
+  // Empty or untouched fields leave the results blank.
+  const hasResultError =
+    validation.hasBlockingErrors &&
+    (Object.keys(validation.errors).length > 0 || Object.keys(validation.warnings).length > 0);
+
   // Handle field blur - mark field as touched
   const handleFieldBlur = (fieldName: string) => {
     setTouched((prev) => ({
@@ -620,12 +626,12 @@ export default function SavingsCalculator() {
                 <>
                   <CardTitle className="text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
                   <div className={`text-4xl font-bold ${
-                      isInvalid(results.totalDeposited) || overflowWarning
+                      !isInvalid(results.totalDeposited) && overflowWarning
                         ? "text-foreground"
                         : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? "-"
+                      ? (hasResultError ? "-" : "")
                       : overflowWarning
                       ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -644,9 +650,9 @@ export default function SavingsCalculator() {
               {mode === "time-to-goal" && (
                 <>
                 <CardTitle className="text-md font-bold">Estimated time to reach goal:</CardTitle>
-                  <div className="text-4xl font-bold" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
+                  <div className="text-4xl font-bold" style={{ color: !isInvalid(results.timeInMonths) && overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
                     {isInvalid(results.timeInMonths)
-                      ? "-"
+                      ? (hasResultError ? "-" : "")
                       : overflowWarning
                       ? "Too large to display"
                       : `${Math.floor(Math.round(results.timeInMonths) / 12)} years ${Math.round(results.timeInMonths) % 12} months`
@@ -659,12 +665,12 @@ export default function SavingsCalculator() {
                 <>
                 <CardTitle className="text-md font-bold">Future balance:</CardTitle>
                 <div className={`text-4xl font-bold ${
-                      isInvalid(results.finalBalance) || overflowWarning
+                      !isInvalid(results.finalBalance) && overflowWarning
                         ? "text-foreground"
                         : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? "-"
+                      ? (hasResultError ? "-" : "")
                       : overflowWarning
                       ? "Too large to display"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -683,7 +689,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.totalDeposited) || overflowWarning
-                        ? "-"
+                        ? (hasResultError ? "-" : "")
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -694,7 +700,7 @@ export default function SavingsCalculator() {
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg sm:bg-[var(--results-white-background)] text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis`}
                       >
                         {isInvalid(results.interestEarned) || overflowWarning
-                        ? "-"
+                        ? (hasResultError ? "-" : "")
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -705,7 +711,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.finalBalance) || overflowWarning
-                        ? "-"
+                        ? (hasResultError ? "-" : "")
                         : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>

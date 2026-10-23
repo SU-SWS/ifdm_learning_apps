@@ -137,6 +137,24 @@ export default function DebtPayoffCalculator() {
     focusedField !== "debtAmount" &&
     focusedField !== "interestRate";
 
+  // Results show "-" only when a visible error or warning blocks them; empty or untouched fields leave them blank.
+  const payoffDash =
+    showDebtAmountError ||
+    showInterestRateError ||
+    showPaymentError ||
+    showPaymentWarning ||
+    !!v.additionalPaymentError
+      ? "-"
+      : "";
+  const requiredDash =
+    showDebtAmountError ||
+    showInterestRateError ||
+    showTargetTimeError ||
+    !!v.targetYearsError ||
+    !!v.targetMonthsError
+      ? "-"
+      : "";
+
   const payoffResult = calculatePayoffTime({
     principal: v.debtAmountNum,
     periodicRate: v.periodicRate,
@@ -430,7 +448,7 @@ export default function DebtPayoffCalculator() {
                         </p>
                         <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">
                           {v.payoffBlocked
-                            ? "-"
+                            ? payoffDash
                             : formatTime(payoffResult.timeInMonths)}
                         </p>
                         {!v.payoffBlocked && (
@@ -447,7 +465,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.payoffBlocked
-                              ? "-"
+                              ? payoffDash
                               : formatCurrency(payoffResult.totalInterest)}
                           </div>
                         </div>
@@ -458,7 +476,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.payoffBlocked
-                              ? "-"
+                              ? payoffDash
                               : formatCurrency(payoffResult.totalAmountPaid)}
                           </div>
                         </div>
@@ -469,7 +487,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--results-white-background)] text-[var(--color-teal)]">
                             {v.payoffBlocked
-                              ? "-"
+                              ? payoffDash
                               : formatCurrency(payoffResult.interestSaved)}
                           </div>
                         </div>
@@ -738,7 +756,7 @@ export default function DebtPayoffCalculator() {
                         </p>
                         <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                           {v.requiredPaymentBlocked
-                            ? "-"
+                            ? requiredDash
                             : formatCurrency(
                                 requiredPaymentResult.requiredPayment,
                               )}
@@ -760,7 +778,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
-                              ? "-"
+                              ? requiredDash
                               : formatCurrency(
                                   requiredPaymentResult.totalInterest,
                                 )}
@@ -773,7 +791,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
-                              ? "-"
+                              ? requiredDash
                               : formatCurrency(
                                   requiredPaymentResult.totalAmountPaid,
                                 )}

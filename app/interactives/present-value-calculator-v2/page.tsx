@@ -101,7 +101,7 @@ export default function PresentValueCalculator() {
   const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
   const seriesMaxPeriods = frequencyMap[paymentFrequency].periods * 100
 
-  // A blank required field suppresses results (shows "—") even before an error
+  // A blank required field suppresses results (they stay blank) even before an error
   // message appears. finalAmount is optional and excluded from these checks.
   const singleAnyFieldEmpty = futureValue === "" || interestRate === "" || timePeriod === ""
   const seriesAnyFieldEmpty = paymentAmount === "" || paymentInterestRate === "" || numberOfPayments === ""
@@ -110,6 +110,11 @@ export default function PresentValueCalculator() {
   const singleHasError = singleAnyFieldEmpty || !!futureValueError || !!interestRateError || !!timePeriodError
   const seriesHasError = seriesAnyFieldEmpty || !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
   const seriesHasValidationError = !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
+  const singleHasValidationError = !!futureValueError || !!interestRateError || !!timePeriodError
+
+  // Results show "-" only when a visible error blocks them; empty required fields leave them blank.
+  const singleBlank = singleHasValidationError ? "-" : ""
+  const seriesBlank = seriesHasValidationError ? "-" : ""
 
   // Debounced inputs for calculations — updates after 300ms pause in typing
   // to avoid recalculating on every keystroke.
@@ -559,7 +564,7 @@ export default function PresentValueCalculator() {
                   </h2>
                   <p className="text-3xl font-bold text-[var(--color-teal)] mb-5">
                     {singleHasError
-                      ? "—"
+                      ? singleBlank
                       : formatCurrency(singleCalculations.presentValue)}
                   </p>
                   <div
@@ -573,7 +578,7 @@ export default function PresentValueCalculator() {
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                         {singleHasError
-                          ? "—"
+                          ? singleBlank
                           : formatCurrency(parseFloat(futureValue) || 0)}
                       </div>
                     </div>
@@ -585,7 +590,7 @@ export default function PresentValueCalculator() {
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!singleHasError && singleCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
                         {singleHasError
-                          ? "—"
+                          ? singleBlank
                           : formatCurrency(
                               suppressNegativeZero(
                                 singleCalculations.discountAmount,
@@ -998,7 +1003,7 @@ export default function PresentValueCalculator() {
                   </h2>
                   <p className="text-3xl font-bold text-[var(--color-teal)] mb-5">
                     {seriesHasError
-                      ? "—"
+                      ? seriesBlank
                       : formatCurrency(paymentCalculations.presentValue)}
                   </p>
                   {seriesHasValidationError && (
@@ -1013,7 +1018,7 @@ export default function PresentValueCalculator() {
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                         {seriesHasError
-                          ? "—"
+                          ? seriesBlank
                           : formatCurrency(paymentCalculations.totalPayments)}
                       </div>
                     </div>
@@ -1025,7 +1030,7 @@ export default function PresentValueCalculator() {
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!seriesHasError && paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
                         {seriesHasError
-                          ? "—"
+                          ? seriesBlank
                           : formatCurrency(
                               suppressNegativeZero(
                                 paymentCalculations.discountAmount,

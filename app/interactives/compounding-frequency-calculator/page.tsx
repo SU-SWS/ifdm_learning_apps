@@ -199,9 +199,10 @@ export default function CompoundInterestCalculator() {
   }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
 
   // Suppress results whenever any required field is blank or has a validation error.
-  // anyFieldEmpty ensures "—" shows from the first keystroke, before error messages appear.
+  // A blank field keeps results blank; "-" appears only for a validation error.
   const anyFieldEmpty = initialAmount === "" || annualRate === "" || periods === ""
   const hasError = anyFieldEmpty || !!initialAmountError || !!annualRateError || !!periodsError
+  const resultDash = !!initialAmountError || !!annualRateError || !!periodsError ? "-" : ""
 
   const { aStr: balanceStr, bStr: interestStr, tooLarge: mainTooLarge } = formatPair(
     selectedResult.finalAmount,
@@ -511,7 +512,7 @@ export default function CompoundInterestCalculator() {
                   : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
-                {hasError ? "-" : balanceStr}
+                {hasError ? resultDash : balanceStr}
               </p>
               <p className="text-[20px] font-bold mb-1">
                 Interest accrued over
@@ -520,7 +521,7 @@ export default function CompoundInterestCalculator() {
                   : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </p>
               <p className="text-3xl/normal font-bold text-foreground overflow-auto">
-                {hasError ? "-" : interestStr}
+                {hasError ? resultDash : interestStr}
               </p>
               {!hasError && mainTooLarge && (
                 <p className="font-bold text-[var(--color-inline-error)] mt-2">
@@ -606,16 +607,16 @@ export default function CompoundInterestCalculator() {
                       <td className="px-4 py-3 border-b">{result.label}</td>
                       <td className="text-right px-4 py-3 border-b">
                         {hasError
-                          ? "-"
+                          ? resultDash
                           : result.totalPeriods % 1 === 0
                             ? result.totalPeriods.toFixed(0)
                             : result.totalPeriods.toFixed(2)}
                       </td>
                       <td className="text-right px-4 py-3 border-b">
-                        {hasError ? "-" : rowBalance}
+                        {hasError ? resultDash : rowBalance}
                       </td>
                       <td className="text-right px-4 py-3 border-b">
-                        {hasError ? "-" : rowInterest}
+                        {hasError ? resultDash : rowInterest}
                       </td>
                     </tr>
                   );
@@ -644,7 +645,7 @@ export default function CompoundInterestCalculator() {
                     <span className="block font-semibold">Periods</span>
                     <span className="block">
                       {hasError
-                        ? "-"
+                        ? resultDash
                         : result.totalPeriods % 1 === 0
                           ? result.totalPeriods.toFixed(0)
                           : result.totalPeriods.toFixed(2)}
@@ -653,7 +654,7 @@ export default function CompoundInterestCalculator() {
                   <div className="mt-1">
                     <span className="block font-semibold">Final Amount</span>
                     <span className="block overflow-auto break-words">
-                      {hasError ? "-" : rowBalance}
+                      {hasError ? resultDash : rowBalance}
                     </span>
                   </div>
                   <div className="mt-1">
@@ -661,7 +662,7 @@ export default function CompoundInterestCalculator() {
                       Interest Accrued
                     </span>
                     <span className="block overflow-auto break-words">
-                      {hasError ? "-" : rowInterest}
+                      {hasError ? resultDash : rowInterest}
                     </span>
                   </div>
                 </div>

@@ -257,7 +257,7 @@ export default function InflationCalculator() {
                       Future price:
                     </div>
                     <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
-                      {futureValue !== null ? formatCurrency(futureValue) : "—"}
+                      {futureValue !== null ? formatCurrency(futureValue) : showError ? "-" : ""}
                     </div>
                   </div>
                 </div>

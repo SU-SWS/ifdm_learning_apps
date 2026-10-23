@@ -230,7 +230,7 @@ export default function MortgageCalculator() {
       affordPriceBlock, affordBlocking, paymentBlocking,
       affordWrongValue, paymentWrongValue,
       // Granular per-field "unusable" flags (empty or out of range). These drive
-      // per-line dashing in the results card: a line shows "—" when any input it
+      // per-line dashing in the results card: a line shows "-" when any input it
       // depends on is unusable, while unaffected lines keep their value.
       paymentBad: paymentBlock, rateBad: rateBlock, priceBad: priceBlock,
       dpBad, taxBad, insBad, hoaBad,
@@ -380,19 +380,24 @@ export default function MortgageCalculator() {
 
   const DASH = "-";
 
-  // Per-line dash flags: a result line shows "—" when any calculator error exists.
-  // When any validation error is active (required field, range, or optional field),
-  // all result rows display dashes to indicate unreliable calculations.
+  // A result shows "-" when a visible validation error exists (required field, range,
+  // or optional field). While a required field is still empty, results stay blank.
+  const affordError =
+    v.affordWrongValue || limitReached || !!v.rateMsg || !!v.paymentMsg || !!v.dpMsg || !!v.taxMsg || !!v.insMsg || !!v.hoaMsg;
+  const paymentError =
+    v.paymentWrongValue || !!v.priceMsg || !!v.rateMsg || !!v.dpMsg || !!v.taxMsg || !!v.insMsg || !!v.hoaMsg;
+  const affordBlank = !affordError && v.affordBlocking;
+  const paymentBlank = !paymentError && v.paymentBlocking;
 
   const affordDash = {
     // All results dash whenever any calculator error exists (core or optional)
-    homePrice: v.affordBlocking || limitReached,
-    downPayment: v.affordBlocking || limitReached,
-    loanAmount: v.affordBlocking || limitReached,
-    monthlyMortgage: v.affordBlocking || limitReached,
-    monthlyTax: v.affordBlocking || limitReached,
-    monthlyInsurance: v.affordBlocking || limitReached,
-    hoa: v.affordBlocking || limitReached,
+    homePrice: affordError,
+    downPayment: affordError,
+    loanAmount: affordError,
+    monthlyMortgage: affordError,
+    monthlyTax: affordError,
+    monthlyInsurance: affordError,
+    hoa: affordError,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
@@ -400,12 +405,12 @@ export default function MortgageCalculator() {
 
   const paymentDash = {
     // All results dash whenever any calculator error exists (core or optional)
-    monthlyMortgage: v.paymentBlocking,
-    downPayment: v.paymentBlocking,
-    loanAmount: v.paymentBlocking,
-    monthlyTax: v.paymentBlocking,
-    monthlyInsurance: v.paymentBlocking,
-    hoa: v.paymentBlocking,
+    monthlyMortgage: paymentError,
+    downPayment: paymentError,
+    loanAmount: paymentError,
+    monthlyTax: paymentError,
+    monthlyInsurance: paymentError,
+    hoa: paymentError,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
@@ -445,7 +450,7 @@ export default function MortgageCalculator() {
     monthlyTax: boolean; monthlyInsurance: boolean; hoa: boolean; total: boolean;
   };
 
-  const ResultsBody = ({ headline, dash }: { headline: string; dash: LineDash }) => (
+  const ResultsBody = ({ headline, dash, blank }: { headline: string; dash: LineDash; blank: boolean }) => (
     <div className="rounded-lg">
       <div className="innerwrapper">
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -453,7 +458,7 @@ export default function MortgageCalculator() {
             Down payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {dash.downPayment ? DASH : formatCurrency(results.downPayment || 0)}
+            {dash.downPayment ? DASH : blank ? "" : formatCurrency(results.downPayment || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -461,7 +466,7 @@ export default function MortgageCalculator() {
             Loan amount:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {dash.loanAmount ? DASH : formatCurrency(results.loanAmount || 0)}
+            {dash.loanAmount ? DASH : blank ? "" : formatCurrency(results.loanAmount || 0)}
           </div>
         </div>
         <div className="flex flex-col my-3">
@@ -473,7 +478,7 @@ export default function MortgageCalculator() {
             Mortgage payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyMortgage ? DASH : formatCurrency(results.monthlyMortgage || 0)}
+            {dash.monthlyMortgage ? DASH : blank ? "" : formatCurrency(results.monthlyMortgage || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -481,7 +486,7 @@ export default function MortgageCalculator() {
             Property taxes:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyTax ? DASH : formatCurrency(results.monthlyTax || 0)}
+            {dash.monthlyTax ? DASH : blank ? "" : formatCurrency(results.monthlyTax || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -489,7 +494,7 @@ export default function MortgageCalculator() {
             Insurance:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyInsurance ? DASH : formatCurrency(results.monthlyInsurance || 0)}
+            {dash.monthlyInsurance ? DASH : blank ? "" : formatCurrency(results.monthlyInsurance || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -497,7 +502,7 @@ export default function MortgageCalculator() {
             HOA:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.hoa ? DASH : formatCurrency(results.hoaDues || 0)}
+            {dash.hoa ? DASH : blank ? "" : formatCurrency(results.hoaDues || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -505,7 +510,7 @@ export default function MortgageCalculator() {
             Total monthly housing cost:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
-            {dash.total ? DASH : formatCurrency(results.totalMonthlyHousingCost || 0)}
+            {dash.total ? DASH : blank ? "" : formatCurrency(results.totalMonthlyHousingCost || 0)}
           </div>
         </div>
         <div className="py-5">
@@ -978,10 +983,10 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-3xl font-bold text-[var(--color-teal)]">
-                          {affordDash.homePrice ? DASH : formatCurrency(Number(results.homePrice))}
+                          {affordDash.homePrice ? DASH : affordBlank ? "" : formatCurrency(Number(results.homePrice))}
                         </p>
                       </div>
-                      <ResultsBody dash={affordDash} headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
+                      <ResultsBody dash={affordDash} blank={affordBlank} headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
                     </CardContent>
                   </Card>
                 </div>
@@ -1418,10 +1423,10 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-3xl font-bold text-[var(--color-teal)]">
-                          {paymentDash.monthlyMortgage ? DASH : formatCurrency(Number(results.monthlyMortgage))}
+                          {paymentDash.monthlyMortgage ? DASH : paymentBlank ? "" : formatCurrency(Number(results.monthlyMortgage))}
                         </p>
                       </div>
-                      <ResultsBody dash={paymentDash} headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />
+                      <ResultsBody dash={paymentDash} blank={paymentBlank} headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />
                     </CardContent>
                   </Card>
                 </div>

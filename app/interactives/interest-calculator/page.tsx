@@ -572,7 +572,7 @@ export default function InterestRateVisual() {
                     Initial amount:
                   </div>
                   <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                    {hasError ? "-" : formatCurrency(parseFloat(amountRaw) || 0)}
+                    {hasValidationError ? "-" : anyFieldEmpty ? "" : formatCurrency(parseFloat(amountRaw) || 0)}
                   </div>
                 </div>
 
@@ -588,9 +588,11 @@ export default function InterestRateVisual() {
                   <div
                     className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "text-[var(--color-palo-verde-var)]" : "text-[var(--color-berry)]"}`}
                   >
-                    {hasError
+                    {hasValidationError
                       ? "-"
-                      : resultTooLarge
+                      : anyFieldEmpty
+                        ? ""
+                        : resultTooLarge
                         ? "Too large to display"
                         : formatCurrency(Math.abs(interestAmount))}
                   </div>
@@ -602,9 +604,11 @@ export default function InterestRateVisual() {
                     Final amount:
                   </div>
                   <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                    {hasError
+                    {hasValidationError
                       ? "-"
-                      : resultTooLarge
+                      : anyFieldEmpty
+                        ? ""
+                        : resultTooLarge
                         ? "Too large to display"
                         : formatCurrency(totalAmount)}
                   </div>

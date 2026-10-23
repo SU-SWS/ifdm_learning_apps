@@ -135,24 +135,9 @@ export default function RetirementCalculator() {
     !errors.retirementLength &&
     !errors.expectedReturnDuringRetirement;
 
-  const balanceRateOutOfRange =
-    inputs.annualSpending > 0 &&
-    inputs.retirementLength > 0 &&
-    !errors.annualSpending &&
-    !errors.retirementLength &&
-    !!errors.expectedReturnDuringRetirement;
-
-  const balanceInputsFilled =
-    annualSpendingInput !== "" &&
-    retirementLengthInput !== "" &&
-    expectedReturnDuringRetirementInput !== "";
-
+  // Any visible error blocks the balance; empty inputs with no message leave it blank.
   const balanceOutOfRange =
-    balanceRateOutOfRange ||
-    (balanceInputsFilled &&
-      (!!errors.annualSpending ||
-        !!errors.retirementLength ||
-        !!errors.expectedReturnDuringRetirement));
+    !!errors.annualSpending || !!errors.retirementLength || !!errors.expectedReturnDuringRetirement;
 
   const hasRequiredBalance = frozenRequiredBalance > 0 && showBalanceResults;
 
@@ -163,6 +148,11 @@ export default function RetirementCalculator() {
     !errors.currentSavings &&
     !errors.yearsToRetirement &&
     !errors.expectedReturnBeforeRetirement;
+
+  // Savings shows "-" only when one of its inputs has an error; empty inputs leave it blank.
+  const savingsOutOfRange =
+    hasRequiredBalance &&
+    (!!errors.currentSavings || !!errors.yearsToRetirement || !!errors.expectedReturnBeforeRetirement);
 
   const results = useMemo(() => {
     const requiredBalance =
@@ -856,7 +846,7 @@ export default function RetirementCalculator() {
                     </div>
                   </>
                 ) : balanceOutOfRange ? (
-                  <p className="text-4xl font-bold">—</p>
+                  <p className="text-4xl font-bold">-</p>
                 ) : (
                   <div className="py-3">
                     <p className="text-sm">
@@ -881,7 +871,7 @@ export default function RetirementCalculator() {
                     {balanceDescription}
                   </>
                 ) : balanceOutOfRange ? (
-                  <p className="text-4xl font-bold">—</p>
+                  <p className="text-4xl font-bold">-</p>
                 ) : (
                   <div className="py-3">
                     <p className="text-sm">
@@ -980,7 +970,7 @@ export default function RetirementCalculator() {
                 ) : hasRequiredBalance ? (
                   <>
                     <h3 className="mb-1 font-bold text-lg">Required Savings</h3>
-                    <p className="text-4xl font-bold">—</p>
+                    <p className="text-4xl font-bold">{savingsOutOfRange ? "-" : " "}</p>
                   </>
                 ) : null}
               </>

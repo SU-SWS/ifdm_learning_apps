@@ -646,11 +646,15 @@ export default function Page() {
     const largeText = size === "desktop" ? "text-3xl/normal" : "text-2xl";
     const medText = size === "desktop" ? "text-2xl sm:text-3xl" : "text-xl";
 
-    if (displayError) {
+    const hasError = !!displayError || fieldErrors.length > 0;
+    if (hasError) {
       return (
-        <p className={`text-[var(--color-inline-error)] ${className}`}>
-          {displayError}
-        </p>
+        <div className={className}>
+          <p className={`${largeText} font-bold text-[var(--foreground)] mb-1`}>-</p>
+          {displayError && (
+            <p className="text-sm text-[var(--color-inline-error)]">{displayError}</p>
+          )}
+        </div>
       );
     }
     if (resultOverflow) {
@@ -672,7 +676,7 @@ export default function Page() {
         </p>
       );
     }
-    return <p className={`${medText} font-medium /50 ${className}`}>—</p>;
+    return <p className={`${medText} font-medium ${className}`}>&nbsp;</p>;
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
