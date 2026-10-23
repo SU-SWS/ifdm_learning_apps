@@ -334,7 +334,7 @@ export default function InterestRateVisual() {
       <div className="mb-8">
         {/* Mode toggle (spans the full width above the two columns) */}
         <div className="flex flex-col mb-6">
-          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
+          <h2 className="text-lg-title text-[var(--foreground)] font-bold mb-1">I am:</h2>
           <div className="flex-1 flex gap-4">
             <button
               className={`group min-w-[150px] flex-1 px-4 py-2 h-18 text-md font-bold rounded-lg border-1 border-lagunita hover:bg-lagunita ${mode === "saving" ? "bg-lagunita" : ""}`}
@@ -370,7 +370,7 @@ export default function InterestRateVisual() {
           {/* LEFT: inputs */}
           <div>
             {/* Amount + Rate */}
-            <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col gap-3 mb-3">
               {/* Initial Amount */}
               <div className="flex-1 min-w-[150px] space-y-1">
                 <label
@@ -397,7 +397,7 @@ export default function InterestRateVisual() {
                     onBlur={handleAmountBlur}
                     aria-invalid={!!amountError}
                     aria-describedby="amount-msg"
-                    className={`block w-full rounded-md shadow-sm py-2 pl-7 pr-10 border ${amountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 pl-7 pr-10 border ${amountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 <p
@@ -431,7 +431,7 @@ export default function InterestRateVisual() {
                     onBlur={handleRateBlur}
                     aria-invalid={!!rateError}
                     aria-describedby="rate-msg"
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       rateError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : rateWarning
@@ -463,7 +463,7 @@ export default function InterestRateVisual() {
             </div>
 
             {/* Periods + Compounding */}
-            <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col gap-3 mb-3">
               {/* Periods */}
               <div className="flex-1 min-w-[150px] space-y-1">
                 <label
@@ -486,7 +486,7 @@ export default function InterestRateVisual() {
                     onBlur={handlePeriodsBlur}
                     aria-invalid={!!periodsError}
                     aria-describedby="periods-msg"
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       periodsError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : periodsWarning
@@ -523,7 +523,7 @@ export default function InterestRateVisual() {
                     id="compounding"
                     value={compounding}
                     onChange={handleCompoundingChange}
-                    className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
+                    className="block w-full h-[55px] rounded-md shadow-sm py-2 px-3 border border-input appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     {Object.entries(frequencyMap).map(([key, { label }]) => (
                       <option key={key} value={key}>
@@ -554,7 +554,7 @@ export default function InterestRateVisual() {
 
           {/* RIGHT: results */}
           <div className="p-4 rounded-lg bg-[var(--card-background)]">
-            <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold pb-4">
+            <h2 className="text-lg-title text-[var(--foreground)] font-bold pb-4">
               {mode === "saving" ? "What you'll have" : "What you'd owe"}
             </h2>
             <div aria-live="polite" aria-atomic="true">
@@ -572,7 +572,7 @@ export default function InterestRateVisual() {
                     Initial amount:
                   </div>
                   <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                    {hasError ? "-" : formatCurrency(parseFloat(amountRaw) || 0)}
+                    {hasValidationError ? "-" : anyFieldEmpty ? "" : formatCurrency(parseFloat(amountRaw) || 0)}
                   </div>
                 </div>
 
@@ -588,9 +588,11 @@ export default function InterestRateVisual() {
                   <div
                     className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis ${mode === "saving" ? "text-[var(--color-palo-verde-var)]" : "text-[var(--color-berry)]"}`}
                   >
-                    {hasError
+                    {hasValidationError
                       ? "-"
-                      : resultTooLarge
+                      : anyFieldEmpty
+                        ? ""
+                        : resultTooLarge
                         ? "Too large to display"
                         : formatCurrency(Math.abs(interestAmount))}
                   </div>
@@ -602,9 +604,11 @@ export default function InterestRateVisual() {
                     Final amount:
                   </div>
                   <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                    {hasError
+                    {hasValidationError
                       ? "-"
-                      : resultTooLarge
+                      : anyFieldEmpty
+                        ? ""
+                        : resultTooLarge
                         ? "Too large to display"
                         : formatCurrency(totalAmount)}
                   </div>

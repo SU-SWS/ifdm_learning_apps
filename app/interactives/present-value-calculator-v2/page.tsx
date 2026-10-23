@@ -101,7 +101,7 @@ export default function PresentValueCalculator() {
   const singleMaxPeriods = frequencyMap[compoundingFrequency].periods * 100
   const seriesMaxPeriods = frequencyMap[paymentFrequency].periods * 100
 
-  // A blank required field suppresses results (shows "—") even before an error
+  // A blank required field suppresses results (they stay blank) even before an error
   // message appears. finalAmount is optional and excluded from these checks.
   const singleAnyFieldEmpty = futureValue === "" || interestRate === "" || timePeriod === ""
   const seriesAnyFieldEmpty = paymentAmount === "" || paymentInterestRate === "" || numberOfPayments === ""
@@ -110,6 +110,11 @@ export default function PresentValueCalculator() {
   const singleHasError = singleAnyFieldEmpty || !!futureValueError || !!interestRateError || !!timePeriodError
   const seriesHasError = seriesAnyFieldEmpty || !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
   const seriesHasValidationError = !!paymentAmountError || !!finalAmountError || !!paymentInterestRateError || !!numberOfPaymentsError
+  const singleHasValidationError = !!futureValueError || !!interestRateError || !!timePeriodError
+
+  // Results show "-" only when a visible error blocks them; empty required fields leave them blank.
+  const singleBlank = singleHasValidationError ? "-" : ""
+  const seriesBlank = seriesHasValidationError ? "-" : ""
 
   // Debounced inputs for calculations — updates after 300ms pause in typing
   // to avoid recalculating on every keystroke.
@@ -246,16 +251,16 @@ export default function PresentValueCalculator() {
             {/* Single Amount Tab */}
             <TabsContent value="single" className="space-y-8">
               <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
-                <div className="w-full md:w-1/2 space-y-6 bg-transparent">
+                <div className="w-full md:w-1/2 space-y-3 bg-transparent">
                   <p>
                     Enter a future value to calculate what it is worth today.
                   </p>
 
                   {/* Future Value */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="future-value"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Future value
                     </Label>
@@ -308,7 +313,7 @@ export default function PresentValueCalculator() {
                             setFutureValue(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(futureValue) > 0 ? "pl-7" : "pl-8"} ${futureValueError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                         min={0}
                         max={1000000000}
                       />
@@ -324,11 +329,11 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Interest Rate */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div className="relative">
                       <Label
                         htmlFor="interest-rate"
-                        className="block font-semibold text-foreground mb-2"
+                        className="block font-semibold text-foreground mb-1"
                       >
                         Annual interest rate
                       </Label>
@@ -389,11 +394,11 @@ export default function PresentValueCalculator() {
                             setInterestRate(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                           interestRateError
-                          ? "border-[var(--color-inline-error)] border-2"
+                          ? "border-2 border-[var(--color-inline-error)]"
                           : interestRateWarning
-                            ? "border-[var(--color-inline-warning)] border-2"
+                            ? "border-2 border-[var(--color-inline-warning)]"
                             : ""
                         }`}
                         min={0}
@@ -423,10 +428,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Time Period */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="time-period"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Number of compounding periods
                     </Label>
@@ -479,7 +484,7 @@ export default function PresentValueCalculator() {
                           if (!isNaN(val)) setTimePeriod(String(val));
                         }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-[var(--color-inline-error)] border-2" : timePeriodWarning ? "border-[var(--color-inline-warning)] border-2" : ""}`}
+                      className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${timePeriodError ? "border-2 border-[var(--color-inline-error)]" : timePeriodWarning ? "border-2 border-[var(--color-inline-warning)]" : ""}`}
                       min={0}
                       max={singleMaxPeriods}
                       step={1}
@@ -500,10 +505,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Compounding Frequency */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       id="single-compounding-frequency-label"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Compounding frequency
                     </Label>
@@ -525,7 +530,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="single-compounding-frequency-label"
                       >
                         <SelectValue />
@@ -559,7 +564,7 @@ export default function PresentValueCalculator() {
                   </h2>
                   <p className="text-3xl font-bold text-[var(--color-teal)] mb-5">
                     {singleHasError
-                      ? "—"
+                      ? singleBlank
                       : formatCurrency(singleCalculations.presentValue)}
                   </p>
                   <div
@@ -573,7 +578,7 @@ export default function PresentValueCalculator() {
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                         {singleHasError
-                          ? "—"
+                          ? singleBlank
                           : formatCurrency(parseFloat(futureValue) || 0)}
                       </div>
                     </div>
@@ -585,7 +590,7 @@ export default function PresentValueCalculator() {
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!singleHasError && singleCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
                         {singleHasError
-                          ? "—"
+                          ? singleBlank
                           : formatCurrency(
                               suppressNegativeZero(
                                 singleCalculations.discountAmount,
@@ -601,7 +606,7 @@ export default function PresentValueCalculator() {
             {/* Payment Series Tab */}
             <TabsContent value="series" className="space-y-8">
               <div className="flex flex-col md:flex-row flex-grow space-between gap-5">
-                <div className="bg-transparent w-full md:w-1/2 space-y-6">
+                <div className="bg-transparent w-full md:w-1/2 space-y-3">
                   <p>
                     Find what a series of payments is worth today. Enter the
                     payment per period and number of periods (payments) to
@@ -609,10 +614,10 @@ export default function PresentValueCalculator() {
                   </p>
 
                   {/* Payment Amount */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="payment-amount"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Payment per period
                     </Label>
@@ -665,7 +670,7 @@ export default function PresentValueCalculator() {
                             setPaymentAmount(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(paymentAmount) > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(paymentAmount) > 0 ? "pl-7" : "pl-8"} ${paymentAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                       />
                     </div>
                     {paymentAmountError && (
@@ -679,11 +684,11 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Final Amount */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div className="space-y-2 flex items-center gap-1 mb-1">
                       <Label
                         htmlFor="final-amount"
-                        className="block font-semibold text-foreground mb-2"
+                        className="block font-semibold text-foreground mb-1"
                       >
                         Final amount (optional)
                       </Label>
@@ -740,7 +745,7 @@ export default function PresentValueCalculator() {
                             setFinalAmount(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(finalAmount) > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${parseFloat(finalAmount) > 0 ? "pl-7" : "pl-8"} ${finalAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                       />
                     </div>
                     {finalAmountError && (
@@ -754,10 +759,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Payment Interest Rate */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="payment-interest-rate"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Annual interest rate
                     </Label>
@@ -819,10 +824,10 @@ export default function PresentValueCalculator() {
                             setPaymentInterestRate(String(val));
                           }
                         }}
-                        className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError
-                        ? "border-[var(--color-inline-error)] border-2"
+                        className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${paymentInterestRateError
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : paymentInterestRateWarning
-                          ? "border-[var(--color-inline-warning)] border-2"
+                          ? "border-2 border-[var(--color-inline-warning)]"
                           : ""}`}
                         min={0}
                         max={1000}
@@ -852,10 +857,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Number of Payments */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       htmlFor="number-of-payments"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Number of compounding periods (payments)
                     </Label>
@@ -908,11 +913,11 @@ export default function PresentValueCalculator() {
                           if (!isNaN(val)) setNumberOfPayments(String(val));
                         }
                       }}
-                      className={`border-1 w-full rounded-md shadow-sm py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                      className={`border w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                         numberOfPaymentsError
-                        ? "border-[var(--color-inline-error)] border-2"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : numberOfPaymentsWarning
-                          ? "border-[var(--color-inline-warning)] border-2"
+                          ? "border-2 border-[var(--color-inline-warning)]"
                           : ""
                       }`}
                       min={0}
@@ -935,10 +940,10 @@ export default function PresentValueCalculator() {
                   </div>
 
                   {/* Payment Frequency */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label
                       id="compounding-frequency-label"
-                      className="block font-semibold text-foreground mb-2"
+                      className="block font-semibold text-foreground mb-1"
                     >
                       Compounding frequency
                     </Label>
@@ -960,7 +965,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="border-1 w-full rounded-md shadow-sm py-2 px-3 !h-auto !text-base"
+                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="compounding-frequency-label"
                       >
                         <SelectValue />
@@ -998,7 +1003,7 @@ export default function PresentValueCalculator() {
                   </h2>
                   <p className="text-3xl font-bold text-[var(--color-teal)] mb-5">
                     {seriesHasError
-                      ? "—"
+                      ? seriesBlank
                       : formatCurrency(paymentCalculations.presentValue)}
                   </p>
                   {seriesHasValidationError && (
@@ -1013,7 +1018,7 @@ export default function PresentValueCalculator() {
                       </div>
                       <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
                         {seriesHasError
-                          ? "—"
+                          ? seriesBlank
                           : formatCurrency(paymentCalculations.totalPayments)}
                       </div>
                     </div>
@@ -1025,7 +1030,7 @@ export default function PresentValueCalculator() {
                         className={`w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)] ${!seriesHasError && paymentCalculations.discountAmount < 0 ? "text-berry" : ""}`}
                       >
                         {seriesHasError
-                          ? "—"
+                          ? seriesBlank
                           : formatCurrency(
                               suppressNegativeZero(
                                 paymentCalculations.discountAmount,

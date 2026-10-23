@@ -56,9 +56,9 @@ export default function PresentValueCalculator() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Parameters Panel */}
           <Card className="flex-1">
-             <CardContent className="space-y-6">
+             <CardContent className="space-y-3">
               {/* Future Value Input */}
-              <div className="space-y-2 relative">
+              <div className="space-y-1 relative">
                 <Label htmlFor="future-value" className="text-md mb-1 block font-bold">
                   Future value ($):
                 </Label>
@@ -67,7 +67,7 @@ export default function PresentValueCalculator() {
                   type="number"
                   value={futureValue === 0 ? "" : futureValue}
                   onChange={(e) => setFutureValue(Number(e.target.value))}
-                  className="text-md font-bold block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="text-md font-bold block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="absolute right-2 top-[41%] flex flex-col">
                   {/* Increment/Decrement buttons for Future Value */}
@@ -93,7 +93,7 @@ export default function PresentValueCalculator() {
               </div>
 
               {/* Interest Rate Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <Label className="text-md mb-1 block font-bold">Interest rate (%): <span className="text-lagunita">{interestRate[0].toFixed(1)} </span></Label>
                 <CustomSlider
                   value={interestRate}
@@ -103,14 +103,14 @@ export default function PresentValueCalculator() {
                   step={0.1}
                   className="w-full border-color-lagunita"
                 />
-                <div className="flex justify-between text-black font-medium font-poppins">
+                <div className="flex justify-between text-black font-medium">
                   <span>0.1%</span>
                   <span>12%</span>
                 </div>
               </div>
 
               {/* Time Period Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <Label className="text-md mb-1 block font-bold">Time period: <span className="text-lagunita">{timePeriod[0]} years</span></Label>
                 <CustomSlider
                   value={timePeriod}
@@ -120,7 +120,7 @@ export default function PresentValueCalculator() {
                   step={1}
                   className="w-full"
                   rangeClassName="time-period-range bg-lagunita-light"/>
-                  <div className="flex justify-between text-black font-medium font-poppins">
+                  <div className="flex justify-between text-black font-medium">
                   <span>1 year</span>
                   <span>50 years</span>
                 </div>

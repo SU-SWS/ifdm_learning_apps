@@ -94,9 +94,9 @@ export default function InflationCalculator() {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Parameters Panel */}
           <Card>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-3">
               {/* Initial Price */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="initial-price" className="text-md font-medium">
                   Initial price
                 </Label>
@@ -133,7 +133,7 @@ export default function InflationCalculator() {
                     }}
                     aria-invalid={showError}
                     aria-describedby="initial-price-error"
-                    className={`bg-[var(--input-background)] text-[var(--input-text)] text-md w-full rounded-md shadow-sm pl-7 border pr-10 ${
+                    className={`bg-[var(--input-background)] text-[var(--input-text)] text-md w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 pl-7 border pr-10 ${
                       showError
                         ? "border-2 border-[var(--color-inline-error)]"
                         : "bg-[var(--input-border)]"
@@ -155,7 +155,7 @@ export default function InflationCalculator() {
               </div>
 
               {/* Inflation Rate Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <div className="flex sm:items-center space-between gap-2 flex-col sm:flex-row">
                   <Label
                     htmlFor="inflation-rate-slider"
@@ -185,7 +185,7 @@ export default function InflationCalculator() {
                   className="w-full"
                 />
                 <div
-                  className="flex justify-between text-md font-medium font-poppins"
+                  className="flex justify-between text-md font-medium"
                   aria-hidden="true"
                 >
                   <span>0%</span>
@@ -194,7 +194,7 @@ export default function InflationCalculator() {
               </div>
 
               {/* Time Period Slider */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <div className="flex items-center gap-1">
                   <Label
                     htmlFor="time-period-slider"
@@ -226,7 +226,7 @@ export default function InflationCalculator() {
                   rangeClassName="time-period-range bg-lagunita-light"
                 />
                 <div
-                  className="flex justify-between text-md font-medium font-poppins"
+                  className="flex justify-between text-md font-medium"
                   aria-hidden="true"
                 >
                   <span>1 year</span>
@@ -239,7 +239,7 @@ export default function InflationCalculator() {
           {/* Results Panel */}
           <Card className="rounded-3xl p-[32px] bg-[var(--card-background)]">
             <CardHeader className="py-1">
-              <CardTitle className="py-1 font-bold font-poppins">
+              <CardTitle className="py-1 font-bold">
                 Results:
               </CardTitle>
             </CardHeader>
@@ -248,7 +248,7 @@ export default function InflationCalculator() {
                 aria-live="polite"
                 aria-atomic="true"
               >
-                <span className="text-md font-bold font-poppins text-[var(--color-teal)]">
+                <span className="text-md font-bold text-[var(--color-teal)]">
                   After {timePeriod} year{timePeriod !== 1 ? "s" : ""}
                 </span>
                 <div className="pt-4 rounded-lg">
@@ -257,7 +257,7 @@ export default function InflationCalculator() {
                       Future price:
                     </div>
                     <div className="w-[50%] bg-[var(--secondary-background)] text-lg-title p-4 rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center">
-                      {futureValue !== null ? formatCurrency(futureValue) : "—"}
+                      {futureValue !== null ? formatCurrency(futureValue) : showError ? "-" : ""}
                     </div>
                   </div>
                 </div>

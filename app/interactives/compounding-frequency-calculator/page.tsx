@@ -199,9 +199,10 @@ export default function CompoundInterestCalculator() {
   }, [principal, rate, totalPeriods, selectedOption.periodsPerYear])
 
   // Suppress results whenever any required field is blank or has a validation error.
-  // anyFieldEmpty ensures "—" shows from the first keystroke, before error messages appear.
+  // A blank field keeps results blank; "-" appears only for a validation error.
   const anyFieldEmpty = initialAmount === "" || annualRate === "" || periods === ""
   const hasError = anyFieldEmpty || !!initialAmountError || !!annualRateError || !!periodsError
+  const resultDash = !!initialAmountError || !!annualRateError || !!periodsError ? "-" : ""
 
   const { aStr: balanceStr, bStr: interestStr, tooLarge: mainTooLarge } = formatPair(
     selectedResult.finalAmount,
@@ -245,12 +246,12 @@ export default function CompoundInterestCalculator() {
           {/* Input Fields */}
           <section
             aria-label="Calculator inputs"
-            className="space-y-6 mb-10 w-full lg:w-1/2"
+            className="space-y-3 mb-10 w-full lg:w-1/2"
           >
             <div>
               <label
                 htmlFor="initial-amount"
-                className="block font-semibold text-foreground mb-2"
+                className="block font-semibold text-foreground mb-1"
               >
                 Initial amount
               </label>
@@ -295,7 +296,7 @@ export default function CompoundInterestCalculator() {
                       );
                   }}
                   min="0"
-                  className={`block w-full pl-8 rounded-md shadow-sm border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                  className={`block w-full pl-8 h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${initialAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)]">
                   $
@@ -314,7 +315,7 @@ export default function CompoundInterestCalculator() {
             <div>
               <label
                 htmlFor="annual-rate"
-                className="block font-semibold text-foreground mb-2"
+                className="block font-semibold text-foreground mb-1"
               >
                 Annual interest rate
               </label>
@@ -354,7 +355,7 @@ export default function CompoundInterestCalculator() {
                         150,
                       );
                   }}
-                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                  className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${annualRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   min="0"
                   step="0.1"
                 />
@@ -379,7 +380,7 @@ export default function CompoundInterestCalculator() {
               <div className="flex items-start gap-2">
                 <label
                   htmlFor="periods"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Number of compounding periods
                 </label>
@@ -425,7 +426,7 @@ export default function CompoundInterestCalculator() {
                         150,
                       );
                   }}
-                  className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${periodsError ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                  className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${periodsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   min="0"
                 />
               </div>
@@ -443,7 +444,7 @@ export default function CompoundInterestCalculator() {
               <div className="flex items-start gap-2">
                 <label
                   htmlFor="compounding-frequency"
-                  className="block font-semibold text-foreground mb-3"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Compounding frequency
                 </label>
@@ -474,7 +475,7 @@ export default function CompoundInterestCalculator() {
                       }
                     }
                   }}
-                  className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
+                  className="h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {compoundingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -511,7 +512,7 @@ export default function CompoundInterestCalculator() {
                   : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </h2>
               <p className="text-3xl/normal font-bold text-[var(--color-teal)] mb-5 overflow-auto">
-                {hasError ? "-" : balanceStr}
+                {hasError ? resultDash : balanceStr}
               </p>
               <p className="text-[20px] font-bold mb-1">
                 Interest accrued over
@@ -520,7 +521,7 @@ export default function CompoundInterestCalculator() {
                   : ` ${periods} ${getPeriodText(selectedCompounding, Number(periods))}`}
               </p>
               <p className="text-3xl/normal font-bold text-foreground overflow-auto">
-                {hasError ? "-" : interestStr}
+                {hasError ? resultDash : interestStr}
               </p>
               {!hasError && mainTooLarge && (
                 <p className="font-bold text-[var(--color-inline-error)] mt-2">
@@ -606,16 +607,16 @@ export default function CompoundInterestCalculator() {
                       <td className="px-4 py-3 border-b">{result.label}</td>
                       <td className="text-right px-4 py-3 border-b">
                         {hasError
-                          ? "-"
+                          ? resultDash
                           : result.totalPeriods % 1 === 0
                             ? result.totalPeriods.toFixed(0)
                             : result.totalPeriods.toFixed(2)}
                       </td>
                       <td className="text-right px-4 py-3 border-b">
-                        {hasError ? "-" : rowBalance}
+                        {hasError ? resultDash : rowBalance}
                       </td>
                       <td className="text-right px-4 py-3 border-b">
-                        {hasError ? "-" : rowInterest}
+                        {hasError ? resultDash : rowInterest}
                       </td>
                     </tr>
                   );
@@ -644,7 +645,7 @@ export default function CompoundInterestCalculator() {
                     <span className="block font-semibold">Periods</span>
                     <span className="block">
                       {hasError
-                        ? "-"
+                        ? resultDash
                         : result.totalPeriods % 1 === 0
                           ? result.totalPeriods.toFixed(0)
                           : result.totalPeriods.toFixed(2)}
@@ -653,7 +654,7 @@ export default function CompoundInterestCalculator() {
                   <div className="mt-1">
                     <span className="block font-semibold">Final Amount</span>
                     <span className="block overflow-auto break-words">
-                      {hasError ? "-" : rowBalance}
+                      {hasError ? resultDash : rowBalance}
                     </span>
                   </div>
                   <div className="mt-1">
@@ -661,7 +662,7 @@ export default function CompoundInterestCalculator() {
                       Interest Accrued
                     </span>
                     <span className="block overflow-auto break-words">
-                      {hasError ? "-" : rowInterest}
+                      {hasError ? resultDash : rowInterest}
                     </span>
                   </div>
                 </div>

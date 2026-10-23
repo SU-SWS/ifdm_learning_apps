@@ -137,6 +137,24 @@ export default function DebtPayoffCalculator() {
     focusedField !== "debtAmount" &&
     focusedField !== "interestRate";
 
+  // Results show "-" only when a visible error or warning blocks them; empty or untouched fields leave them blank.
+  const payoffDash =
+    showDebtAmountError ||
+    showInterestRateError ||
+    showPaymentError ||
+    showPaymentWarning ||
+    !!v.additionalPaymentError
+      ? "-"
+      : "";
+  const requiredDash =
+    showDebtAmountError ||
+    showInterestRateError ||
+    showTargetTimeError ||
+    !!v.targetYearsError ||
+    !!v.targetMonthsError
+      ? "-"
+      : "";
+
   const payoffResult = calculatePayoffTime({
     principal: v.debtAmountNum,
     periodicRate: v.periodicRate,
@@ -177,8 +195,8 @@ export default function DebtPayoffCalculator() {
               <>
                 <div className="grid md:grid-cols-2 gap-8">
                   <Card className="mb-6">
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
+                    <CardContent className="space-y-3">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="debt-amount"
@@ -205,7 +223,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("debtAmount")}
                             onBlur={() => clearFocus("debtAmount")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {showDebtAmountError && (
@@ -218,7 +236,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate"
@@ -242,7 +260,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("interestRate")}
                             onBlur={() => clearFocus("interestRate")}
-                            className={`relative block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`relative block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
@@ -258,7 +276,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2 relative">
+                      <div className="space-y-1 relative">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select"
@@ -282,7 +300,7 @@ export default function DebtPayoffCalculator() {
                             }
                             id="compounding-select"
                             aria-describedby="compounding-desc"
-                            className="border-1 w-full rounded-md shadow-sm py-2 px-3 appearance-none"
+                            className="h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                           >
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
@@ -305,7 +323,7 @@ export default function DebtPayoffCalculator() {
                           12 debt payments per year.
                         </p>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label htmlFor="payment" className="font-semibold">
                             Payment per compounding period
@@ -329,7 +347,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("payment")}
                             onBlur={() => clearFocus("payment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               showPaymentError
                                 ? "border-2 border-[var(--color-inline-error)]"
                                 : showPaymentWarning
@@ -353,7 +371,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="addtlpayment"
@@ -382,7 +400,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("additionalPayment")}
                             onBlur={() => clearFocus("additionalPayment")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.additionalPaymentError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {v.additionalPaymentError ? (
@@ -419,18 +437,18 @@ export default function DebtPayoffCalculator() {
                     className="bg-[var(--card-background)] rounded-3xl p-[32px]"
                   >
                     <CardHeader>
-                      <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">
+                      <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">
                         Your payoff summary
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                      <div className="rounded-lg mb-6 text-center">
+                      <div className="rounded-lg mb-6">
                         <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">
                           Time to pay off
                         </p>
                         <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">
                           {v.payoffBlocked
-                            ? "-"
+                            ? payoffDash
                             : formatTime(payoffResult.timeInMonths)}
                         </p>
                         {!v.payoffBlocked && (
@@ -447,7 +465,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.payoffBlocked
-                              ? "-"
+                              ? payoffDash
                               : formatCurrency(payoffResult.totalInterest)}
                           </div>
                         </div>
@@ -458,7 +476,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.payoffBlocked
-                              ? "-"
+                              ? payoffDash
                               : formatCurrency(payoffResult.totalAmountPaid)}
                           </div>
                         </div>
@@ -469,7 +487,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis bg-[var(--results-white-background)] text-[var(--color-teal)]">
                             {v.payoffBlocked
-                              ? "-"
+                              ? payoffDash
                               : formatCurrency(payoffResult.interestSaved)}
                           </div>
                         </div>
@@ -489,8 +507,8 @@ export default function DebtPayoffCalculator() {
               <>
                 <div className="grid md:grid-cols-2 gap-8">
                   <Card className="mb-6">
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
+                    <CardContent className="space-y-3">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="debt-amount-2"
@@ -517,7 +535,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("debtAmount")}
                             onBlur={() => clearFocus("debtAmount")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 pl-7 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showDebtAmountError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                         </div>
                         {showDebtAmountError && (
@@ -530,7 +548,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2 relative">
+                      <div className="space-y-1 relative">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="interest-rate-2"
@@ -554,7 +572,7 @@ export default function DebtPayoffCalculator() {
                             }
                             onFocus={() => setFocusedField("interestRate")}
                             onBlur={() => clearFocus("interestRate")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${showInterestRateError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">
                             %
@@ -570,7 +588,7 @@ export default function DebtPayoffCalculator() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label
                             htmlFor="compounding-select-2"
@@ -592,7 +610,7 @@ export default function DebtPayoffCalculator() {
                               )
                             }
                             id="compounding-select-2"
-                            className="w-full border-1 rounded-md shadow-sm py-2 px-3 appearance-none"
+                            className="h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             aria-describedby="compounding-desc-2"
                           >
                             <option value="daily">Daily</option>
@@ -616,7 +634,7 @@ export default function DebtPayoffCalculator() {
                           12 debt payments per year.
                         </p>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Label className="font-semibold">
                             Target time to payoff
@@ -646,7 +664,7 @@ export default function DebtPayoffCalculator() {
                                 }
                                 onFocus={() => setFocusedField("targetYears")}
                                 onBlur={() => clearFocus("targetYears")}
-                                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetYearsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                                className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetYearsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                               />
                             </div>
                           </div>
@@ -664,7 +682,7 @@ export default function DebtPayoffCalculator() {
                                 }
                                 onFocus={() => setFocusedField("targetMonths")}
                                 onBlur={() => clearFocus("targetMonths")}
-                                className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetMonthsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                                className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.targetMonthsError ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                               />
                             </div>
                             <Label
@@ -727,18 +745,18 @@ export default function DebtPayoffCalculator() {
                     className="bg-[var(--card-background)] rounded-3xl p-[32px]"
                   >
                     <CardHeader className="">
-                      <CardTitle className="text-[var(--text-navy)] text-[22px] text-center font-bold">
+                      <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">
                         Required payment
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="">
-                      <div className="rounded-lg mb-6 text-center">
+                      <div className="rounded-lg mb-6">
                         <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">
                           Payment per {getPeriodLabel(compoundingFrequency)}
                         </p>
                         <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                           {v.requiredPaymentBlocked
-                            ? "-"
+                            ? requiredDash
                             : formatCurrency(
                                 requiredPaymentResult.requiredPayment,
                               )}
@@ -760,7 +778,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
-                              ? "-"
+                              ? requiredDash
                               : formatCurrency(
                                   requiredPaymentResult.totalInterest,
                                 )}
@@ -773,7 +791,7 @@ export default function DebtPayoffCalculator() {
                           </div>
                           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
                             {v.requiredPaymentBlocked
-                              ? "-"
+                              ? requiredDash
                               : formatCurrency(
                                   requiredPaymentResult.totalAmountPaid,
                                 )}

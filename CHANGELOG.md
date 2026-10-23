@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.4] - 2026-10-21
+
+### Fixed
+- Mortgage Refinancing Calculator: Near-zero values (below 0.001) now display as $0.00 (IFDM-262).
+- Mortgage Refinancing Calculator: Months remaining and New loan term only accept whole numbers (IFDM-274).
+- Debt Payoff Calculator: Out-of-range and negative values show their errors right away while typing (IFDM-357, IFDM-358, IFDM-359).
+
+### Changed
+- Mortgage Refinancing Calculator: Moved Continue under the inputs with Reset as a secondary button, removed the refresh icon from Reset buttons, and added intro guidance on Refinance Analysis (IFDM-272, IFDM-273, IFDM-331).
+- Mortgage Refinancing Calculator: On mobile, the result summary is now a sticky bottom footer with Continue and Reset, buttons stay disabled until they can be used, and comparison rows stack on small screens (IFDM-277, IFDM-331).
+- Retirement Calculator: Field labels now match the input text size, and inputs use the same height, border, radius, and colors as the CF and PV calculators (IFDM-306, IFDM-307).
+
 ## [1.3.3] - 2026-10-08
 
 ### Fixed
