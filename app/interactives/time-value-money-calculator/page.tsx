@@ -1076,7 +1076,7 @@ export default function Page() {
                 <div className="pt-2">
                   <Label
                     htmlFor="paymentFreq"
-                    className="text-sm font-medium text-foreground"
+                    className="block text-sm font-medium text-foreground mb-1"
                   >
                     Payment frequency
                   </Label>
