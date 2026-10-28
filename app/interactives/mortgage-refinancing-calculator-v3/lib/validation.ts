@@ -97,6 +97,10 @@ export type Validation = {
   currentBlocking: boolean
   /** Anything unusable on either tab — blocks the refinance analysis. */
   refiBlocking: boolean
+  /** A Current Balance field has a visible error message. Drives "-". */
+  currentError: boolean
+  /** A visible error on either tab, including Current Balance. Drives "-" in the analysis. */
+  refiError: boolean
 }
 
 /**
@@ -135,11 +139,11 @@ export function validate(values: Values, ui: UiState): Validation {
     // A bare "." survives the input formatter, so treat anything unparseable
     // the same as out of range rather than letting num() coerce it to 0.
     const n = Number.parseFloat(raw)
-    const outOfRange = !Number.isFinite(n) || n < min || n > max
-    bad[field] = outOfRange
+    const isOutOfRange = !Number.isFinite(n) || n < min || n > max
+    bad[field] = isOutOfRange
     // Range messages are never hidden while focused: the user needs to know
     // why the result stopped updating.
-    messages[field] = outOfRange ? RANGE_MESSAGES[field] : ''
+    messages[field] = isOutOfRange ? RANGE_MESSAGES[field] : ''
   }
 
   const currentBlocking = CURRENT_FIELDS.some((f) => bad[f])
@@ -148,5 +152,12 @@ export function validate(values: Values, ui: UiState): Validation {
     REFI_REQUIRED_FIELDS.some((f) => bad[f]) ||
     REFI_OPTIONAL_FIELDS.some((f) => bad[f])
 
-  return { messages, bad, currentBlocking, refiBlocking }
+  // "Error" means a message is visible, so it also covers an empty required field
+  // once its message is showing. Empty fields with no message stay blank instead.
+  const currentError = CURRENT_FIELDS.some((f) => messages[f] !== '')
+  const refiError =
+    currentError ||
+    [...REFI_REQUIRED_FIELDS, ...REFI_OPTIONAL_FIELDS].some((f) => messages[f] !== '')
+
+  return { messages, bad, currentBlocking, refiBlocking, currentError, refiError }
 }

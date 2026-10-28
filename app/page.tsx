@@ -4,6 +4,13 @@ import path from 'path';
 import Link from 'next/link';
 import React from 'react';  
 
+// Routes hidden from the index. They still build and stay reachable by URL.
+const EXCLUDED_ROUTES = new Set([
+    '/interactives/mortgage-refinancing-calculator',
+    '/interactives/mortgage-refinancing-calculator-v2',
+    '/interactives/present-value-calculator',
+]);
+
 // Function to get all page routes from the app directory
 function getPageRoutes() {
     const appDir = path.join(process.cwd(), 'app');
@@ -23,7 +30,7 @@ function getPageRoutes() {
                     fs.existsSync(path.join(dirPath, file))
                 );
 
-                if (hasPageFile && routePath !== '/') { // Exclude home page
+                if (hasPageFile && routePath !== '/' && !EXCLUDED_ROUTES.has(routePath)) { // Exclude home page and hidden routes
                     routes.push({
                         path: routePath,
                         name: item.name
