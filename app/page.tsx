@@ -2,7 +2,8 @@
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
-import React from 'react';  
+import React from 'react';
+import { LegalDisclaimerFooter } from '@/app/ui/components/legal-disclaimer-footer';
 
 // Routes hidden from the index. They still build and stay reachable by URL.
 const EXCLUDED_ROUTES = new Set([
@@ -93,6 +94,8 @@ export default function HomePage() {
               directory.
             </p>
           </div>
+
+          <LegalDisclaimerFooter />
         </div>
       </div>
     );

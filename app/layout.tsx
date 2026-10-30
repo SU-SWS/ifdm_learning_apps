@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { openSans } from "@/app/ui/fonts";
 import "@/app/ui/globals.css";
+import { SiteLegalFooter } from "@/app/ui/components/site-legal-footer";
 
 export const metadata: Metadata = {
   title: "Understanding money's building blocks",
@@ -23,6 +24,7 @@ export default function RootLayout({
         className={`${openSans.variable}  antialiased`}
       >
         {children}
+        <SiteLegalFooter />
       </body>
     </html>
   );

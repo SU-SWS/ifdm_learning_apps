@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -130,6 +130,24 @@ export function RefinanceCalculator() {
       setHasStartedEditing(true);
     }
   }, [newAmount, newTerm, newRate, closingCosts, years, hasStartedEditing]);
+
+  // Publish the mobile sticky bar's height so the legal disclaimer in the
+  // root layout can add matching bottom padding and stay above the bar.
+  const stickyBarRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = stickyBarRef.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const update = () =>
+      root.style.setProperty("--sticky-footer-height", `${bar.offsetHeight}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(bar);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--sticky-footer-height");
+    };
+  }, []);
 
   // Debounced snapshot of the calculation inputs, updated 300ms after typing
   // pauses. handleAnalyze/resetCurrent/resetNewLoan flush it immediately.
@@ -524,7 +542,10 @@ export function RefinanceCalculator() {
       )}
 
       {/* Mobile sticky footer: summary and Reset stay in view while scrolling. */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-[var(--sticky-footer-background)] px-4 py-3 text-[var(--sticky-footer-text)] shadow-lg sm:hidden">
+      <div
+        ref={stickyBarRef}
+        className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-[var(--sticky-footer-background)] px-4 py-3 text-[var(--sticky-footer-text)] shadow-lg sm:hidden"
+      >
         <div
           className={
             tab === "current"

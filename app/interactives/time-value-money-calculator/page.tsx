@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react"
+import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { Card, CardContent } from "@/app/ui/components/card"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
@@ -488,6 +488,24 @@ export default function Page() {
     compoundingFrequency, effectivePaymentFrequency,
     paymentFrequencyMode, paymentTiming, solveFor, validateInputs,
   ])
+
+  // Publish the mobile sticky bar's height so the legal disclaimer in the
+  // root layout can add matching bottom padding and stay above the bar.
+  const stickyBarRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const bar = stickyBarRef.current
+    if (!bar) return
+    const root = document.documentElement
+    const update = () =>
+      root.style.setProperty("--sticky-footer-height", `${bar.offsetHeight}px`)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(bar)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty("--sticky-footer-height")
+    }
+  }, [])
 
   useEffect(() => { calculate() }, [calculate])
 
@@ -1153,7 +1171,7 @@ export default function Page() {
         </div>
 
         {/* Mobile sticky footer */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
+        <div ref={stickyBarRef} className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
           <div className="flex flex-col items-center justify-between">
             <div className="text-sm">{currentOption?.label}</div>
             <ResultDisplay
