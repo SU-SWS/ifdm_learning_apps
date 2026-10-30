@@ -6,7 +6,7 @@ import { Button } from "@/app/ui/components/button"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
 import { RotateCcw } from "lucide-react"
-import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
+import { FaAngleDown } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { validateAllFields } from "./lib/validation";
 import {
@@ -283,7 +283,6 @@ export default function SavingsCalculator() {
               className={`h-18 whitespace-normal cursor-pointer ${mode === "monthly-savings" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("monthly-savings")}
             >
-              <FaDollarSign className="hidden sm:block h-5 w-5 mr-2" />
               Savings
             </Button>
             <Button
@@ -291,7 +290,6 @@ export default function SavingsCalculator() {
               className={`h-18 whitespace-normal cursor-pointer ${mode === "time-to-goal" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("time-to-goal")}
             >
-              <FaRegCalendar className="hidden sm:block h-5 w-5 mr-2" />
               Time to Goal
             </Button>
             <Button
@@ -299,7 +297,6 @@ export default function SavingsCalculator() {
               className={`h-18 whitespace-normal cursor-pointer ${mode === "future-balance" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("future-balance")}
             >
-              <FaArrowTrendUp className="hidden sm:block h-5 w-5 mr-2" />
               Future Balance
             </Button>
           </div>
@@ -331,7 +328,7 @@ export default function SavingsCalculator() {
               {mode !== "future-balance" && (
               <div>
                 <Label htmlFor="savings-goal" className="font-medium">
-                  Savings goal amount:
+                  Savings goal amount
                 </Label>
                 <div className="relative mt-1">
                   <Input
@@ -381,7 +378,7 @@ export default function SavingsCalculator() {
 
               <div>
                 <Label htmlFor="current-balance" className="font-medium">
-                  Current savings balance:
+                  Current savings balance
                 </Label>
                 <div className="relative mt-1">
                   <Input
@@ -427,7 +424,7 @@ export default function SavingsCalculator() {
 
               {mode !== "monthly-savings" && (
                 <div>
-                  <Label htmlFor="contribution-period" className="font-medium">Saving per compounding period:</Label>
+                  <Label htmlFor="contribution-period" className="font-medium">Saving per compounding period</Label>
                   <div className="relative mt-1">
                     <Input
                       id="contribution-period"
@@ -470,7 +467,7 @@ export default function SavingsCalculator() {
               {mode !== "time-to-goal" && (
                 <div>
                   <Label htmlFor="time-years" className="font-medium">
-                    {mode === "future-balance" ? "Time period" : "Time to goal"}:
+                    {mode === "future-balance" ? "Time period" : "Time to goal"}
                   </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
                     <div className="flex flex-col gap-2">
