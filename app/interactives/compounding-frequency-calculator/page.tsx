@@ -242,11 +242,11 @@ export default function CompoundInterestCalculator() {
         {/* Header */}
         <h1 className="sr-only">Compounding Frequency Calculator</h1>
         <ThemeToggle />
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-10 md:gap-8">
           {/* Input Fields */}
           <section
             aria-label="Calculator inputs"
-            className="space-y-3 mb-10 w-full lg:w-1/2"
+            className="space-y-3 md:mb-10 w-full lg:w-1/2"
           >
             <div>
               <label
