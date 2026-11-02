@@ -214,7 +214,7 @@ export default function CompoundInterestCalculator() {
     setInitialAmount("")
     setAnnualRate("")
     setPeriods("")
-    setSelectedCompounding("monthly")
+    setSelectedCompounding("annually")
     setInitialAmountError("")
     setAnnualRateError("")
     setPeriodsError("")
