@@ -384,6 +384,14 @@ export function RefinanceCalculator() {
     setAnalyzed(true);
   }
 
+  const hasCurrentLoanError = v.currentBlocking && (
+    analyzed || Boolean(
+      v.messages.months ||
+      v.messages.currentRate ||
+      v.messages.monthlyPayment
+    )
+  );
+
   const mobileShowAnalysis = analyzed && hasStartedEditing && !refiAnalysisBlocking;
   const mobileNet = normalizeDisplayValue(analysis.overallBenefit);
 
@@ -415,7 +423,7 @@ export function RefinanceCalculator() {
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         {/* Left column */}
         <div>
-          {tab === "refinance" && v.currentBlocking && (
+          {tab === "refinance" && v.currentBlocking && !hasCurrentLoanError && (
             <div
               className="mb-6 p-5 bg-blue-50 rounded-lg border border-blue-200 [.dark_&]:bg-[var(--info-popup-background)]"
             >
@@ -521,6 +529,7 @@ export function RefinanceCalculator() {
                   payment: analysis.newPayment,
                 }}
                 analyzed={analyzed}
+                hasCurrentLoanError={hasCurrentLoanError}
               />
             </>
           )}
@@ -969,6 +978,7 @@ function ResultPanel({
   current,
   next,
   analyzed,
+  hasCurrentLoanError,
 }: {
   analysis: {
     newPayment: number;
@@ -993,6 +1003,7 @@ function ResultPanel({
   current: LoanTerms;
   next: LoanTerms;
   analyzed: boolean;
+  hasCurrentLoanError: boolean;
 }) {
   const displayedNet = normalizeDisplayValue(analysis.overallBenefit);
 
@@ -1023,14 +1034,6 @@ const subtext =
     : verdict === "positive"
       ? "Adjusted to today's dollars, refinancing comes out ahead."
       : "Adjusted to today's dollars, refinancing costs more than it saves.";
-
-  const hasCurrentLoanError = validation.currentBlocking && (
-    analyzed || Boolean(
-      validation.messages.months ||
-      validation.messages.currentRate ||
-      validation.messages.monthlyPayment
-    )
-  );
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
