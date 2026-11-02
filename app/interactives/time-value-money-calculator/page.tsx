@@ -1051,7 +1051,7 @@ export default function Page() {
               >
                 <SelectTrigger
                   id="compounding"
-                  className="border-border bg-card"
+                  className="w-full border-border bg-card"
                 >
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
@@ -1104,7 +1104,7 @@ export default function Page() {
                   >
                     <SelectTrigger
                       id="paymentFreq"
-                      className="border-border bg-card mt-2"
+                      className="w-full border-border bg-card mt-2"
                     >
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
