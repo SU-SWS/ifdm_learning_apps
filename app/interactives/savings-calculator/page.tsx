@@ -631,7 +631,7 @@ export default function SavingsCalculator() {
                         : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? (hasResultError ? "-" : "")
+                      ? (hasResultError ? "-" : " ")
                       : overflowWarning
                       ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -652,7 +652,7 @@ export default function SavingsCalculator() {
                 <CardTitle className="text-md font-bold">Estimated time to reach goal:</CardTitle>
                   <div className="text-4xl font-bold" style={{ color: !isInvalid(results.timeInMonths) && overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
                     {isInvalid(results.timeInMonths)
-                      ? (hasResultError ? "-" : "")
+                      ? (hasResultError ? "-" : " ")
                       : overflowWarning
                       ? "Too large to display"
                       : `${Math.floor(Math.round(results.timeInMonths) / 12)} years ${Math.round(results.timeInMonths) % 12} months`
@@ -670,7 +670,7 @@ export default function SavingsCalculator() {
                         : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? (hasResultError ? "-" : "")
+                      ? (hasResultError ? "-" : " ")
                       : overflowWarning
                       ? "Too large to display"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -689,7 +689,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.totalDeposited) || overflowWarning
-                        ? (hasResultError ? "-" : "")
+                        ? (hasResultError ? "-" : " ")
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -700,7 +700,7 @@ export default function SavingsCalculator() {
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg sm:bg-[var(--results-white-background)] text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis`}
                       >
                         {isInvalid(results.interestEarned) || overflowWarning
-                        ? (hasResultError ? "-" : "")
+                        ? (hasResultError ? "-" : " ")
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -711,7 +711,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.finalBalance) || overflowWarning
-                        ? (hasResultError ? "-" : "")
+                        ? (hasResultError ? "-" : " ")
                         : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>

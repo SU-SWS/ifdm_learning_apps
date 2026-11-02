@@ -145,7 +145,7 @@ export default function DebtPayoffCalculator() {
     showPaymentWarning ||
     !!v.additionalPaymentError
       ? "-"
-      : "";
+      : " ";
   const requiredDash =
     showDebtAmountError ||
     showInterestRateError ||
@@ -153,7 +153,7 @@ export default function DebtPayoffCalculator() {
     !!v.targetYearsError ||
     !!v.targetMonthsError
       ? "-"
-      : "";
+      : " ";
 
   const payoffResult = calculatePayoffTime({
     principal: v.debtAmountNum,
@@ -451,11 +451,11 @@ export default function DebtPayoffCalculator() {
                             ? payoffDash
                             : formatTime(payoffResult.timeInMonths)}
                         </p>
-                        {!v.payoffBlocked && (
-                          <p className="text-medium font-semibold text-[var(--color-teal)]">
-                            Debt-free by {formatDate(payoffResult.payoffDate)}
-                          </p>
-                        )}
+                        <p className="text-medium font-semibold text-[var(--color-teal)]">
+                          {v.payoffBlocked
+                            ? " "
+                            : `Debt-free by ${formatDate(payoffResult.payoffDate)}`}
+                        </p>
                       </div>
 
                       <div className="innerwrapper">
@@ -761,14 +761,13 @@ export default function DebtPayoffCalculator() {
                                 requiredPaymentResult.requiredPayment,
                               )}
                         </p>
-                        {!v.requiredPaymentBlocked && (
-                          <p className="text-[var(--color-teal)] text-lg font-semibold">
-                            To pay off in{" "}
-                            {formatTime(
-                              v.targetYearsNum * 12 + v.targetMonthsNum,
-                            )}
-                          </p>
-                        )}
+                        <p className="text-[var(--color-teal)] text-lg font-semibold">
+                          {v.requiredPaymentBlocked
+                            ? " "
+                            : `To pay off in ${formatTime(
+                                v.targetYearsNum * 12 + v.targetMonthsNum,
+                              )}`}
+                        </p>
                       </div>
 
                       <div className="innerwrapper">

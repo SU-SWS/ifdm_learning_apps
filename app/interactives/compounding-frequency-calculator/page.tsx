@@ -202,7 +202,7 @@ export default function CompoundInterestCalculator() {
   // A blank field keeps results blank; "-" appears only for a validation error.
   const anyFieldEmpty = initialAmount === "" || annualRate === "" || periods === ""
   const hasError = anyFieldEmpty || !!initialAmountError || !!annualRateError || !!periodsError
-  const resultDash = !!initialAmountError || !!annualRateError || !!periodsError ? "-" : ""
+  const resultDash = !!initialAmountError || !!annualRateError || !!periodsError ? "-" : " "
 
   const { aStr: balanceStr, bStr: interestStr, tooLarge: mainTooLarge } = formatPair(
     selectedResult.finalAmount,

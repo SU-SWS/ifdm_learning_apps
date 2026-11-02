@@ -462,7 +462,7 @@ export default function MortgageCalculator() {
             Down payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {dash.downPayment ? DASH : blank ? "" : formatCurrency(results.downPayment || 0)}
+            {dash.downPayment ? DASH : blank ? " " : formatCurrency(results.downPayment || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -470,7 +470,7 @@ export default function MortgageCalculator() {
             Loan amount:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {dash.loanAmount ? DASH : blank ? "" : formatCurrency(results.loanAmount || 0)}
+            {dash.loanAmount ? DASH : blank ? " " : formatCurrency(results.loanAmount || 0)}
           </div>
         </div>
         <div className="flex flex-col my-3">
@@ -482,7 +482,7 @@ export default function MortgageCalculator() {
             Mortgage payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyMortgage ? DASH : blank ? "" : formatCurrency(results.monthlyMortgage || 0)}
+            {dash.monthlyMortgage ? DASH : blank ? " " : formatCurrency(results.monthlyMortgage || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -490,7 +490,7 @@ export default function MortgageCalculator() {
             Property taxes:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyTax ? DASH : blank ? "" : formatCurrency(results.monthlyTax || 0)}
+            {dash.monthlyTax ? DASH : blank ? " " : formatCurrency(results.monthlyTax || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -498,7 +498,7 @@ export default function MortgageCalculator() {
             Insurance:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyInsurance ? DASH : blank ? "" : formatCurrency(results.monthlyInsurance || 0)}
+            {dash.monthlyInsurance ? DASH : blank ? " " : formatCurrency(results.monthlyInsurance || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -506,7 +506,7 @@ export default function MortgageCalculator() {
             HOA:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.hoa ? DASH : blank ? "" : formatCurrency(results.hoaDues || 0)}
+            {dash.hoa ? DASH : blank ? " " : formatCurrency(results.hoaDues || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -514,7 +514,7 @@ export default function MortgageCalculator() {
             Total monthly housing cost:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
-            {dash.total ? DASH : blank ? "" : formatCurrency(results.totalMonthlyHousingCost || 0)}
+            {dash.total ? DASH : blank ? " " : formatCurrency(results.totalMonthlyHousingCost || 0)}
           </div>
         </div>
         <div className="py-5">
@@ -990,7 +990,7 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-3xl font-bold text-[var(--color-teal)]">
-                          {affordDash.homePrice ? DASH : affordBlank ? "" : formatCurrency(Number(results.homePrice))}
+                          {affordDash.homePrice ? DASH : affordBlank ? " " : formatCurrency(Number(results.homePrice))}
                         </p>
                       </div>
                       <ResultsBody dash={affordDash} blank={affordBlank} headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
@@ -1433,7 +1433,7 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-3xl font-bold text-[var(--color-teal)]">
-                          {paymentDash.monthlyMortgage ? DASH : paymentBlank ? "" : formatCurrency(Number(results.monthlyMortgage))}
+                          {paymentDash.monthlyMortgage ? DASH : paymentBlank ? " " : formatCurrency(Number(results.monthlyMortgage))}
                         </p>
                       </div>
                       <ResultsBody dash={paymentDash} blank={paymentBlank} headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />

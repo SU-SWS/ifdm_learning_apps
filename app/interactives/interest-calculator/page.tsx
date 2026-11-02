@@ -572,7 +572,7 @@ export default function InterestRateVisual() {
                     Initial amount:
                   </div>
                   <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg bg-[var(--secondary-background)] font-bold text-[var(--foreground)] overflow-hidden text-ellipsis">
-                    {hasValidationError ? "-" : anyFieldEmpty ? "" : formatCurrency(parseFloat(amountRaw) || 0)}
+                    {hasValidationError ? "-" : anyFieldEmpty ? " " : formatCurrency(parseFloat(amountRaw) || 0)}
                   </div>
                 </div>
 
@@ -591,7 +591,7 @@ export default function InterestRateVisual() {
                     {hasValidationError
                       ? "-"
                       : anyFieldEmpty
-                        ? ""
+                        ? " "
                         : resultTooLarge
                         ? "Too large to display"
                         : formatCurrency(Math.abs(interestAmount))}
@@ -607,7 +607,7 @@ export default function InterestRateVisual() {
                     {hasValidationError
                       ? "-"
                       : anyFieldEmpty
-                        ? ""
+                        ? " "
                         : resultTooLarge
                         ? "Too large to display"
                         : formatCurrency(totalAmount)}
