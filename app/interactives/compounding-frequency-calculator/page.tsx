@@ -214,7 +214,7 @@ export default function CompoundInterestCalculator() {
     setInitialAmount("")
     setAnnualRate("")
     setPeriods("")
-    setSelectedCompounding("monthly")
+    setSelectedCompounding("annually")
     setInitialAmountError("")
     setAnnualRateError("")
     setPeriodsError("")
@@ -242,11 +242,11 @@ export default function CompoundInterestCalculator() {
         {/* Header */}
         <h1 className="sr-only">Compounding Frequency Calculator</h1>
         <ThemeToggle />
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-10 md:gap-8">
           {/* Input Fields */}
           <section
             aria-label="Calculator inputs"
-            className="space-y-3 mb-10 w-full lg:w-1/2"
+            className="space-y-3 md:mb-10 w-full lg:w-1/2"
           >
             <div>
               <label
@@ -549,7 +549,7 @@ export default function CompoundInterestCalculator() {
           className="rounded-3xl bg-[var(--grey-background)] p-6 mt-10"
         >
           <h2 className="text-xl font-semibold mb-2">
-            Comparison Across Compounding Frequencies
+            Comparison across compounding frequencies
           </h2>
           <p className="text-sm mb-4">
             See how compounding frequency affects returns over the same time
@@ -564,26 +564,26 @@ export default function CompoundInterestCalculator() {
                     scope="col"
                     className="w-1/4 font-semibold text-left px-4 py-3"
                   >
-                    Compounding Frequency
+                    Compounding frequency
                   </th>
                   <th
                     scope="col"
                     className="w-1/4 font-semibold text-right px-4 py-3"
                   >
                     Number of <br />
-                    Compounding Periods
+                    compounding periods
                   </th>
                   <th
                     scope="col"
                     className="w-1/4 font-semibold text-right px-4 py-3"
                   >
-                    Final Amount
+                    Final amount
                   </th>
                   <th
                     scope="col"
                     className="w-1/4 font-semibold text-right px-4 py-3"
                   >
-                    Interest Accrued
+                    Interest accrued
                   </th>
                 </tr>
               </thead>
@@ -652,14 +652,14 @@ export default function CompoundInterestCalculator() {
                     </span>
                   </div>
                   <div className="mt-1">
-                    <span className="block font-semibold">Final Amount</span>
+                    <span className="block font-semibold">Final amount</span>
                     <span className="block overflow-auto break-words">
                       {hasError ? resultDash : rowBalance}
                     </span>
                   </div>
                   <div className="mt-1">
                     <span className="block font-semibold">
-                      Interest Accrued
+                      Interest accrued
                     </span>
                     <span className="block overflow-auto break-words">
                       {hasError ? resultDash : rowInterest}
