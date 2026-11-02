@@ -662,13 +662,12 @@ export default function Page() {
     className?: string;
   }) => {
     const largeText = size === "desktop" ? "text-3xl/normal" : "text-2xl";
-    const medText = size === "desktop" ? "text-2xl sm:text-3xl" : "text-xl";
 
     const hasError = !!displayError || fieldErrors.length > 0;
     if (hasError) {
       return (
         <div className={className}>
-          <p className={`${largeText} font-bold text-[var(--foreground)] mb-1`}>-</p>
+          <p className={`${largeText} font-bold text-[var(--foreground)] mb-5`}>-</p>
           {displayError && (
             <p className="text-sm text-[var(--color-inline-error)]">{displayError}</p>
           )}
@@ -694,7 +693,7 @@ export default function Page() {
         </p>
       );
     }
-    return <p className={`${medText} font-medium ${className}`}>&nbsp;</p>;
+    return <p className={`${largeText} font-bold mb-5 ${className}`}>&nbsp;</p>;
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────

@@ -499,7 +499,7 @@ export function RefinanceCalculator() {
                 </p>
                 {/* Suppressed rather than computed from zero-coerced blanks. */}
                 <p className="mt-1 text-4xl font-bold text-primary">
-                  {currentBalanceError ? DASH : currentBalanceBlocking ? "" : formatCurrency(currentBalance)}
+                  {currentBalanceError ? DASH : currentBalanceBlocking ? " " : formatCurrency(currentBalance)}
                 </p>
               </div>
             </>
@@ -573,12 +573,12 @@ export function RefinanceCalculator() {
               aria-atomic="true"
             >
               {tab === "current"
-                ? currentBalanceError ? DASH : currentBalanceBlocking ? "" : formatCurrency(currentBalance)
+                ? currentBalanceError ? DASH : currentBalanceBlocking ? " " : formatCurrency(currentBalance)
                 : mobileShowAnalysis
                   ? mobileNet < 0
                     ? `−${formatCurrency(Math.abs(mobileNet))}`
                     : formatCurrency(mobileNet)
-                  : refiAnalysisError ? DASH : ""}
+                  : refiAnalysisError ? DASH : " "}
             </p>
             {tab === "refinance" && mobileShowAnalysis && (
               <p className="text-xs font-semibold">
@@ -1095,7 +1095,7 @@ const subtext =
                 ? displayedNet < 0
                   ? `−${formatCurrency(Math.abs(displayedNet))}`
                   : formatCurrency(displayedNet)
-                : refiAnalysisError ? DASH : ""}
+                : refiAnalysisError ? DASH : " "}
             </p>
             {showAnalysis && (
               <>
@@ -1184,7 +1184,7 @@ function LoanComparison({
   // the new payment from all of the refinance inputs, so those two cells use
   // the aggregate flags instead of a single field's.
   const dash = (errored: boolean, blocked: boolean, text: string) =>
-    errored ? DASH : blocked ? "" : text;
+    errored ? DASH : blocked ? " " : text;
   // Field-level cells also depend on the current balance, as they did before.
   const fieldCell = (field: FieldName, text: string) =>
     dash(

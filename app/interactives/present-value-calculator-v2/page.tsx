@@ -113,8 +113,8 @@ export default function PresentValueCalculator() {
   const singleHasValidationError = !!futureValueError || !!interestRateError || !!timePeriodError
 
   // Results show "-" only when a visible error blocks them; empty required fields leave them blank.
-  const singleBlank = singleHasValidationError ? "-" : ""
-  const seriesBlank = seriesHasValidationError ? "-" : ""
+  const singleBlank = singleHasValidationError ? "-" : " "
+  const seriesBlank = seriesHasValidationError ? "-" : " "
 
   // Debounced inputs for calculations — updates after 300ms pause in typing
   // to avoid recalculating on every keystroke.
@@ -567,6 +567,11 @@ export default function PresentValueCalculator() {
                       ? singleBlank
                       : formatCurrency(singleCalculations.presentValue)}
                   </p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {singleHasValidationError
+                      ? "Fix the fields on the left to see results."
+                      : " "}
+                  </p>
                   <div
                     aria-live="polite"
                     aria-atomic="true"
@@ -1006,11 +1011,11 @@ export default function PresentValueCalculator() {
                       ? seriesBlank
                       : formatCurrency(paymentCalculations.presentValue)}
                   </p>
-                  {seriesHasValidationError && (
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Fix the fields on the left to see results.
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {seriesHasValidationError
+                      ? "Fix the fields on the left to see results."
+                      : " "}
+                  </p>
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
                       <div className="w-full sm:w-[50%] text-md p-4 font-bold text-black bg-grey-med-dark rounded-lg sm:rounded-l-lg sm:rounded-r-none flex items-center">
