@@ -56,6 +56,10 @@ function FieldError({ id, children }: { id: string; children: React.ReactNode })
   );
 }
 
+function addLeadingZero(raw: string) {
+  return raw.replace(/^(-?)\./, "$10.");
+}
+
 export default function MortgageCalculator() {
   const [mode, setMode] = useState<Mode>('afford');
   const [monthlyPayment, setMonthlyPayment] = useState("");
@@ -735,6 +739,7 @@ export default function MortgageCalculator() {
                         onBlur={() => {
                           setFocusedField(null);
                           setTouched((t) => ({ ...t, interestRate: true }));
+                          setInterestRate(addLeadingZero(interestRate));
                         }}
                         aria-describedby={v.rateMsg ? "interest-rate-afford-error" : undefined}
                         aria-invalid={!!v.rateMsg}
@@ -825,6 +830,7 @@ export default function MortgageCalculator() {
                               setPropertyTaxPercentInput(raw);
                               setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                             }}
+                            onBlur={() => setPropertyTaxPercentInput(addLeadingZero(propertyTaxPercentInput))}
                             aria-label="Property tax percentage"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
                             aria-invalid={!!v.taxMsg}
@@ -916,6 +922,7 @@ export default function MortgageCalculator() {
                               setHomeInsurancePercentInput(raw);
                               setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                             }}
+                            onBlur={() => setHomeInsurancePercentInput(addLeadingZero(homeInsurancePercentInput))}
                             aria-label="Home insurance percentage"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
                             aria-invalid={!!v.insMsg}
@@ -1175,6 +1182,7 @@ export default function MortgageCalculator() {
                         onBlur={() => {
                           setFocusedField(null);
                           setTouched((t) => ({ ...t, interestRate: true }));
+                          setInterestRate(addLeadingZero(interestRate));
                         }}
                         aria-describedby={v.rateMsg ? "interest-rate-payment-error" : undefined}
                         aria-invalid={!!v.rateMsg}
@@ -1264,6 +1272,7 @@ export default function MortgageCalculator() {
                                 setPropertyTaxPercentInput(raw);
                                 setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                               }}
+                              onBlur={() => setPropertyTaxPercentInput(addLeadingZero(propertyTaxPercentInput))}
                               aria-label="Property tax percentage"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
                               aria-invalid={!!v.taxMsg}
@@ -1355,6 +1364,7 @@ export default function MortgageCalculator() {
                                 setHomeInsurancePercentInput(raw);
                                 setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                               }}
+                              onBlur={() => setHomeInsurancePercentInput(addLeadingZero(homeInsurancePercentInput))}
                               aria-label="Home insurance percentage"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
                               aria-invalid={!!v.insMsg}
