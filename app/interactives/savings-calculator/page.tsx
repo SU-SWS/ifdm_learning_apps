@@ -6,7 +6,7 @@ import { Button } from "@/app/ui/components/button"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
 import { RotateCcw } from "lucide-react"
-import { FaRegCalendar, FaDollarSign, FaAngleDown, FaArrowTrendUp } from "react-icons/fa6";
+import { FaAngleDown } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { validateAllFields } from "./lib/validation";
 import {
@@ -193,6 +193,12 @@ export default function SavingsCalculator() {
     currentBalance <= 1000000000 &&
     savingsGoal <= currentBalance;
 
+  // Results dash only when the calculation is blocked by a visible error or warning.
+  // Empty or untouched fields leave the results blank.
+  const hasResultError =
+    validation.hasBlockingErrors &&
+    (Object.keys(validation.errors).length > 0 || Object.keys(validation.warnings).length > 0);
+
   // Handle field blur - mark field as touched
   const handleFieldBlur = (fieldName: string) => {
     setTouched((prev) => ({
@@ -270,14 +276,13 @@ export default function SavingsCalculator() {
         <h1 className="sr-only">Savings Calculator</h1>
         {/* Mode Selection */}
         <div className="mb-8">
-          <h2 className="font-poppins text-lg-title text-[var(--foreground)] font-bold mb-1">Solve for:</h2>
+          <h2 className="text-lg-title text-[var(--foreground)] font-bold mb-1">Solve for:</h2>
           <div className="grid grid-cols-3 gap-2">
             <Button
               variant={mode === "monthly-savings" ? "default" : "outline"}
               className={`h-18 whitespace-normal cursor-pointer ${mode === "monthly-savings" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("monthly-savings")}
             >
-              <FaDollarSign className="hidden sm:block h-5 w-5 mr-2" />
               Savings
             </Button>
             <Button
@@ -285,7 +290,6 @@ export default function SavingsCalculator() {
               className={`h-18 whitespace-normal cursor-pointer ${mode === "time-to-goal" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("time-to-goal")}
             >
-              <FaRegCalendar className="hidden sm:block h-5 w-5 mr-2" />
               Time to Goal
             </Button>
             <Button
@@ -293,7 +297,6 @@ export default function SavingsCalculator() {
               className={`h-18 whitespace-normal cursor-pointer ${mode === "future-balance" ? "bg-lagunita text-white hover:bg-navy" : "bg-[var(--results-white-background)] hover:bg-lagunita hover:text-white"}`}
               onClick={() => setMode("future-balance")}
             >
-              <FaArrowTrendUp className="hidden sm:block h-5 w-5 mr-2" />
               Future Balance
             </Button>
           </div>
@@ -314,7 +317,7 @@ export default function SavingsCalculator() {
                 <p className="font-semibold">What will my savings grow to in the future?</p>
               )}
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-3">
               {overflowWarning && (
                 <div className="p-3 rounded-md bg-[var(--color-inline-warning)]/10 border border-[var(--color-inline-warning)]">
                   <p className="text-sm font-semibold text-[var(--color-inline-warning)]">
@@ -325,7 +328,7 @@ export default function SavingsCalculator() {
               {mode !== "future-balance" && (
               <div>
                 <Label htmlFor="savings-goal" className="font-medium">
-                  Savings goal amount:
+                  Savings goal amount
                 </Label>
                 <div className="relative mt-1">
                   <Input
@@ -344,11 +347,11 @@ export default function SavingsCalculator() {
                       handleFieldBlur("savingsGoal");
                       setFocusedField(null);
                     }}
-                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.savingsGoal
-                        ? "border-[var(--color-inline-error)]"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : validation.warnings.savingsGoal
-                        ? "border-[var(--color-inline-warning)]"
+                        ? "border-2 border-[var(--color-inline-warning)]"
                         : "border-input"
                     }`}
 
@@ -375,7 +378,7 @@ export default function SavingsCalculator() {
 
               <div>
                 <Label htmlFor="current-balance" className="font-medium">
-                  Current savings balance:
+                  Current savings balance
                 </Label>
                 <div className="relative mt-1">
                   <Input
@@ -395,11 +398,11 @@ export default function SavingsCalculator() {
                       setFocusedField(null);
                     }}
 
-                    className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.currentBalance
-                        ? "border-[var(--color-inline-error)]"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : validation.warnings.currentBalance
-                        ? "border-[var(--color-inline-warning)]"
+                        ? "border-2 border-[var(--color-inline-warning)]"
                         : "border-input"
                     }`}
                   />
@@ -421,7 +424,7 @@ export default function SavingsCalculator() {
 
               {mode !== "monthly-savings" && (
                 <div>
-                  <Label htmlFor="contribution-period" className="font-medium">Saving per compounding period:</Label>
+                  <Label htmlFor="contribution-period" className="font-medium">Saving per compounding period</Label>
                   <div className="relative mt-1">
                     <Input
                       id="contribution-period"
@@ -440,8 +443,8 @@ export default function SavingsCalculator() {
                         handleFieldBlur("contributionPerPeriod");
                         setFocusedField(null);
                       }}
-                      className={`block w-full rounded-md shadow-sm py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                        validation.errors.contributionPerPeriod ? "border-[var(--color-inline-error)]" : "border-input"
+                      className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 border pl-8 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        validation.errors.contributionPerPeriod ? "border-2 border-[var(--color-inline-error)]" : "border-input"
                       }`}
                     />
                     {!hasReachedGoal && (
@@ -464,7 +467,7 @@ export default function SavingsCalculator() {
               {mode !== "time-to-goal" && (
                 <div>
                   <Label htmlFor="time-years" className="font-medium">
-                    {mode === "future-balance" ? "Time period" : "Time to goal"}:
+                    {mode === "future-balance" ? "Time period" : "Time to goal"}
                   </Label>
                   <div className="grid grid-cols-2 gap-4 mt-1">
                     <div className="flex flex-col gap-2">
@@ -481,8 +484,8 @@ export default function SavingsCalculator() {
                               setEditedFields(prev => ({ ...prev, timeYears: e.target.value !== "" }));
                             }}
                             onBlur={() => handleFieldBlur("timeYears")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                              validation.errors.timeYears ? "border-[var(--color-inline-error)]" : "border-input"
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeYears ? "border-2 border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
                         </div>
@@ -508,8 +511,8 @@ export default function SavingsCalculator() {
                               setEditedFields(prev => ({ ...prev, timeMonths: e.target.value !== "" }));
                             }}
                             onBlur={() => handleFieldBlur("timeMonths")}
-                            className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                              validation.errors.timeMonths ? "border-[var(--color-inline-error)]" : "border-input"
+                            className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              validation.errors.timeMonths ? "border-2 border-[var(--color-inline-error)]" : "border-input"
                             }`}
                           />
                         </div>
@@ -548,11 +551,11 @@ export default function SavingsCalculator() {
                       handleFieldBlur("interestRate");
                       setFocusedField(null);
                     }}
-                    className={`block w-full rounded-md shadow-sm py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    className={`block w-full h-[55px] rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 py-2 px-3 border pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                       validation.errors.interestRate
-                        ? "border-[var(--color-inline-error)]"
+                        ? "border-2 border-[var(--color-inline-error)]"
                         : validation.warnings.interestRate
-                        ? "border-[var(--color-inline-warning)]"
+                        ? "border-2 border-[var(--color-inline-warning)]"
                         : "border-input"
                     }`}
                   />
@@ -584,7 +587,7 @@ export default function SavingsCalculator() {
                   value={hasReachedGoal ? "" : compounding}
                   disabled={hasReachedGoal}
                   onChange={(e) => setCompounding(e.target.value as CompoundingFrequency)}
-                  className="block w-full rounded-md shadow-sm py-2 px-3 border appearance-none"
+                  className="block w-full h-[55px] rounded-md shadow-sm py-2 px-3 border border-input appearance-none ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     {hasReachedGoal && <option value="">-</option>}
                     <option value="daily">Daily</option>
@@ -618,14 +621,14 @@ export default function SavingsCalculator() {
             <CardHeader className="pb-2">
               {mode === "monthly-savings" && (
                 <>
-                  <CardTitle className="text-center text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
-                  <div className={`text-4xl font-bold text-center ${
-                      isInvalid(results.totalDeposited) || overflowWarning
+                  <CardTitle className="text-md font-bold">Save each {getPeriodLabel(compounding)}:</CardTitle>
+                  <div className={`text-4xl font-bold ${
+                      !isInvalid(results.totalDeposited) && overflowWarning
                         ? "text-foreground"
                         : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.totalDeposited)
-                      ? "-"
+                      ? (hasResultError ? "-" : " ")
                       : overflowWarning
                       ? "Too large to display"
                       : `$${results.contributionPerPeriod.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -643,10 +646,10 @@ export default function SavingsCalculator() {
 
               {mode === "time-to-goal" && (
                 <>
-                <CardTitle className="text-center text-md font-bold">Estimated time to reach goal:</CardTitle>
-                  <div className="text-4xl font-bold text-center" style={{ color: isInvalid(results.timeInMonths) || overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
+                <CardTitle className="text-md font-bold">Estimated time to reach goal:</CardTitle>
+                  <div className="text-4xl font-bold" style={{ color: !isInvalid(results.timeInMonths) && overflowWarning ? "var(--foreground)" : "var(--lagunita)" }}>
                     {isInvalid(results.timeInMonths)
-                      ? "-"
+                      ? (hasResultError ? "-" : " ")
                       : overflowWarning
                       ? "Too large to display"
                       : `${Math.floor(Math.round(results.timeInMonths) / 12)} years ${Math.round(results.timeInMonths) % 12} months`
@@ -657,14 +660,14 @@ export default function SavingsCalculator() {
 
               {mode === "future-balance" && (
                 <>
-                <CardTitle className="text-center text-md font-bold">Future balance:</CardTitle>
-                <div className={`text-4xl font-bold text-center ${
-                      isInvalid(results.finalBalance) || overflowWarning
+                <CardTitle className="text-md font-bold">Future balance:</CardTitle>
+                <div className={`text-4xl font-bold ${
+                      !isInvalid(results.finalBalance) && overflowWarning
                         ? "text-foreground"
                         : "text-[var(--color-teal)]"
                     }`}>
                       {isInvalid(results.finalBalance)
-                      ? "-"
+                      ? (hasResultError ? "-" : " ")
                       : overflowWarning
                       ? "Too large to display"
                       : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -683,7 +686,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.totalDeposited) || overflowWarning
-                        ? "-"
+                        ? (hasResultError ? "-" : " ")
                         : `$${results.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -694,7 +697,7 @@ export default function SavingsCalculator() {
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg sm:bg-[var(--results-white-background)] text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis`}
                       >
                         {isInvalid(results.interestEarned) || overflowWarning
-                        ? "-"
+                        ? (hasResultError ? "-" : " ")
                         : `$${results.interestEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>
@@ -705,7 +708,7 @@ export default function SavingsCalculator() {
                       </div>
                       <div className={`w-full sm:w-[50%] text-lg-title p-4 flex items-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] sm:bg-[var(--results-white-background)] overflow-hidden text-ellipsis`}>
                         {isInvalid(results.finalBalance) || overflowWarning
-                        ? "-"
+                        ? (hasResultError ? "-" : " ")
                         : `$${results.finalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </div>
                     </div>

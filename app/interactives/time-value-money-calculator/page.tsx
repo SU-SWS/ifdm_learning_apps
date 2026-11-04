@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react"
+import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { Card, CardContent } from "@/app/ui/components/card"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
@@ -489,6 +489,24 @@ export default function Page() {
     paymentFrequencyMode, paymentTiming, solveFor, validateInputs,
   ])
 
+  // Publish the mobile sticky bar's height so the legal disclaimer in the
+  // root layout can add matching bottom padding and stay above the bar.
+  const stickyBarRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const bar = stickyBarRef.current
+    if (!bar) return
+    const root = document.documentElement
+    const update = () =>
+      root.style.setProperty("--sticky-footer-height", `${bar.offsetHeight}px`)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(bar)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty("--sticky-footer-height")
+    }
+  }, [])
+
   useEffect(() => { calculate() }, [calculate])
 
   useEffect(() => {
@@ -644,13 +662,16 @@ export default function Page() {
     className?: string;
   }) => {
     const largeText = size === "desktop" ? "text-3xl/normal" : "text-2xl";
-    const medText = size === "desktop" ? "text-2xl sm:text-3xl" : "text-xl";
 
-    if (displayError) {
+    const hasError = !!displayError || fieldErrors.length > 0;
+    if (hasError) {
       return (
-        <p className={`text-[var(--color-inline-error)] ${className}`}>
-          {displayError}
-        </p>
+        <div className={className}>
+          <p className={`${largeText} font-bold text-[var(--foreground)] mb-5`}>-</p>
+          {displayError && (
+            <p className="text-sm text-[var(--color-inline-error)]">{displayError}</p>
+          )}
+        </div>
       );
     }
     if (resultOverflow) {
@@ -672,7 +693,7 @@ export default function Page() {
         </p>
       );
     }
-    return <p className={`${medText} font-medium /50 ${className}`}>—</p>;
+    return <p className={`${largeText} font-bold mb-5 ${className}`}>&nbsp;</p>;
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -806,14 +827,14 @@ export default function Page() {
           {/* Input Fields */}
           <section
             aria-label="Calculator inputs"
-            className="space-y-5 mb-25 md:mb-0 w-full lg:w-1/2"
+            className="space-y-3 mb-25 md:mb-0 w-full lg:w-1/2"
           >
             {/* Present Value */}
             {solveFor !== "PV" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="pv"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Present value
                 </Label>
@@ -833,7 +854,7 @@ export default function Page() {
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setPresentValue)
                     }
-                    className={`border-border pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pl-7 bg-card ${getFieldError("presentValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("presentValue") && (
@@ -846,10 +867,10 @@ export default function Page() {
 
             {/* Payment — early position for RATE/NPER */}
             {(solveFor === "RATE" || solveFor === "NPER") && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="pmt"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Payment per period
                 </Label>
@@ -867,7 +888,7 @@ export default function Page() {
                       handleInputChange(e.target.value, setPayment)
                     }
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
-                    className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("payment") && (
@@ -880,10 +901,10 @@ export default function Page() {
 
             {/* Future Value */}
             {solveFor !== "FV" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="fv"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Future value
                 </Label>
@@ -903,7 +924,7 @@ export default function Page() {
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setFutureValue)
                     }
-                    className={`border-border pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pl-7 bg-card ${getFieldError("futureValue") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                 </div>
                 {getFieldError("futureValue") && (
@@ -918,10 +939,10 @@ export default function Page() {
             {solveFor !== "PMT" &&
               solveFor !== "RATE" &&
               solveFor !== "NPER" && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label
                     htmlFor="pmt"
-                    className="block font-semibold text-foreground mb-2"
+                    className="block font-semibold text-foreground mb-1"
                   >
                     Payment per period
                   </Label>
@@ -941,7 +962,7 @@ export default function Page() {
                       onBlur={(e) =>
                         handleInputBlur(e.target.value, setPayment)
                       }
-                      className={`border-border pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                      className={`border-input pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                     />
                   </div>
                   {getFieldError("payment") && (
@@ -954,10 +975,10 @@ export default function Page() {
 
             {/* Annual Interest Rate */}
             {solveFor !== "RATE" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="rate"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Annual interest rate
                 </Label>
@@ -973,7 +994,7 @@ export default function Page() {
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setAnnualRate)
                     }
-                    className={`border-border pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                    className={`border-input pr-8 bg-card ${getFieldError("annualRate") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">
                     %
@@ -989,10 +1010,10 @@ export default function Page() {
 
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label
                   htmlFor="periods"
-                  className="block font-semibold text-foreground mb-2"
+                  className="block font-semibold text-foreground mb-1"
                 >
                   Number of periods
                 </Label>
@@ -1005,7 +1026,7 @@ export default function Page() {
                     const val = e.target.value;
                     if (val === "" || /^\d*$/.test(val)) setPeriods(val);
                   }}
-                  className={`border-border bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
+                  className={`border-input bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                 />
                 {getFieldError("periods") && (
                   <p className="text-sm text-[var(--color-inline-error)]">
@@ -1016,10 +1037,10 @@ export default function Page() {
             )}
 
             {/* Compounding Frequency */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label
                 htmlFor="compounding"
-                className="block font-semibold text-foreground mb-2"
+                className="block font-semibold text-foreground mb-1"
               >
                 Compounding frequency
               </Label>
@@ -1029,7 +1050,7 @@ export default function Page() {
               >
                 <SelectTrigger
                   id="compounding"
-                  className="border-border bg-card"
+                  className="w-full border-border bg-card"
                 >
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
@@ -1044,8 +1065,8 @@ export default function Page() {
             </div>
 
             {/* Payment Frequency */}
-            <div className="space-y-3">
-              <Label className="block font-semibold text-foreground mb-2">
+            <div className="space-y-1">
+              <Label className="block font-semibold text-foreground mb-1">
                 Payments occur
               </Label>
               <div className="flex items-center gap-4">
@@ -1072,7 +1093,7 @@ export default function Page() {
                 <div className="pt-2">
                   <Label
                     htmlFor="paymentFreq"
-                    className="text-sm font-medium text-foreground"
+                    className="block text-sm font-medium text-foreground mb-1"
                   >
                     Payment frequency
                   </Label>
@@ -1082,7 +1103,7 @@ export default function Page() {
                   >
                     <SelectTrigger
                       id="paymentFreq"
-                      className="border-border bg-card mt-2"
+                      className="w-full border-border bg-card mt-2"
                     >
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
@@ -1099,8 +1120,8 @@ export default function Page() {
             </div>
 
             {/* Payment Timing */}
-            <div className="space-y-2">
-              <Label className="block font-semibold text-foreground mb-2">
+            <div className="space-y-1">
+              <Label className="block font-semibold text-foreground mb-1">
                 Payment timing
               </Label>
               <div className="flex rounded-md border border-border overflow-hidden w-fit">
@@ -1149,7 +1170,7 @@ export default function Page() {
         </div>
 
         {/* Mobile sticky footer */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
+        <div ref={stickyBarRef} className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
           <div className="flex flex-col items-center justify-between">
             <div className="text-sm">{currentOption?.label}</div>
             <ResultDisplay

@@ -135,24 +135,9 @@ export default function RetirementCalculator() {
     !errors.retirementLength &&
     !errors.expectedReturnDuringRetirement;
 
-  const balanceRateOutOfRange =
-    inputs.annualSpending > 0 &&
-    inputs.retirementLength > 0 &&
-    !errors.annualSpending &&
-    !errors.retirementLength &&
-    !!errors.expectedReturnDuringRetirement;
-
-  const balanceInputsFilled =
-    annualSpendingInput !== "" &&
-    retirementLengthInput !== "" &&
-    expectedReturnDuringRetirementInput !== "";
-
+  // Any visible error blocks the balance; empty inputs with no message leave it blank.
   const balanceOutOfRange =
-    balanceRateOutOfRange ||
-    (balanceInputsFilled &&
-      (!!errors.annualSpending ||
-        !!errors.retirementLength ||
-        !!errors.expectedReturnDuringRetirement));
+    !!errors.annualSpending || !!errors.retirementLength || !!errors.expectedReturnDuringRetirement;
 
   const hasRequiredBalance = frozenRequiredBalance > 0 && showBalanceResults;
 
@@ -163,6 +148,11 @@ export default function RetirementCalculator() {
     !errors.currentSavings &&
     !errors.yearsToRetirement &&
     !errors.expectedReturnBeforeRetirement;
+
+  // Savings shows "-" only when one of its inputs has an error; empty inputs leave it blank.
+  const savingsOutOfRange =
+    hasRequiredBalance &&
+    (!!errors.currentSavings || !!errors.yearsToRetirement || !!errors.expectedReturnBeforeRetirement);
 
   const results = useMemo(() => {
     const requiredBalance =
@@ -320,7 +310,7 @@ export default function RetirementCalculator() {
 
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Left Column - Inputs */}
-          <div className="space-y-8">
+          <div className="space-y-3">
             {activeTab === "balance" ? (
               <>
                 <div key="step1-heading" className="mb-4">
@@ -330,7 +320,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Annual Spending */}
-                <div key="annual-spending-field" className="space-y-2">
+                <div key="annual-spending-field" className="space-y-1">
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="annual-spending"
@@ -407,7 +397,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Retirement Length */}
-                <div key="retirement-length-field" className="space-y-2">
+                <div key="retirement-length-field" className="space-y-1">
                   <label
                     htmlFor="retirement-length"
                     className="block text-base text-foreground"
@@ -489,7 +479,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Expected Return During Retirement */}
-                <div key="return-during-retirement-field" className="space-y-2">
+                <div key="return-during-retirement-field" className="space-y-1">
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-during-retirement"
@@ -588,7 +578,7 @@ export default function RetirementCalculator() {
                     </p>
                   </div>
                 )}
-                <div key="step2-heading" className="mb-4">
+                <div key="step2-heading" className="mt-8 mb-4">
                   <p className="font-semibold">
                     Step 2: Calculate savings needed to reach the required
                     balance
@@ -596,7 +586,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Current Savings */}
-                <div key="current-savings-field" className="space-y-2">
+                <div key="current-savings-field" className="space-y-1">
                   <label
                     htmlFor="current-savings"
                     className="block text-base text-foreground"
@@ -648,7 +638,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Years to Retirement */}
-                <div key="years-to-retirement-field" className="space-y-2">
+                <div key="years-to-retirement-field" className="space-y-1">
                   <label
                     htmlFor="years-to-retirement"
                     className="block text-base text-foreground"
@@ -722,7 +712,7 @@ export default function RetirementCalculator() {
                 </div>
 
                 {/* Expected Return Before Retirement */}
-                <div key="return-before-retirement-field" className="space-y-2">
+                <div key="return-before-retirement-field" className="space-y-1">
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="return-before-retirement"
@@ -856,7 +846,7 @@ export default function RetirementCalculator() {
                     </div>
                   </>
                 ) : balanceOutOfRange ? (
-                  <p className="text-4xl font-bold">—</p>
+                  <p className="text-4xl font-bold">-</p>
                 ) : (
                   <div className="py-3">
                     <p className="text-sm">
@@ -881,7 +871,7 @@ export default function RetirementCalculator() {
                     {balanceDescription}
                   </>
                 ) : balanceOutOfRange ? (
-                  <p className="text-4xl font-bold">—</p>
+                  <p className="text-4xl font-bold">-</p>
                 ) : (
                   <div className="py-3">
                     <p className="text-sm">
@@ -980,7 +970,7 @@ export default function RetirementCalculator() {
                 ) : hasRequiredBalance ? (
                   <>
                     <h3 className="mb-1 font-bold text-lg">Required Savings</h3>
-                    <p className="text-4xl font-bold">—</p>
+                    <p className="text-4xl font-bold">{savingsOutOfRange ? "-" : " "}</p>
                   </>
                 ) : null}
               </>

@@ -171,7 +171,7 @@ export function calculateRequiredPayment(params: {
 }
 
 export function formatCurrency(amount: number): string {
-  if (!isFinite(amount)) return "—";
+  if (!isFinite(amount)) return "-";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -185,7 +185,7 @@ export function formatDate(date: Date): string {
 }
 
 export function formatTime(months: number): string {
-  if (!isFinite(months)) return "—";
+  if (!isFinite(months)) return "-";
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
   if (years === 0)

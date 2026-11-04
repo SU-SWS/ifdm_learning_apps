@@ -254,7 +254,7 @@ export default function MortgageCalculator() {
             {/* ── Tab 1: Current Balance ─────────────────────────────────── */}
             <TabsContent value="current-balance">
               <Card>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-3">
                   <div className="grid gap-12 lg:grid-cols-2">
                     {/* Left — inputs */}
                     <div>
@@ -263,8 +263,8 @@ export default function MortgageCalculator() {
                         value of your remaining monthly mortgage payments).
                       </p>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="months">
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="months">
                           Months remaining on loan
                         </Label>
                         <div className="relative">
@@ -294,7 +294,7 @@ export default function MortgageCalculator() {
                         )}
                       </div>
 
-                      <div className="mb-5 relative">
+                      <div className="mb-3 relative">
                         <div className="flex items-center gap-1 mb-1">
                           <Label className="font-semibold" htmlFor="rate">
                             Current interest rate
@@ -304,7 +304,7 @@ export default function MortgageCalculator() {
                               type="button"
                               aria-label="Interest rate help"
                               aria-describedby="rate-tooltip"
-                              className="cursor-help text-[#A7C1CC] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
+                              className="cursor-help text-[var(--info-icon)] text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-lagunita"
                             >
                               <FaCircleInfo size={16} aria-hidden="true" />
                             </button>
@@ -340,8 +340,8 @@ export default function MortgageCalculator() {
                         </div>
                       </div>
 
-                      <div className="mb-5 relative">
-                        <Label className="font-semibold" htmlFor="payment">
+                      <div className="mb-3 relative">
+                        <Label className="block mb-1 font-semibold" htmlFor="payment">
                           Monthly payment amount
                         </Label>
                         <div className="relative">
@@ -365,7 +365,7 @@ export default function MortgageCalculator() {
                             data-1p-ignore
                             data-bwignore
                             data-form-type="other"
-                            className="w-full pl-8 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full pl-8 pr-4 py-3 h-[55px] border border-input rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                             $
@@ -515,9 +515,9 @@ export default function MortgageCalculator() {
                           New Loan Terms
                         </h2>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-new-loan-amount"
                           >
                             New loan amount
@@ -542,7 +542,7 @@ export default function MortgageCalculator() {
                               step="0.01"
                               aria-describedby={refErrors.newLoanAmount ? "loan-amount-error" : undefined}
                               aria-invalid={!!refErrors.newLoanAmount}
-                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refNewLoanAmount ? "pl-8" : "pl-8 pr-4"} ${refErrors.newLoanAmount ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                             />
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none" aria-hidden="true">
                               $
@@ -559,9 +559,9 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-new-months"
                           >
                             New loan term (months)
@@ -580,7 +580,7 @@ export default function MortgageCalculator() {
                                 refErrors.newMonths ? "new-months-error" : "",
                               ].filter(Boolean).join(" ") || undefined}
                               aria-invalid={!!refErrors.newMonths}
-                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                              className={`pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newMonths ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] text-sm pointer-events-none" aria-hidden="true">
                               months
@@ -604,9 +604,9 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-new-rate"
                           >
                             New interest rate
@@ -622,7 +622,7 @@ export default function MortgageCalculator() {
                               step="0.1"
                               aria-describedby={refErrors.newRate ? "new-rate-error" : undefined}
                               aria-invalid={!!refErrors.newRate}
-                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-[var(--color-inline-error)] border-2" : ""}`}
+                              className={`pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${refErrors.newRate ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                             />
                             {refNewRate && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-teal)] font-bold pointer-events-none" aria-hidden="true">
@@ -641,10 +641,10 @@ export default function MortgageCalculator() {
                           )}
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <h2 className="mb-4 text-lg text-[var(--color-teal)] font-semibold border-b border-lagunita pb-2">Optional</h2>
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-closing"
                           >
                             Closing costs & fees
@@ -677,9 +677,9 @@ export default function MortgageCalculator() {
                           </div>
                         </div>
 
-                        <div className="mb-5 relative">
+                        <div className="mb-3 relative">
                           <Label
-                            className="font-semibold"
+                            className="block mb-1 font-semibold"
                             htmlFor="ref-years-in-house"
                           >
                             Expected years living in house

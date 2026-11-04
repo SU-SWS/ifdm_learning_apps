@@ -5,6 +5,28 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.5] - 2026-11-04
+
+Release PR [#217](https://github.com/SU-SWS/ifdm_learning_apps/pull/217) (`dev` into `1.x`).
+
+### Added
+- All pages: Added a legal disclaimer footer to every calculator and the home page (IFDM-381, #210).
+
+### Changed
+- All calculators: Removed the Poppins font, set inputs and selects to a consistent height and border, moved tab and brand colors to shared rgba tokens, and made result font sizes and alignment consistent (IFDM-198, IFDM-371, IFDM-368, IFDM-185, #209).
+- All calculators: Standardized spacing to 4px between a label and its input and 12px between fields. The Mortgage Refinancing Calculator v3 page now lines up with the other calculators (IFDM-292, #209).
+- All calculators: Results stay blank until a calculation runs and show a plain "-" only while a visible error blocks them. Em dashes were replaced with "-" (IFDM-287, #209).
+- Home page: Older calculator versions (Mortgage Refinancing v1 and v2, Present Value v1) are no longer listed. They still build and stay reachable by URL (#209).
+- Savings Calculator: Removed colons from field labels and icons from the top tabs (IFDM-310, IFDM-283, #211).
+- Compounding Frequency Calculator: Comparison box heading and column labels are now sentence case, and the mobile gap between Reset and the results card now matches the other section gaps (IFDM-210, IFDM-201, #213).
+- Time Value of Money Calculator: Compounding and payment frequency dropdowns now span the full column width (IFDM-205, #214).
+- Mortgage Calculator v2: A decimal typed without a leading zero (for example ".5") displays as "0.5" when the field loses focus, for interest rate and percent-mode property taxes and insurance (IFDM-319, #215).
+
+### Fixed
+- Compounding Frequency Calculator: Reset now returns compounding frequency to Annually, matching the initial state, instead of Monthly (IFDM-199, #213).
+- Mortgage Refinancing Calculator v3: With an error on Current Balance, Refinance Analysis now shows only the red error, not the contradictory blue intro prompt (#212).
+- Results cards across calculators no longer change height when switching between blank, dash, and calculated states. Present Value Calculator v2's Single tab now shows the same "Fix the fields on the left to see results." helper line as the Series tab (IFDM-287, #216).
+
 ## [1.3.4] - 2026-10-21
 
 ### Fixed

@@ -49,11 +49,15 @@ function FieldError({ id, children }: { id: string; children: React.ReactNode })
     <p
       id={id}
       role="alert"
-      className="mt-1 text-sm font-semibold text-[var(--color-inline-error)]"
+      className="mt-1 text-base font-semibold text-[var(--color-inline-error)]"
     >
       {children}
     </p>
   );
+}
+
+function addLeadingZero(raw: string) {
+  return raw.replace(/^(-?)\./, "$10.");
 }
 
 export default function MortgageCalculator() {
@@ -230,7 +234,7 @@ export default function MortgageCalculator() {
       affordPriceBlock, affordBlocking, paymentBlocking,
       affordWrongValue, paymentWrongValue,
       // Granular per-field "unusable" flags (empty or out of range). These drive
-      // per-line dashing in the results card: a line shows "—" when any input it
+      // per-line dashing in the results card: a line shows "-" when any input it
       // depends on is unusable, while unaffected lines keep their value.
       paymentBad: paymentBlock, rateBad: rateBlock, priceBad: priceBlock,
       dpBad, taxBad, insBad, hoaBad,
@@ -380,19 +384,24 @@ export default function MortgageCalculator() {
 
   const DASH = "-";
 
-  // Per-line dash flags: a result line shows "—" when any calculator error exists.
-  // When any validation error is active (required field, range, or optional field),
-  // all result rows display dashes to indicate unreliable calculations.
+  // A result shows "-" when a visible validation error exists (required field, range,
+  // or optional field). While a required field is still empty, results stay blank.
+  const affordError =
+    v.affordWrongValue || limitReached || !!v.rateMsg || !!v.paymentMsg || !!v.dpMsg || !!v.taxMsg || !!v.insMsg || !!v.hoaMsg;
+  const paymentError =
+    v.paymentWrongValue || !!v.priceMsg || !!v.rateMsg || !!v.dpMsg || !!v.taxMsg || !!v.insMsg || !!v.hoaMsg;
+  const affordBlank = !affordError && v.affordBlocking;
+  const paymentBlank = !paymentError && v.paymentBlocking;
 
   const affordDash = {
     // All results dash whenever any calculator error exists (core or optional)
-    homePrice: v.affordBlocking || limitReached,
-    downPayment: v.affordBlocking || limitReached,
-    loanAmount: v.affordBlocking || limitReached,
-    monthlyMortgage: v.affordBlocking || limitReached,
-    monthlyTax: v.affordBlocking || limitReached,
-    monthlyInsurance: v.affordBlocking || limitReached,
-    hoa: v.affordBlocking || limitReached,
+    homePrice: affordError,
+    downPayment: affordError,
+    loanAmount: affordError,
+    monthlyMortgage: affordError,
+    monthlyTax: affordError,
+    monthlyInsurance: affordError,
+    hoa: affordError,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
@@ -400,12 +409,12 @@ export default function MortgageCalculator() {
 
   const paymentDash = {
     // All results dash whenever any calculator error exists (core or optional)
-    monthlyMortgage: v.paymentBlocking,
-    downPayment: v.paymentBlocking,
-    loanAmount: v.paymentBlocking,
-    monthlyTax: v.paymentBlocking,
-    monthlyInsurance: v.paymentBlocking,
-    hoa: v.paymentBlocking,
+    monthlyMortgage: paymentError,
+    downPayment: paymentError,
+    loanAmount: paymentError,
+    monthlyTax: paymentError,
+    monthlyInsurance: paymentError,
+    hoa: paymentError,
     total: false,
   };
   // Total dashes iff any required component (mortgage + tax + insurance) is dashed. HOA is optional.
@@ -445,7 +454,7 @@ export default function MortgageCalculator() {
     monthlyTax: boolean; monthlyInsurance: boolean; hoa: boolean; total: boolean;
   };
 
-  const ResultsBody = ({ headline, dash }: { headline: string; dash: LineDash }) => (
+  const ResultsBody = ({ headline, dash, blank }: { headline: string; dash: LineDash; blank: boolean }) => (
     <div className="rounded-lg">
       <div className="innerwrapper">
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -453,7 +462,7 @@ export default function MortgageCalculator() {
             Down payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg font-bold text-[var(--foreground)] overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {dash.downPayment ? DASH : formatCurrency(results.downPayment || 0)}
+            {dash.downPayment ? DASH : blank ? " " : formatCurrency(results.downPayment || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -461,11 +470,11 @@ export default function MortgageCalculator() {
             Loan amount:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 self-center rounded-lg sm:rounded-r-lg text-[var(--color-teal)] font-bold overflow-hidden text-ellipsis bg-[var(--secondary-background)]">
-            {dash.loanAmount ? DASH : formatCurrency(results.loanAmount || 0)}
+            {dash.loanAmount ? DASH : blank ? " " : formatCurrency(results.loanAmount || 0)}
           </div>
         </div>
         <div className="flex flex-col my-3">
-          <h3 className="text-lg font-bold mb-4">Monthly breakdown</h3>
+          <h3 className="text-lg-title tracking-tight text-md font-bold mb-4">Monthly breakdown</h3>
           <hr />
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -473,7 +482,7 @@ export default function MortgageCalculator() {
             Mortgage payment:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyMortgage ? DASH : formatCurrency(results.monthlyMortgage || 0)}
+            {dash.monthlyMortgage ? DASH : blank ? " " : formatCurrency(results.monthlyMortgage || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -481,7 +490,7 @@ export default function MortgageCalculator() {
             Property taxes:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyTax ? DASH : formatCurrency(results.monthlyTax || 0)}
+            {dash.monthlyTax ? DASH : blank ? " " : formatCurrency(results.monthlyTax || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -489,7 +498,7 @@ export default function MortgageCalculator() {
             Insurance:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.monthlyInsurance ? DASH : formatCurrency(results.monthlyInsurance || 0)}
+            {dash.monthlyInsurance ? DASH : blank ? " " : formatCurrency(results.monthlyInsurance || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -497,7 +506,7 @@ export default function MortgageCalculator() {
             HOA:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold overflow-hidden text-ellipsis flex items-center bg-[var(--secondary-background)]">
-            {dash.hoa ? DASH : formatCurrency(results.hoaDues || 0)}
+            {dash.hoa ? DASH : blank ? " " : formatCurrency(results.hoaDues || 0)}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row mb-1 sm:bg-[var(--results-white-background)] rounded-lg">
@@ -505,11 +514,11 @@ export default function MortgageCalculator() {
             Total monthly housing cost:
           </div>
           <div className="w-full sm:w-[50%] text-lg-title p-4 rounded-lg sm:rounded-r-lg font-bold bg-[var(--secondary-background)] overflow-hidden text-ellipsis flex items-center">
-            {dash.total ? DASH : formatCurrency(results.totalMonthlyHousingCost || 0)}
+            {dash.total ? DASH : blank ? " " : formatCurrency(results.totalMonthlyHousingCost || 0)}
           </div>
         </div>
         <div className="py-5">
-          <p className="text-sm">{headline}</p>
+          <p className="text-base">{headline}</p>
         </div>
       </div>
     </div>
@@ -538,18 +547,18 @@ export default function MortgageCalculator() {
 
             {/* ── Tab 1: Afford ─────────────────────────────────────────── */}
             <TabsContent value="afford">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Estimate home price based on a monthly payment you can allocate
                 toward a mortgage.
               </p>
               <div className="grid md:grid-cols-2 gap-8 py-8">
                 <div className="pr-0">
                   {/* Monthly payment */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <div className="flex items-center gap-2 mb-1">
                       <label
                         htmlFor="monthly-payment"
-                        className="block text-sm font-semibold"
+                        className="block text-base font-semibold"
                       >
                         Monthly mortgage payment (principal + interest)
                       </label>
@@ -584,7 +593,7 @@ export default function MortgageCalculator() {
                         }}
                         aria-describedby={v.paymentMsg ? "monthly-payment-error" : undefined}
                         aria-invalid={!!v.paymentMsg}
-                        className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.paymentMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.paymentMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                     </div>
                     {v.paymentMsg ? (
@@ -599,9 +608,9 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Down Payment */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <div className="flex flex-row pb-2 justify-between items-center">
-                      <span className="block text-sm font-semibold">Down payment</span>
+                      <span className="block text-base font-semibold">Down payment</span>
                       <fieldset className="border-0 p-0 m-0">
                         <legend className="sr-only">Down payment type</legend>
                         <div className="flex flex-row gap-4">
@@ -672,7 +681,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment percentage"
                             aria-describedby={v.dpMsg ? "down-payment-afford-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -699,7 +708,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment amount in dollars"
                             aria-describedby={v.dpMsg ? "down-payment-afford-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
                         </div>
@@ -713,8 +722,8 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Interest Rate */}
-                  <div className="pb-5">
-                    <label htmlFor="interest-rate-afford" className="block text-sm font-semibold">
+                  <div className="pb-3">
+                    <label htmlFor="interest-rate-afford" className="block text-base font-semibold mb-1">
                       Interest rate
                     </label>
                     <div className="relative">
@@ -730,10 +739,11 @@ export default function MortgageCalculator() {
                         onBlur={() => {
                           setFocusedField(null);
                           setTouched((t) => ({ ...t, interestRate: true }));
+                          setInterestRate(addLeadingZero(interestRate));
                         }}
                         aria-describedby={v.rateMsg ? "interest-rate-afford-error" : undefined}
                         aria-invalid={!!v.rateMsg}
-                        className={`w-full pr-8 pl-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pr-8 pl-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                       <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                     </div>
@@ -741,9 +751,9 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Loan Term */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="block text-sm font-semibold mb-2">Loan term</legend>
+                      <legend className="block text-base font-semibold mb-1">Loan term</legend>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <label className="flex-1 cursor-pointer flex flex-row">
                           <input type="radio" name="loanTermAfford" value="15" checked={loanTerm === 15} onChange={() => setLoanTerm(15)} className="mr-3 w-4 accent-lagunita" />
@@ -759,12 +769,12 @@ export default function MortgageCalculator() {
 
                   {/* Optional Section */}
                   <div className="pt-4 border-t border-gray-200">
-                    <h2 className="text-lg font-semibold mb-4">Additional housing costs</h2>
+                    <h2 className="text-lg-title tracking-tight text-md font-bold mb-4">Additional housing costs</h2>
 
                     {/* Property Taxes */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Property taxes (annual)</span>
+                        <span className="block text-base font-semibold">Property taxes (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Property tax input type</legend>
                           <div className="flex flex-row gap-4">
@@ -820,10 +830,11 @@ export default function MortgageCalculator() {
                               setPropertyTaxPercentInput(raw);
                               setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                             }}
+                            onBlur={() => setPropertyTaxPercentInput(addLeadingZero(propertyTaxPercentInput))}
                             aria-label="Property tax percentage"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
                             aria-invalid={!!v.taxMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -844,7 +855,7 @@ export default function MortgageCalculator() {
                             aria-label="Property tax annual dollar amount"
                             aria-describedby={v.taxMsg ? "property-tax-afford-error" : undefined}
                             aria-invalid={!!v.taxMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
@@ -853,9 +864,9 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* Homeowners Insurance */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Homeowners insurance (annual)</span>
+                        <span className="block text-base font-semibold">Homeowners insurance (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Home insurance input type</legend>
                           <div className="flex flex-row gap-4">
@@ -911,10 +922,11 @@ export default function MortgageCalculator() {
                               setHomeInsurancePercentInput(raw);
                               setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                             }}
+                            onBlur={() => setHomeInsurancePercentInput(addLeadingZero(homeInsurancePercentInput))}
                             aria-label="Home insurance percentage"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
                             aria-invalid={!!v.insMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -935,7 +947,7 @@ export default function MortgageCalculator() {
                             aria-label="Home insurance annual dollar amount"
                             aria-describedby={v.insMsg ? "home-insurance-afford-error" : undefined}
                             aria-invalid={!!v.insMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
@@ -944,8 +956,8 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* HOA Dues */}
-                    <div className="pb-5">
-                      <label htmlFor="hoa-dues-afford" className="block text-sm font-semibold">HOA dues (monthly)</label>
+                    <div className="pb-3">
+                      <label htmlFor="hoa-dues-afford" className="block text-base font-semibold mb-1">HOA dues (monthly)</label>
                       <div className="relative">
                         <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] font-medium">$</span>
                         <input
@@ -961,7 +973,7 @@ export default function MortgageCalculator() {
                           onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-afford-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
-                          className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                          className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                         />
                       </div>
                       {v.hoaMsg && <FieldError id="hoa-dues-afford-error">{v.hoaMsg}</FieldError>}
@@ -978,10 +990,10 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-3xl font-bold text-[var(--color-teal)]">
-                          {affordDash.homePrice ? DASH : formatCurrency(Number(results.homePrice))}
+                          {affordDash.homePrice ? DASH : affordBlank ? " " : formatCurrency(Number(results.homePrice))}
                         </p>
                       </div>
-                      <ResultsBody dash={affordDash} headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
+                      <ResultsBody dash={affordDash} blank={affordBlank} headline="This estimate is based on the portion of your monthly budget allocated to principal and interest. Taxes, insurance, and HOA are shown separately." />
                     </CardContent>
                   </Card>
                 </div>
@@ -990,14 +1002,14 @@ export default function MortgageCalculator() {
 
             {/* ── Tab 2: Payment ────────────────────────────────────────── */}
             <TabsContent value="payment">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Estimate a monthly mortgage payment based on your target home price.
               </p>
               <div className="grid md:grid-cols-2 py-8 gap-8">
-                <div className="pb-5">
+                <div className="pb-3">
                   {/* Home Price */}
-                  <div className="pb-5">
-                    <label htmlFor="home-price" className="block text-sm font-semibold">Home price</label>
+                  <div className="pb-3">
+                    <label htmlFor="home-price" className="block text-base font-semibold mb-1">Home price</label>
                     <div className="relative">
                       <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                       <input
@@ -1028,7 +1040,7 @@ export default function MortgageCalculator() {
                         }}
                         aria-describedby={v.priceMsg ? "home-price-error" : undefined}
                         aria-invalid={!!v.priceMsg}
-                        className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.priceMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.priceMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                     </div>
                     {v.priceMsg ? (
@@ -1039,9 +1051,9 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Down Payment */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <div className="flex flex-row pb-2 justify-between items-center">
-                      <span className="block text-sm font-semibold">Down payment</span>
+                      <span className="block text-base font-semibold">Down payment</span>
                       <fieldset className="border-0 p-0 m-0">
                         <legend className="sr-only">Down payment type</legend>
                         <div className="flex flex-row gap-4">
@@ -1108,7 +1120,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment percentage"
                             aria-describedby={v.dpMsg ? "down-payment-payment-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                         </div>
@@ -1141,7 +1153,7 @@ export default function MortgageCalculator() {
                             aria-label="Down payment amount in dollars"
                             aria-describedby={v.dpMsg ? "down-payment-payment-error" : undefined}
                             aria-invalid={!!v.dpMsg}
-                            className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.dpMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                            className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.dpMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                           />
                           <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                         </div>
@@ -1155,8 +1167,8 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Interest Rate */}
-                  <div className="pb-5">
-                    <label htmlFor="interest-rate-payment" className="block text-sm font-semibold">Interest rate</label>
+                  <div className="pb-3">
+                    <label htmlFor="interest-rate-payment" className="block text-base font-semibold mb-1">Interest rate</label>
                     <div className="relative">
                       <input
                         id="interest-rate-payment"
@@ -1170,10 +1182,11 @@ export default function MortgageCalculator() {
                         onBlur={() => {
                           setFocusedField(null);
                           setTouched((t) => ({ ...t, interestRate: true }));
+                          setInterestRate(addLeadingZero(interestRate));
                         }}
                         aria-describedby={v.rateMsg ? "interest-rate-payment-error" : undefined}
                         aria-invalid={!!v.rateMsg}
-                        className={`w-full pr-8 pl-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                        className={`w-full pr-8 pl-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.rateMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                       />
                       <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                     </div>
@@ -1181,9 +1194,9 @@ export default function MortgageCalculator() {
                   </div>
 
                   {/* Loan Term */}
-                  <div className="pb-5">
+                  <div className="pb-3">
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="block text-sm font-semibold mb-2">Loan term</legend>
+                      <legend className="block text-base font-semibold mb-1">Loan term</legend>
                       <div className="flex flex-col sm:flex-row gap-2">
                         <label className="flex-1 cursor-pointer flex flex-row">
                           <input type="radio" name="loanTermPayment" value="15" checked={loanTerm === 15} onChange={() => setLoanTerm(15)} className="mr-3 w-4 accent-lagunita" />
@@ -1202,9 +1215,9 @@ export default function MortgageCalculator() {
                     <h2 className="text-lg font-semibold mb-4">Additional housing costs</h2>
 
                     {/* Property Taxes */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Property taxes (annual)</span>
+                        <span className="block text-base font-semibold">Property taxes (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Property tax input type</legend>
                           <div className="flex flex-row gap-4">
@@ -1259,10 +1272,11 @@ export default function MortgageCalculator() {
                                 setPropertyTaxPercentInput(raw);
                                 setPropertyTaxPercent(raw === "" ? 0 : Number(raw));
                               }}
+                              onBlur={() => setPropertyTaxPercentInput(addLeadingZero(propertyTaxPercentInput))}
                               aria-label="Property tax percentage"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
                               aria-invalid={!!v.taxMsg}
-                              className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                           </>
@@ -1283,7 +1297,7 @@ export default function MortgageCalculator() {
                               aria-label="Property tax annual dollar amount"
                               aria-describedby={v.taxMsg ? "property-tax-payment-error" : undefined}
                               aria-invalid={!!v.taxMsg}
-                              className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.taxMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.taxMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">$</span>
                           </>
@@ -1293,9 +1307,9 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* Homeowners Insurance */}
-                    <div className="pb-5">
+                    <div className="pb-3">
                       <div className="flex flex-row pb-2 justify-between items-center">
-                        <span className="block text-sm font-semibold">Homeowners insurance (annual)</span>
+                        <span className="block text-base font-semibold">Homeowners insurance (annual)</span>
                         <fieldset className="border-0 p-0 m-0">
                           <legend className="sr-only">Home insurance input type</legend>
                           <div className="flex flex-row gap-4">
@@ -1350,10 +1364,11 @@ export default function MortgageCalculator() {
                                 setHomeInsurancePercentInput(raw);
                                 setHomeInsurancePercent(raw === "" ? 0 : Number(raw));
                               }}
+                              onBlur={() => setHomeInsurancePercentInput(addLeadingZero(homeInsurancePercentInput))}
                               aria-label="Home insurance percentage"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
                               aria-invalid={!!v.insMsg}
-                              className={`w-full pl-4 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-4 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-symbols)] pointer-events-none">%</span>
                           </>
@@ -1374,7 +1389,7 @@ export default function MortgageCalculator() {
                               aria-label="Home insurance annual dollar amount"
                               aria-describedby={v.insMsg ? "home-insurance-payment-error" : undefined}
                               aria-invalid={!!v.insMsg}
-                              className={`w-full pl-8 pr-16 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition ${v.insMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                              className={`w-full pl-8 pr-16 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${v.insMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                             />
                             <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">$</span>
                           </>
@@ -1384,8 +1399,8 @@ export default function MortgageCalculator() {
                     </div>
 
                     {/* HOA Dues */}
-                    <div className="pb-5">
-                      <label htmlFor="hoa-dues-payment" className="block text-sm font-semibold">HOA dues (monthly)</label>
+                    <div className="pb-3">
+                      <label htmlFor="hoa-dues-payment" className="block text-base font-semibold mb-1">HOA dues (monthly)</label>
                       <div className="relative">
                         <span aria-hidden="true" className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 font-medium">$</span>
                         <input
@@ -1401,7 +1416,7 @@ export default function MortgageCalculator() {
                           onBlur={() => setFocusedField(null)}
                           aria-describedby={v.hoaMsg ? "hoa-dues-payment-error" : undefined}
                           aria-invalid={!!v.hoaMsg}
-                          className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-[var(--color-inline-error)]" : "border-gray-300"}`}
+                          className={`w-full pl-8 pr-4 h-[55px] py-3 border rounded-md shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${v.hoaMsg ? "border-2 border-[var(--color-inline-error)]" : "border-input"}`}
                         />
                       </div>
                       {v.hoaMsg && <FieldError id="hoa-dues-payment-error">{v.hoaMsg}</FieldError>}
@@ -1418,10 +1433,10 @@ export default function MortgageCalculator() {
                     <CardContent className="">
                       <div className="mb-6">
                         <p className="text-3xl font-bold text-[var(--color-teal)]">
-                          {paymentDash.monthlyMortgage ? DASH : formatCurrency(Number(results.monthlyMortgage))}
+                          {paymentDash.monthlyMortgage ? DASH : paymentBlank ? " " : formatCurrency(Number(results.monthlyMortgage))}
                         </p>
                       </div>
-                      <ResultsBody dash={paymentDash} headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />
+                      <ResultsBody dash={paymentDash} blank={paymentBlank} headline="This estimate shows your monthly mortgage payment based on the loan amount, interest rate, and term. Taxes, insurance, and HOA are shown separately." />
                     </CardContent>
                   </Card>
                 </div>

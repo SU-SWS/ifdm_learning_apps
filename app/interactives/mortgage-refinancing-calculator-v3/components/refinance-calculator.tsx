@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -131,6 +131,24 @@ export function RefinanceCalculator() {
     }
   }, [newAmount, newTerm, newRate, closingCosts, years, hasStartedEditing]);
 
+  // Publish the mobile sticky bar's height so the legal disclaimer in the
+  // root layout can add matching bottom padding and stay above the bar.
+  const stickyBarRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = stickyBarRef.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const update = () =>
+      root.style.setProperty("--sticky-footer-height", `${bar.offsetHeight}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(bar);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--sticky-footer-height");
+    };
+  }, []);
+
   // Debounced snapshot of the calculation inputs, updated 300ms after typing
   // pauses. handleAnalyze/resetCurrent/resetNewLoan flush it immediately.
   const [debounced, setDebounced] = useState({
@@ -229,6 +247,8 @@ export function RefinanceCalculator() {
   const currentBalanceBlocking =
     v.currentBlocking || debouncedV.currentBlocking;
   const refiAnalysisBlocking = v.refiBlocking || debouncedV.refiBlocking;
+  const currentBalanceError = v.currentError || debouncedV.currentError;
+  const refiAnalysisError = v.refiError || debouncedV.refiError;
 
   // --- Refinance analysis ---
   // Single net-present-value formula for every case:
@@ -364,6 +384,14 @@ export function RefinanceCalculator() {
     setAnalyzed(true);
   }
 
+  const hasCurrentLoanError = v.currentBlocking && (
+    analyzed || Boolean(
+      v.messages.months ||
+      v.messages.currentRate ||
+      v.messages.monthlyPayment
+    )
+  );
+
   const mobileShowAnalysis = analyzed && hasStartedEditing && !refiAnalysisBlocking;
   const mobileNet = normalizeDisplayValue(analysis.overallBenefit);
 
@@ -395,7 +423,7 @@ export function RefinanceCalculator() {
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         {/* Left column */}
         <div>
-          {tab === "refinance" && v.currentBlocking && (
+          {tab === "refinance" && v.currentBlocking && !hasCurrentLoanError && (
             <div
               className="mb-6 p-5 bg-blue-50 rounded-lg border border-blue-200 [.dark_&]:bg-[var(--info-popup-background)]"
             >
@@ -471,7 +499,7 @@ export function RefinanceCalculator() {
                 </p>
                 {/* Suppressed rather than computed from zero-coerced blanks. */}
                 <p className="mt-1 text-4xl font-bold text-primary">
-                  {currentBalanceBlocking ? DASH : formatCurrency(currentBalance)}
+                  {currentBalanceError ? DASH : currentBalanceBlocking ? " " : formatCurrency(currentBalance)}
                 </p>
               </div>
             </>
@@ -483,6 +511,8 @@ export function RefinanceCalculator() {
                 validation={v}
                 currentBalanceBlocking={currentBalanceBlocking}
                 refiAnalysisBlocking={refiAnalysisBlocking}
+                currentBalanceError={currentBalanceError}
+                refiAnalysisError={refiAnalysisError}
                 hasClosing={hasClosing}
                 onAnalyze={handleAnalyze}
                 onEditBalance={() => setTab("current")}
@@ -499,6 +529,7 @@ export function RefinanceCalculator() {
                   payment: analysis.newPayment,
                 }}
                 analyzed={analyzed}
+                hasCurrentLoanError={hasCurrentLoanError}
               />
             </>
           )}
@@ -520,7 +551,10 @@ export function RefinanceCalculator() {
       )}
 
       {/* Mobile sticky footer: summary and Reset stay in view while scrolling. */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-[var(--sticky-footer-background)] px-4 py-3 text-[var(--sticky-footer-text)] shadow-lg sm:hidden">
+      <div
+        ref={stickyBarRef}
+        className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-[var(--sticky-footer-background)] px-4 py-3 text-[var(--sticky-footer-text)] shadow-lg sm:hidden"
+      >
         <div
           className={
             tab === "current"
@@ -539,12 +573,12 @@ export function RefinanceCalculator() {
               aria-atomic="true"
             >
               {tab === "current"
-                ? currentBalanceBlocking ? DASH : formatCurrency(currentBalance)
+                ? currentBalanceError ? DASH : currentBalanceBlocking ? " " : formatCurrency(currentBalance)
                 : mobileShowAnalysis
                   ? mobileNet < 0
                     ? `−${formatCurrency(Math.abs(mobileNet))}`
                     : formatCurrency(mobileNet)
-                  : DASH}
+                  : refiAnalysisError ? DASH : " "}
             </p>
             {tab === "refinance" && mobileShowAnalysis && (
               <p className="text-xs font-semibold">
@@ -609,11 +643,11 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={[
-        "border-2 border-lagunita px-4 py-2 h-18 whitespace-normal rounded-md text-center font-bold ring-offset-background transition-colors cursor-pointer",
+        "text-[var(--tab-text-color)] border-2 border-lagunita px-4 py-2 h-18 whitespace-normal rounded-md text-center font-bold ring-offset-background transition-colors cursor-pointer",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-navy hover:text-white",
         active
           ? "bg-lagunita text-white"
-          : "bg-transparent text-lagunita",
+          : "bg-transparent",
       ].join(" ")}
     >
       {children}
@@ -669,7 +703,7 @@ function NumberField({
       .join(" ") || undefined;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <label
         htmlFor={id}
         className="flex items-center gap-1.5 font-semibold text-foreground"
@@ -682,10 +716,10 @@ function NumberField({
 
       <div
         className={[
-          "flex items-center rounded-md bg-card px-3 focus-within:ring-2 focus-within:ring-primary/30",
+          "flex h-[55px] items-center rounded-md bg-card px-3 shadow-sm ring-offset-background transition focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           error
             ? "border-2 border-[var(--color-inline-error)]"
-            : "border border-input focus-within:border-primary",
+            : "border border-input",
         ].join(" ")}
       >
         {prefix ? <span className="mr-2">{prefix}</span> : null}
@@ -757,7 +791,7 @@ function CurrentBalanceForm(
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-3">
       <p className=" leading-relaxed ">
         Calculate your remaining mortgage balance (the present value of your
         remaining monthly mortgage payments).
@@ -847,7 +881,7 @@ function RefinanceForm(
       </p>
 
       {/* New loan terms */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
           <h2 className="text-base font-semibold text-primary">
             New Loan Terms
@@ -892,7 +926,7 @@ function RefinanceForm(
       </div>
 
       {/* Optional */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <h2 className="border-b border-border pb-2 text-base font-semibold text-primary">
           Optional
         </h2>
@@ -936,12 +970,15 @@ function ResultPanel({
   validation,
   currentBalanceBlocking,
   refiAnalysisBlocking,
+  currentBalanceError,
+  refiAnalysisError,
   hasClosing,
   onAnalyze,
   onEditBalance,
   current,
   next,
   analyzed,
+  hasCurrentLoanError,
 }: {
   analysis: {
     newPayment: number;
@@ -958,12 +995,15 @@ function ResultPanel({
   validation: Validation;
   currentBalanceBlocking: boolean;
   refiAnalysisBlocking: boolean;
+  currentBalanceError: boolean;
+  refiAnalysisError: boolean;
   hasClosing: boolean;
   onAnalyze: () => void;
   onEditBalance: () => void;
   current: LoanTerms;
   next: LoanTerms;
   analyzed: boolean;
+  hasCurrentLoanError: boolean;
 }) {
   const displayedNet = normalizeDisplayValue(analysis.overallBenefit);
 
@@ -994,14 +1034,6 @@ const subtext =
     : verdict === "positive"
       ? "Adjusted to today's dollars, refinancing comes out ahead."
       : "Adjusted to today's dollars, refinancing costs more than it saves.";
-
-  const hasCurrentLoanError = validation.currentBlocking && (
-    analyzed || Boolean(
-      validation.messages.months ||
-      validation.messages.currentRate ||
-      validation.messages.monthlyPayment
-    )
-  );
 
   return (
     <div className="bg-[var(--card-background)] rounded-3xl p-[32px]">
@@ -1063,7 +1095,7 @@ const subtext =
                 ? displayedNet < 0
                   ? `−${formatCurrency(Math.abs(displayedNet))}`
                   : formatCurrency(displayedNet)
-                : DASH}
+                : refiAnalysisError ? DASH : " "}
             </p>
             {showAnalysis && (
               <>
@@ -1101,6 +1133,8 @@ const subtext =
           validation={validation}
           currentBalanceBlocking={currentBalanceBlocking}
           refiAnalysisBlocking={refiAnalysisBlocking}
+          currentBalanceError={currentBalanceError}
+          refiAnalysisError={refiAnalysisError}
         />
       </div>
 
@@ -1123,8 +1157,8 @@ const subtext =
  * Side-by-side comparison of the current loan terms (carried over from the
  * Current Balance tab) against the proposed new loan terms.
  *
- * All values are dashed while the current balance is unusable. Once it is
- * valid, each cell follows its own input validation. Valid 0% rates stay visible.
+ * Cells show "-" while an out-of-range value blocks them, and stay blank while a
+ * required field is still empty. Valid 0% rates stay visible.
  */
 function LoanComparison({
   current,
@@ -1132,12 +1166,16 @@ function LoanComparison({
   validation,
   currentBalanceBlocking,
   refiAnalysisBlocking,
+  currentBalanceError,
+  refiAnalysisError,
 }: {
   current: LoanTerms;
   next: LoanTerms;
   validation: Validation;
   currentBalanceBlocking: boolean;
   refiAnalysisBlocking: boolean;
+  currentBalanceError: boolean;
+  refiAnalysisError: boolean;
 }) {
   const paymentDelta = next.payment - current.payment;
   const { bad } = validation;
@@ -1145,8 +1183,15 @@ function LoanComparison({
   // The current balance is derived from all three Current Balance fields, and
   // the new payment from all of the refinance inputs, so those two cells use
   // the aggregate flags instead of a single field's.
-  const dash = (unusable: boolean, text: string) =>
-    (currentBalanceBlocking || unusable ? DASH : text);
+  const dash = (errored: boolean, blocked: boolean, text: string) =>
+    errored ? DASH : blocked ? " " : text;
+  // Field-level cells also depend on the current balance, as they did before.
+  const fieldCell = (field: FieldName, text: string) =>
+    dash(
+      currentBalanceError || validation.messages[field] !== "",
+      currentBalanceBlocking || bad[field],
+      text,
+    );
 
   const rows: {
     label: string;
@@ -1161,23 +1206,23 @@ function LoanComparison({
       // dashed off currentBalanceBlocking (which accounts for that lag) rather
       // than the raw, instantly-updating validation.currentBlocking — see
       // currentBalanceBlocking's definition.
-      cur: dash(currentBalanceBlocking, formatCurrency(current.balance)),
-      nxt: dash(bad.newAmount, formatCurrency(next.balance)),
+      cur: dash(currentBalanceError, currentBalanceBlocking, formatCurrency(current.balance)),
+      nxt: fieldCell("newAmount", formatCurrency(next.balance)),
     },
     {
       label: "Months remaining",
-      cur: dash(bad.months, `${current.months} mo`),
-      nxt: dash(bad.newTerm, `${next.months} mo`),
+      cur: fieldCell("months", `${current.months} mo`),
+      nxt: fieldCell("newTerm", `${next.months} mo`),
     },
     {
       label: "Interest rate",
-      cur: dash(bad.currentRate, `${current.rate}%`),
-      nxt: dash(bad.newRate, `${next.rate}%`),
+      cur: fieldCell("currentRate", `${current.rate}%`),
+      nxt: fieldCell("newRate", `${next.rate}%`),
     },
     {
       label: "Monthly payment",
-      cur: dash(bad.monthlyPayment, formatCurrency(current.payment)),
-      nxt: dash(refiAnalysisBlocking, formatCurrency(next.payment)),
+      cur: fieldCell("monthlyPayment", formatCurrency(current.payment)),
+      nxt: dash(refiAnalysisError, refiAnalysisBlocking, formatCurrency(next.payment)),
       delta:
         !refiAnalysisBlocking && !bad.monthlyPayment && paymentDelta !== 0
           ? `${paymentDelta < 0 ? "−" : "+"}${formatCurrency(Math.abs(paymentDelta))}/mo`
