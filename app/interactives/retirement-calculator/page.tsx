@@ -805,7 +805,7 @@ export default function RetirementCalculator() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-8 py-2 h-10 whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
+                className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 px-8 py-2 h-[55px] whitespace-normal bg-navy border-2 border-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
               >
                 Reset
               </button>
@@ -839,7 +839,7 @@ export default function RetirementCalculator() {
                           );
                           setActiveTab("savings");
                         }}
-                        className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-lagunita disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-12 whitespace-normal cursor-pointer bg-white border-2 border-white text-lagunita hover:bg-navy hover:border-navy hover:text-white [.dark_&]:bg-navy [.dark_&]:border-navy [.dark_&]:text-white [.dark_&]:hover:bg-white [.dark_&]:hover:border-lagunita [.dark_&]:hover:text-lagunita [.dark_&]:focus-visible:ring-ring [.dark_&]:focus-visible:ring-offset-background"
+                        className="inline-flex items-center justify-center rounded-md font-bold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-lagunita disabled:pointer-events-none disabled:opacity-50 px-4 py-2 h-[55px] whitespace-normal cursor-pointer bg-white border-2 border-white text-lagunita hover:bg-navy hover:border-navy hover:text-white [.dark_&]:bg-navy [.dark_&]:border-navy [.dark_&]:text-white [.dark_&]:hover:bg-white [.dark_&]:hover:border-lagunita [.dark_&]:hover:text-lagunita [.dark_&]:focus-visible:ring-ring [.dark_&]:focus-visible:ring-offset-background"
                       >
                         Continue to annual savings
                       </button>

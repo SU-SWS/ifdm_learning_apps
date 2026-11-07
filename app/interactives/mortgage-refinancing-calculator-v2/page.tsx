@@ -374,7 +374,7 @@ export default function MortgageCalculator() {
                       </div>
 
                       {currentBalance !== null && (
-                        <Button onClick={handleReset} variant="lagunita" className="flex items-center gap-2 font-medium px-8">
+                        <Button onClick={handleReset} variant="lagunita" className="h-[55px] flex items-center gap-2 font-medium px-8">
                           Reset<FaRotateLeft size={14} aria-hidden="true" />
                         </Button>
                       )}
@@ -395,7 +395,7 @@ export default function MortgageCalculator() {
                             ${formatCurrency(currentBalance)}
                           </p>
                           <Button
-                            className="mt-4 px-6 py-6 whitespace-normal bg-navy border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
+                            className="mt-4 h-[55px] px-6 py-2 whitespace-normal bg-navy border-2 border-lagunita cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full md:w-auto"
                             onClick={() => setActiveTab("refinance")}
                           >
                             Continue to refinance analysis
@@ -705,7 +705,7 @@ export default function MortgageCalculator() {
                         {refinanceResults ? (
                           <div className="flex gap-4">
                             <Button
-                              className="h-18 whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white flex-1"
+                              className="h-[55px] whitespace-normal cursor-pointer bg-lagunita border-2 border-lagunita hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white flex-1"
                               onClick={calculateRefinance}
                             >
                               Recalculate
@@ -721,14 +721,14 @@ export default function MortgageCalculator() {
                                 setRefErrors({});
                               }}
                               variant="lagunita"
-                              className="h-18 whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                              className="h-[55px] whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                             >
                               Reset new loan terms<FaRotateLeft size={14} aria-hidden="true" />
                             </Button>
                           </div>
                         ) : (
                           <Button
-                            className="h-18 whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full"
+                            className="h-[55px] whitespace-normal bg-navy cursor-pointer hover:bg-white hover:border-2 hover:border-lagunita hover:text-[var(--color-teal)] text-white w-full"
                             onClick={calculateRefinance}
                           >
                             Compare Refinance Options

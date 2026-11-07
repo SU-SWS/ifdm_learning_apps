@@ -423,7 +423,7 @@ export default function DebtPayoffCalculator() {
                           type="button"
                           onClick={resetAll}
                           variant="lagunita"
-                          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                          className="h-[55px] whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                         >
                           Reset{" "}
                           <RotateCcw className="h-4 w-4" aria-hidden="true" />
@@ -731,7 +731,7 @@ export default function DebtPayoffCalculator() {
                           type="button"
                           onClick={resetAll}
                           variant="lagunita"
-                          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                          className="h-[55px] whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                         >
                           Reset{" "}
                           <RotateCcw className="h-4 w-4" aria-hidden="true" />

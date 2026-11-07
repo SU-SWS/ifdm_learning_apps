@@ -549,7 +549,7 @@ export default function PresentValueCalculator() {
                       type="button"
                       variant="lagunita"
                       size="sm"
-                      className="font-medium px-8 mt-4"
+                      className="h-[55px] font-medium px-8 mt-4"
                       onClick={resetSingle}
                     >
                       Reset
@@ -993,7 +993,7 @@ export default function PresentValueCalculator() {
                       type="button"
                       variant="lagunita"
                       size="sm"
-                      className="mt-4 font-medium px-8"
+                      className="h-[55px] mt-4 font-medium px-8"
                       onClick={resetSeries}
                     >
                       Reset
