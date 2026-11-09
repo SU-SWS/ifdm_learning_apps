@@ -543,8 +543,8 @@ export default function InterestRateVisual() {
               <Button
                 type="button"
                 variant="lagunita"
-                size="sm"
-                className="mt-4 h-[55px]"
+                size="field"
+                className="mt-4 px-3"
                 onClick={handleReset}
               >
                 Reset

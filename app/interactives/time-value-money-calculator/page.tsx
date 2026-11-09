@@ -1151,7 +1151,8 @@ export default function Page() {
               <Button
                 onClick={clearAll}
                 variant="lagunita"
-                className="hidden md:block h-[55px] font-medium px-8"
+                size="field"
+                className="hidden md:inline-flex font-medium px-8"
               >
                 Reset
               </Button>
@@ -1177,7 +1178,7 @@ export default function Page() {
               size="mobile"
               className="text-[var(--sticky-footer-text)]"
             />
-            <Button onClick={clearAll} variant="lagunita" size="sm" className="h-[55px]">
+            <Button onClick={clearAll} variant="lagunita" size="field" className="px-3">
               Reset
             </Button>
           </div>
