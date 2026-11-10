@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { RotateCcw } from "lucide-react";
 import { Button } from "@/app/ui/components/button";
 import {
   Card,
@@ -330,7 +329,7 @@ export default function DebtPayoffCalculator() {
                           </Label>
                           <InfoPopover title="Payment per compounding period">
                             This is the amount you pay each period at the
-                            selected frequency (e.g. $100 per month)
+                            selected frequency (e.g. $100 per month).
                           </InfoPopover>
                         </div>
                         <div className="relative">
@@ -381,7 +380,8 @@ export default function DebtPayoffCalculator() {
                           </Label>
                           <InfoPopover title="Additional payment per period (optional)">
                             Enter a fixed extra amount you plan to pay each
-                            month.
+                            period at the selected frequency (e.g. $50 per
+                            month).
                           </InfoPopover>
                         </div>
                         <div className="relative">
@@ -424,10 +424,9 @@ export default function DebtPayoffCalculator() {
                           onClick={resetAll}
                           variant="lagunita"
                           size="field"
-                          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                          className="whitespace-normal cursor-pointer flex font-medium px-8"
                         >
-                          Reset{" "}
-                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                          Reset
                         </Button>
                       </div>
                     </CardContent>
@@ -439,20 +438,17 @@ export default function DebtPayoffCalculator() {
                   >
                     <CardHeader>
                       <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">
-                        Your payoff summary
+                        Time to pay off
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                       <div className="rounded-lg mb-6">
-                        <p className="text-medium font-semibold text-[var(--text-navy)] tracking-wide">
-                          Time to pay off
-                        </p>
                         <p className="text-3xl font-bold text-[var(--color-teal)] mb-2">
                           {v.payoffBlocked
                             ? payoffDash
                             : formatTime(payoffResult.timeInMonths)}
                         </p>
-                        <p className="text-medium font-semibold text-[var(--color-teal)]">
+                        <p className="text-medium font-semibold text-[var(--foreground)]">
                           {v.payoffBlocked
                             ? " "
                             : `Debt-free by ${formatDate(payoffResult.payoffDate)}`}
@@ -733,10 +729,9 @@ export default function DebtPayoffCalculator() {
                           onClick={resetAll}
                           variant="lagunita"
                           size="field"
-                          className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
+                          className="whitespace-normal cursor-pointer flex font-medium px-8"
                         >
-                          Reset{" "}
-                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                          Reset
                         </Button>
                       </div>
                     </CardContent>
@@ -748,14 +743,11 @@ export default function DebtPayoffCalculator() {
                   >
                     <CardHeader className="">
                       <CardTitle className="text-[var(--text-navy)] text-[22px] font-bold">
-                        Required payment
+                        Payment per {getPeriodLabel(compoundingFrequency)}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="">
                       <div className="rounded-lg mb-6">
-                        <p className="text-lg text-[var(--text-navy)] tracking-wide mb-2">
-                          Payment per {getPeriodLabel(compoundingFrequency)}
-                        </p>
                         <p className="text-4xl font-bold text-[var(--color-teal)] mb-2">
                           {v.requiredPaymentBlocked
                             ? requiredDash
@@ -763,7 +755,7 @@ export default function DebtPayoffCalculator() {
                                 requiredPaymentResult.requiredPayment,
                               )}
                         </p>
-                        <p className="text-[var(--color-teal)] text-lg font-semibold">
+                        <p className="text-[var(--foreground)] text-lg font-semibold">
                           {v.requiredPaymentBlocked
                             ? " "
                             : `To pay off in ${formatTime(
