@@ -17,7 +17,7 @@ A four-phase loop for changing code with confidence. The rule is simple: **never
 propose a fix from a theory alone, and never call a change done without
 re-observing it.** Evidence bookends every change.
 
-This repo has no test suite (see `CLAUDE.md`) and its financial math is a
+This repo has no test suite (see `AGENTS.md`) and its financial math is a
 sensitive surface with a history of edge-case regressions. That makes the
 observe/verify halves non-optional here, not ceremony.
 
