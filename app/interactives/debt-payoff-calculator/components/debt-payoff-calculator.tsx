@@ -423,6 +423,7 @@ export default function DebtPayoffCalculator() {
                           type="button"
                           onClick={resetAll}
                           variant="lagunita"
+                          size="field"
                           className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                         >
                           Reset{" "}
@@ -731,6 +732,7 @@ export default function DebtPayoffCalculator() {
                           type="button"
                           onClick={resetAll}
                           variant="lagunita"
+                          size="field"
                           className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                         >
                           Reset{" "}

@@ -543,6 +543,7 @@ export function RefinanceCalculator() {
             onClick={resetNewLoan}
             disabled={!refiHasInput}
             variant="lagunita"
+            size="field"
             className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
           >
             Reset new loan terms{" "}
@@ -597,7 +598,7 @@ export function RefinanceCalculator() {
                 onClick={() => setTab("refinance")}
                 disabled={continueDisabled}
                 variant="lagunita"
-                className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal px-4 py-2 font-medium"
+                className="h-auto min-h-[55px] w-auto min-w-0 flex-1 whitespace-normal leading-tight px-4 py-0.5 font-medium"
               >
                 Continue to refinance analysis
               </Button>
@@ -617,8 +618,8 @@ export function RefinanceCalculator() {
               onClick={resetNewLoan}
               disabled={!refiHasInput}
               variant="lagunita"
-              size="sm"
-              className="h-auto w-auto shrink-0 px-4"
+              size="field"
+              className="w-auto shrink-0 px-4"
             >
               Reset
             </Button>
@@ -832,7 +833,7 @@ function CurrentBalanceForm(
           onClick={props.onContinue}
           disabled={props.continueDisabled}
           variant="lagunita"
-          className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal font-medium px-4 py-2 sm:flex-none sm:px-8"
+          className="h-auto min-h-[55px] w-auto min-w-0 flex-1 whitespace-normal leading-tight font-medium px-4 py-2 sm:flex-none sm:px-8"
         >
           Continue to refinance analysis
         </Button>

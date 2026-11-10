@@ -530,7 +530,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                        className="w-full rounded-md border border-input shadow-sm py-2 px-3 focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="single-compounding-frequency-label"
                       >
                         <SelectValue />
@@ -548,7 +548,7 @@ export default function PresentValueCalculator() {
                     <Button
                       type="button"
                       variant="lagunita"
-                      size="sm"
+                      size="field"
                       className="font-medium px-8 mt-4"
                       onClick={resetSingle}
                     >
@@ -970,7 +970,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                        className="w-full rounded-md border border-input shadow-sm py-2 px-3 focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="compounding-frequency-label"
                       >
                         <SelectValue />
@@ -992,7 +992,7 @@ export default function PresentValueCalculator() {
                     <Button
                       type="button"
                       variant="lagunita"
-                      size="sm"
+                      size="field"
                       className="mt-4 font-medium px-8"
                       onClick={resetSeries}
                     >
