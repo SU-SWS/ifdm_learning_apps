@@ -1219,12 +1219,12 @@ export default function Page() {
         {/* Mobile sticky footer */}
         <div ref={stickyBarRef} className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--sticky-footer-background)] border-t border-border p-8 shadow-lg text-[var(--sticky-footer-text)]">
           <div className="flex flex-col items-center justify-between">
-            <div className="text-sm">{currentOption?.label}</div>
+            <div className="text-base font-semibold">{currentOption?.label}</div>
             <ResultDisplay
               size="mobile"
               className="text-[var(--sticky-footer-text)]"
             />
-            <Button onClick={clearAll} variant="lagunita" size="field" className="px-3">
+            <Button onClick={clearAll} variant="lagunita" size="field" className="px-3 font-medium">
               Reset
             </Button>
           </div>
