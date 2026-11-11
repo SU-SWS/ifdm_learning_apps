@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react"
+import { useState, useCallback, useEffect, useMemo, useRef, type ChangeEvent } from "react"
 import { Card, CardContent } from "@/app/ui/components/card"
 import { Input } from "@/app/ui/components/input"
 import { Label } from "@/app/ui/components/label"
@@ -96,10 +96,42 @@ export default function Page() {
     return parts.length > 1 ? signed + "." + parts[1] : signed
   }
 
-  const handleInputChange = (value: string, setter: (val: string) => void) => {
-    const raw = value.replace(/,/g, "")
+  const writeWithCaret = (input: HTMLInputElement, value: string, pos: number) => {
+    input.value = value
+    input.setSelectionRange(pos, pos)
+  }
+
+  const caretAfterFormat = (typed: string, caret: number, formatted: string): number => {
+    const target = typed.slice(0, caret).replace(/,/g, "").length
+    let pos = 0
+    let seen = 0
+    while (pos < formatted.length && seen < target) {
+      if (formatted[pos] !== ",") seen++
+      pos++
+    }
+    return pos
+  }
+
+  const rejectInput = (input: HTMLInputElement, previous: string) => {
+    const caret = input.selectionStart ?? input.value.length
+    const pos = caret - (input.value.length - previous.length)
+    writeWithCaret(input, previous, Math.min(previous.length, Math.max(0, pos)))
+  }
+
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    previous: string,
+    setter: (val: string) => void,
+  ) => {
+    const input = e.target
+    const typed = input.value
+    const caret = input.selectionStart ?? typed.length
+    const raw = typed.replace(/,/g, "")
     if (raw === "" || raw === "-" || raw === "." || raw === "-.") { setter(raw); return }
-    if (/^-?\d*\.?\d*$/.test(raw)) setter(formatWithCommas(raw))
+    if (!/^-?\d*\.?\d*$/.test(raw)) { rejectInput(input, previous); return }
+    const formatted = formatWithCommas(raw)
+    if (formatted !== typed) writeWithCaret(input, formatted, caretAfterFormat(typed, caret, formatted))
+    setter(formatted)
   }
 
   const handleInputBlur = (value: string, setter: (val: string) => void) => {
@@ -391,6 +423,7 @@ export default function Page() {
           for (let i = 1; i <= G_STEPS; i++) {
             const g = G_LO + ((G_HI - G_LO) * i) / G_STEPS
             const f = objective(g)
+            if (Number.isNaN(f)) break
             if (f === 0) {
               bracketLo = g; bracketHi = g; bracketFLo = 0
               prevG = g; prevF = f
@@ -523,7 +556,7 @@ export default function Page() {
     setPresentValue(""); setFutureValue(""); setPayment("")
     setAnnualRate(""); setPeriods("")
     setCompoundingFrequency("1"); setPaymentFrequencyMode("same")
-    setPaymentFrequency("12"); setPaymentTiming("end")
+    setPaymentFrequency("1"); setPaymentTiming("end")
     setResult(null); setResultOverflow(false)
     setCalcError(""); setSignError(""); setFieldErrors([])
   }
@@ -544,7 +577,31 @@ export default function Page() {
     if (example.periods     !== undefined) setPeriods(example.periods)
     if (example.compoundFreq !== undefined) setCompoundingFrequency(example.compoundFreq)
     if (example.paymentFreq  !== undefined) setPaymentFrequency(example.paymentFreq)
-    if (example.paymentFreqMode !== undefined) setPaymentFrequencyMode(example.paymentFreqMode)
+    setPaymentFrequencyMode(example.paymentFreqMode ?? "same")
+    setPaymentTiming("end")
+  }
+
+  const formatCarriedValue = (value: number, field: SolveFor): string =>
+    new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: field !== "NPER",
+    }).format(Math.abs(value) < 0.005 ? 0 : value)
+
+  const handleSolveForChange = (value: string) => {
+    const next = value as SolveFor
+    if (next === solveFor) return
+    if (result !== null) {
+      const carried = formatCarriedValue(result, solveFor)
+      switch (solveFor) {
+        case "FV":   setFutureValue(carried);  break
+        case "PV":   setPresentValue(carried); break
+        case "PMT":  setPayment(carried);      break
+        case "RATE": setAnnualRate(carried);   break
+        case "NPER": setPeriods(carried);      break
+      }
+    }
+    setSolveFor(next)
   }
 
   const getExample = () => {
@@ -707,22 +764,7 @@ export default function Page() {
         {/* Solve-for tabs */}
         <div className="mb-6">
           <h2 className="sr-only">Solve for</h2>
-          <Tabs
-            value={solveFor}
-            onValueChange={(value) => {
-              const next = value as SolveFor;
-              if (next !== solveFor) {
-                setPresentValue("");
-                setFutureValue("");
-                setPayment("");
-                setAnnualRate("");
-                setPeriods("");
-                setPaymentFrequencyMode("same");
-                setPaymentTiming("end");
-              }
-              setSolveFor(next);
-            }}
-          >
+          <Tabs value={solveFor} onValueChange={handleSolveForChange}>
             <TabsList className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 mb-0 p-0 w-full [&_button]:h-12 md:[&_button]:h-16 lg:[&_button]:h-18">
               {SOLVE_OPTIONS.map((option) => (
                 <TabsTrigger key={option.value} value={option.value}>
@@ -849,7 +891,7 @@ export default function Page() {
                     value={presentValue}
                     placeholder={isActivelyCalculating ? "0" : ""}
                     onChange={(e) =>
-                      handleInputChange(e.target.value, setPresentValue)
+                      handleInputChange(e, presentValue, setPresentValue)
                     }
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setPresentValue)
@@ -885,7 +927,7 @@ export default function Page() {
                     value={payment}
                     placeholder={isActivelyCalculating ? "0" : ""}
                     onChange={(e) =>
-                      handleInputChange(e.target.value, setPayment)
+                      handleInputChange(e, payment, setPayment)
                     }
                     onBlur={(e) => handleInputBlur(e.target.value, setPayment)}
                     className={`border-input pl-7 bg-card ${getFieldError("payment") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
@@ -919,7 +961,7 @@ export default function Page() {
                     value={futureValue}
                     placeholder={isActivelyCalculating ? "0" : ""}
                     onChange={(e) =>
-                      handleInputChange(e.target.value, setFutureValue)
+                      handleInputChange(e, futureValue, setFutureValue)
                     }
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setFutureValue)
@@ -957,7 +999,7 @@ export default function Page() {
                       value={payment}
                       placeholder={isActivelyCalculating ? "0" : ""}
                       onChange={(e) =>
-                        handleInputChange(e.target.value, setPayment)
+                        handleInputChange(e, payment, setPayment)
                       }
                       onBlur={(e) =>
                         handleInputBlur(e.target.value, setPayment)
@@ -989,7 +1031,7 @@ export default function Page() {
                     inputMode="decimal"
                     value={annualRate}
                     onChange={(e) =>
-                      handleInputChange(e.target.value, setAnnualRate)
+                      handleInputChange(e, annualRate, setAnnualRate)
                     }
                     onBlur={(e) =>
                       handleInputBlur(e.target.value, setAnnualRate)
@@ -1020,11 +1062,15 @@ export default function Page() {
                 <Input
                   id="periods"
                   type="text"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   value={periods}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "" || /^\d*$/.test(val)) setPeriods(val);
+                    if (/^\d*\.?\d{0,2}$/.test(val)) setPeriods(val);
+                    else rejectInput(e.target, periods);
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value.startsWith(".")) setPeriods("0" + e.target.value);
                   }}
                   className={`border-input bg-card ${getFieldError("periods") ? "border-2 border-[var(--color-inline-error)]" : ""}`}
                 />
