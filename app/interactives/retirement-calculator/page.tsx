@@ -578,7 +578,7 @@ export default function RetirementCalculator() {
                     </p>
                   </div>
                 )}
-                <div key="step2-heading" className="mt-8 mb-4">
+                <div key="step2-heading" className="mb-4">
                   <p className="font-semibold">
                     Step 2: Calculate savings needed to reach the required
                     balance
