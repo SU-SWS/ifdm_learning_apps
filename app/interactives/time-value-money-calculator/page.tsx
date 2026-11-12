@@ -14,6 +14,7 @@ import {
 } from "@/app/ui/components/select"
 import { Info, ChevronDown, ChevronUp } from "lucide-react"
 import ThemeToggle from "@/app/lib/theme-toggle"
+import InfoPopover from "@/app/ui/components/popover"
 import { FaPlus, FaMinus } from "react-icons/fa6"
 import { Tabs, TabsList, TabsTrigger } from "@/app/ui/components/tabs"
 
@@ -1011,12 +1012,19 @@ export default function Page() {
             {/* Number of Periods */}
             {solveFor !== "NPER" && (
               <div className="space-y-1">
-                <Label
-                  htmlFor="periods"
-                  className="block font-semibold text-foreground mb-1"
-                >
-                  Number of periods
-                </Label>
+                <div className="flex items-start gap-2">
+                  <Label
+                    htmlFor="periods"
+                    className="block font-semibold text-foreground mb-1"
+                  >
+                    Number of periods
+                  </Label>
+                  <InfoPopover title="Number of periods">
+                    Periods are counted based on the selected compounding
+                    frequency. For monthly compounding, 60 periods equals 60
+                    months.
+                  </InfoPopover>
+                </div>
                 <Input
                   id="periods"
                   type="text"

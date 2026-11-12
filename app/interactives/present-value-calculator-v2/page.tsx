@@ -429,12 +429,19 @@ export default function PresentValueCalculator() {
 
                   {/* Time Period */}
                   <div className="space-y-1">
-                    <Label
-                      htmlFor="time-period"
-                      className="block font-semibold text-foreground mb-1"
-                    >
-                      Number of compounding periods
-                    </Label>
+                    <div className="flex items-start gap-2">
+                      <Label
+                        htmlFor="time-period"
+                        className="block font-semibold text-foreground mb-1"
+                      >
+                        Number of compounding periods
+                      </Label>
+                      <InfoPopover title="Number of compounding periods">
+                        Periods are counted based on the selected compounding
+                        frequency. For monthly compounding, 60 periods equals 60
+                        months.
+                      </InfoPopover>
+                    </div>
                     <Input
                       id="time-period"
                       type="number"
@@ -863,12 +870,19 @@ export default function PresentValueCalculator() {
 
                   {/* Number of Payments */}
                   <div className="space-y-1">
-                    <Label
-                      htmlFor="number-of-payments"
-                      className="block font-semibold text-foreground mb-1"
-                    >
-                      Number of compounding periods (payments)
-                    </Label>
+                    <div className="flex items-start gap-2">
+                      <Label
+                        htmlFor="number-of-payments"
+                        className="block font-semibold text-foreground mb-1"
+                      >
+                        Number of compounding periods (payments)
+                      </Label>
+                      <InfoPopover title="Number of compounding periods (payments)">
+                        Periods are counted based on the selected compounding
+                        frequency. For monthly compounding, 60 periods equals 60
+                        months.
+                      </InfoPopover>
+                    </div>
                     <Input
                       id="number-of-payments"
                       type="number"
