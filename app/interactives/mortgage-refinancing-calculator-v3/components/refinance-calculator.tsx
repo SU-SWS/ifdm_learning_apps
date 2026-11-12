@@ -406,7 +406,7 @@ export function RefinanceCalculator() {
   const continueDisabled = currentBalanceBlocking;
 
   return (
-    <div className="mx-auto w-full max-w-5xl pb-48 sm:pb-0">
+    <div className="mx-auto w-full max-w-5xl">
       {/* Tabs */}
       <div className="grid grid-cols-2 gap-4 [&_button]:cursor-pointer">
         <TabButton active={tab === "current"} onClick={() => setTab("current")}>
