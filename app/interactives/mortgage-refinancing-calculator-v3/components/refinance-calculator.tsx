@@ -406,7 +406,7 @@ export function RefinanceCalculator() {
   const continueDisabled = currentBalanceBlocking;
 
   return (
-    <div className="mx-auto w-full max-w-5xl pb-48 sm:pb-0">
+    <div className="mx-auto w-full max-w-5xl">
       {/* Tabs */}
       <div className="grid grid-cols-2 gap-4 [&_button]:cursor-pointer">
         <TabButton active={tab === "current"} onClick={() => setTab("current")}>
@@ -494,7 +494,7 @@ export function RefinanceCalculator() {
                 aria-live="polite"
                 aria-atomic="true"
               >
-                <p className="text-panel-foreground/70">
+                <p className="text-[20px] text-foreground">
                   Estimated current balance
                 </p>
                 {/* Suppressed rather than computed from zero-coerced blanks. */}
@@ -1083,7 +1083,7 @@ const subtext =
               {/* Hero: net value today — show after button is clicked,
                   but display a dash if inputs are incomplete or have errors. */}
               <div>
-            <p className=" font-medium text-panel-foreground/70">
+            <p className="text-[20px] font-medium text-foreground">
               Net value today
             </p>
             <p
@@ -1235,13 +1235,13 @@ function LoanComparison({
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
-        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">
+        <div className="px-4 py-2.5 text-xs font-semibold tracking-wide">
           Terms
         </div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">
+        <div className="px-4 py-2.5 text-right text-xs font-semibold tracking-wide">
           Current loan terms
         </div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-primary">
+        <div className="px-4 py-2.5 text-right text-xs font-semibold tracking-wide text-primary">
           New loan terms
         </div>
       </div>
