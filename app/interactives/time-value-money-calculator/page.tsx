@@ -59,6 +59,8 @@ const OUTPUT_OVERFLOW_CEILING = 1e15
 const MSG_NO_MEANINGFUL_RATE =
   "No interest rate could be calculated for these inputs. Try adjusting your values, or double-check the cash flow amounts and timing."
 
+const enteredPeriods = (value: string): string => (value === "." ? "" : value)
+
 interface FieldError {
   field: string
   message: string
@@ -147,10 +149,10 @@ export default function Page() {
 
   const isActivelyCalculating = useMemo(() => {
     const requiredFilled: Record<SolveFor, string[]> = {
-      FV: [annualRate, periods],
-      PV: [annualRate, periods],
-      PMT: [annualRate, periods],
-      RATE: [periods],
+      FV: [annualRate, enteredPeriods(periods)],
+      PV: [annualRate, enteredPeriods(periods)],
+      PMT: [annualRate, enteredPeriods(periods)],
+      RATE: [enteredPeriods(periods)],
       NPER: [annualRate],
     };
     return requiredFilled[solveFor].every((f) => f.trim() !== "");
@@ -231,11 +233,11 @@ export default function Page() {
         errors.push({ field: "annualRate", message: `Enter a rate between ${CONSTRAINTS.annualRate.min}% and ${CONSTRAINTS.annualRate.max.toLocaleString()}%.` })
     }
 
-    if (solveFor !== "NPER" && rawPeriods !== "") {
+    if (solveFor !== "NPER" && enteredPeriods(rawPeriods) !== "") {
       const n          = parseFloat(rawPeriods)
       const maxPeriods = 500 * parseFloat(effectivePaymentFrequency)
-      if (n < 0 || n > maxPeriods)
-        errors.push({ field: "periods", message: `Enter a number of periods between 0 and ${maxPeriods.toLocaleString()}.` })
+      if (!(n > 0) || n > maxPeriods)
+        errors.push({ field: "periods", message: `Enter a number of periods greater than 0 and up to ${maxPeriods.toLocaleString()}.` })
     }
 
     return errors
@@ -255,10 +257,10 @@ export default function Page() {
 
     // Completeness guard: suppress results until every required input is filled
     const requiredFields: Record<SolveFor, string[]> = {
-      FV: [annualRate, periods],
-      PV: [annualRate, periods],
-      PMT: [annualRate, periods],
-      RATE: [periods],
+      FV: [annualRate, enteredPeriods(periods)],
+      PV: [annualRate, enteredPeriods(periods)],
+      PMT: [annualRate, enteredPeriods(periods)],
+      RATE: [enteredPeriods(periods)],
       NPER: [annualRate],
     };
     const allFilled = requiredFields[solveFor].every(f => f.trim() !== "")
