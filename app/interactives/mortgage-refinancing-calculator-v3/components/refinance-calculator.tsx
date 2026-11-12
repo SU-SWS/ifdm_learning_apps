@@ -494,7 +494,7 @@ export function RefinanceCalculator() {
                 aria-live="polite"
                 aria-atomic="true"
               >
-                <p className="text-panel-foreground/70">
+                <p className="text-[20px] text-foreground">
                   Estimated current balance
                 </p>
                 {/* Suppressed rather than computed from zero-coerced blanks. */}
@@ -1083,7 +1083,7 @@ const subtext =
               {/* Hero: net value today — show after button is clicked,
                   but display a dash if inputs are incomplete or have errors. */}
               <div>
-            <p className=" font-medium text-panel-foreground/70">
+            <p className="text-[20px] font-medium text-foreground">
               Net value today
             </p>
             <p
