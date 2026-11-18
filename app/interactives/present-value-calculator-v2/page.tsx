@@ -429,12 +429,19 @@ export default function PresentValueCalculator() {
 
                   {/* Time Period */}
                   <div className="space-y-1">
-                    <Label
-                      htmlFor="time-period"
-                      className="block font-semibold text-foreground mb-1"
-                    >
-                      Number of compounding periods
-                    </Label>
+                    <div className="flex items-start gap-2">
+                      <Label
+                        htmlFor="time-period"
+                        className="block font-semibold text-foreground mb-1"
+                      >
+                        Number of compounding periods
+                      </Label>
+                      <InfoPopover title="Number of compounding periods">
+                        Periods are counted based on the selected compounding
+                        frequency. For monthly compounding, 60 periods equals 60
+                        months.
+                      </InfoPopover>
+                    </div>
                     <Input
                       id="time-period"
                       type="number"
@@ -530,7 +537,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                        className="w-full rounded-md border border-input shadow-sm py-2 px-3 focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="single-compounding-frequency-label"
                       >
                         <SelectValue />
@@ -548,7 +555,7 @@ export default function PresentValueCalculator() {
                     <Button
                       type="button"
                       variant="lagunita"
-                      size="sm"
+                      size="field"
                       className="font-medium px-8 mt-4"
                       onClick={resetSingle}
                     >
@@ -863,12 +870,19 @@ export default function PresentValueCalculator() {
 
                   {/* Number of Payments */}
                   <div className="space-y-1">
-                    <Label
-                      htmlFor="number-of-payments"
-                      className="block font-semibold text-foreground mb-1"
-                    >
-                      Number of compounding periods (payments)
-                    </Label>
+                    <div className="flex items-start gap-2">
+                      <Label
+                        htmlFor="number-of-payments"
+                        className="block font-semibold text-foreground mb-1"
+                      >
+                        Number of compounding periods (payments)
+                      </Label>
+                      <InfoPopover title="Number of compounding periods (payments)">
+                        Periods are counted based on the selected compounding
+                        frequency. For monthly compounding, 60 periods equals 60
+                        months.
+                      </InfoPopover>
+                    </div>
                     <Input
                       id="number-of-payments"
                       type="number"
@@ -970,7 +984,7 @@ export default function PresentValueCalculator() {
                       }}
                     >
                       <SelectTrigger
-                        className="!h-[55px] w-full rounded-md border border-input shadow-sm py-2 px-3 !text-base focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                        className="w-full rounded-md border border-input shadow-sm py-2 px-3 focus-visible:border-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         aria-labelledby="compounding-frequency-label"
                       >
                         <SelectValue />
@@ -992,7 +1006,7 @@ export default function PresentValueCalculator() {
                     <Button
                       type="button"
                       variant="lagunita"
-                      size="sm"
+                      size="field"
                       className="mt-4 font-medium px-8"
                       onClick={resetSeries}
                     >

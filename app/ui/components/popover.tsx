@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { InfoIcon, X } from "lucide-react";
 
@@ -12,6 +12,10 @@ export default function InfoPopover({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  // Unique per instance so multiple popovers on a page don't share ARIA IDs.
+  const uid = useId();
+  const titleId = `${uid}-title`;
+  const bodyId = `${uid}-body`;
   const contentRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -54,8 +58,8 @@ export default function InfoPopover({
             ref={contentRef}
             tabIndex={-1}
             role="dialog"
-            aria-labelledby="info-popover-title"
-            aria-describedby="info-popover-body"
+            aria-labelledby={titleId}
+            aria-describedby={bodyId}
             className="outline-none"
           >
             <a
@@ -66,10 +70,10 @@ export default function InfoPopover({
             >
               <X className="w-6 h-6 text-[var(--color-teal)] font-bold" />
             </a>
-            <h3 id="info-popover-title" className="sr-only font-semibold text-sm mb-1 text-[var(--foreground)]">
+            <h3 id={titleId} className="sr-only font-semibold text-sm mb-1 text-[var(--foreground)]">
               {title}
             </h3>
-            <div id="info-popover-body" className="text-sm text-[var(--foreground)]">
+            <div id={bodyId} className="text-sm text-[var(--foreground)]">
               {children}
             </div>
           </div>

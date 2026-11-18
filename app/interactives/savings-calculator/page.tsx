@@ -608,6 +608,7 @@ export default function SavingsCalculator() {
                   type="button"
                   onClick={handleReset}
                   variant="lagunita"
+                  size="field"
                   className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
                 >
                   Reset <RotateCcw className="h-4 w-4" aria-hidden="true" />

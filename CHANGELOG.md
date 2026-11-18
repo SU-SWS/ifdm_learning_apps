@@ -5,6 +5,33 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Releases are identified by deploy date.
 
+## [1.3.6] - 2026-11-18
+
+Release PR [#226](https://github.com/SU-SWS/ifdm_learning_apps/pull/226) (`dev` into `1.x`).
+
+### Added
+- Interest Calculator, Present Value Calculator v2 (Single and Series tabs), and Time Value of Money Calculator: Added an info popover to the number of periods field explaining that periods are counted at the selected compounding frequency (for monthly compounding, 60 periods equals 60 months) (IFDM-383, #220).
+
+### Changed
+- All calculators: Input and dropdown text is now 17.5px instead of 14px (IFDM-373, #219).
+- All calculators: Buttons and dropdowns are now 55px tall to match the inputs. Mortgage Refinancing Calculator v3's Continue button grows instead of overflowing when its label wraps, and Mortgage Refinancing Calculator v2's months/years unit labels are larger (IFDM-370, IFDM-373, #219).
+- Debt Payoff Calculator: Result cards are now titled "Time to pay off" and "Payment per [period]" in place of a generic title plus a separate label. The line under each result uses the default text color instead of teal, Reset no longer has an icon, and the additional payment help text now says it applies per period at the selected frequency (IFDM-383, #220).
+- Mortgage Refinancing Calculator v3: The "Estimated current balance" and "Net value today" labels are larger (20px) and use full-strength text color instead of muted text (IFDM-386, #222).
+- Mortgage Refinancing Calculator v3: Loan comparison column headers are no longer all caps (IFDM-387, #222).
+- Mortgage Refinancing Calculator v3: Removed extra blank space at the bottom of the page on mobile (IFDM-389, #222).
+- Retirement Calculator: Removed the extra space above the Step 2 heading so it matches Step 1 (IFDM-388, #223).
+- Time Value of Money Calculator: Number of periods accepts up to 2 decimals, opens the decimal keypad on mobile, turns ".5" into "0.5" on blur, and must be greater than 0 (IFDM-203, #221).
+- Time Value of Money Calculator: On mobile, the sticky footer label is larger and semibold, and the Reset button is medium weight (IFDM-204, #221).
+- Repo: Renamed CLAUDE.md to AGENTS.md and moved agent skills to `.agents/skills`, with `.claude/skills` linking to them. No change to the calculators (#218).
+- Docs: Rewrote the deployment guide with prerequisites, separate staging and production release steps, changelog and release PR steps, and a troubleshooting table (IFDM-325, #224).
+
+### Fixed
+- Time Value of Money Calculator: Reset now returns payment frequency to Annually, matching the initial state, instead of Monthly (IFDM-203, #221).
+- Time Value of Money Calculator: In dollar and interest rate fields, the cursor no longer jumps when commas are added or removed, and invalid characters are rejected without moving the cursor (IFDM-203, #221).
+- Time Value of Money Calculator: Loading an example now resets payment frequency mode and payment timing (IFDM-203, #221).
+- Time Value of Money Calculator: The interest rate solver no longer fails when it hits an undefined value while scanning for a solution (IFDM-203, #221).
+- Info popovers: Each popover now has its own ARIA IDs, so screen readers read the right title and text when a page has more than one (IFDM-383, #220).
+
 ## [1.3.5] - 2026-11-04
 
 Release PR [#217](https://github.com/SU-SWS/ifdm_learning_apps/pull/217) (`dev` into `1.x`).

@@ -493,8 +493,8 @@ export default function CompoundInterestCalculator() {
               <Button
                 type="button"
                 variant="lagunita"
-                size="sm"
-                className="mt-4"
+                size="field"
+                className="mt-4 px-3"
                 onClick={reset}
               >
                 Reset

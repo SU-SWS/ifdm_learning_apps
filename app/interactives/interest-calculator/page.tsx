@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { FaAngleDown } from "react-icons/fa6";
 import ThemeToggle from "@/app/lib/theme-toggle";
 import { Button } from "@/app/ui/components/button"
+import InfoPopover from "@/app/ui/components/popover";
 
 type CompoundingFrequency =
   | "daily"
@@ -466,12 +467,19 @@ export default function InterestRateVisual() {
             <div className="flex flex-col gap-3 mb-3">
               {/* Periods */}
               <div className="flex-1 min-w-[150px] space-y-1">
-                <label
-                  htmlFor="periods"
-                  className="block text-md font-medium text-[var(--foreground)]"
-                >
-                  Number of compounding periods
-                </label>
+                <div className="flex items-start gap-2">
+                  <label
+                    htmlFor="periods"
+                    className="block text-md font-medium text-[var(--foreground)]"
+                  >
+                    Number of compounding periods
+                  </label>
+                  <InfoPopover title="Number of compounding periods">
+                    Periods are counted based on the selected compounding
+                    frequency. For monthly compounding, 60 periods equals 60
+                    months.
+                  </InfoPopover>
+                </div>
                 <div className="relative">
                   <input
                     id="periods"
@@ -543,8 +551,8 @@ export default function InterestRateVisual() {
               <Button
                 type="button"
                 variant="lagunita"
-                size="sm"
-                className="mt-4"
+                size="field"
+                className="mt-4 px-3"
                 onClick={handleReset}
               >
                 Reset

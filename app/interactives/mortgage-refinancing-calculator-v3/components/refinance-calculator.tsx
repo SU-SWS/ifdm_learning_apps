@@ -406,7 +406,7 @@ export function RefinanceCalculator() {
   const continueDisabled = currentBalanceBlocking;
 
   return (
-    <div className="mx-auto w-full max-w-5xl pb-48 sm:pb-0">
+    <div className="mx-auto w-full max-w-5xl">
       {/* Tabs */}
       <div className="grid grid-cols-2 gap-4 [&_button]:cursor-pointer">
         <TabButton active={tab === "current"} onClick={() => setTab("current")}>
@@ -494,7 +494,7 @@ export function RefinanceCalculator() {
                 aria-live="polite"
                 aria-atomic="true"
               >
-                <p className="text-panel-foreground/70">
+                <p className="text-[20px] text-foreground">
                   Estimated current balance
                 </p>
                 {/* Suppressed rather than computed from zero-coerced blanks. */}
@@ -543,6 +543,7 @@ export function RefinanceCalculator() {
             onClick={resetNewLoan}
             disabled={!refiHasInput}
             variant="lagunita"
+            size="field"
             className="whitespace-normal cursor-pointer flex flex-row items-center gap-2 font-medium px-8"
           >
             Reset new loan terms{" "}
@@ -597,7 +598,7 @@ export function RefinanceCalculator() {
                 onClick={() => setTab("refinance")}
                 disabled={continueDisabled}
                 variant="lagunita"
-                className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal px-4 py-2 font-medium"
+                className="h-auto min-h-[55px] w-auto min-w-0 flex-1 whitespace-normal leading-tight px-4 py-0.5 font-medium"
               >
                 Continue to refinance analysis
               </Button>
@@ -617,8 +618,8 @@ export function RefinanceCalculator() {
               onClick={resetNewLoan}
               disabled={!refiHasInput}
               variant="lagunita"
-              size="sm"
-              className="h-auto w-auto shrink-0 px-4"
+              size="field"
+              className="w-auto shrink-0 px-4"
             >
               Reset
             </Button>
@@ -832,7 +833,7 @@ function CurrentBalanceForm(
           onClick={props.onContinue}
           disabled={props.continueDisabled}
           variant="lagunita"
-          className="h-auto min-h-10 w-auto min-w-0 flex-1 whitespace-normal font-medium px-4 py-2 sm:flex-none sm:px-8"
+          className="h-auto min-h-[55px] w-auto min-w-0 flex-1 whitespace-normal leading-tight font-medium px-4 py-2 sm:flex-none sm:px-8"
         >
           Continue to refinance analysis
         </Button>
@@ -1082,7 +1083,7 @@ const subtext =
               {/* Hero: net value today — show after button is clicked,
                   but display a dash if inputs are incomplete or have errors. */}
               <div>
-            <p className=" font-medium text-panel-foreground/70">
+            <p className="text-[20px] font-medium text-foreground">
               Net value today
             </p>
             <p
@@ -1234,13 +1235,13 @@ function LoanComparison({
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-border bg-muted/40">
-        <div className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide">
+        <div className="px-4 py-2.5 text-xs font-semibold tracking-wide">
           Terms
         </div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide">
+        <div className="px-4 py-2.5 text-right text-xs font-semibold tracking-wide">
           Current loan terms
         </div>
-        <div className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-primary">
+        <div className="px-4 py-2.5 text-right text-xs font-semibold tracking-wide text-primary">
           New loan terms
         </div>
       </div>
