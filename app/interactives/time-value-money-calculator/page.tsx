@@ -584,25 +584,15 @@ export default function Page() {
     setPaymentTiming("end")
   }
 
-  const formatCarriedValue = (value: number, field: SolveFor): string =>
-    new Intl.NumberFormat("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-      useGrouping: field !== "NPER",
-    }).format(Math.abs(value) < 0.005 ? 0 : value)
-
+  // Switching solve-for tabs starts fresh: clear every value field and return
+  // payment frequency mode and timing to their defaults. Compounding and
+  // payment frequency are intentionally left as-is.
   const handleSolveForChange = (value: string) => {
     const next = value as SolveFor
-    if (next === solveFor) return
-    if (result !== null) {
-      const carried = formatCarriedValue(result, solveFor)
-      switch (solveFor) {
-        case "FV":   setFutureValue(carried);  break
-        case "PV":   setPresentValue(carried); break
-        case "PMT":  setPayment(carried);      break
-        case "RATE": setAnnualRate(carried);   break
-        case "NPER": setPeriods(carried);      break
-      }
+    if (next !== solveFor) {
+      setPresentValue(""); setFutureValue(""); setPayment("")
+      setAnnualRate(""); setPeriods("")
+      setPaymentFrequencyMode("same"); setPaymentTiming("end")
     }
     setSolveFor(next)
   }
